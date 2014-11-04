@@ -81,6 +81,132 @@
 
 #pragma mark -
 #pragma mark - Public Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Creation & Updates
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                            withID:(NSString *)id
+streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (id == nil){
+        NSLog(@"XMPPChatRoomCoreDataStorageObject: invalid jid (nil)");
+        return nil;
+    }
+    
+    XMPPChatRoomUserCoreDataStorageObject *chatRoomuser;
+    chatRoomuser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomUserCoreDataStorageObject"
+                                             inManagedObjectContext:moc];
+    
+    chatRoomuser.streamBareJidStr = streamBareJidStr;
+    chatRoomuser.bareJidStr = id;
+    chatRoomuser.nickeName = nil;
+    chatRoomuser.chatRoomBareJidStr = nil;
+   
+    return chatRoomuser;
+}
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                  withNSDictionary:(NSDictionary *)Dic
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    
+    NSString *jid = [Dic objectForKey:@"jid"];
+    
+    if (jid == nil){
+        NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
+        return nil;
+    }
+    
+    XMPPChatRoomUserCoreDataStorageObject *chatRoomUser;
+    chatRoomUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomUserCoreDataStorageObject"
+                                             inManagedObjectContext:moc];
+    
+    chatRoomUser.streamBareJidStr = streamBareJidStr;
+    
+    [chatRoomUser updateWithDictionary:Dic];
+    
+    return chatRoomUser;
+  
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Delete method
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withNSDictionary:(NSDictionary *)Dic
+                    streamBareJidStr:(NSString *)streamBareJidStr;
+{
+    NSString *jid = [Dic objectForKey:@"jid"];
+    return [self deleteInManagedObjectContext:moc
+                                       withID:jid
+                             streamBareJidStr:streamBareJidStr];
+    
+    return YES;
+}
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                              withID:(NSString *)id streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (id == nil) return NO;
+    if (moc == nil) return NO;
+    
+    XMPPChatRoomUserCoreDataStorageObject *deleteObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    if (deleteObject){
+        
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    
+    return NO;
+    
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark  Update methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withNSDictionary:(NSDictionary *)Dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    NSString *id = [Dic objectForKey:@"jid"];
+    
+    if (id == nil) return NO;
+    if (moc == nil) return NO;
+    
+    NSError *error = nil;
+    
+    XMPPChatRoomUserCoreDataStorageObject *updateObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    //if we find the object we will update for,we update it with the new obejct
+    if (updateObject){
+        
+        [updateObject updateWithDictionary:Dic];
+        return YES;
+    }
+    return NO;
+}
++ (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                                  withNSDictionary:(NSDictionary *)Dic
+                                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    NSString *id = [Dic objectForKey:@"jid"];
+    if (id == nil) return NO;
+    if (moc == nil) return NO;
+    XMPPChatRoomUserCoreDataStorageObject* updateOrInsertObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    //if the object we find alreadly in the coredata system ,we should update it
+    if (updateOrInsertObject){
+        
+        [updateOrInsertObject updateWithDictionary:Dic];
+        
+        return YES;
+        
+    }else{//if not find the object in the CoreData system ,we should insert the new object to it
+        //FIXME:There is a bug maybe here
+        updateOrInsertObject   = [XMPPChatRoomUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      withNSDictionary:Dic
+                                                                      streamBareJidStr:streamBareJidStr];
+        [moc insertObject:updateOrInsertObject];
+        return YES;
+    }
+    return NO;
+    
+
+}
 + (id)fetchObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                          withBareJidStr:(NSString *)bareJidStr
                        streamBareJidStr:(NSString *)streamBareJidStr
@@ -121,5 +247,30 @@
 
 #pragma mark -
 #pragma mark - Private Methods
+- (void)updateWithDictionary:(NSDictionary *)Dic
+{
+    NSString *bareJidStr = [Dic objectForKey:@"bareJidStr "];
+    NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
+    NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
+    NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
+    if (bareJidStr == nil){
+        NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
+        return;
+    }
+    if (self.bareJidStr) {
+        self.bareJidStr = bareJidStr;
+    }
+    if (self.chatRoomBareJidStr) {
+        self.chatRoomBareJidStr = roomBareJidStr;
+    }
+    if (self.nickeName) {
+        self.nickeName = nickNameStr;
+    }
+    if (self.streamBareJidStr) {
+        self.streamBareJidStr = streamBareJidStr;
+    }
+  
+
+}
 
 @end
