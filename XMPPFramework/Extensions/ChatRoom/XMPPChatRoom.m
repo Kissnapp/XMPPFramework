@@ -332,7 +332,65 @@ enum XMPPChatRoomFlags
     else
         flags &= ~kPopulatingChatRoom;
 }
+#pragma mark -
+#pragma mark - Private Methods
 
+- (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = [xmppChatRoomStorage isMasterForBareChatRoomJidStr:bareChatRoomJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+
+}
+
+- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr
+{
+    if (![self isMasterForBareChatRoomJidStr:bareChatRoomJidStr]) {
+        return;
+    }
+    
+    dispatch_block_t block = ^{
+        //Delete the chat room
+        //TODO:1.send a delete request xml to the server 2.wait for the server's respsone 3.accord to the server's respone we do delete action in the coredata
+        //The delete resquest xml as below
+        /*
+         <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
+            <query xmlns="aft:iq:groupchat" query_type="aft_dismiss_group" groupid=”1”>
+            </query>
+         </iq>
+         */
+        NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
+        [query addAttributeWithName:@"query_type" stringValue:@"aft_dismiss_group"];
+        [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
+        [iq addChild:query];
+        
+        [xmppIDTracker addElement:iq
+                           target:self
+                         selector:@selector(handleFetchChatRoomListQueryIQ:withInfo:)
+                          timeout:60];
+        
+        [xmppStream sendElement:iq];
+
+        [multicastDelegate xmppChatRoom:self willDeleteChatRoomWithBareJidStr:bareChatRoomJidStr];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 - (void)fetchChatRoomList
 {
     // This is a public method, so it may be invoked on any thread/queue.

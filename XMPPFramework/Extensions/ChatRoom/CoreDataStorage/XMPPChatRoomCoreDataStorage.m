@@ -110,6 +110,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         NSString *chatRoomBareJidStr = [dictionary objectForKey:@"chatRoomBareJidStr"];
         NSString *streamBarJidStr = [[stream myJID] bare];
         
+        //FIXME:action in coredata
         
         
     }];
@@ -379,6 +380,28 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         }
     
     }];
+}
+
+- (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:bareChatRoomJidStr
+                                                               xmppStream:stream
+                                                     managedObjectContext:moc];
+        //if the chat room obejct is exsited
+        //We compare self jid is whether equal to the master bare jid string
+        if (chatRoom) {
+            result = ([chatRoom.masterBareJidStr isEqualToString:[[stream myJID] bare]]);
+        }
+    }];
+    
+    return result;
 }
 
 @end

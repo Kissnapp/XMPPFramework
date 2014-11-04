@@ -121,6 +121,21 @@
  *  @param bareJidStr   The chat room's bare jid string
  */
 - (void)setNickName:(NSString *)nickName forBareJidStr:(NSString *)bareJidStr;
+/**
+ *  Whether self is the chat room 's master
+ *
+ *  @param bareChatRoomJidStr The chat room bare jid string
+ *
+ *  @return YES,if self is the master of the chat room
+ *          NO,if not
+ */
+- (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+/**
+ *  Delete a chat room which is created by self
+ *
+ *  @param bareChatRoomJidStr The chat room bare jid str which will been delete
+ */
+- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 
 @end
 
@@ -140,6 +155,7 @@
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
 - (BOOL)chatRoomExistsWithID:(NSString *)id xmppStream:(XMPPStream *)stream;
+- (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
 - (void)clearAllChatRoomsForXMPPStream:(XMPPStream *)stream;
 
@@ -177,6 +193,7 @@
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameWithID:(NSString *)roomID roomNickName:(NSString *)nickname;
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameError:(NSXMLElement *)errorElement;
 
+- (void)xmppChatRoom:(XMPPChatRoom *)sender willDeleteChatRoomWithBareJidStr:(NSString *)bareJidStr;
 /**
  * Sent when a Roster Push is received as specified in Section 2.1.6 of RFC 6121.
  **/
