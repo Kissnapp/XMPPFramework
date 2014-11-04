@@ -436,10 +436,14 @@ enum XMPPChatRoomFlags
     dispatch_block_t block=^{
         
         @autoreleasepool{
-            
-            NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:aft_groupchat"];
+            /*
+             <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
+             <query xmlns="aft:iq:groupchat" query_type="aft_create_group" groupname="FirstGroup"></query>
+             </iq>
+             */
+            NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
             [query addAttributeWithName:@"query_type" stringValue:@"aft_create_group"];
-            [query setStringValue:room_nickeName];
+            [query addAttributeWithName:@"groupname" stringValue:room_nickeName ];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
             [iq addChild:query];
