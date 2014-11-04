@@ -628,11 +628,8 @@ enum XMPPChatRoomFlags
 
 - (void)handleCreateChatRoomIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
     /*
-    <iq to='juliet@example.com/balcony' type='result' id='112233'>
-    <query xmlns="jabber:iq:aft_groupchat" groupid="1000000000003"/>
-    </iq>
-     <iq to='juliet@example.com/balcony' type='result' id='112233'>
-     <query xmlns="jabber:iq:aft_groupchat" groupid="1000000000003" ,name = "nickname" ,master="1234567@192.168.1.100" action="add"/>
+     <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
+     <query xmlns="aft:iq:groupchat" query_type="aft_create_group">{"groupid": "100001","groupname": "First","master":"123456789@192.168.1.167"}</query>
      </iq>
      */
     dispatch_block_t block = ^{
@@ -646,24 +643,29 @@ enum XMPPChatRoomFlags
             //if this action have succeed
             if ([[iq type] isEqualToString:@"result"]) {
                 //find the query elment
-                NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:aft_groupchat"];
+                NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-                if (query) {
+                if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_create_group"]) {
                     //init a XMPPChatRoomCoreDataStorageObject to restore the info
-                    NSString *roomID = [query attributeStringValueForName:@"groupid"];
-                    NSString *roomNickName = [query stringValue];
+                    NSString *jsonStr = [query stringValue];
+                    /*
+                    NSDictionary *dic = [[query stringValue] objectFromJSONString];
+                    NSString *roomID = [dic objectForKey:@"groupid"];
+                    NSString *roomNickName = [dic objectForKey:@"groupname"];
+                    NSString *roomMaster = [dic objectForKey:@"master"];
                     NSDictionary *tempDictionary = @{
                                                      @"jid":roomID,
-                                                     @"nickname":roomNickName
+                                                     @"nickname":roomNickName,
+                                                     @"master":roomMaster
                                                      };
                     NSArray *tempArray = @[tempDictionary];
                     
                     NSString *jsonStr = [tempArray JSONString];
-                    
-                    if (roomID) {
+                    */
+                    if (jsonStr) {
                         //TODO:Here need save the room info into the database
-                        [self transFormDataWithJSONStr:jsonStr];
-                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:roomID roomNickName:roomNickName];
+                        [self transFormDataWithJSONStr:[jsonStr copy]];
+                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:[[(NSDictionary *)[jsonStr objectFromJSONString] objectForKey:@"groupid"] copy] roomNickName:[[(NSDictionary *)[jsonStr objectFromJSONString] objectForKey:@"groupname"] copy]];
                     }
                 }
                 
