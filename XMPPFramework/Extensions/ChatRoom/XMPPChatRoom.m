@@ -730,12 +730,32 @@ enum XMPPChatRoomFlags
                                                      };
                     NSArray *tempArray = @[tempDictionary];
                     
-                    NSString *jsonStr = [tempArray JSONString];
+                    NSString *roomJsonStr = [tempArray JSONString];
                     
+                    
+                    //The user list here
+                    NSArray *userBareJidStrArray = [[query stringValue] objectFromJSONString];
+                    NSMutableArray *array = [NSMutableArray array];
+                    [userBareJidStrArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                      
+                        NSDictionary *dic = @{
+                                              @"bareJidStr":obj,
+                                              @"chatRoomBareJidStr":[roomID copy]
+                                              };
+                        [array addObject:dic];
+                    }];
+                    NSString *userJsonStr = [array JSONString];
+                    
+                    //Transfor the room info
                     if (roomID) {
                         //TODO:Here need save the room info into the database
-                        [self transFormDataWithJSONStr:jsonStr];
-                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:roomID roomNickName:roomNickName];
+                        [self transFormDataWithJSONStr:roomJsonStr];
+                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:[roomID copy] roomNickName:[roomNickName copy]];
+                    }
+                    
+                    //Transfor the room user list info
+                    if (userJsonStr) {
+                        [self transChatRoomUserDataWithJSONStr:userJsonStr];
                     }
                 }
                 

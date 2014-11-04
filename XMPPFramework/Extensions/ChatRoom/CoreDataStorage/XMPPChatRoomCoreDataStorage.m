@@ -103,6 +103,14 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     XMPPLogTrace();
     
     [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        //@"bareJidStr":obj,
+        //@"chatRoomBareJidStr":[roomID copy]
+        NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
+        NSString *chatRoomBareJidStr = [dictionary objectForKey:@"chatRoomBareJidStr"];
+        NSString *streamBarJidStr = [[stream myJID] bare];
+        
+        
         
     }];
     

@@ -11,6 +11,7 @@
 #import "xmppChatRoom.h"
 #import "XMPPCoreDataStorage.h" 
 #import "XMPPChatRoomCoreDataStorageObject.h"
+#import "XMPPChatRoomUserCoreDataStorageObject.h"
 
 @protocol XMPPChatRoomStorage;
 @interface XMPPChatRoomCoreDataStorage : XMPPCoreDataStorage<XMPPChatRoomStorage>
