@@ -195,7 +195,7 @@
                   withNSDictionary:(NSDictionary *)Dic
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *jid = [Dic objectForKey:@"jid"];
+    NSString *jid = [Dic objectForKey:@"groupid"];
     
     if (jid == nil){
         NSLog(@"XMPPChatRoomCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
@@ -281,8 +281,6 @@ streamBareJidStr:(NSString *)streamBareJidStr
     if (id == nil) return NO;
     if (moc == nil) return NO;
     
-    NSError *error = nil;
-    
     XMPPChatRoomCoreDataStorageObject *updateObject = [XMPPChatRoomCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                                withID:id
                                                                                                      streamBareJidStr:streamBareJidStr];
@@ -308,19 +306,19 @@ streamBareJidStr:(NSString *)streamBareJidStr
 
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *jidStr = [Dic objectForKey:@"jid"];
-    NSString *nickNameStr = [Dic objectForKey:@"nickname"];
+    NSString *jidStr = [Dic objectForKey:@"groupid"];
+    NSString *nickNameStr = [Dic objectForKey:@"groupname"];
     NSString *subscriptionStr = [Dic objectForKey:@"subscription"];
-    NSString *masterBareJidStr = [Dic objectForKey:@"masterBareJidStr"];
+    NSString *masterBareJidStr = [Dic objectForKey:@"master"];
     if (jidStr == nil){
         NSLog(@"XMPPUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
     
     self.jid = jidStr;
-    self.nickName = nickNameStr;
-    self.subscription = subscriptionStr;
-    self.masterBareJidStr = masterBareJidStr;
+    if (nickNameStr) self.nickName = nickNameStr;
+    if (subscriptionStr) self.subscription = subscriptionStr;
+    if (masterBareJidStr) self.masterBareJidStr = masterBareJidStr;
     //TODO:这里需要处理photo属性
 }
 

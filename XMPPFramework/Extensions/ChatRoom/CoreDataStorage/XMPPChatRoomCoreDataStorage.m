@@ -100,6 +100,12 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
 {
     //MARK:here we will storage the chat room user in to the Core Data system
     //???:Your code here ...
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+    }];
+    
 }
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
@@ -205,7 +211,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                            withNSDictionary:dic
                                                            streamBareJidStr:streamBareJidStr];
         }else{
-            NSString *jid = [dic objectForKey:@"jid"];
+            NSString *jid = [dic objectForKey:@"groupid"];
             
             XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
                                                                    xmppStream:stream

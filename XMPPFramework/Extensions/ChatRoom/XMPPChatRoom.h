@@ -174,6 +174,8 @@
 
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didCreateChatRoomID:(NSString *)roomID roomNickName:(NSString *)nickname;
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didCreateChatRoomError:(NSXMLElement *)errorElement;
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameWithID:(NSString *)roomID roomNickName:(NSString *)nickname;
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameError:(NSXMLElement *)errorElement;
 
 /**
  * Sent when a Roster Push is received as specified in Section 2.1.6 of RFC 6121.
