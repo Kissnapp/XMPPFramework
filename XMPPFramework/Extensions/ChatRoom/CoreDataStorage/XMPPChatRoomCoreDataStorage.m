@@ -407,4 +407,54 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     return result;
 }
 
+- (BOOL)isMemeberOfChatRoomWithBareJisStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:bareChatRoomJidStr
+                                                               xmppStream:stream
+                                                     managedObjectContext:moc];
+        //if the chat room obejct is exsited
+        //We compare self jid is whether equal to the master bare jid string
+        if (chatRoom) {
+            result = YES;
+        }
+    }];
+    
+    return result;
+}
+
+- (void)deleteChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!chatRoomBareJidStr || !stream) return;
+    
+    
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                 withID:chatRoomBareJidStr
+                                                       streamBareJidStr:[[stream myJID] bare]];
+        
+    }];
+
+}
+
+- (void)clearAllUserForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+    }];
+}
+
 @end

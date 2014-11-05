@@ -136,6 +136,26 @@
  *  @param bareChatRoomJidStr The chat room bare jid str which will been delete
  */
 - (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
+/**
+ *  Whether self is a memeber of the chat room
+ *
+ *  @param chatRoomBareJidStr The chat room bare jid str
+ *
+ *  @return YES,if is,other is NO
+ */
+- (BOOL)isSelfAMemeberOfChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr;
+/**
+ *  Exit from a chat room
+ *
+ *  @param chatRoomBareJidStr The chat room bare jid string
+ */
+- (void)exitFromChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr;
+/**
+ *  Fetch the user list with a given bare chat room jid str
+ *
+ *  @param bareChatRoomJidStr The given bare chat room jid str
+ */
+- (void)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 
 @end
 
@@ -156,13 +176,14 @@
 
 - (BOOL)chatRoomExistsWithID:(NSString *)id xmppStream:(XMPPStream *)stream;
 - (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
-
+- (BOOL)isMemeberOfChatRoomWithBareJisStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 - (void)clearAllChatRoomsForXMPPStream:(XMPPStream *)stream;
+- (void)clearAllUserForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
-
+- (void)deleteChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr xmppStream:(XMPPStream *)stream;
 - (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr  xmppStream:(XMPPStream *)stream;
 
 @optional
@@ -192,6 +213,11 @@
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didCreateChatRoomError:(NSXMLElement *)errorElement;
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameWithID:(NSString *)roomID roomNickName:(NSString *)nickname;
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterChatRoomNickNameError:(NSXMLElement *)errorElement;
+
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didDeleteChatRoomError:(NSXMLElement *)errorElement;
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didDeleteChatRoomIDWith:(NSString *)roomID;
+
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didInviteFriendError:(NSXMLElement *)errorElement;
 
 - (void)xmppChatRoom:(XMPPChatRoom *)sender willDeleteChatRoomWithBareJidStr:(NSString *)bareJidStr;
 /**
