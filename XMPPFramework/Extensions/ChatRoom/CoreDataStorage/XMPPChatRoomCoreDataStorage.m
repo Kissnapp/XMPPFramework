@@ -493,6 +493,9 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     
     [self scheduleBlock:^{
         //Your code ...
+        NSManagedObjectContext * moc = [self managedObjectContext];
+        [XMPPChatRoomUserCoreDataStorageObject deleteInManagedObjectContext:moc withID:bareJidStr chatRoomJid:bareChatRoomJidStr streamBareJidStr:[[stream myJID] bare]];
+     
         
     }];
 }
