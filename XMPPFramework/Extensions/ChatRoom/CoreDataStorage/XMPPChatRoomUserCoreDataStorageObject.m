@@ -261,7 +261,7 @@
 #pragma mark - Private Methods
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *bareJidStr = [Dic objectForKey:@"bareJidStr "];
+    NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
     NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
     NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
     NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
