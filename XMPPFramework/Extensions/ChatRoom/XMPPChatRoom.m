@@ -557,7 +557,22 @@ enum XMPPChatRoomUserListFlags
     [multicastDelegate xmppChatRoom:self didAlterNickName:nickname withBareJidStr:bareJidStr];
 }
 
--(void)transChatRoomUserDataWithArray:(NSArray *)array
+- (void)transFromDeleteChatRoomUserDataWithArray:(NSArray *)array
+{
+    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    if (!array) return;
+    
+    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        NSDictionary *dic = obj;
+        
+        [xmppChatRoomStorage deleteUserWithBareJidStr:[dic objectForKey:@"bareJidStr"]
+                   fromChatRoomWithBareChatRoomJidStr:[dic objectForKey:@"RoomBareJidStr"]
+                                           xmppStream:xmppStream];
+    }];
+}
+
+- (void)transChatRoomUserDataWithArray:(NSArray *)array
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
     
@@ -846,7 +861,44 @@ enum XMPPChatRoomUserListFlags
         </iq>
      */
     
+    dispatch_block_t block = ^{ @autoreleasepool {
+        //if there is a error attribute
+        if ([[iq attributeStringValueForName:@"type"] isEqualToString:@"error"]) {
+            [multicastDelegate xmppChatRoom:self didDeleteChatRoomError:iq];
+            return ;
+        }
+        
+        //if this action have succeed
+        if ([[iq type] isEqualToString:@"result"]) {
+            //find the query elment
+            NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
+            
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_kick_members"])
+            {
+                NSString *groupid = [query attributeStringValueForName:@"groupid"];
+                NSArray *tempArray = [[query stringValue] objectFromJSONString];
+                NSMutableArray *array = [NSMutableArray array];
+                [tempArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                    NSString *bareJidStr = obj;
+                    NSDictionary *dic = @{
+                                          @"bareJidStr":bareJidStr,
+                                          @"RoomBareJidStr":groupid
+                                          };
+                    [array addObject:dic];
+                }];
+
+                //Transfor the room user list info
+                if ([array count] > 0) {
+                    [self transFromDeleteChatRoomUserDataWithArray:array];
+                }
+            }
+        }
+    }};
     
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 - (void)handleAletrSelfNickNameIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {
