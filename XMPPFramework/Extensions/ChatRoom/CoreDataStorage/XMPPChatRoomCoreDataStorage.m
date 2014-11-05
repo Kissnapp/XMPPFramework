@@ -111,7 +111,10 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         NSString *streamBarJidStr = [[stream myJID] bare];
         
         //FIXME:action in coredata
-        
+        [XMPPChatRoomUserCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                         withNSDictionary:dictionary
+                                                                              chatRoomJid:chatRoomBareJidStr
+                                                                         streamBareJidStr:streamBarJidStr];
         
     }];
     
