@@ -27,6 +27,7 @@
  */
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                             withID:(NSString *)id
+                            chatRoomJid:(NSString*)roomJid
 streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Insert a new XMPPChatRoomUserCoreDataStorageObject into the CoraData System
@@ -40,6 +41,7 @@ streamBareJidStr:(NSString *)streamBareJidStr;
  */
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                   withNSDictionary:(NSDictionary *)Dic
+                  chatRoomJid:(NSString*)roomJid
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 /**
@@ -53,7 +55,8 @@ streamBareJidStr:(NSString *)streamBareJidStr;
  */
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                               withID:(NSString *)id
-streamBareJidStr:(NSString *)streamBareJidStr;
+                              chatRoomJid:(NSString*)roomJid
+                              streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Delete the user info Which info  is equal to the given info dictionary
  *
@@ -65,6 +68,7 @@ streamBareJidStr:(NSString *)streamBareJidStr;
  */
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                     withNSDictionary:(NSDictionary *)Dic
+                    chatRoomJid:(NSString*)roomJid
                     streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Update the user info Which info is equal to the given info dictionary
@@ -78,6 +82,7 @@ streamBareJidStr:(NSString *)streamBareJidStr;
  */
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
                     withNSDictionary:(NSDictionary *)Dic
+                    chatRoomJid:(NSString*)roomJid
                     streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Update the user info Which info is equal to the given info dictionary
@@ -92,6 +97,7 @@ streamBareJidStr:(NSString *)streamBareJidStr;
  */
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                   withNSDictionary:(NSDictionary *)Dic
+                                  chatRoomJid:(NSString*)roomJid
                                   streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Fetch the user info from the CoreData system with user's jid
@@ -109,6 +115,7 @@ streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (XMPPChatRoomUserCoreDataStorageObject *)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                                                          withBareJidStr:(NSString *)bareJidStr
+                                                         chatRoomJid:(NSString*)roomJid
                                                        streamBareJidStr:(NSString *)streamBareJidStr;
 
 @end

@@ -86,7 +86,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                             withID:(NSString *)id
-streamBareJidStr:(NSString *)streamBareJidStr
+                            chatRoomJid:(NSString*)roomJid
+                            streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (id == nil){
         NSLog(@"XMPPChatRoomCoreDataStorageObject: invalid jid (nil)");
@@ -99,13 +100,15 @@ streamBareJidStr:(NSString *)streamBareJidStr
     
     chatRoomuser.streamBareJidStr = streamBareJidStr;
     chatRoomuser.bareJidStr = id;
+    chatRoomuser.chatRoomBareJidStr = roomJid;
     chatRoomuser.nickeName = nil;
-    chatRoomuser.chatRoomBareJidStr = nil;
+    
    
     return chatRoomuser;
 }
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                   withNSDictionary:(NSDictionary *)Dic
+                       chatRoomJid:(NSString*)roomJid
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     
@@ -120,8 +123,9 @@ streamBareJidStr:(NSString *)streamBareJidStr
     chatRoomUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomUserCoreDataStorageObject"
                                              inManagedObjectContext:moc];
     
-    chatRoomUser.streamBareJidStr = streamBareJidStr;
     
+    chatRoomUser.streamBareJidStr = streamBareJidStr;
+    chatRoomUser.bareJidStr = roomJid;
     [chatRoomUser updateWithDictionary:Dic];
     
     return chatRoomUser;
@@ -131,23 +135,25 @@ streamBareJidStr:(NSString *)streamBareJidStr
 #pragma mark Delete method
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
-                    withNSDictionary:(NSDictionary *)Dic
+                    withNSDictionary:(NSDictionary *)Dic chatRoomJid:(NSString*)roomJid
                     streamBareJidStr:(NSString *)streamBareJidStr;
 {
     NSString *jid = [Dic objectForKey:@"jid"];
     return [self deleteInManagedObjectContext:moc
-                                       withID:jid
+                                       withID:jid chatRoomJid:roomJid
                              streamBareJidStr:streamBareJidStr];
     
     return YES;
 }
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
-                              withID:(NSString *)id streamBareJidStr:(NSString *)streamBareJidStr
+                              withID:(NSString *)id
+                                chatRoomJid:(NSString*)roomJid
+                                streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (id == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPChatRoomUserCoreDataStorageObject *deleteObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    XMPPChatRoomUserCoreDataStorageObject *deleteObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id chatRoomJid:roomJid streamBareJidStr:streamBareJidStr];
     if (deleteObject){
         
         [moc deleteObject:deleteObject];
@@ -162,6 +168,7 @@ streamBareJidStr:(NSString *)streamBareJidStr
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
                     withNSDictionary:(NSDictionary *)Dic
+                         chatRoomJid:(NSString*)roomJid
                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     NSString *id = [Dic objectForKey:@"jid"];
@@ -171,7 +178,7 @@ streamBareJidStr:(NSString *)streamBareJidStr
     
     NSError *error = nil;
     
-    XMPPChatRoomUserCoreDataStorageObject *updateObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    XMPPChatRoomUserCoreDataStorageObject *updateObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id chatRoomJid:roomJid streamBareJidStr:streamBareJidStr];
     //if we find the object we will update for,we update it with the new obejct
     if (updateObject){
         
@@ -182,12 +189,13 @@ streamBareJidStr:(NSString *)streamBareJidStr
 }
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                   withNSDictionary:(NSDictionary *)Dic
+                                  chatRoomJid:(NSString*)roomJid
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     NSString *id = [Dic objectForKey:@"jid"];
     if (id == nil) return NO;
     if (moc == nil) return NO;
-    XMPPChatRoomUserCoreDataStorageObject* updateOrInsertObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id streamBareJidStr:streamBareJidStr];
+    XMPPChatRoomUserCoreDataStorageObject* updateOrInsertObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id chatRoomJid:roomJid  streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (updateOrInsertObject){
         
@@ -199,6 +207,7 @@ streamBareJidStr:(NSString *)streamBareJidStr
         //FIXME:There is a bug maybe here
         updateOrInsertObject   = [XMPPChatRoomUserCoreDataStorageObject insertInManagedObjectContext:moc
                                                                       withNSDictionary:Dic
+                                                                      chatRoomJid: roomJid
                                                                       streamBareJidStr:streamBareJidStr];
         [moc insertObject:updateOrInsertObject];
         return YES;
@@ -209,15 +218,18 @@ streamBareJidStr:(NSString *)streamBareJidStr
 }
 + (id)fetchObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                          withBareJidStr:(NSString *)bareJidStr
+                         chatRoomJid:(NSString*)roomJid
                        streamBareJidStr:(NSString *)streamBareJidStr
 {
     return [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc
                                                                 withBareJidStr:bareJidStr
+                                                                chatRoomJid:(NSString*)roomJid
                                                               streamBareJidStr:streamBareJidStr];
 }
 
 + (XMPPChatRoomUserCoreDataStorageObject *)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                                                          withBareJidStr:(NSString *)bareJidStr
+                                                            chatRoomJid:(NSString*)roomJid
                                                        streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (bareJidStr == nil) return nil;
