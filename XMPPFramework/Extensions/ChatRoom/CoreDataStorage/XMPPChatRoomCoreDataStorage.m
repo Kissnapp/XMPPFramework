@@ -454,7 +454,37 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     
     [self scheduleBlock:^{
         //Your code ...
+        NSManagedObjectContext* moc = [self managedObjectContext];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPChatRoomUserCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr== %@ AND chatRoomBareJidStr == %@",
+                         [[self myJIDForXMPPStream:stream] bare],bareChatRoomJidStr];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allChatRoomUser = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        
+        __block NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        [allChatRoomUser enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            
+            [moc deleteObject:(XMPPChatRoomUserCoreDataStorageObject *)obj];
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
+            
+        }];
     }];
+
 }
 
 @end
