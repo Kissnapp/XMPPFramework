@@ -223,7 +223,7 @@
 {
     return [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc
                                                                 withBareJidStr:bareJidStr
-                                                                chatRoomJid:(NSString*)roomJid
+                                                                chatRoomJid:roomJid
                                                               streamBareJidStr:streamBareJidStr];
 }
 
@@ -240,10 +240,10 @@
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"jid == %@", bareJidStr];
+        predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND chatRoomBareJidStr == %@", bareJidStr,roomJid];
     else
-        predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND streamBareJidStr == %@",
-                     bareJidStr, streamBareJidStr];
+        predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND chatRoomBareJidStr == %@ AND streamBareJidStr == %@",
+                     bareJidStr,roomJid, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
