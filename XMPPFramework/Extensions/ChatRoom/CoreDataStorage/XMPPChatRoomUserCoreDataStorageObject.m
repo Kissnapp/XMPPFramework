@@ -112,7 +112,7 @@
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     
-    NSString *jid = [Dic objectForKey:@"jid"];
+    NSString *jid = [Dic objectForKey:@"bareJidStr"];
     
     if (jid == nil){
         NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
@@ -192,7 +192,7 @@
                                   chatRoomJid:(NSString*)roomJid
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *id = [Dic objectForKey:@"jid"];
+    NSString *id = [Dic objectForKey:@"bareJidStr"];
     if (id == nil) return NO;
     if (moc == nil) return NO;
     XMPPChatRoomUserCoreDataStorageObject* updateOrInsertObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id chatRoomJid:roomJid  streamBareJidStr:streamBareJidStr];
