@@ -487,4 +487,13 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
 
 }
 
+- (void)deleteUserWithBareJidStr:(NSString *)bareJidStr fromChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+    }];
+}
+
 @end

@@ -169,13 +169,13 @@
  */
 - (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName;
 /**
- *  Delete one user from the chat room which is created by yourself,
+ *  Delete some users from the chat room which is created by yourself,
  *  Note.you must been the master of the chat room
  *
- *  @param bareJidStr         The user's bare jid string which will been delete
+ *  @param bareJidStrArray         The user's bare jid string array which will been delete
  *  @param bareChatRoomJidStr The chat room's bare jid string
  */
-- (void)DeleteTheUerWithBareJidStr:(NSString  *)bareJidStr fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
+- (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +204,8 @@
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 - (void)deleteChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr xmppStream:(XMPPStream *)stream;
 - (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr  xmppStream:(XMPPStream *)stream;
+
+- (void)deleteUserWithBareJidStr:(NSString *)bareJidStr fromChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 
 @optional
 

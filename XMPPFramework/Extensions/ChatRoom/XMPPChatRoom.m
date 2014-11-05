@@ -341,6 +341,37 @@ enum XMPPChatRoomUserListFlags
 }
 #pragma mark -
 #pragma mark - Private Methods
+- (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName
+{
+    dispatch_block_t block = ^{
+        //The resquest xml as below
+        /*
+         <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
+         <query xmlns="aft:iq:groupchat" query_type="aft_set_nickname" groupid="1" nickname=”testnick”></query>
+         </iq>
+         */
+        NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
+        [query addAttributeWithName:@"query_type" stringValue:@"aft_set_nickname"];
+        [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+        [query addAttributeWithName:@"nickname" stringValue:newNickName];
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
+        [iq addChild:query];
+        
+        [xmppIDTracker addElement:iq
+                           target:self
+                         selector:@selector(handleExitChatRoomIQ:withInfo:)
+                          timeout:60];
+        
+        [xmppStream sendElement:iq];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 - (BOOL)isSelfAMemeberOfChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr
 {
     __block BOOL result = NO;
@@ -491,9 +522,9 @@ enum XMPPChatRoomUserListFlags
         dispatch_async(moduleQueue, block);
 }
 /**
- *  transfrom the data to the xmppChatRoomStorage
+ *  transfrom the array to the xmppChatRoomStorage
  *
- *  @param json JSON data
+ *  @param array The info array
  */
 - (void)transFormDataWithArray:(NSArray *)array
 {
@@ -754,9 +785,115 @@ enum XMPPChatRoomUserListFlags
 
 }
 
+- (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr
+{
+   /*
+    <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
+        <query xmlns="aft:iq:groupchat" query_type="aft_kick_members" groupid="1">
+            [“13411111111@localhost”,”13422222222@localhost”]
+        </query>
+    </iq>
+    */
+    
+    if ([bareJidStrArray count] <= 0 || !bareChatRoomJidStr) {
+        return;
+    }
+    
+    if (![self isMasterForBareChatRoomJidStr:bareChatRoomJidStr]) {
+        return;
+    }
+    
+    dispatch_block_t block=^{
+        
+        @autoreleasepool{
+            
+            NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
+            [query addAttributeWithName:@"query_type" stringValue:@"aft_kick_members"];
+            [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+            
+            NSString *jsonStr = [[bareJidStrArray JSONString] copy];
+            [query setStringValue:jsonStr];
+            
+            XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
+            [iq addChild:query];
+            
+            [xmppIDTracker addElement:iq
+                               target:self
+                             selector:@selector(handleDeleteUserFromChatRoomIQ:withInfo:)
+                              timeout:60];
+            
+            [xmppStream sendElement:iq];
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)handleDeleteUserFromChatRoomIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
+    /*
+     <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
+        <query xmlns="aft:iq:groupchat" query_type="aft_kick_members" groupid=”1”>
+            [“13411111111@localhost”,”13422222222@localhost”]</query>
+        </iq>
+     */
+    
+    
+}
+- (void)handleAletrSelfNickNameIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
+    /*
+     <iq to="13412345678@localhost/caoyue-PC" type="result" id="aad5a">
+        <query xmlns="aft:iq:groupchat" query_type="aft_set_nickname" groupid="1" nickname=”testnick”>
+        </query>
+     </iq>
+     */
+    dispatch_block_t block = ^{ @autoreleasepool {
+        //if there is a error attribute
+        if ([[iq attributeStringValueForName:@"type"] isEqualToString:@"error"]) {
+            [multicastDelegate xmppChatRoom:self didDeleteChatRoomError:iq];
+            return ;
+        }
+        
+        //if this action have succeed
+        if ([[iq type] isEqualToString:@"result"]) {
+            //find the query elment
+            NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
+            
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_set_nickname"])
+            {
+                NSString *groupid = [query attributeStringValueForName:@"groupid"];
+                NSString *nickname = [query attributeStringValueForName:@"nickname"];
+                NSString *userid = [[iq to] bare];
+                NSArray *array = @[
+                                    @{
+                                       @"bareJidStr":userid,
+                                       @"nicknameStr":nickname,
+                                       @"RoomBareJidStr":groupid
+                                     }
+                                  ];
+
+                //Transfor the room user list info
+                if ([array count] > 0) {
+                    [self transChatRoomUserDataWithArray:array];
+                }
+            }
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 - (void)handleFetchChatRoomUserListQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {
     /*
