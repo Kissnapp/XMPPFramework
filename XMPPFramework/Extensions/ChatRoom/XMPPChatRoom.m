@@ -795,10 +795,15 @@ enum XMPPChatRoomFlags
                     NSArray *userBareJidStrArray = [[query stringValue] objectFromJSONString];
                     NSMutableArray *array = [NSMutableArray array];
                     [userBareJidStrArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                      
+                      /*
+                       NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
+                       NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
+                       NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
+                       NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
+                       */
                         NSDictionary *dic = @{
                                               @"bareJidStr":obj,
-                                              @"chatRoomBareJidStr":[roomID copy]
+                                              @"RoomBareJidStr":[roomID copy]
                                               };
                         [array addObject:dic];
                     }];
