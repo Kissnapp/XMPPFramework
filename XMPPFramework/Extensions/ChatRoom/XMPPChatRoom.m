@@ -38,6 +38,13 @@ enum XMPPChatRoomFlags
     kPopulatingChatRoom = 1 << 2,  // If set, we are populating the ChatRoom
 };
 
+enum XMPPChatRoomUserListFlags
+{
+    requestedChatRoomUserList = 1 << 0,  // If set, we have requested the ChatRoom user list
+    hasChatRoomList       = 1 << 1,  // If set, we have received the ChatRoom user list
+    populatingChatRoomUserList = 1 << 2,  // If set, we are populating the ChatRoom user list
+};
+
 
 @implementation XMPPChatRoom
 
@@ -502,6 +509,11 @@ enum XMPPChatRoomFlags
         
         [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
         
+        //If the autoFetchChatRoomUserList == YES,we should fetch the user list
+        if ([self autoFetchChatRoomUserList]) {
+            [self fetchUserListWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
+        }
+        
     }];
 }
 
@@ -719,14 +731,15 @@ enum XMPPChatRoomFlags
          */
         
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_get_groups"];
+        [query addAttributeWithName:@"query_type" stringValue:@"aft_get_members"];
+        [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
         
         [xmppIDTracker addElement:iq
                            target:self
-                         selector:@selector(handleFetchChatRoomListQueryIQ:withInfo:)
+                         selector:@selector(handleFetchChatRoomUserListQueryIQ:withInfo:)
                           timeout:60];
         
         [xmppStream sendElement:iq];
@@ -744,6 +757,59 @@ enum XMPPChatRoomFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)handleFetchChatRoomUserListQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
+    /*
+     <iq to="jid" id="aad5a" type="result">
+        <query xmlns="aft:iq:groupchat" query_type="aft_get_members" groupid="1">
+            [{"userjid":"13411111111@localhost","nickname":"张三"},
+            {"userjid":"13422222222@localhost","nickname":"李四"}]
+        </query>
+     </iq>
+     */
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
+        NSArray  *tempArray = [[query stringValue] objectFromJSONString];
+        NSString *roomID = [query attributeStringValueForName:@"groupid"];
+       
+        if ([tempArray count] > 0){
+            //clear all the before data
+            [xmppChatRoomStorage clearAllUserForBareChatRoomJidStr:roomID xmppStream:xmppStream];
+            
+            //add new down data
+            NSMutableArray *array = [NSMutableArray array];
+            
+            [tempArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                /*
+                 NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
+                 NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
+                 NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
+                 NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
+                 */
+                NSDictionary *tempDic = obj;
+                NSDictionary *dic = @{
+                                      @"bareJidStr":[tempDic objectForKey:@"userjid"],
+                                      @"nicknameStr":[tempDic objectForKey:@"nickname"],
+                                      @"RoomBareJidStr":[roomID copy]
+                                      };
+                [array addObject:dic];
+            }];
+            
+            //Transfor the room user list info
+            if ([array count] > 0) {
+                [self transChatRoomUserDataWithArray:array];
+            }
+
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+}
 
 - (void)handleExitChatRoomIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {

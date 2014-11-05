@@ -58,9 +58,14 @@
 /**
  * Whether or not to automatically fetch the Chat room list from the server.
  *
- * The default value is YES.
+ * The default value is NO.
  **/
 @property (assign) BOOL autoFetchChatRoomList;
+/**
+ *  Whether or not to automatically fetch the Chat room's user list from the server.
+ *  The default value is NO.
+ */
+@property (assign) BOOL autoFetchChatRoomUserList;
 
 /**
  * Whether or not to automatically clear all ChatRooms and Resources when the stream disconnects.
@@ -84,6 +89,12 @@
  */
 - (void)fetchChatRoomList;
 /**
+ *  Fetch the user list with a given bare chat room jid str
+ *
+ *  @param bareChatRoomJidStr The given bare chat room jid str
+ */
+- (void)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+/**
  *  create room with a nick name
  *
  *  @param room_nickeName the nick name of the room which  will been created
@@ -92,6 +103,16 @@
  *           NO:other cases
  */
 - (BOOL)createChatRoomWithNickName:(NSString *)room_nickeName;
+/**
+ *  Create a room and invite some user join it
+ *
+ *  @param userArray     user jid string array
+ *  @param room_nickName the nickname of the room you want to create
+ *
+ *  @return YES,if action finished
+ *          NO,Other cases
+ */
+- (BOOL)inviteUser:(NSArray *)userArray andCreateChatRoomWithNickName:(NSString *)room_nickName;
 /**
  *  invite other users to join the chat room
  *
@@ -104,16 +125,6 @@
  *           NO,other cases
  */
 - (BOOL)inviteUser:(NSArray *)userArray joinChatRoom:(NSString *)roomJIDStr;
-/**
- *  Create a room and invite some user join it
- *
- *  @param userArray     user jid string array
- *  @param room_nickName the nickname of the room you want to create
- *
- *  @return YES,if action finished
- *          NO,Other cases
- */
-- (BOOL)inviteUser:(NSArray *)userArray andCreateChatRoomWithNickName:(NSString *)room_nickName;
 /**
  *  Set the nickname for name
  *
@@ -131,12 +142,6 @@
  */
 - (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 /**
- *  Delete a chat room which is created by self
- *
- *  @param bareChatRoomJidStr The chat room bare jid str which will been delete
- */
-- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
-/**
  *  Whether self is a memeber of the chat room
  *
  *  @param chatRoomBareJidStr The chat room bare jid str
@@ -151,12 +156,26 @@
  */
 - (void)exitFromChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr;
 /**
- *  Fetch the user list with a given bare chat room jid str
+ *  Delete a chat room which is created by self
  *
- *  @param bareChatRoomJidStr The given bare chat room jid str
+ *  @param bareChatRoomJidStr The chat room bare jid str which will been delete
  */
-- (void)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
-
+- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
+/**
+ *  Set self nick name which will been display in the chat room user list
+ *
+ *  @param bareChatRoomJidStr The chat room bare jid string
+ *  @param newNickName        Your new nick name
+ */
+- (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName;
+/**
+ *  Delete one user from the chat room which is created by yourself,
+ *  Note.you must been the master of the chat room
+ *
+ *  @param bareJidStr         The user's bare jid string which will been delete
+ *  @param bareChatRoomJidStr The chat room's bare jid string
+ */
+- (void)DeleteTheUerWithBareJidStr:(NSString  *)bareJidStr fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
