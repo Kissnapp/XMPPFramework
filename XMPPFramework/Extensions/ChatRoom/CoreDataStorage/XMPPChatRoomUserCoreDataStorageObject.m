@@ -171,7 +171,7 @@
                          chatRoomJid:(NSString*)roomJid
                     streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *id = [Dic objectForKey:@"jid"];
+    NSString *id = [Dic objectForKey:@"bareJidStr"];
     
     if (id == nil) return NO;
     if (moc == nil) return NO;
