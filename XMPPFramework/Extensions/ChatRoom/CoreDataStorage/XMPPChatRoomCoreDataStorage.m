@@ -107,7 +107,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         //@"bareJidStr":obj,
         //@"chatRoomBareJidStr":[roomID copy]
         NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
-        NSString *chatRoomBareJidStr = [dictionary objectForKey:@"chatRoomBareJidStr"];
+        NSString *chatRoomBareJidStr = [dictionary objectForKey:@"RoomBareJidStr"];
         NSString *streamBarJidStr = [[stream myJID] bare];
         
         //FIXME:action in coredata
