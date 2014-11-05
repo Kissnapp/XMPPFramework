@@ -125,7 +125,7 @@
     
     
     chatRoomUser.streamBareJidStr = streamBareJidStr;
-    chatRoomUser.bareJidStr = roomJid;
+    chatRoomUser.chatRoomBareJidStr = roomJid;
     [chatRoomUser updateWithDictionary:Dic];
     
     return chatRoomUser;
@@ -143,7 +143,7 @@
                                        withID:jid chatRoomJid:roomJid
                              streamBareJidStr:streamBareJidStr];
     
-    return YES;
+    
 }
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                               withID:(NSString *)id
@@ -209,8 +209,8 @@
                                                                       withNSDictionary:Dic
                                                                       chatRoomJid: roomJid
                                                                       streamBareJidStr:streamBareJidStr];
-        [moc insertObject:updateOrInsertObject];
-        return YES;
+       // [moc insertObject:updateOrInsertObject];
+         return YES;
     }
     return NO;
     
@@ -219,7 +219,7 @@
 + (id)fetchObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                          withBareJidStr:(NSString *)bareJidStr
                          chatRoomJid:(NSString*)roomJid
-                       streamBareJidStr:(NSString *)streamBareJidStr
+                         streamBareJidStr:(NSString *)streamBareJidStr
 {
     return [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc
                                                                 withBareJidStr:bareJidStr
