@@ -500,4 +500,37 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     }];
 }
 
+- (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block NSArray *results = [NSMutableArray array];
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPChatRoomUserCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"chatRoomBareJidStr == %@ && streamBareJidStr == %@",bareJidStr,
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        results = [moc executeFetchRequest:fetchRequest error:nil];
+
+    }];
+    
+    return results;
+
+}
+
 @end

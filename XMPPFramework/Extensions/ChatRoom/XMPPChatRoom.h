@@ -176,6 +176,20 @@
  *  @param bareChatRoomJidStr The chat room's bare jid string
  */
 - (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
+/**
+ *  Fetch a chat room's all user with the given chat room bare jid string,
+ *
+ *
+ *  @param bareChatRoomJidStr The given chat room bare jid string
+ *  @param requestFromServer  Whether request from the server if there is no data in local
+ *                            Note:
+ *                                  1.When we set it into "YES",the system will pull the user list from the server when it not exist in loacal
+ *                                  2.When we set it into "NO",the system will not pull the user list from the server when it not exist in loacal
+ *
+ *  @return The result array which contain some XMPPChatRoomUserCoreDataStorageObject obejct in it
+ */
+- (NSArray *)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,6 +214,7 @@
 - (void)clearAllUserForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
+- (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 - (void)deleteChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr xmppStream:(XMPPStream *)stream;

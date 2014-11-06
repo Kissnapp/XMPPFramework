@@ -855,6 +855,34 @@ enum XMPPChatRoomUserListFlags
     
 }
 
+- (NSArray *)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer
+{
+    if (!bareChatRoomJidStr) return nil;
+    
+    __block NSArray *userListArray = nil;
+    
+    dispatch_block_t block=^{
+        
+        @autoreleasepool{
+            
+            userListArray = [xmppChatRoomStorage userListForChatRoomWithBareJidStr:bareChatRoomJidStr xmppStream:xmppStream];
+            
+            if (requestFromServer) {//If we want to request a info from the server when the chat room user list is not exist in local
+                if (!userListArray || [userListArray count] <= 0) {//If there is no data in the laocal,we should request from the server
+                    [self fetchUserListWithBareChatRoomJidStr:bareChatRoomJidStr];
+                }
+            }
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return userListArray;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
