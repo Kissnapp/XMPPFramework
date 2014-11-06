@@ -110,8 +110,8 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
         NSString *chatRoomBareJidStr = [dictionary objectForKey:@"RoomBareJidStr"];
         NSString *streamBarJidStr = [[stream myJID] bare];
-        
-        if (!action || [action isEqualToString:@"add"] || [action isEqualToString:@"alter"]) {
+        //When we add or update a object in the coredata system,we all use the updateOrInsert... method
+        if (![action isEqualToString:@"remove"]) {
             //action in coredata
             [XMPPChatRoomUserCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                              withNSDictionary:dictionary
