@@ -15,6 +15,7 @@
 - (BOOL)isChatRoomMessageWithBody;
 - (BOOL)isChatRoomMessageWithSubject;
 
-- (NSXMLElement *)bodyElementFromChatRoomPushMessage;
+- (BOOL)hasPushElementWithXmlns:(NSString *)xmlns;
+- (NSXMLElement *)psuhElementFromChatRoomPushMessageWithXmlns:(NSString *)xmlns;
 
 @end

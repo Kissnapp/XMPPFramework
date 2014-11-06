@@ -26,6 +26,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #define GROUP_INFO_PUSH @"groupinfo"
 #define GROUP_MEMBER_PUSH @"groupmember"
+#define GROUP_PUSH_XMLNS @"aft:push:group"
 
 enum XMPPChatRoomConfig
 {
@@ -373,11 +374,11 @@ enum XMPPChatRoomUserListFlags
         //The resquest xml as below
         /*
          <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-         <query xmlns="aft:iq:groupchat" query_type="aft_set_nickname" groupid="1" nickname=”testnick”></query>
+         <query xmlns="aft:iq:groupchat" query_type="set_nickname" groupid="1" nickname=”testnick”></query>
          </iq>
          */
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_set_nickname"];
+        [query addAttributeWithName:@"query_type" stringValue:@"set_nickname"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
         [query addAttributeWithName:@"nickname" stringValue:newNickName];
         
@@ -425,13 +426,13 @@ enum XMPPChatRoomUserListFlags
         //The delete resquest xml as below
         /*
          <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-            <query xmlns="aft:iq:groupchat" query_type="aft_remove_members" groupid="1">
+            <query xmlns="aft:iq:groupchat" query_type="remove_members" groupid="1">
                 [“13412345678@localhost”]
             </query>
          </iq>
          */
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_remove_members"];
+        [query addAttributeWithName:@"query_type" stringValue:@"remove_members"];
         [query addAttributeWithName:@"groupid" stringValue:chatRoomBareJidStr];
         
         NSString *bareJidStr = [[xmppStream myJID] bare];
@@ -488,12 +489,12 @@ enum XMPPChatRoomUserListFlags
         //The delete resquest xml as below
         /*
          <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-            <query xmlns="aft:iq:groupchat" query_type="aft_dismiss_group" groupid=”1”>
+            <query xmlns="aft:iq:groupchat" query_type="dismiss_group" groupid=”1”>
             </query>
          </iq>
          */
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_dismiss_group"];
+        [query addAttributeWithName:@"query_type" stringValue:@"dismiss_group"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
@@ -529,12 +530,12 @@ enum XMPPChatRoomUserListFlags
         
         /*//we send the request xml as below:
          <iq from="1341234578@localhost/caoyue-PC" id="aad5a" type="get">
-         <query xmlns="aft:iq:groupchat" query_type="aft_get_groups"/>
+         <query xmlns="aft:iq:groupchat" query_type="get_groups"/>
          </iq>
          */
         
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_get_groups"];
+        [query addAttributeWithName:@"query_type" stringValue:@"get_groups"];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
@@ -666,11 +667,11 @@ enum XMPPChatRoomUserListFlags
         @autoreleasepool{
             /*
              <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-             <query xmlns="aft:iq:groupchat" query_type="aft_create_group" groupname="FirstGroup"></query>
+             <query xmlns="aft:iq:groupchat" query_type="create_group" groupname="FirstGroup"></query>
              </iq>
              */
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"aft_create_group"];
+            [query addAttributeWithName:@"query_type" stringValue:@"create_group"];
             [query addAttributeWithName:@"groupname" stringValue:room_nickeName ];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
@@ -698,7 +699,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="13412345678@localhost/caoyue-PC" id="aad5a" type="set">
-        <query xmlns="aft:iq:groupchat" groupid="3" query_type="aft_add_member">
+        <query xmlns="aft:iq:groupchat" groupid="3" query_type="add_member">
             ["13411111111@localhost","13422222222@localhost"]
         </query>
      </iq>
@@ -712,7 +713,7 @@ enum XMPPChatRoomUserListFlags
         @autoreleasepool{
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"aft_add_member"];
+            [query addAttributeWithName:@"query_type" stringValue:@"add_member"];
             [query addAttributeWithName:@"groupid" stringValue:roomJIDstr];
             
             NSString *jsonStr = [userArray JSONString];
@@ -752,14 +753,14 @@ enum XMPPChatRoomUserListFlags
             //we will this xml request to the server to create a chat room and invite some user join it
             /*
              <iq from="13412345678@localhost/caoyue-PC" id="2115763" type="set">
-                <query xmlns="aft:iq:groupchat" query_type="aft_group_member" groupname="FirstGroup">
+                <query xmlns="aft:iq:groupchat" query_type="group_member" groupname="FirstGroup">
                     ["13411111111@localhost","13422222222@localhost"]
                 </query>
              </iq>
              */
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"aft_group_member"];
+            [query addAttributeWithName:@"query_type" stringValue:@"group_member"];
             [query addAttributeWithName:@"nickname" stringValue:room_nickName];
             
             NSString *jsonStr = [userArray JSONString];
@@ -795,14 +796,14 @@ enum XMPPChatRoomUserListFlags
         @autoreleasepool{
             /*
              <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-                <query xmlns="aft:iq:groupchat" query_type="aft_set_groupname" groupid="1" groupname="FirstGroup">
+                <query xmlns="aft:iq:groupchat" query_type="set_groupname" groupid="1" groupname="FirstGroup">
                 </query>
              </iq>
              */
 
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"aft_set_groupname"];
+            [query addAttributeWithName:@"query_type" stringValue:@"set_groupname"];
             [query addAttributeWithName:@"gruopid" stringValue:bareChatRoomJidStr];
             [query addAttributeWithName:@"gruopname" stringValue:nickName];
             
@@ -834,12 +835,12 @@ enum XMPPChatRoomUserListFlags
         //we send the request xml as below:
         /*
          <iq from="1341234578@localhost/caoyue-PC" id="aad5a" type="get">
-            <query xmlns="aft:iq:groupchat" query_type="aft_get_members" groupid="1"/>
+            <query xmlns="aft:iq:groupchat" query_type="get_members" groupid="1"/>
          </iq>
          */
         
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_get_members"];
+        [query addAttributeWithName:@"query_type" stringValue:@"get_members"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
@@ -866,7 +867,7 @@ enum XMPPChatRoomUserListFlags
 {
    /*
     <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_kick_members" groupid="1">
+        <query xmlns="aft:iq:groupchat" query_type="kick_members" groupid="1">
             [“13411111111@localhost”,”13422222222@localhost”]
         </query>
     </iq>
@@ -885,7 +886,7 @@ enum XMPPChatRoomUserListFlags
         @autoreleasepool{
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"aft_kick_members"];
+            [query addAttributeWithName:@"query_type" stringValue:@"kick_members"];
             [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
             
             NSString *jsonStr = [[bareJidStrArray JSONString] copy];
@@ -965,7 +966,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_kick_members" groupid=”1”>
+        <query xmlns="aft:iq:groupchat" query_type="kick_members" groupid=”1”>
             [“13411111111@localhost”,”13422222222@localhost”]</query>
         </iq>
      */
@@ -982,7 +983,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_kick_members"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"kick_members"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 NSArray *tempArray = [[query stringValue] objectFromJSONString];
@@ -1013,7 +1014,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq to="13412345678@localhost/caoyue-PC" type="result" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_set_nickname" groupid="1" nickname=”testnick”>
+        <query xmlns="aft:iq:groupchat" query_type="set_nickname" groupid="1" nickname=”testnick”>
         </query>
      </iq>
      */
@@ -1029,7 +1030,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_set_nickname"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"set_nickname"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 NSString *nickname = [query attributeStringValueForName:@"nickname"];
@@ -1059,7 +1060,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq to="jid" id="aad5a" type="result">
-        <query xmlns="aft:iq:groupchat" query_type="aft_get_members" groupid="1">
+        <query xmlns="aft:iq:groupchat" query_type="get_members" groupid="1">
             [{"userjid":"13411111111@localhost","nickname":"张三"},
             {"userjid":"13422222222@localhost","nickname":"李四"}]
         </query>
@@ -1113,7 +1114,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_remove_members" groupid=”1”>
+        <query xmlns="aft:iq:groupchat" query_type="remove_members" groupid=”1”>
             [“13411111111@localhost”,”13422222222@localhost”]
         </query>
      </iq>
@@ -1130,7 +1131,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_quit_group"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"quit_group"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 [xmppChatRoomStorage deleteChatRoomWithBareJidStr:groupid xmppStream:xmppStream];
@@ -1147,7 +1148,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="13412345678@localhost" type="result" to="13412345678@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_add_member" groupid="1">
+        <query xmlns="aft:iq:groupchat" query_type="add_member" groupid="1">
             [{"userjid":"13411111111@localhost","nickname":"张三"},
              {"userjid":"13411111111@localhost","nickname":"李四"}]
         </query>
@@ -1212,7 +1213,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-     <query xmlns="aft:iq:groupchat" query_type="aft_dismiss_group" groupid=”1”></query>
+     <query xmlns="aft:iq:groupchat" query_type="dismiss_group" groupid=”1”></query>
      </iq>
 
      */
@@ -1228,7 +1229,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_dismiss_group"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"dismiss_group"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 [xmppChatRoomStorage deleteChatRoomWithBareJidStr:groupid xmppStream:xmppStream];
@@ -1247,7 +1248,7 @@ enum XMPPChatRoomUserListFlags
     //we will
     /*
     <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-     <query xmlns="aft:iq:groupchat" query_type="aft_get_groups">
+     <query xmlns="aft:iq:groupchat" query_type="get_groups">
         [{"groupid": "100001","groupname": "First"，“master“：”123456789@192.168.1.167”},
         {"groupid": "100002","groupname": "Second",“master“：”1234567890@192.168.1.167”}]
      </query>
@@ -1296,7 +1297,7 @@ enum XMPPChatRoomUserListFlags
 - (void)handleCreateChatRoomIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_create_group">
+        <query xmlns="aft:iq:groupchat" query_type="create_group">
             {"groupid": "100001","groupname": "First","master":"123456789@192.168.1.167"}
         </query>
      </iq>
@@ -1314,7 +1315,7 @@ enum XMPPChatRoomUserListFlags
                 //find the query elment
                 NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:iq:groupchat"];
             
-                if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"aft_create_group"]) {
+                if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"create_group"]) {
                     //init a XMPPChatRoomCoreDataStorageObject to restore the info
                     NSDictionary *tempDictionary = [[query stringValue] objectFromJSONString];
                     
@@ -1355,7 +1356,7 @@ enum XMPPChatRoomUserListFlags
 - (void)handleCreateChatRoomAndInviteUserIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
     /*
      <iq from="13412345678@localhost" type="result" to="13412345678@localhost/caoyue-PC" id="2115763">
-        <query xmlns="aft:iq:groupchat" query_type="aft_group_member" groupid="1" groupname="FirstGroup" master="12345678@120.140.80.54">
+        <query xmlns="aft:iq:groupchat" query_type="group_member" groupid="1" groupname="FirstGroup" master="12345678@120.140.80.54">
             [{"userjid":"13411111111@localhost","nickname":"张三"},
              {"userjid":"13411111111@localhost","nickname":"李四"}]
         </query>
@@ -1433,7 +1434,7 @@ enum XMPPChatRoomUserListFlags
     //After we sending the alter nickname for a chat room,we will receice a result xml as below:
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-     <query xmlns="aft:iq:groupchat" query_type="aft_set_groupname" groupname=”FirstGroup”></query>
+     <query xmlns="aft:iq:groupchat" query_type="set_groupname" groupname=”FirstGroup”></query>
      </iq>
      */
     dispatch_block_t block = ^{
@@ -1504,7 +1505,7 @@ enum XMPPChatRoomUserListFlags
     // Because of the bug in Apple's NSXML (documented in our elementForName method),
     // it is important we specify the xmlns for the query.
     
-    NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:aft_groupchat"];
+    NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:groupchat"];
     
     if (query){
         if([iq isSetIQ]){
@@ -1540,7 +1541,7 @@ enum XMPPChatRoomUserListFlags
 {
     // This method is invoked on the moduleQueue.
     /*
-     <message from="aftgroup_33@localhost" type="aft_groupchat" push="true" xml:lang="en" to="13412345678@localhost">
+     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
         <body groupid="33" groupname="FirstGroup" master="13412345678@localhost" type = "groupmember">
             [{"jid":"13412345678@localhost","nickname":"test1123","action":"add"},//or remove,alter
             {"jid":"13412345678@localhost","nickname":"test1123","action":"add"},
@@ -1548,7 +1549,7 @@ enum XMPPChatRoomUserListFlags
         </body>
      </message>
      
-     <message from="aftgroup_33@localhost" type="aft_groupchat" push="true" xml:lang="en" to="13412345678@localhost">
+     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
         <body  type = "groupinfo">
             [{"groupid":"1","groupname":"testgroup","action":"dismiss"},//dismiss a group
             {"groupid":"1","groupname":"testgroup","action":"rename"}]//modyfy the group nickname
@@ -1563,22 +1564,22 @@ enum XMPPChatRoomUserListFlags
     // A message to all recipients MUST be of type groupchat.
     // A message to an individual recipient would have a <body/>.
     
-    NSXMLElement *bodyElement = [message bodyElementFromChatRoomPushMessage];
+    NSXMLElement *pushElement = [message psuhElementFromChatRoomPushMessageWithXmlns:GROUP_PUSH_XMLNS];
     
     //This is a chart room push message
-    if (bodyElement) {
+    if (pushElement) {
         
         //Note:if this is a push message about the group info
-        if ([[bodyElement attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]){
+        if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]){
             //TODO:... Handle other types of messages.
             //FIXME:fix the code here ...
             //MARK:mark the code here ...
             //???:what's this?
             //!!!!:how to do this here?
-            NSString *chatRoomID = [bodyElement attributeStringValueForName:@"groupid"];
-            NSString *chatRoomNickName = [bodyElement attributeStringValueForName:@"groupidname"];
-            NSString *master = [bodyElement attributeStringValueForName:@"master"];
-            NSString *jsonStr = [bodyElement stringValue];
+            NSString *chatRoomID = [pushElement attributeStringValueForName:@"groupid"];
+            NSString *chatRoomNickName = [pushElement attributeStringValueForName:@"groupidname"];
+            NSString *master = [pushElement attributeStringValueForName:@"master"];
+            NSString *jsonStr = [pushElement stringValue];
             
             if (chatRoomID && chatRoomNickName) {
                 NSDictionary *dic = @{
@@ -1593,9 +1594,9 @@ enum XMPPChatRoomUserListFlags
                 [self transChatRoomUserDataWithJsonStr:jsonStr];
             }
         //Note:if this is a push message about the group member
-        }else if ([[bodyElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
+        }else if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
             
-            NSArray *tempArray = [[bodyElement stringValue] objectFromJSONString];
+            NSArray *tempArray = [[pushElement stringValue] objectFromJSONString];
             
             [self transFormDataWithArray:tempArray];
             

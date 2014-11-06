@@ -8,18 +8,15 @@
 
 #import "XMPPMessage+ChatRoomMessage.h"
 
+#define PUSH_ELEMNET @"push"
+#define PUSH_ELEMENT_XMLNS @"aft:push:group"
+
 @implementation XMPPMessage (ChatRoomMessage)
 
 - (BOOL)isChatRoomMessage
 {
     return ([[[self attributeForName:@"type"] stringValue] isEqualToString:@"chat"] & ([self attributeStringValueForName:@"user"] != nil));
 }
-
-- (BOOL)isChatRoomPushMessage
-{
-    return ([[[self attributeForName:@"type"] stringValue] isEqualToString:@"aft_groupchat"] & [[self attributeStringValueForName:@"push"] isEqualToString:@"true"]);
-}
-
 
 - (BOOL)isChatRoomMessageWithBody
 {
@@ -33,6 +30,13 @@
     return NO;
 }
 
+
+- (BOOL)isChatRoomPushMessage
+{
+    return ([self elementForName:PUSH_ELEMNET xmlns:PUSH_ELEMENT_XMLNS] != nil);
+}
+
+
 - (BOOL)isChatRoomMessageWithSubject
 {
     if ([self isChatRoomMessage])
@@ -45,14 +49,26 @@
     return NO;
 }
 
-- (NSXMLElement *)bodyElementFromChatRoomPushMessage
+- (BOOL)hasPushElementWithXmlns:(NSString *)xmlns
 {
-    NSXMLElement *body = nil;
-    if ([self isChatRoomPushMessage]) {
-        body = [self elementForName:@"body"];
+    BOOL result = NO;
+    
+    NSXMLElement *push = [self elementForName:PUSH_ELEMNET xmlns:xmlns];
+    if (push != nil) {
+        result = YES;
     }
     
-    return body;
+    return result;
 }
+
+- (NSXMLElement *)psuhElementFromChatRoomPushMessageWithXmlns:(NSString *)xmlns
+{
+    NSXMLElement *push = nil;
+    
+    push = [self elementForName:PUSH_ELEMNET xmlns:xmlns];
+
+    return push;
+}
+
 
 @end
