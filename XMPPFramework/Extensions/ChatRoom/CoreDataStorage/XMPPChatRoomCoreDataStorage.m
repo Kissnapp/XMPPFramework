@@ -233,20 +233,33 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                            streamBareJidStr:streamBareJidStr];
         }else{
             NSString *jid = [dic objectForKey:@"groupid"];
+            NSString *action = [dic objectForKey:@"action"];
             
-            XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
-                                                                   xmppStream:stream
-                                                         managedObjectContext:moc];
-            
-            if (chatRoom) {
-                [chatRoom updateWithDictionary:dic];
-            }else{
+            if (![action isEqualToString:@"dismiss"]) {
+                
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
+                                                                       xmppStream:stream
+                                                             managedObjectContext:moc];
+                
+                if (chatRoom) {
+                    [chatRoom updateWithDictionary:dic];
+                }else{
+                    NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                    
+                    [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                   withNSDictionary:dic
+                                                                   streamBareJidStr:streamBareJidStr];
+                }
+
+            }else if ([action isEqualToString:@"dismiss"]){
+                
                 NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
                 
-                [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
-                                                               withNSDictionary:dic
+                [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                         withID:jid
                                                                streamBareJidStr:streamBareJidStr];
             }
+            
         }
         
     }];

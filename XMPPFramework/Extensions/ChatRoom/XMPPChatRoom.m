@@ -554,6 +554,28 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
 }
+- (void)transFormDataAndFetchUseListWithArray:(NSArray *)array
+{
+    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    
+    if (!array) return;
+    
+    //BOOL hasChatRoom = [self hasChatRoomList];
+    
+    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        NSDictionary *dic = obj;
+        
+        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
+        
+        //If the autoFetchChatRoomUserList == YES,we should fetch the user list
+        if ([self autoFetchChatRoomUserList]) {
+            [self fetchUserListWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
+        }
+        
+    }];
+
+}
 /**
  *  transfrom the array to the xmppChatRoomStorage
  *
@@ -572,11 +594,6 @@ enum XMPPChatRoomUserListFlags
         NSDictionary *dic = obj;
         
         [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
-        
-        //If the autoFetchChatRoomUserList == YES,we should fetch the user list
-        if ([self autoFetchChatRoomUserList]) {
-            [self fetchUserListWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
-        }
         
     }];
 }
@@ -769,9 +786,9 @@ enum XMPPChatRoomUserListFlags
     return YES;
 }
 
-- (void)setNickName:(NSString *)nickName forBareJidStr:(NSString *)bareJidStr
+- (void)setChatRoomNickName:(NSString *)nickName forBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
 {
-    if (!nickName || !bareJidStr) return;
+    if (!nickName || !bareChatRoomJidStr) return;
     
     dispatch_block_t block=^{
         
@@ -786,7 +803,7 @@ enum XMPPChatRoomUserListFlags
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
             [query addAttributeWithName:@"query_type" stringValue:@"aft_set_groupname"];
-            [query addAttributeWithName:@"gruopid" stringValue:bareJidStr];
+            [query addAttributeWithName:@"gruopid" stringValue:bareChatRoomJidStr];
             [query addAttributeWithName:@"gruopname" stringValue:nickName];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
@@ -1253,7 +1270,7 @@ enum XMPPChatRoomUserListFlags
         //TODO:Save all the chat room list here
         NSArray *array = [jsonStr objectFromJSONString];
         if ([array count] > 0) {
-             [self transFormDataWithArray:array];
+             [self transFormDataAndFetchUseListWithArray:array];
         }
     
         if (!hasChatRoom){
@@ -1573,10 +1590,14 @@ enum XMPPChatRoomUserListFlags
             }
             
             if (jsonStr) {
-                [self transChatRoomUserDataWithArray:nil];
+                [self transChatRoomUserDataWithJsonStr:jsonStr];
             }
         //Note:if this is a push message about the group member
         }else if ([[bodyElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
+            
+            NSArray *tempArray = [[bodyElement stringValue] objectFromJSONString];
+            
+            [self transFormDataWithArray:tempArray];
             
         }
         

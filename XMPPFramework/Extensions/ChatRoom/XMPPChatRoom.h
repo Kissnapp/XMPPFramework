@@ -126,12 +126,12 @@
  */
 - (BOOL)inviteUser:(NSArray *)userArray joinChatRoom:(NSString *)roomJIDStr;
 /**
- *  Set the nickname for name
+ *  Set the chat room nickname for given nick name and bare jid string
  *
  *  @param nickName     chat room nickname
  *  @param bareJidStr   The chat room's bare jid string
  */
-- (void)setNickName:(NSString *)nickName forBareJidStr:(NSString *)bareJidStr;
+- (void)setChatRoomNickName:(NSString *)nickName forBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 /**
  *  Whether self is the chat room 's master
  *
