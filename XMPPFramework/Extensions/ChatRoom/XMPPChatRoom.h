@@ -150,6 +150,14 @@
  */
 - (BOOL)isSelfAMemeberOfChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr;
 /**
+ *  Whether the chat room is existed with the given bare jid string
+ *
+ *  @param bareJidStr The given chat room bare jid string
+ *
+ *  @return YES,if exist,Other case return NO;
+ */
+- (BOOL)existChatRoomWithBareJidStr:(NSString *)bareJidStr;
+/**
  *  Exit from a chat room
  *
  *  @param chatRoomBareJidStr The chat room bare jid string
@@ -210,6 +218,7 @@
 - (BOOL)chatRoomExistsWithID:(NSString *)id xmppStream:(XMPPStream *)stream;
 - (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 - (BOOL)isMemeberOfChatRoomWithBareJisStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
+- (BOOL)existChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (void)clearAllChatRoomsForXMPPStream:(XMPPStream *)stream;
 - (void)clearAllUserForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
