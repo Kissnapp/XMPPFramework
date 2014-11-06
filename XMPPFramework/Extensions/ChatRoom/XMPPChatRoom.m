@@ -398,13 +398,20 @@ enum XMPPChatRoomUserListFlags
         //The delete resquest xml as below
         /*
          <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-            <query xmlns="aft:iq:groupchat" query_type="aft_quit_group" groupid="1">
+            <query xmlns="aft:iq:groupchat" query_type="aft_remove_members" groupid="1">
+                [“13412345678@localhost”]
             </query>
          </iq>
          */
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:iq:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"aft_quit_group"];
+        [query addAttributeWithName:@"query_type" stringValue:@"aft_remove_members"];
         [query addAttributeWithName:@"groupid" stringValue:chatRoomBareJidStr];
+        
+        NSString *bareJidStr = [[xmppStream myJID] bare];
+        NSArray *array = [NSArray arrayWithObjects:bareJidStr, nil];
+        NSString *jsonStr = [array JSONString];
+        
+        [query setStringValue:jsonStr];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
@@ -1003,7 +1010,8 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:iq:groupchat" query_type="aft_quit_group" groupid=”1”>
+        <query xmlns="aft:iq:groupchat" query_type="aft_remove_members" groupid=”1”>
+            [“13411111111@localhost”,”13422222222@localhost”]
         </query>
      </iq>
      */
