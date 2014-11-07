@@ -14,7 +14,7 @@
 
 @property (nonatomic, retain) NSString * bareJidStr;
 @property (nonatomic, retain) NSString * chatRoomBareJidStr;
-@property (nonatomic, retain) NSString * nickeName;
+@property (nonatomic, retain) NSString * nickName;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 /**
  *  Insert a new XMPPChatRoomUserCoreDataStorageObject into the CoraData System

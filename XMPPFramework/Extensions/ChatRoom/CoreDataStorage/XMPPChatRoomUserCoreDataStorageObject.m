@@ -13,7 +13,7 @@
 
 @dynamic bareJidStr;
 @dynamic chatRoomBareJidStr;
-@dynamic nickeName;
+@dynamic nickName;
 @dynamic streamBareJidStr;
 
 #pragma mark -
@@ -49,19 +49,19 @@
     [self didChangeValueForKey:@"chatRoomBareJidStr"];
 }
 
-- (NSString *)nickeName
+- (NSString *)nickName
 {
-    [self willAccessValueForKey:@"nickeName"];
-    NSString *value = [self primitiveValueForKey:@"nickeName"];
-    [self didAccessValueForKey:@"nickeName"];
+    [self willAccessValueForKey:@"nickName"];
+    NSString *value = [self primitiveValueForKey:@"nickName"];
+    [self didAccessValueForKey:@"nickName"];
     return value;
 }
 
-- (void)setNickeName:(NSString *)value
+- (void)setNickName:(NSString *)value
 {
-    [self willChangeValueForKey:@"nickeName"];
-    [self setPrimitiveValue:value forKey:@"nickeName"];
-    [self didChangeValueForKey:@"nickeName"];
+    [self willChangeValueForKey:@"nickName"];
+    [self setPrimitiveValue:value forKey:@"nickName"];
+    [self didChangeValueForKey:@"nickName"];
 }
 
 - (NSString *)streamBareJidStr
@@ -101,7 +101,7 @@
     chatRoomuser.streamBareJidStr = streamBareJidStr;
     chatRoomuser.bareJidStr = id;
     chatRoomuser.chatRoomBareJidStr = roomJid;
-    chatRoomuser.nickeName = nil;
+    chatRoomuser.nickName = nil;
     
    
     return chatRoomuser;
@@ -269,16 +269,16 @@
         NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
-    if (self.bareJidStr) {
+    if (bareJidStr) {
         self.bareJidStr = bareJidStr;
     }
-    if (self.chatRoomBareJidStr) {
+    if (roomBareJidStr) {
         self.chatRoomBareJidStr = roomBareJidStr;
     }
-    if (self.nickeName) {
-        self.nickeName = nickNameStr;
+    if (nickNameStr) {
+        self.nickName = nickNameStr;
     }
-    if (self.streamBareJidStr) {
+    if (streamBareJidStr) {
         self.streamBareJidStr = streamBareJidStr;
     }
   

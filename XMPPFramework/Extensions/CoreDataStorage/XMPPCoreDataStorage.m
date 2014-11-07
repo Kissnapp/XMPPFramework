@@ -149,7 +149,7 @@ static NSMutableSet *databaseFileNames;
     
 		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
 		
-		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSBinaryStoreType/*NSSQLiteStoreType*/
+		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType/*NSBinaryStoreType*/
 		                                                           configuration:nil
 		                                                                     URL:storeUrl
 		                                                                 options:storeOptions

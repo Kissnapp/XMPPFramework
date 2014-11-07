@@ -11,7 +11,7 @@
     <entity name="XMPPChatRoomUserCoreDataStorageObject" representedClassName="XMPPChatRoomUserCoreDataStorageObject" syncable="YES">
         <attribute name="bareJidStr" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="chatRoomBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="nickeName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="nickName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>

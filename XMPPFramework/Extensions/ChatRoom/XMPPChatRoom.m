@@ -380,7 +380,7 @@ enum XMPPChatRoomUserListFlags
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
         [query addAttributeWithName:@"query_type" stringValue:@"set_nickname"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
-        [query addAttributeWithName:@"gruopname" stringValue:newNickName];
+        [query addAttributeWithName:@"groupname" stringValue:newNickName];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
@@ -761,7 +761,7 @@ enum XMPPChatRoomUserListFlags
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
             [query addAttributeWithName:@"query_type" stringValue:@"group_member"];
-            [query addAttributeWithName:@"gruopname" stringValue:room_nickName];
+            [query addAttributeWithName:@"groupname" stringValue:room_nickName];
             
             NSString *jsonStr = [userArray JSONString];
             [query setStringValue:jsonStr];
@@ -804,8 +804,8 @@ enum XMPPChatRoomUserListFlags
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
             [query addAttributeWithName:@"query_type" stringValue:@"set_groupname"];
-            [query addAttributeWithName:@"gruopid" stringValue:bareChatRoomJidStr];
-            [query addAttributeWithName:@"gruopname" stringValue:nickName];
+            [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+            [query addAttributeWithName:@"groupname" stringValue:nickName];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
             [iq addChild:query];
