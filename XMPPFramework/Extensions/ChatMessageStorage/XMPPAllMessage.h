@@ -98,12 +98,56 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  @param messageID The given messageID
  */
 - (void)readMessageWithMessageID:(NSString *)messageID;
+/**
+ *  Delete a message object with given message id
+ *
+ *  @param messageID The given message ID
+ */
 - (void)deleteMessageWithMessageID:(NSString *)messageID;
+/**
+ *  Update The message 's sending status
+ *
+ *  @param messageID The given message id
+ */
 - (void)updateMessageSendStatusWithMessageID:(NSString *)messageID;
-
+/**
+ *  Set a message's hasBeenRead status into YES;
+ *
+ *  @param message The given message object
+ */
 - (void)readMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message;
+/**
+ *  Delete a message with the message object
+ *
+ *  @param message The given message object
+ */
 - (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message;
+/**
+ *  Update a message with given message object
+ *
+ *  @param message The given object
+ */
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message;
+/**
+ *  Get the last chat message with the given user bare jid string
+ *
+ *  @param bareJidStr the given user bare jid string
+ *  @param isPrivate  Whether this message is a private message
+ *
+ *  @return The message object
+ */
+- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate;
+/**
+ *  Fetch a lot of messages with given user bare jid string,the fetch size and the fetch offset
+ *
+ *  @param bareJidStr  The given user bare jid str
+ *  @param fetchSize   The message count we will fetch
+ *  @param fetchOffset The beginnig oppsion we want to fetch
+ *  @param isPrivate   Whether Fetch the private message
+ *
+ *  @return A array which contains the fetch result
+ */
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate;
 
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
@@ -138,7 +182,8 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)updateMessageSendStatusWithMessageID:(NSString *)messageID success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
-
+- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream;
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream;
 @end
 
 

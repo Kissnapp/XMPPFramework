@@ -375,4 +375,109 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [message setHasBeenRead:[NSNumber numberWithBool:success]];
     }];
 }
+
+- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream
+{
+    if (!bareJidStr || !xmppStream) return nil;
+    
+    __block id result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:YES];
+       
+        NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor1, nil];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (xmppStream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
+                         streamBareJidStr,@"isPrivate",@(isPrivate > 0)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allMessages = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        result = (XMPPMessageCoreDataStorageObject *)[allMessages lastObject];
+    }];
+    
+    return result;
+}
+
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream
+{
+    if (bareJidStr == nil || xmppStream == nil) return nil;
+    
+    __block NSArray *results = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:YES];
+        
+        NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor1, nil];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:fetchSize];
+        [fetchRequest setFetchOffset:fetchOffset];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (xmppStream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
+                                      streamBareJidStr,@"isPrivate",@(isPrivate > 0)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        results = [moc executeFetchRequest:fetchRequest error:nil];
+    }];
+    
+    return results;
+}
+
+////查询
+//- (NSMutableArray*)selectData:(int)pageSize andOffset:(int)currentPage
+//{
+//    NSManagedObjectContext *moc = [self managedObjectContext];
+//    
+//    // 限定查询结果的数量
+//    //setFetchLimit
+//    // 查询的偏移量
+//    //setFetchOffset
+//    
+//    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+//    
+//    [fetchRequest setFetchLimit:pageSize];
+//    [fetchRequest setFetchOffset:currentPage];
+//    
+//    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject" inManagedObjectContext:moc];
+//    [fetchRequest setEntity:entity];
+//    NSError *error;
+//    NSArray *fetchedObjects = [moc executeFetchRequest:fetchRequest error:&error];
+//    NSMutableArray *resultArray = [NSMutableArray array];
+//    
+//    for (News *info in fetchedObjects) {
+//        NSLog(@"id:%@", info.newsid);
+//        NSLog(@"title:%@", info.title);
+//        [resultArray addObject:info];
+//    }
+//    return resultArray;
+//}
 @end

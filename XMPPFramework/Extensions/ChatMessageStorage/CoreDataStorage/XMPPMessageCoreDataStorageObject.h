@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPAdditionMessageObject.h"
+#import "XMPPAdditionalMessageObject.h"
 
 
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject

@@ -423,7 +423,44 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
+- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate
+{
+    if (!bareJidStr) return nil;
+    
+    __block XMPPMessageCoreDataStorageObject *result = nil;
+    
+    dispatch_block_t block = ^{
+        
+        result = [xmppMessageStorage lastMessageWithBareJidStr:bareJidStr isPrivate:isPrivate xmppStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
 
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate
+{
+    if (!bareJidStr) return nil;
+    
+    __block NSArray *results = nil;
+    
+    dispatch_block_t block = ^{
+        
+        results = [xmppMessageStorage fetchMessagesWithBareJidStr:bareJidStr fetchSize:fetchSize fetchOffset:fetchOffset isPrivate:isPrivate xmppStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    return  results;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
