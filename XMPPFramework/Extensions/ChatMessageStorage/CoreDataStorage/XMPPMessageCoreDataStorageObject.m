@@ -14,7 +14,7 @@
 @dynamic bareJidStr;
 @dynamic hasBeenRead;
 @dynamic messageType;
-@dynamic isChatRoomMessage;
+@dynamic isGroupChat;
 @dynamic isPrivate;
 @dynamic messageID;
 @dynamic messageBody;
@@ -53,7 +53,7 @@
     [self setPrimitiveValue:value forKey:@"hasBeenRead"];
     [self didChangeValueForKey:@"hasBeenRead"];
 }
-- (NSNumber *)isChatRoomMessage
+- (NSNumber *)isGroupChat
 {
     [self willAccessValueForKey:@"isChatRoomMessage"];
     NSNumber *value = [self primitiveValueForKey:@"isChatRoomMessage"];
@@ -61,7 +61,7 @@
     return value;
 }
 
-- (void)setIsChatRoomMessage:(NSNumber *)value
+- (void)setIsGroupChat:(NSNumber *)value
 {
     [self willChangeValueForKey:@"isChatRoomMessage"];
     [self setPrimitiveValue:value forKey:@"isChatRoomMessage"];
@@ -81,15 +81,15 @@
     [self setPrimitiveValue:value forKey:@"isPrivate"];
     [self didChangeValueForKey:@"isPrivate"];
 }
-- (XMPPSimpleMessageObject *)messageBody
+- (XMPPAdditionalMessageObject *)messageBody
 {
     [self willAccessValueForKey:@"messageBody"];
-    XMPPSimpleMessageObject *value = [self primitiveValueForKey:@"messageBody"];
+    XMPPAdditionalMessageObject *value = [self primitiveValueForKey:@"messageBody"];
     [self didAccessValueForKey:@"messageBody"];
     return value;
 }
 
-- (void)setMessageBody:(XMPPSimpleMessageObject *)value
+- (void)setMessageBody:(XMPPAdditionalMessageObject *)value
 {
     [self willChangeValueForKey:@"messageBody"];
     [self setPrimitiveValue:value forKey:@"messageBody"];
@@ -305,7 +305,7 @@
     [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
     [self setMessageType:[messageDic objectForKey:@"messageType"]];
     [self setStreamBareJidStr:streamBareJidStr];
-    [self setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
+    [self setIsGroupChat:[messageDic objectForKey:@"isChatRoomMessage"]];
     [self setMessageBody:[messageDic objectForKey:@"messageBody"]];
 }
 

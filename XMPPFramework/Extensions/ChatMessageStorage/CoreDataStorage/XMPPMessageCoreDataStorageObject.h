@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPSimpleMessageObject.h"
+#import "XMPPAdditionMessageObject.h"
 
 
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
@@ -16,9 +16,9 @@
 @property (nonatomic, retain) NSString                  * bareJidStr;
 @property (nonatomic, retain) NSNumber                  * messageType;
 @property (nonatomic, retain) NSNumber                  * hasBeenRead;
-@property (nonatomic, retain) NSNumber                  * isChatRoomMessage;
+@property (nonatomic, retain) NSNumber                  * isGroupChat;
 @property (nonatomic, retain) NSNumber                  * isPrivate;
-@property (nonatomic, retain) XMPPSimpleMessageObject   * messageBody;
+@property (nonatomic, retain) XMPPAdditionalMessageObject   * messageBody;
 @property (nonatomic, retain) NSString                  * messageID;
 @property (nonatomic, retain) NSDate                    * messageTime;
 @property (nonatomic, retain) NSNumber                  * sendFromMe;

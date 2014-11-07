@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPSimpleMessageObject.h"
+#import "XMPPAdditionalMessageObject.h"
 #import "XMPPFramework.h"
 
 #define MESSAGE_TEXT_ELEMENT_NAME           @"messageText"
@@ -15,12 +15,12 @@
 #define FILE_DATA_ELEMENT_NAME              @"fileData"
 #define LATITUDE_ELEMENT_NAME               @"latitude"
 #define LONGITUDE_ELEMENT_NAME              @"longitude"
-#define CHATROOM_USERJID_ELEMENT_NAME       @"chatRoomUserJid"
+#define GROUP_USERJID_ELEMENT_NAME          @"groupUserJid"
 #define TIME_LENGTH_ELEMENT_NAME            @"timeLength"
 #define ASPECT_RATIO_USERJID_ELEMENT_NAME   @"aspectRatio"
 #define MESSAGE_TAG_ELEMENT_NAME            @"messageTag"
 
-@implementation XMPPSimpleMessageObject
+@implementation XMPPAdditionalMessageObject
 
 #pragma mark -
 #pragma mark - Public  Methods
@@ -59,8 +59,8 @@
         [dictionary setObject:self.fileName forKey:@"fileName"];
     if (self.fileData)
         [dictionary setObject:[self.fileData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength] forKey:@"fileData"];
-    if (self.chatRoomUserJid)
-        [dictionary setObject:self.chatRoomUserJid forKey:@"chatRoomUserJid"];
+    if (self.groupUserJid)
+        [dictionary setObject:self.groupUserJid forKey:@"groupUserJid"];
     
     [dictionary setObject:[NSNumber numberWithDouble:self.timeLength] forKey:@"timeLength"];
     [dictionary setObject:[NSNumber numberWithFloat:self.aspectRatio] forKey:@"aspectRatio"];
@@ -77,7 +77,7 @@
     self.longitude = [message objectForKey:@"longitude"];
     self.latitude = [message objectForKey:@"latitude"];
     self.fileName = [message objectForKey:@"fileName"];
-    self.chatRoomUserJid = [message objectForKey:@"chatRoomUserJid"];
+    self.groupUserJid = [message objectForKey:@"groupUserJid"];
 #warning initWithBase64Encoding only used in the system version more than 7.0
     if ([message objectForKey:@"fileData"])
         self.fileData = [[NSData alloc] initWithBase64EncodedString:[message objectForKey:@"fileData"] options:NSDataBase64DecodingIgnoreUnknownCharacters];
@@ -89,6 +89,7 @@
 -(NSXMLElement *)toXMLElement
 {
     NSXMLElement *additionalElement = [NSXMLElement elementWithName:ADDITION_ELEMENT_NAME xmlns:ADDITION_ELEMENT_XMLNS];
+    
     if (self.messageText) {
         NSXMLElement *messageText = [NSXMLElement elementWithName:MESSAGE_TEXT_ELEMENT_NAME stringValue:self.messageText];
         [additionalElement addChild:messageText];
@@ -118,8 +119,8 @@
         [additionalElement addChild:longitude];
     }
     
-    if (self.chatRoomUserJid) {
-        NSXMLElement *chatRoomUserJid = [NSXMLElement elementWithName:CHATROOM_USERJID_ELEMENT_NAME stringValue:self.chatRoomUserJid];
+    if (self.groupUserJid) {
+        NSXMLElement *chatRoomUserJid = [NSXMLElement elementWithName:GROUP_USERJID_ELEMENT_NAME stringValue:self.groupUserJid];
         [additionalElement addChild:chatRoomUserJid];
     }
     
@@ -158,14 +159,14 @@
     self.filePath = [[xmlElement elementForName:FILE_PATH_ELEMENT_NAME] stringValue];
     self.latitude = [[xmlElement elementForName:LATITUDE_ELEMENT_NAME] stringValue];
     self.longitude = [[xmlElement elementForName:LONGITUDE_ELEMENT_NAME] stringValue];
-    self.chatRoomUserJid = [[xmlElement elementForName:CHATROOM_USERJID_ELEMENT_NAME] stringValue];
+    self.groupUserJid = [[xmlElement elementForName:GROUP_USERJID_ELEMENT_NAME] stringValue];
 }
 
 #pragma mark -
 #pragma mark NSCopying Methods
 - (id)copyWithZone:(NSZone *)zone
 {
-    XMPPSimpleMessageObject *newObject = [[[self class] allocWithZone:zone] init];
+    XMPPAdditionalMessageObject *newObject = [[[self class] allocWithZone:zone] init];
     
     [newObject setMessageText:self.messageText];
     [newObject setMessageTag:self.messageTag];
@@ -173,7 +174,7 @@
     [newObject setFileName:self.fileName];
     [newObject setFilePath:self.filePath];
     [newObject setTimeLength:self.timeLength];
-    [newObject setChatRoomUserJid:self.chatRoomUserJid];
+    [newObject setGroupUserJid:self.groupUserJid];
     [newObject setLongitude:self.longitude];
     [newObject setLatitude:self.latitude];
     [newObject setAspectRatio:self.aspectRatio];
@@ -191,7 +192,7 @@
     [aCoder encodeObject:self.filePath forKey:@"filePath"];
     [aCoder encodeObject:self.latitude forKey:@"latitude"];
     [aCoder encodeObject:self.longitude forKey:@"longitude"];
-    [aCoder encodeObject:self.chatRoomUserJid forKey:@"chatRoomUserJid"];
+    [aCoder encodeObject:self.groupUserJid forKey:@"groupUserJid"];
     [aCoder encodeObject:[NSNumber numberWithDouble:self.timeLength] forKey:@"timeLength"];
     [aCoder encodeObject:[NSNumber numberWithFloat:self.aspectRatio] forKey:@"aspectRatio"];
 }
@@ -204,7 +205,7 @@
         self.filePath = [aDecoder decodeObjectForKey:@"filePath"];
         self.latitude = [aDecoder decodeObjectForKey:@"latitude"];
         self.longitude = [aDecoder decodeObjectForKey:@"longitude"];
-        self.chatRoomUserJid = [aDecoder decodeObjectForKey:@"chatRoomUserJid"];
+        self.groupUserJid = [aDecoder decodeObjectForKey:@"groupUserJid"];
         self.messageTag = [(NSNumber *)[aDecoder decodeObjectForKey:@"messageTag"] boolValue];
         self.timeLength = [(NSNumber *)[aDecoder decodeObjectForKey:@"timeLength"] doubleValue];
         self.aspectRatio = [(NSNumber *)[aDecoder decodeObjectForKey:@"aspectRatio"] floatValue];

@@ -12,9 +12,9 @@
 #define MESSAGE_TYPE_ELEMENT_NAME           @"messageType"
 #define MESSAGE_ID_ELEMENT_NAME             @"messageID"
 #define IS_PRIVATE_ELEMENT_NAME             @"isPrivate"
-#define IS_CHAT_ROOM_MESSAGE_ELEMENT_NAME   @"isChatRoomMessage"
+#define IS_GROUP_CHAT_ELEMENT_NAME          @"isGroupChat"
 
-#define ADDITION_ELEMENT_NAME               @"additionMessageInfo"
+//#define ADDITION_ELEMENT_NAME               @"additionMessage"
 
 @implementation XMPPChatMessageObject
 
@@ -108,19 +108,12 @@
         [dictionary setObject:self.messageID forKey:@"messageID"];
     if (self.messageTime)
         [dictionary setObject:self.messageTime forKey:@"messageTime"];
-    if (self.xmppSimpleMessageObject)
-        [dictionary setObject:[self.xmppSimpleMessageObject toDictionary] forKey:@"xmppSimpleMessageObject"];
+    if (self.xmppAdditionalMessageObject)
+        [dictionary setObject:[self.xmppAdditionalMessageObject toDictionary] forKey:@"additionMessage"];
     
     [dictionary setObject:[NSNumber numberWithBool:self.isPrivate] forKey:@"isPrivate"];
-    [dictionary setObject:[NSNumber numberWithBool:self.isChatRoomMessage] forKey:@"isChatRoomMessage"];
+    [dictionary setObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:self.messageType] forKey:@"messageType"];
-    
-//    if (self.fromUser)
-//        [dictionary setObject:self.fromUser forKey:@"fromUser"];
-//    if (self.toUser)
-//        [dictionary setObject:self.toUser forKey:@"toUser"];
-//    [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
-//    [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
     
     return dictionary;
 }
@@ -130,46 +123,43 @@
     self.messageID = [message objectForKey:@"messageID"];
     self.messageTime = [message objectForKey:@"sendTime"];
     
-    self.xmppSimpleMessageObject = [[XMPPSimpleMessageObject alloc] initWithDictionary:[message objectForKey:@"xmppSimpleMessageObject"] ];
+    self.xmppAdditionalMessageObject = [[XMPPAdditionalMessageObject alloc] initWithDictionary:[message objectForKey:@"additionMessage"] ];
     self.isPrivate = [(NSNumber *)[message objectForKey:@"isPrivate"] boolValue];
-    self.isChatRoomMessage = [(NSNumber *)[message objectForKey:@"isChatRoomMessage"] boolValue];
+    self.isGroupChat = [(NSNumber *)[message objectForKey:@"isGroupChat"] boolValue];
     self.messageType = [(NSNumber *)[message objectForKey:@"messageType"] unsignedIntegerValue];
-    
-//    self.fromUser = [message objectForKey:@"fromUser"];
-//    self.toUser = [message objectForKey:@"toUser"];
-//    self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] boolValue];
-//    self.sendFromMe = [(NSNumber *)[message objectForKey:@"sendFromMe"] boolValue];
-
 }
 
 -(XMPPMessage *)toXMPPMessage
 {
     NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
     
-    if (self.messageType > 0) {
-        NSXMLElement *messageType = [NSXMLElement elementWithName:MESSAGE_TYPE_ELEMENT_NAME numberValue:[NSNumber numberWithUnsignedInteger:self.messageType]];
-        [body addChild:messageType];
+    if (self.xmppAdditionalMessageObject) {
+        [body addChild:[self.xmppAdditionalMessageObject toXMLElement]];
     }
     
     if (self.messageID) {
         NSXMLElement *messageID = [NSXMLElement elementWithName:MESSAGE_ID_ELEMENT_NAME stringValue:self.messageID];
         [body addChild:messageID];
     }
-    if (self.isPrivate) {
-        NSXMLElement *isPrivate = [NSXMLElement elementWithName:IS_PRIVATE_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isPrivate]];
-        [body addChild:isPrivate];
+    
+    XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:[XMPPJID jidWithString:self.toUser] elementID:nil child:body];
+    
+    if (self.messageType > 0) {
+        NSXMLElement *messageType = [NSXMLElement elementWithName:MESSAGE_TYPE_ELEMENT_NAME numberValue:[NSNumber numberWithUnsignedInteger:self.messageType]];
+        [message addChild:messageType];
     }
     
-    if (self.isChatRoomMessage) {
-        NSXMLElement *isChatRoomMessage = [NSXMLElement elementWithName:IS_CHAT_ROOM_MESSAGE_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isChatRoomMessage]];
+    if (self.isPrivate) {
+        NSXMLElement *isPrivate = [NSXMLElement elementWithName:IS_PRIVATE_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isPrivate]];
+        [message addChild:isPrivate];
+    }
+    
+    if (self.isGroupChat) {
+        NSXMLElement *isChatRoomMessage = [NSXMLElement elementWithName:IS_GROUP_CHAT_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isGroupChat]];
         [body addChild:isChatRoomMessage];
     }
     
-    if (self.xmppSimpleMessageObject) {
-        [body addChild:[self.xmppSimpleMessageObject toXMLElement]];
-    }
-    
-    XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:[XMPPJID jidWithString:self.toUser] elementID:nil child:body];
+   
     return message;
 }
 //This method has no Parameter hasBeenRead,sendFromMe...
@@ -180,16 +170,17 @@
     
     self.fromUser = [[message from] bare];
     self.toUser = [[message to] bare];
-    self.messageTime = [self getLocalDateWithUTCString:[[body elementForName:@"messageTime"] stringValue]];
-    self.messageType = [[body elementForName:@"messageType"] stringValueAsNSUInteger];
-    self.messageID = [[body elementForName:@"messageID"] stringValue];
-    self.isPrivate = [[body elementForName:@"isPrivate"] stringValueAsBool];
-    self.isChatRoomMessage = [[body elementForName:@"isChatRoomMessage"] stringValueAsBool];
+    self.messageTime = [self getLocalDateWithUTCString:[[message elementForName:@"timestamp"] stringValue]];
+    self.messageType = [[message elementForName:@"messageType"] stringValueAsNSUInteger];
+    self.isPrivate = [[message elementForName:@"isPrivate"] stringValueAsBool];
+    self.isGroupChat = [[body elementForName:@"isGroupChat"] stringValueAsBool];
     
-    NSXMLElement *additionMessageInfo = [body elementForName:ADDITION_ELEMENT_NAME];
+    self.messageID = [[body elementForName:@"messageID"] stringValue];
+    
+    NSXMLElement *additionMessageInfo = [body elementForName:ADDITION_ELEMENT_NAME xmlns:ADDITION_ELEMENT_XMLNS];
     if (additionMessageInfo) {
-        self.xmppSimpleMessageObject = [[XMPPSimpleMessageObject alloc] init];
-        [self.xmppSimpleMessageObject fromXMLElement:additionMessageInfo];
+        self.xmppAdditionalMessageObject = [[XMPPAdditionalMessageObject alloc] init];
+        [self.xmppAdditionalMessageObject fromXMLElement:additionMessageInfo];
     }
 }
 /**
@@ -216,11 +207,11 @@
     self.messageID = xmppMessageCoreDataStorageObject.messageID;
     self.messageTime = xmppMessageCoreDataStorageObject.messageTime;
     self.sendFromMe = [xmppMessageCoreDataStorageObject.sendFromMe boolValue];
-    self.xmppSimpleMessageObject = xmppMessageCoreDataStorageObject.messageBody;
+    self.xmppAdditionalMessageObject = xmppMessageCoreDataStorageObject.messageBody;
     self.fromUser = self.sendFromMe ? xmppMessageCoreDataStorageObject.streamBareJidStr:xmppMessageCoreDataStorageObject.bareJidStr;
     self.toUser = self.sendFromMe ? xmppMessageCoreDataStorageObject.bareJidStr:xmppMessageCoreDataStorageObject.streamBareJidStr;
     self.isPrivate = xmppMessageCoreDataStorageObject.isPrivate > 0;
-    self.isChatRoomMessage = xmppMessageCoreDataStorageObject.isChatRoomMessage > 0;
+    self.isGroupChat = xmppMessageCoreDataStorageObject.isGroupChat > 0;
     self.hasBeenRead = [xmppMessageCoreDataStorageObject.hasBeenRead boolValue];
     self.messageType = [xmppMessageCoreDataStorageObject.messageType unsignedIntegerValue];
 }
@@ -236,11 +227,11 @@
     [newObject setFromUser:self.fromUser];
     [newObject setToUser:self.toUser];
     [newObject setMessageTime:self.messageTime];
-    [newObject setIsChatRoomMessage:self.isChatRoomMessage];
+    [newObject setIsGroupChat:self.isGroupChat];
     [newObject setIsPrivate:self.isPrivate];
     [newObject setHasBeenRead:self.hasBeenRead];
     [newObject setSendFromMe:self.sendFromMe];
-    [newObject setXmppSimpleMessageObject:self.xmppSimpleMessageObject];
+    [newObject setXmppAdditionalMessageObject:self.xmppAdditionalMessageObject];
     
     return newObject;
 }
@@ -253,12 +244,12 @@
     [aCoder encodeObject:self.fromUser forKey:@"fromUser"];
     [aCoder encodeObject:self.toUser forKey:@"toUser"];
     [aCoder encodeObject:self.messageTime forKey:@"messageTime"];
-    [aCoder encodeObject:self.xmppSimpleMessageObject forKey:@"xmppSimpleMessageObject"];
+    [aCoder encodeObject:self.xmppAdditionalMessageObject forKey:@"xmppAdditionalMessageObject"];
 
     [aCoder encodeObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
     [aCoder encodeObject:[NSNumber numberWithBool:self.isPrivate] forKey:@"isPrivate"];
     [aCoder encodeObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
-    [aCoder encodeObject:[NSNumber numberWithBool:self.isChatRoomMessage] forKey:@"isChatRoomMessage"];
+    [aCoder encodeObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
 }
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
@@ -268,10 +259,10 @@
         self.messageTime = [aDecoder decodeObjectForKey:@"messageTime"];
         self.fromUser = [aDecoder decodeObjectForKey:@"fromUser"];
         self.toUser = [aDecoder decodeObjectForKey:@"toUser"];
-        self.xmppSimpleMessageObject = [aDecoder decodeObjectForKey:@"xmppSimpleMessageObject"];
+        self.xmppAdditionalMessageObject = [aDecoder decodeObjectForKey:@"xmppAdditionalMessageObject"];
         self.sendFromMe = [(NSNumber *)[aDecoder decodeObjectForKey:@"sendFromMe"] boolValue];
         self.isPrivate = [(NSNumber *)[aDecoder decodeObjectForKey:@"isPrivate"] boolValue];
-        self.isChatRoomMessage = [(NSNumber *)[aDecoder decodeObjectForKey:@"isChatRoomMessage"] boolValue];
+        self.isGroupChat = [(NSNumber *)[aDecoder decodeObjectForKey:@"isGroupChat"] boolValue];
         self.hasBeenRead = [(NSNumber *)[aDecoder decodeObjectForKey:@"hasBeenRead"] boolValue];
     }
     return  self;

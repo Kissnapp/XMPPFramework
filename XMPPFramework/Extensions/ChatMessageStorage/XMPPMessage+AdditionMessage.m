@@ -7,7 +7,7 @@
 //
 
 #import "XMPPMessage+AdditionMessage.h"
-#import "XMPPSimpleMessageObject.h"
+#import "XMPPAdditionalMessageObject.h"
 
 @implementation XMPPMessage (AdditionMessage)
 
@@ -167,7 +167,7 @@
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
     NSUInteger messageType = [[body elementForName:@"messageType"] stringValueAsNSUInteger];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[body elementForName:@"messageTime"] stringValue]];
-    XMPPSimpleMessageObject *xmppSimpleMessageObject = [[XMPPSimpleMessageObject alloc] initWithXMLElement:[body elementForName:ADDITION_ELEMENT_NAME]];
+    XMPPAdditionalMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalMessageObject alloc] initWithXMLElement:[body elementForName:ADDITION_ELEMENT_NAME]];
     
     [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];

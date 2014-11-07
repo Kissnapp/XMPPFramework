@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DDXML.h"
 #import "XMPPMessage.h"
-#import "XMPPSimpleMessageObject.h"
+#import "XMPPAdditionalMessageObject.h"
 #import "XMPPMessageCoreDataStorageObject.h"
 /**
  *  The type of a message
@@ -55,9 +55,9 @@ typedef NS_ENUM(NSUInteger, XMPPChatMessageType){
 @property (strong, nonatomic) NSDate                            *messageTime;        //The message send time
 @property (assign, nonatomic) BOOL                              isPrivate;        //The mark to  distinguish the message whether is a private message
 @property (assign, nonatomic) BOOL                              hasBeenRead;      //The mark to  distinguish whether the message has been read
-@property (assign, nonatomic) BOOL                              isChatRoomMessage; //Mark value 4,Wether is a chat room chat
+@property (assign, nonatomic) BOOL                              isGroupChat; //Mark value 4,Wether is a chat room chat
 @property (assign, nonatomic) BOOL                              sendFromMe;       //Whether the message is send from myself
-@property (strong, nonatomic) XMPPSimpleMessageObject           *xmppSimpleMessageObject;
+@property (strong, nonatomic) XMPPAdditionalMessageObject       *xmppAdditionalMessageObject;
 /**
  *  When we using this method the messageID has been setted and the sendFromMe has been setted to YES,
  *

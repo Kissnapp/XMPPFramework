@@ -9,10 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "DDXML.h"
 
-#define ADDITION_ELEMENT_NAME               @"additionMessageInfo"
+#define ADDITION_ELEMENT_NAME               @"additionMessage"
 #define ADDITION_ELEMENT_XMLNS              @"http://kissnapp.com/message/AdditionMessage"
 
-@interface XMPPSimpleMessageObject : NSObject<NSCopying,NSCoding>
+@interface XMPPAdditionalMessageObject : NSObject<NSCopying,NSCoding>
 
 //Text message
 @property (strong, nonatomic) NSString    *messageText;     //The text type message's text body
@@ -26,7 +26,7 @@
 @property (assign, nonatomic) BOOL        messageTag;       //A Mark value
 
 //This parameter value only can been used when set the parameter "isChatRoomMessage = YES"
-@property (strong, nonatomic) NSString    *chatRoomUserJid;  //The jid string of the user in the Chat room message，we can know who send this chat room message during a room chatting
+@property (strong, nonatomic) NSString    *groupUserJid;  //The jid string of the user in the Chat room message，we can know who send this chat room message during a room chatting
 
 //The position information
 @property (strong, nonatomic) NSString    *longitude;       //longitude
