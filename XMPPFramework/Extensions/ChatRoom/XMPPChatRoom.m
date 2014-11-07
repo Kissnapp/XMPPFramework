@@ -1505,7 +1505,7 @@ enum XMPPChatRoomUserListFlags
     // Because of the bug in Apple's NSXML (documented in our elementForName method),
     // it is important we specify the xmlns for the query.
     
-    NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:groupchat"];
+    NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:groupchat"];
     
     if (query){
         if([iq isSetIQ]){
