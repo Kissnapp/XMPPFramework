@@ -10,7 +10,7 @@
 #import "DDXML.h"
 
 #define ADDITION_ELEMENT_NAME               @"additionMessage"
-#define ADDITION_ELEMENT_XMLNS              @"http://kissnapp.com/message/AdditionMessage"
+#define ADDITION_ELEMENT_XMLNS              @"aft:message"
 
 @interface XMPPAdditionalMessageObject : NSObject<NSCopying,NSCoding>
 
