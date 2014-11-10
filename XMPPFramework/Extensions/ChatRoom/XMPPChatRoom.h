@@ -10,6 +10,7 @@
 #import "XMPP.h"
 #import "JSONKit.h"
 #import "XMPPChatRoomCoreDataStorageObject.h"
+#import "XMPPChatRoomUserCoreDataStorageObject.h"
 #import "XMPPMessage+ChatRoomMessage.h"
 
 
