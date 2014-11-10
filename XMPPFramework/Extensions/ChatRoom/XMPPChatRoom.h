@@ -85,15 +85,16 @@
 @property (assign, readonly) BOOL hasChatRoomList;
 
 /**
- *  fetch all the chat room list
+ *  fetch all the chat room list from the server, 
+ *  NOTE:This method is not a method that fetch list from the CoreData system
  */
-- (void)fetchChatRoomList;
+- (void)fetchChatRoomListFromServer;
 /**
  *  Fetch the user list with a given bare chat room jid str
  *
  *  @param bareChatRoomJidStr The given bare chat room jid str
  */
-- (void)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 /**
  *  create room with a nick name
  *
@@ -185,6 +186,10 @@
  */
 - (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 /**
+ *  Get all the list from the local core datasystem
+ */
+- (NSArray *)fetchChatRoomListFromLocal;
+/**
  *  Fetch a chat room's all user with the given chat room bare jid string,
  *
  *
@@ -196,7 +201,24 @@
  *
  *  @return The result array which contain some XMPPChatRoomUserCoreDataStorageObject obejct in it
  */
-- (NSArray *)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
+- (NSArray *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
+/**
+ *  Get a XMPPChatRoomCoreDataStorageObject with given bare Jid string and bare Chat Room Jid string
+ *
+ *  @param bareJidStr The given bare Jid string
+ *
+ *  @return The XMPPChatRoomCoreDataStorageObject
+ */
+- (XMPPChatRoomCoreDataStorageObject *)chatRoomWithBareJidStr:(NSString *)bareJidStr;
+/**
+ *  Get a XMPPChatRoomUserCoreDataStorageObject with given bareChatRoomJidStr and bareJidStr
+ *
+ *  @param bareChatRoomJidStr The given bareChatRoomJidStr
+ *  @param bareJidStr         The given bareJidStr
+ *
+ *  @return XMPPChatRoomUserCoreDataStorageObject
+ */
+- (XMPPChatRoomUserCoreDataStorageObject *)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr;
 
 @end
 
@@ -224,6 +246,10 @@
 
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 - (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
+- (NSArray *)chatRoomListWithXMPPStream:(XMPPStream *)stream;
+
+- (id)chatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
+- (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 - (void)deleteChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr xmppStream:(XMPPStream *)stream;

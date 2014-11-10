@@ -344,6 +344,7 @@ enum XMPPChatRoomUserListFlags
 }
 #pragma mark -
 #pragma mark - Private Methods
+
 /**
  *  Add a new dic and fetch its user list if needed
  *
@@ -358,7 +359,7 @@ enum XMPPChatRoomUserListFlags
         
         [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
         if (fetchUserList) {
-            [self fetchUserListWithBareChatRoomJidStr:[dic  objectForKey:@"groupid"]];
+            [self fetchUserListFromServerWithBareChatRoomJidStr:[dic  objectForKey:@"groupid"]];
         }
     };
     
@@ -367,6 +368,60 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
     
+}
+#pragma mark - Public methods
+
+- (XMPPChatRoomCoreDataStorageObject *)chatRoomWithBareJidStr:(NSString *)bareJidStr
+{
+    __block XMPPChatRoomCoreDataStorageObject *result = nil;
+    
+    dispatch_block_t block = ^{
+        
+        result = [xmppChatRoomStorage chatRoomWithBareJidStr:bareJidStr xmppStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+    
+}
+- (XMPPChatRoomUserCoreDataStorageObject *)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr
+{
+    __block XMPPChatRoomUserCoreDataStorageObject *result = nil;
+    
+    dispatch_block_t block = ^{
+        
+        result = [xmppChatRoomStorage userInfoFromChatRoom:bareChatRoomJidStr withBareJidStr:bareJidStr xmppStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSArray *)fetchChatRoomListFromLocal
+{
+    __block NSArray *results = nil;
+    
+    dispatch_block_t block = ^{
+        
+        results = [xmppChatRoomStorage chatRoomListWithXMPPStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return results;
 }
 - (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName
 {
@@ -516,7 +571,7 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)fetchChatRoomList
+- (void)fetchChatRoomListFromServer
 {
     // This is a public method, so it may be invoked on any thread/queue.
     
@@ -571,7 +626,7 @@ enum XMPPChatRoomUserListFlags
         
         //If the autoFetchChatRoomUserList == YES,we should fetch the user list
         if ([self autoFetchChatRoomUserList]) {
-            [self fetchUserListWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
+            [self fetchUserListFromServerWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
         }
         
     }];
@@ -826,7 +881,7 @@ enum XMPPChatRoomUserListFlags
         dispatch_async(moduleQueue, block);
 }
 //MARK:Here
-- (void)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
 {
     // This is a public method, so it may be invoked on any thread/queue.
     
@@ -912,7 +967,7 @@ enum XMPPChatRoomUserListFlags
     
 }
 
-- (NSArray *)fetchUserListWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer
+- (NSArray *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer
 {
     if (!bareChatRoomJidStr) return nil;
     
@@ -926,7 +981,7 @@ enum XMPPChatRoomUserListFlags
             
             if (requestFromServer) {//If we want to request a info from the server when the chat room user list is not exist in local
                 if (!userListArray || [userListArray count] <= 0) {//If there is no data in the laocal,we should request from the server
-                    [self fetchUserListWithBareChatRoomJidStr:bareChatRoomJidStr];
+                    [self fetchUserListFromServerWithBareChatRoomJidStr:bareChatRoomJidStr];
                 }
             }
         }
@@ -1491,7 +1546,7 @@ enum XMPPChatRoomUserListFlags
     
     if ([self autoFetchChatRoomList])
     {
-        [self fetchChatRoomList];
+        [self fetchChatRoomListFromServer];
     }
 }
 
