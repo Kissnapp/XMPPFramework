@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63D8E2EC1A0CBFF800DD68C7 /* ICEServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = 63D8E2E71A0CBFF800DD68C7 /* ICEServers.plist */; };
+		63D8E2ED1A0CBFF800DD68C7 /* Systemconfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 63D8E2E81A0CBFF800DD68C7 /* Systemconfig.plist */; };
+		63D8E2EE1A0CBFF800DD68C7 /* UserConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 63D8E2E91A0CBFF800DD68C7 /* UserConfig.plist */; };
+		63D8E2EF1A0CBFF800DD68C7 /* CountryCode.plist in Resources */ = {isa = PBXBuildFile; fileRef = 63D8E2EA1A0CBFF800DD68C7 /* CountryCode.plist */; };
 		63F3B15F1960F8B400BD8134 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63F3B15E1960F8B400BD8134 /* UIKit.framework */; };
 		63F3B46D1960F91700BD8134 /* XMPPAnonymousAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 63F3B1631960F91500BD8134 /* XMPPAnonymousAuthentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		63F3B46E1960F91700BD8134 /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F3B1641960F91500BD8134 /* XMPPAnonymousAuthentication.m */; };
@@ -313,6 +317,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		63D8E2E71A0CBFF800DD68C7 /* ICEServers.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ICEServers.plist; sourceTree = "<group>"; };
+		63D8E2E81A0CBFF800DD68C7 /* Systemconfig.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Systemconfig.plist; sourceTree = "<group>"; };
+		63D8E2E91A0CBFF800DD68C7 /* UserConfig.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = UserConfig.plist; sourceTree = "<group>"; };
+		63D8E2EA1A0CBFF800DD68C7 /* CountryCode.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CountryCode.plist; sourceTree = "<group>"; };
 		63F3B1231960F7BA00BD8134 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		63F3B14D1960F80900BD8134 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F3B1561960F80900BD8134 /* XMPPFramework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "XMPPFramework-Info.plist"; sourceTree = "<group>"; };
@@ -649,9 +657,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		63D8E2EB1A0CBFF800DD68C7 /* PlistFiles */ = {
+			isa = PBXGroup;
+			children = (
+				63D8E2E71A0CBFF800DD68C7 /* ICEServers.plist */,
+				63D8E2E81A0CBFF800DD68C7 /* Systemconfig.plist */,
+				63D8E2E91A0CBFF800DD68C7 /* UserConfig.plist */,
+				63D8E2EA1A0CBFF800DD68C7 /* CountryCode.plist */,
+			);
+			name = PlistFiles;
+			path = ../Kissnapp10.20/Kissnapp/Resources/PlistFiles;
+			sourceTree = "<group>";
+		};
 		63F3B1171960F7BA00BD8134 = {
 			isa = PBXGroup;
 			children = (
+				63D8E2EB1A0CBFF800DD68C7 /* PlistFiles */,
 				E7AE677B19FFAC23008546EA /* LICENSE */,
 				E7AE677C19FFAC23008546EA /* README.md */,
 				63F3B1541960F80900BD8134 /* XMPPFramework */,
@@ -1800,6 +1821,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7AE677D19FFAC23008546EA /* LICENSE in Resources */,
+				63D8E2EC1A0CBFF800DD68C7 /* ICEServers.plist in Resources */,
+				63D8E2ED1A0CBFF800DD68C7 /* Systemconfig.plist in Resources */,
+				63D8E2EF1A0CBFF800DD68C7 /* CountryCode.plist in Resources */,
+				63D8E2EE1A0CBFF800DD68C7 /* UserConfig.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

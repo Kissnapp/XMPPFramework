@@ -240,9 +240,9 @@
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND chatRoomBareJidStr == %@", bareJidStr,roomJid];
+        predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ AND chatRoomBareJidStr == %@", bareJidStr,roomJid];
     else
-        predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND chatRoomBareJidStr == %@ AND streamBareJidStr == %@",
+        predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ AND chatRoomBareJidStr == %@ AND streamBareJidStr == %@",
                      bareJidStr,roomJid, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
