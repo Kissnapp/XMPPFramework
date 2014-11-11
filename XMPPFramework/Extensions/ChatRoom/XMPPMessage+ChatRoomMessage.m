@@ -9,7 +9,7 @@
 #import "XMPPMessage+ChatRoomMessage.h"
 
 #define PUSH_ELEMNET @"push"
-#define PUSH_ELEMENT_XMLNS @"aft:push:group"
+#define PUSH_ELEMENT_XMLNS @"aft:groupchat"
 
 @implementation XMPPMessage (ChatRoomMessage)
 

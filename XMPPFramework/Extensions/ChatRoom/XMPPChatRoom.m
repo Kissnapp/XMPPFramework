@@ -26,7 +26,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 #define GROUP_INFO_PUSH @"groupinfo"
 #define GROUP_MEMBER_PUSH @"groupmember"
-#define GROUP_PUSH_XMLNS @"aft:push:group"
+#define GROUP_PUSH_XMLNS @"aft:groupchat"
 
 enum XMPPChatRoomConfig
 {
