@@ -811,6 +811,17 @@ enum XMPPChatRoomUserListFlags
 
 }
 
+- (void)joinChatRoomWithBareJidStr:(NSString *)bareJidStr
+{
+    NSArray *bareJidStrArray = [NSArray arrayWithObjects:[[xmppStream myJID] bare], nil];
+    
+    if ([bareJidStrArray count] <= 0) {
+        return;
+    }
+    
+    [self inviteUser:bareJidStrArray joinChatRoom:bareJidStr];
+}
+
 - (BOOL)inviteUser:(NSArray *)userArray andCreateChatRoomWithNickName:(NSString *)room_nickName
 {
     if (!room_nickName || [userArray count] <= 0) {

@@ -128,6 +128,12 @@
  */
 - (BOOL)inviteUser:(NSArray *)userArray joinChatRoom:(NSString *)roomJIDStr;
 /**
+ *  Self join a chat room with the given chat room
+ *
+ *  @param bareJidStr The given chat room bare jid string
+ */
+- (void)joinChatRoomWithBareJidStr:(NSString *)bareJidStr;
+/**
  *  Set the chat room nickname for given nick name and bare jid string
  *
  *  @param nickName     chat room nickname
