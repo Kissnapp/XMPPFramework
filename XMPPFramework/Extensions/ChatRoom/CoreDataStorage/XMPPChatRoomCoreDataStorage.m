@@ -429,7 +429,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     return result;
 }
 
-- (BOOL)isMemeberOfChatRoomWithBareJisStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+- (BOOL)isMemberOfChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
 {
     
     XMPPLogTrace();
@@ -439,14 +439,37 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     [self executeBlock:^{
         
         NSManagedObjectContext *moc = [self managedObjectContext];
-        XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:bareChatRoomJidStr
-                                                               xmppStream:stream
-                                                     managedObjectContext:moc];
+        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                withBareJidStr:[[stream myJID] bare]
+                                                                                                                   chatRoomJid:bareChatRoomJidStr
+                                                                                                              streamBareJidStr:[[stream myJID] bare]];
         //if the chat room obejct is exsited
         //We compare self jid is whether equal to the master bare jid string
-        if (chatRoom) {
-            result = YES;
-        }
+        result = (user != nil);
+    }];
+    
+    return result;
+}
+
+- (BOOL)isUserWithBareJidStr:(NSString *)bareJidStr aMemberOfChatRoom:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!bareJidStr || !bareChatRoomJidStr || !stream) return NO;
+    
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                withBareJidStr:bareJidStr
+                                                                                                                   chatRoomJid:bareChatRoomJidStr
+                                                                                                              streamBareJidStr:[[stream myJID] bare]];
+        //if the chat room obejct is exsited
+        //We compare self jid is whether equal to the master bare jid string
+        result = (user != nil);
     }];
     
     return result;

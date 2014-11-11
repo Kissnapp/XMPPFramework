@@ -454,12 +454,27 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
 }
-- (BOOL)isSelfAMemeberOfChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr
+- (BOOL)isUserWithBareJidStr:(NSString *)bareJidStr aMemberOfChatRoom:(NSString *)bareChatRoomJidStr
 {
     __block BOOL result = NO;
     
     dispatch_block_t block = ^{
-        result = [xmppChatRoomStorage isMemeberOfChatRoomWithBareJisStr:chatRoomBareJidStr xmppStream:xmppStream];
+        result = [xmppChatRoomStorage isUserWithBareJidStr:bareJidStr aMemberOfChatRoom:bareChatRoomJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (BOOL)isSelfAMemberOfChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = [xmppChatRoomStorage isMemberOfChatRoomWithBareJidStr:chatRoomBareJidStr xmppStream:xmppStream];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -472,7 +487,7 @@ enum XMPPChatRoomUserListFlags
 
 - (void)exitFromChatRoomWithBareJidStr:(NSString *)chatRoomBareJidStr
 {
-    if (![self isSelfAMemeberOfChatRoomWithBareJidStr:chatRoomBareJidStr]) {
+    if (![self isSelfAMemberOfChatRoomWithBareJidStr:chatRoomBareJidStr]) {
         return;
     }
     

@@ -1941,15 +1941,29 @@ enum XMPPStreamConfig
 		
 		id <XMPPSASLAuthentication> someAuth = nil;
         //TODO: 这里supportsSCRAMSHA1Authentication是最优先选择
-		if ([self supportsDigestMD5Authentication])
-		{
-			someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
-			result = [self authenticate:someAuth error:&err];
-		}else if ([self supportsSCRAMSHA1Authentication])
-		{
-			someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
-			result = [self authenticate:someAuth error:&err];
-		}
+        /*需要修改的
+         if ([self supportsSCRAMSHA1Authentication])
+         {
+         someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
+         result = [self authenticate:someAuth error:&err];
+         }
+         else if ([self supportsDigestMD5Authentication])
+         {
+         someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+         result = [self authenticate:someAuth error:&err];
+         }
+        */
+        
+        if ([self supportsDigestMD5Authentication])
+        {
+            someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+            result = [self authenticate:someAuth error:&err];
+        }
+        else if ([self supportsSCRAMSHA1Authentication])
+        {
+            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
+            result = [self authenticate:someAuth error:&err];
+        }
 
 		else if ([self supportsPlainAuthentication])
 		{
