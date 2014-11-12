@@ -1340,6 +1340,8 @@ enum XMPPChatRoomUserListFlags
         NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:groupchat"];
         NSString *jsonStr = [query stringValue];
         
+        if (!query || !jsonStr) return ;
+        
         BOOL hasChatRoom = [self hasChatRoomList];
         
         if (!hasChatRoom){
