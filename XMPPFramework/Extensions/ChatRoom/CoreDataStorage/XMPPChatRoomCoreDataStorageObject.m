@@ -67,21 +67,6 @@
     subscription = primitiveSubscription;
 }
 
-- (NSString *)masterBareJidStr
-{
-    [self willAccessValueForKey:@"masterBareJidStr"];
-    NSString *value = [self primitiveValueForKey:@"masterBareJidStr"];
-    [self didAccessValueForKey:@"masterBareJidStr"];
-    return value;
-}
-            
-- (void)setMasterBareJidStr:(NSString *)value
-{
-    [self willChangeValueForKey:@"masterBareJidStr"];
-    [self setPrimitiveValue:value forKey:@"masterBareJidStr"];
-    [self didChangeValueForKey:@"masterBareJidStr"];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public Parameters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,6 +148,22 @@
     // If the jidStr changes, the jid becomes invalid.
     //[self setPrimitiveSubscription:nil];
 }
+
+- (NSString *)masterBareJidStr
+{
+    [self willAccessValueForKey:@"masterBareJidStr"];
+    NSString *value = [self primitiveValueForKey:@"masterBareJidStr"];
+    [self didAccessValueForKey:@"masterBareJidStr"];
+    return value;
+}
+
+- (void)setMasterBareJidStr:(NSString *)value
+{
+    [self willChangeValueForKey:@"masterBareJidStr"];
+    [self setPrimitiveValue:value forKey:@"masterBareJidStr"];
+    [self didChangeValueForKey:@"masterBareJidStr"];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates

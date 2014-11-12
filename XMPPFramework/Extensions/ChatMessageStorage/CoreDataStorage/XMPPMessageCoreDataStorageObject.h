@@ -17,7 +17,6 @@
 @property (nonatomic, retain) NSNumber                  * messageType;
 @property (nonatomic, retain) NSNumber                  * hasBeenRead;
 @property (nonatomic, retain) NSNumber                  * isGroupChat;
-@property (nonatomic, retain) NSNumber                  * isPrivate;
 @property (nonatomic, retain) XMPPAdditionalMessageObject   * messageBody;
 @property (nonatomic, retain) NSString                  * messageID;
 @property (nonatomic, retain) NSDate                    * messageTime;

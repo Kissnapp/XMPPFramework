@@ -67,20 +67,6 @@
     [self setPrimitiveValue:value forKey:@"isChatRoomMessage"];
     [self didChangeValueForKey:@"isChatRoomMessage"];
 }
-- (NSNumber *)isPrivate
-{
-    [self willAccessValueForKey:@"isPrivate"];
-    NSNumber *value = [self primitiveValueForKey:@"isPrivate"];
-    [self didAccessValueForKey:@"isPrivate"];
-    return value;
-}
-
-- (void)setIsPrivate:(NSNumber *)value
-{
-    [self willChangeValueForKey:@"isPrivate"];
-    [self setPrimitiveValue:value forKey:@"isPrivate"];
-    [self didChangeValueForKey:@"isPrivate"];
-}
 - (XMPPAdditionalMessageObject *)messageBody
 {
     [self willAccessValueForKey:@"messageBody"];
@@ -237,7 +223,6 @@
 //    newObject.messageTime = [messageDic objectForKey:@"messageTime"];
 //    newObject.hasBeenRead = [messageDic objectForKey:@"hasBeenRead"];
 //    newObject.isChatRoomMessage = [messageDic objectForKey:@"isChatRoomMessage"];
-//    newObject.isPrivate = [messageDic objectForKey:@"isPrivate"];
 //    newObject.messageBody = [messageDic objectForKey:@"messageBody"];
 //    newObject.messageType = [messageDic objectForKey:@"messageType"];
     
@@ -268,7 +253,6 @@
         
 //        [updateObject setMessageID:messageID];
 //        [updateObject setMessageTime:[messageDic objectForKey:@"messageTime"]];
-//        [updateObject setIsPrivate:[messageDic objectForKey:@"isPrivate"]];
 //        [updateObject setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
 //        [updateObject setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
 //        [updateObject setStreamBareJidStr:streamBareJidStr];
@@ -299,7 +283,6 @@
 {
     [self setMessageID:[messageDic objectForKey:@"messageID"]];
     [self setMessageTime:[messageDic objectForKey:@"messageTime"]];
-    [self setIsPrivate:[messageDic objectForKey:@"isPrivate"]];
     [self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
     [self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
     [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];

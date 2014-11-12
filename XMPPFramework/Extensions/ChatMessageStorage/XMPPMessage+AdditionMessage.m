@@ -148,7 +148,6 @@
     /*
     //[self setMessageID:[messageDic objectForKey:@"messageID"]];
     //[self setMessageTime:[messageDic objectForKey:@"messageTime"]];
-    //[self setIsPrivate:[messageDic objectForKey:@"isPrivate"]];
     //[self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
     //[self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
     //[self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
@@ -182,7 +181,6 @@
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
     
     [dictionary setObject:[[body elementForName:@"messageID"] stringValue] forKey:@"messageID"];
-    [dictionary setObject:[NSNumber numberWithBool:[[body elementForName:@"isPrivate"] stringValueAsBool]] forKey:@"isPrivate"];
     [dictionary setObject:[NSNumber numberWithBool:[[body elementForName:@"isChatRoomMessage"] stringValueAsBool]] forKey:@"isChatRoomMessage"];
     
     if (xmppSimpleMessageObject)

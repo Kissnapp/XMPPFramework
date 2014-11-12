@@ -547,7 +547,7 @@ enum XMPPChatRoomUserListFlags
 
 }
 
-- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr
+- (void)deleteChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
 {
     if (![self isMasterForBareChatRoomJidStr:bareChatRoomJidStr]) {
         return;

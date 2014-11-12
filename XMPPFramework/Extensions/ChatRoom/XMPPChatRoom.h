@@ -186,7 +186,7 @@
  *
  *  @param bareChatRoomJidStr The chat room bare jid str which will been delete
  */
-- (void)deleteChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
+- (void)deleteChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 /**
  *  Set self nick name which will been display in the chat room user list
  *

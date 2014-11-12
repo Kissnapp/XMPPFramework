@@ -11,14 +11,11 @@
 
 #define MESSAGE_TYPE_ELEMENT_NAME           @"messageType"
 #define MESSAGE_ID_ELEMENT_NAME             @"messageID"
-#define IS_PRIVATE_ELEMENT_NAME             @"isPrivate"
 #define IS_GROUP_CHAT_ELEMENT_NAME          @"isGroupChat"
 
-//#define ADDITION_ELEMENT_NAME               @"additionMessage"
 
 @implementation XMPPChatMessageObject
 
-#pragma mark -
 #pragma mark - Public Methods
 
 - (instancetype)init
@@ -111,7 +108,6 @@
     if (self.xmppAdditionalMessageObject)
         [dictionary setObject:[self.xmppAdditionalMessageObject toDictionary] forKey:@"additionMessage"];
     
-    [dictionary setObject:[NSNumber numberWithBool:self.isPrivate] forKey:@"isPrivate"];
     [dictionary setObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:self.messageType] forKey:@"messageType"];
     
@@ -124,7 +120,7 @@
     self.messageTime = [message objectForKey:@"sendTime"];
     
     self.xmppAdditionalMessageObject = [[XMPPAdditionalMessageObject alloc] initWithDictionary:[message objectForKey:@"additionMessage"] ];
-    self.isPrivate = [(NSNumber *)[message objectForKey:@"isPrivate"] boolValue];
+    
     self.isGroupChat = [(NSNumber *)[message objectForKey:@"isGroupChat"] boolValue];
     self.messageType = [(NSNumber *)[message objectForKey:@"messageType"] unsignedIntegerValue];
 }
@@ -149,11 +145,6 @@
         [message addChild:messageType];
     }
     
-    if (self.isPrivate) {
-        NSXMLElement *isPrivate = [NSXMLElement elementWithName:IS_PRIVATE_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isPrivate]];
-        [message addChild:isPrivate];
-    }
-    
     if (self.isGroupChat) {
         NSXMLElement *isChatRoomMessage = [NSXMLElement elementWithName:IS_GROUP_CHAT_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.isGroupChat]];
         [body addChild:isChatRoomMessage];
@@ -172,7 +163,6 @@
     self.toUser = [[message to] bare];
     self.messageTime = [self getLocalDateWithUTCString:[[message elementForName:@"timestamp"] stringValue]];
     self.messageType = [[message elementForName:@"messageType"] stringValueAsNSUInteger];
-    self.isPrivate = [[message elementForName:@"isPrivate"] stringValueAsBool];
     self.isGroupChat = [[body elementForName:@"isGroupChat"] stringValueAsBool];
     
     self.messageID = [[body elementForName:@"messageID"] stringValue];
@@ -210,7 +200,6 @@
     self.xmppAdditionalMessageObject = xmppMessageCoreDataStorageObject.messageBody;
     self.fromUser = self.sendFromMe ? xmppMessageCoreDataStorageObject.streamBareJidStr:xmppMessageCoreDataStorageObject.bareJidStr;
     self.toUser = self.sendFromMe ? xmppMessageCoreDataStorageObject.bareJidStr:xmppMessageCoreDataStorageObject.streamBareJidStr;
-    self.isPrivate = xmppMessageCoreDataStorageObject.isPrivate > 0;
     self.isGroupChat = xmppMessageCoreDataStorageObject.isGroupChat > 0;
     self.hasBeenRead = [xmppMessageCoreDataStorageObject.hasBeenRead boolValue];
     self.messageType = [xmppMessageCoreDataStorageObject.messageType unsignedIntegerValue];
@@ -228,7 +217,6 @@
     [newObject setToUser:self.toUser];
     [newObject setMessageTime:self.messageTime];
     [newObject setIsGroupChat:self.isGroupChat];
-    [newObject setIsPrivate:self.isPrivate];
     [newObject setHasBeenRead:self.hasBeenRead];
     [newObject setSendFromMe:self.sendFromMe];
     [newObject setXmppAdditionalMessageObject:self.xmppAdditionalMessageObject];
@@ -247,7 +235,6 @@
     [aCoder encodeObject:self.xmppAdditionalMessageObject forKey:@"xmppAdditionalMessageObject"];
 
     [aCoder encodeObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
-    [aCoder encodeObject:[NSNumber numberWithBool:self.isPrivate] forKey:@"isPrivate"];
     [aCoder encodeObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
     [aCoder encodeObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
 }
@@ -261,7 +248,6 @@
         self.toUser = [aDecoder decodeObjectForKey:@"toUser"];
         self.xmppAdditionalMessageObject = [aDecoder decodeObjectForKey:@"xmppAdditionalMessageObject"];
         self.sendFromMe = [(NSNumber *)[aDecoder decodeObjectForKey:@"sendFromMe"] boolValue];
-        self.isPrivate = [(NSNumber *)[aDecoder decodeObjectForKey:@"isPrivate"] boolValue];
         self.isGroupChat = [(NSNumber *)[aDecoder decodeObjectForKey:@"isGroupChat"] boolValue];
         self.hasBeenRead = [(NSNumber *)[aDecoder decodeObjectForKey:@"hasBeenRead"] boolValue];
     }
