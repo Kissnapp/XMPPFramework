@@ -15,7 +15,6 @@
 @dynamic hasBeenRead;
 @dynamic messageType;
 @dynamic isGroupChat;
-@dynamic isPrivate;
 @dynamic messageID;
 @dynamic messageBody;
 @dynamic messageTime;
