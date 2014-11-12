@@ -17,6 +17,7 @@
     UIImage  * photo;
     NSString * streamBareJidStr;
     NSString * subscription;
+    NSString * masterBareJidStr;
 }
 @property (nonatomic, strong) NSString * jid;
 @property (nonatomic, strong) NSString * nickName;

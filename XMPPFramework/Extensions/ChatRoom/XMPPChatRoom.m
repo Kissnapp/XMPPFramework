@@ -1464,7 +1464,7 @@ enum XMPPChatRoomUserListFlags
                     NSDictionary *tempDictionary = @{
                                                      @"groupid":roomID,
                                                      @"groupname":roomNickName,
-                                                     @"mastr":master
+                                                     @"master":master
                                                      };
                     NSArray *tempArray = @[tempDictionary];
                     
