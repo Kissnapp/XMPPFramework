@@ -20,8 +20,8 @@
 @dynamic messageTime;
 @dynamic sendFromMe;
 @dynamic streamBareJidStr;
+
 //This the getter and setters
-#pragma mark -
 #pragma mark - Getters/Setters methods
 - (NSString *)bareJidStr
 {
