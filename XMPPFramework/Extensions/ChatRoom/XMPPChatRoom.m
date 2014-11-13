@@ -794,7 +794,7 @@ enum XMPPChatRoomUserListFlags
             
             [xmppIDTracker addElement:iq
                                target:self
-                             selector:@selector(handleCreateChatRoomListIQ:withInfo:)
+                             selector:@selector(handleInviteFriendIQ:withInfo:)
                               timeout:60];
             
             [xmppStream sendElement:iq];
