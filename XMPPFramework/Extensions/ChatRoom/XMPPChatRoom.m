@@ -408,6 +408,82 @@ enum XMPPChatRoomUserListFlags
 
 }
 
+- (void)groupInfoPushElement:(NSXMLElement *)push
+{
+    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]) return;
+    
+    dispatch_block_t block = ^{
+        @autoreleasepool {
+            
+            NSArray *tempArray = [[push stringValue] objectFromJSONString];
+            
+            [self transFormDataWithArray:tempArray];
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)groupMemberPushElement:(NSXMLElement *)push
+{
+    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]) return;
+    
+    BOOL isChatRoomExisted = [self existChatRoomWithBareJidStr:[push attributeStringValueForName:@"groupid"]];
+    
+    dispatch_block_t block = ^{
+        @autoreleasepool {
+            
+            NSString *chatRoomID = [push attributeStringValueForName:@"groupid"];
+            NSString *chatRoomNickName = [push attributeStringValueForName:@"groupname"];
+            NSString *master = [push attributeStringValueForName:@"master"];
+            NSString *jsonStr = [push stringValue];
+            
+            NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionary];
+            if (chatRoomID) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
+            if (chatRoomNickName) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
+            if (master) [tempDictionary setObject:master forKey:@"master"];
+            
+            //If this chat room has already in the core data system
+            if (isChatRoomExisted) {
+                //update the chat room info
+                [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
+                
+                //update the user info of this chat room
+                if (jsonStr) {
+                    
+                    [self transChatRoomUserDataWithJsonStr:jsonStr];
+                }
+                //If this chat room info is new to us
+            }else{
+                //down the group info and the user info
+                
+                //If there is a full chat room info,we will insert it into the coredata system
+                if (chatRoomID && chatRoomNickName && master) {
+                    //Insert the chat room info to the coredata syetem
+                    [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
+                    
+                    //only download the user list info from server
+                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
+                    
+                }else{
+                    //download the chat room info and the user list info both
+                    [self downloadChatRoomInfoWith:chatRoomID];
+                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
+                }
+            }
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
 #pragma mark - Public methods
 - (void)fetchChatRoomInfoFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
@@ -1759,81 +1835,5 @@ enum XMPPChatRoomUserListFlags
     }
 }
 
-- (void)groupInfoPushElement:(NSXMLElement *)push
-{
-    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]) return;
-    
-    dispatch_block_t block = ^{
-        @autoreleasepool {
-            
-            NSArray *tempArray = [[push stringValue] objectFromJSONString];
-            
-            [self transFormDataWithArray:tempArray];
-            
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
-- (void)groupMemberPushElement:(NSXMLElement *)push
-{
-    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]) return;
-    
-    BOOL isChatRoomExisted = [self existChatRoomWithBareJidStr:[push attributeStringValueForName:@"groupid"]];
-    
-    dispatch_block_t block = ^{
-        @autoreleasepool {
-            
-            NSString *chatRoomID = [push attributeStringValueForName:@"groupid"];
-            NSString *chatRoomNickName = [push attributeStringValueForName:@"groupname"];
-            NSString *master = [push attributeStringValueForName:@"master"];
-            NSString *jsonStr = [push stringValue];
-            
-            NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionary];
-            if (chatRoomID) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
-            if (chatRoomNickName) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
-            if (master) [tempDictionary setObject:master forKey:@"master"];
-            
-            //If this chat room has already in the core data system
-            if (isChatRoomExisted) {
-                //update the chat room info
-                [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
-                
-                //update the user info of this chat room
-                if (jsonStr) {
-                    
-                    [self transChatRoomUserDataWithJsonStr:jsonStr];
-                }
-            //If this chat room info is new to us
-            }else{
-                //down the group info and the user info
-                
-                //If there is a full chat room info,we will insert it into the coredata system
-                if (chatRoomID && chatRoomNickName && master) {
-                    //Insert the chat room info to the coredata syetem
-                    [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
-                    
-                    //only download the user list info from server
-                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
-                    
-                }else{
-                    //download the chat room info and the user list info both
-                    [self downloadChatRoomInfoWith:chatRoomID];
-                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
-                }
-            }
-            
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
 
 @end
