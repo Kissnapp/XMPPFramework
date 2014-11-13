@@ -1274,6 +1274,7 @@ enum XMPPChatRoomUserListFlags
                     //Transfor the room user list info
                     if ([array count] > 0) {
                         [self transChatRoomUserDataWithArray:array];
+                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:[roomID copy] roomNickName:nil];
                     }
                 }
                 
