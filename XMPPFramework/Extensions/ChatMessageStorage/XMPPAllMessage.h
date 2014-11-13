@@ -132,11 +132,10 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  Get the last chat message with the given user bare jid string
  *
  *  @param bareJidStr the given user bare jid string
- *  @param isPrivate  Whether this message is a private message
  *
  *  @return The message object
  */
-- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate;
+- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr;
 /**
  *  Fetch a lot of messages with given user bare jid string,the fetch size and the fetch offset
  *
@@ -147,7 +146,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @return A array which contains the fetch result
  */
-- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate;
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset;
 
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
@@ -182,7 +181,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)updateMessageSendStatusWithMessageID:(NSString *)messageID success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
-- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream;
+- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream;
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream;
 @end
 

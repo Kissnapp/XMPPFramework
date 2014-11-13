@@ -423,7 +423,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate
+- (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr
 {
     if (!bareJidStr) return nil;
     
@@ -431,7 +431,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         
-        result = [xmppMessageStorage lastMessageWithBareJidStr:bareJidStr isPrivate:isPrivate xmppStream:xmppStream];
+        result = [xmppMessageStorage lastMessageWithBareJidStr:bareJidStr xmppStream:xmppStream];
         
     };
     

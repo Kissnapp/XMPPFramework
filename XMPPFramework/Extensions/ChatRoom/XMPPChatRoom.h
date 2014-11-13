@@ -91,6 +91,12 @@
  */
 - (void)fetchChatRoomListFromServer;
 /**
+ *  fetch the Chat Room From Server With the given bare chat room jid string
+ *
+ *  @param bareChatRoomJidStr The given bare chat room jid string
+ */
+- (void)fetchChatRoomFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+/**
  *  Fetch the user list with a given bare chat room jid str
  *
  *  @param bareChatRoomJidStr The given bare chat room jid str

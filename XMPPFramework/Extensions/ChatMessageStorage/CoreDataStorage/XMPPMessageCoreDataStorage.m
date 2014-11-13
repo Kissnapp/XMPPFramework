@@ -376,7 +376,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     }];
 }
 
-- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream
+- (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream
 {
     if (!bareJidStr || !xmppStream) return nil;
     
@@ -400,9 +400,9 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (xmppStream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
-                         streamBareJidStr,@"isPrivate",@(isPrivate > 0)];
-            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
+                         streamBareJidStr];
+        
             [fetchRequest setPredicate:predicate];
         }
         
