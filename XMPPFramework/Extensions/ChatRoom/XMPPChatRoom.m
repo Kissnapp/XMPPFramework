@@ -1116,13 +1116,12 @@ enum XMPPChatRoomUserListFlags
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 NSString *nickname = [query attributeStringValueForName:@"nickname"];
                 NSString *userid = [[iq to] bare];
-                NSArray *array = @[
-                                    @{
-                                       @"bareJidStr":userid,
-                                       @"nicknameStr":nickname,
-                                       @"RoomBareJidStr":groupid
-                                     }
-                                  ];
+                NSDictionary *tempDic = @{
+                                          @"bareJidStr":userid,
+                                          @"nicknameStr":nickname,
+                                          @"RoomBareJidStr":groupid
+                                          };
+                NSArray *array = [NSArray arrayWithObjects:tempDic, nil];
 
                 //Transfor the room user list info
                 if ([array count] > 0) {
