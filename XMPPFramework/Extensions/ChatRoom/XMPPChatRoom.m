@@ -442,7 +442,7 @@ enum XMPPChatRoomUserListFlags
         
         [xmppIDTracker addElement:iq
                            target:self
-                         selector:@selector(handleExitChatRoomIQ:withInfo:)
+                         selector:@selector(handleAlterSelfNickNameIQ:withInfo:)
                           timeout:60];
         
         [xmppStream sendElement:iq];
@@ -948,7 +948,7 @@ enum XMPPChatRoomUserListFlags
 {
    /*
     <iq from="13412345678@localhost/caoyue-PC" type="set" id="aad5a">
-        <query xmlns="aft:groupchat" query_type="kick_members" groupid="1">
+        <query xmlns="aft:groupchat" query_type="remove_members" groupid="1">
             [“13411111111@localhost”,”13422222222@localhost”]
         </query>
     </iq>
@@ -967,7 +967,7 @@ enum XMPPChatRoomUserListFlags
         @autoreleasepool{
             
             NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
-            [query addAttributeWithName:@"query_type" stringValue:@"kick_members"];
+            [query addAttributeWithName:@"query_type" stringValue:@"remove_members"];
             [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
             
             NSString *jsonStr = [[bareJidStrArray JSONString] copy];
@@ -1047,7 +1047,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-        <query xmlns="aft:groupchat" query_type="kick_members" groupid=”1”>
+        <query xmlns="aft:groupchat" query_type="remove_members" groupid=”1”>
             [“13411111111@localhost”,”13422222222@localhost”]</query>
         </iq>
      */
@@ -1064,7 +1064,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"kick_members"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"remove_members"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 NSArray *tempArray = [[query stringValue] objectFromJSONString];
@@ -1091,7 +1091,7 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)handleAletrSelfNickNameIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+- (void)handleAlterSelfNickNameIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {
     /*
      <iq to="13412345678@localhost/caoyue-PC" type="result" id="aad5a">
@@ -1212,7 +1212,7 @@ enum XMPPChatRoomUserListFlags
             //find the query elment
             NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:groupchat"];
             
-            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"quit_group"])
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"remove_members"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
                 [xmppChatRoomStorage deleteChatRoomWithBareJidStr:groupid xmppStream:xmppStream];

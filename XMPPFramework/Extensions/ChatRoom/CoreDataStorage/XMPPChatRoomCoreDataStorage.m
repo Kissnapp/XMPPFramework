@@ -485,10 +485,12 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     [self scheduleBlock:^{
         
         NSManagedObjectContext *moc = [self managedObjectContext];
+        //delete the chat room
         [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
                                                                  withID:chatRoomBareJidStr
                                                        streamBareJidStr:[[stream myJID] bare]];
-        
+        //Delete the user in the chat room
+        [self clearAllUserForBareChatRoomJidStr:chatRoomBareJidStr xmppStream:stream];
     }];
 
 }
