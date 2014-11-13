@@ -342,34 +342,88 @@ enum XMPPChatRoomUserListFlags
     else
         flags &= ~kPopulatingChatRoom;
 }
-#pragma mark -
+
 #pragma mark - Private Methods
 
-/**
- *  Add a new dic and fetch its user list if needed
- *
- *  @param dic           The new chat room's dictionary info
- *  @param fetchUserList Whether we will fetch the new chat room's user list
- */
-- (void)addChatRoomWithDictionary:(NSDictionary *)dic fetchUserList:(BOOL)fetchUserList
+- (void)downloadChatRoomInfoWith:(NSString *)bareChatRoomJidStr
 {
-    if (!dic) return;
+    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    
+    if (!bareChatRoomJidStr) return;
+    
+    //we send the request xml as below:
+    /*
+     <iq type="get" id="aad5ba">
+        <query xmlns="aft:groupchat" query_type="get_groupinfo" groupid="1"></query>
+     </iq>
+     */
+    
+    NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
+    [query addAttributeWithName:@"query_type" stringValue:@"get_groupinfo"];
+    [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+    
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
+    [iq addChild:query];
+    
+    [xmppIDTracker addElement:iq
+                       target:self
+                     selector:@selector(handleSingleChatRoomInfoIQ:withInfo:)
+                      timeout:60];
+    
+    [xmppStream sendElement:iq];
+    
+    [self _setRequestedChatRoom:YES];
+
+}
+
+- (void)downloadUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+    // This is a private method, so it may be invoked on any thread/queue.
+     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    
+    if (!bareChatRoomJidStr) return;
+    
+    //we send the request xml as below:
+    /*
+     <iq from="1341234578@localhost/caoyue-PC" id="aad5a" type="get">
+     <query xmlns="aft:groupchat" query_type="get_members" groupid="1"/>
+     </iq>
+     */
+    
+    NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
+    [query addAttributeWithName:@"query_type" stringValue:@"get_members"];
+    [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
+    
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
+    [iq addChild:query];
+    
+    [xmppIDTracker addElement:iq
+                       target:self
+                     selector:@selector(handleFetchChatRoomUserListQueryIQ:withInfo:)
+                      timeout:60];
+    
+    [xmppStream sendElement:iq];
+    
+    [self _setRequestedChatRoom:YES];
+
+}
+
+
+#pragma mark - Public methods
+- (void)fetchChatRoomInfoFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+    if ( !bareChatRoomJidStr ) return;
     
     dispatch_block_t block = ^{
         
-        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
-        if (fetchUserList) {
-            [self fetchUserListFromServerWithBareChatRoomJidStr:[dic  objectForKey:@"groupid"]];
-        }
+        
     };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_async(moduleQueue, block);
-    
 }
-#pragma mark - Public methods
 
 - (XMPPChatRoomCoreDataStorageObject *)chatRoomWithBareJidStr:(NSString *)bareJidStr
 {
@@ -625,6 +679,22 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_async(moduleQueue, block);
 }
+
+- (void)fetchChatRoomFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        [self downloadChatRoomInfoWith:bareChatRoomJidStr];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
+}
+
 - (void)transFormDataAndFetchUseListWithArray:(NSArray *)array
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
@@ -913,28 +983,8 @@ enum XMPPChatRoomUserListFlags
     
     dispatch_block_t block = ^{ @autoreleasepool {
         
-        //we send the request xml as below:
-        /*
-         <iq from="1341234578@localhost/caoyue-PC" id="aad5a" type="get">
-            <query xmlns="aft:groupchat" query_type="get_members" groupid="1"/>
-         </iq>
-         */
+        [self downloadUserListFromServerWithBareChatRoomJidStr:bareChatRoomJidStr];
         
-        NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
-        [query addAttributeWithName:@"query_type" stringValue:@"get_members"];
-        [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
-        
-        XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
-        [iq addChild:query];
-        
-        [xmppIDTracker addElement:iq
-                           target:self
-                         selector:@selector(handleFetchChatRoomUserListQueryIQ:withInfo:)
-                          timeout:60];
-        
-        [xmppStream sendElement:iq];
-        
-        [self _setRequestedChatRoom:YES];
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -1043,6 +1093,45 @@ enum XMPPChatRoomUserListFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)handleSingleChatRoomInfoIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
+    /*
+    <iq type="result" id="aad5ba">
+        <query xmlns="aft:groupchat" query_type="get_groupinfo" groupid="1">
+            {"groupid":"2","groupname":"FirstGroup","master":"13412345678@localhost"}
+        </query>
+    </iq>
+     */
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        //if there is a error attribute
+        if ([[iq attributeStringValueForName:@"type"] isEqualToString:@"error"]) {
+            [multicastDelegate xmppChatRoom:self didInviteFriendError:iq];
+            return ;
+        }
+        
+        //if this action have succeed
+        if ([[iq type] isEqualToString:@"result"]) {
+            //find the query elment
+            NSXMLElement *query = [iq elementForName:@"query" xmlns:@"aft:groupchat"];
+            
+            if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"get_groupinfo"])
+            {
+                NSDictionary *tempDictionary = [[query stringValue] objectFromJSONString];
+                NSArray *array = [NSArray arrayWithObjects:tempDictionary, nil];
+                
+                if ([array count] > 0) {
+                    [self transFormDataWithArray:array];
+                }
+            }
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 - (void)handleDeleteUserFromChatRoomIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {
     /*
@@ -1657,38 +1746,94 @@ enum XMPPChatRoomUserListFlags
         
         //Note:if this is a push message about the group info
         if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]){
-            //TODO:... Handle other types of messages.
-            //FIXME:fix the code here ...
-            //MARK:mark the code here ...
-            //???:what's this?
-            //!!!!:how to do this here?
-            NSString *chatRoomID = [pushElement attributeStringValueForName:@"groupid"];
-            NSString *chatRoomNickName = [pushElement attributeStringValueForName:@"groupname"];
-           // NSString *master = [pushElement attributeStringValueForName:@"master"];
-            NSString *jsonStr = [pushElement stringValue];
             
-            if (chatRoomID && chatRoomNickName) {
-                NSDictionary *dic = @{
-                                      @"jid":chatRoomID,
-                                      @"nickname":chatRoomNickName,
-                                      };
-                [xmppChatRoomStorage InsertOrUpdateChatRoomWith:dic xmppStream:xmppStream];
-            }
-            
-            if (jsonStr) {
-                [self transChatRoomUserDataWithJsonStr:jsonStr];
-            }
+            [self groupMemberPushElement:pushElement];
+
         //Note:if this is a push message about the group member
         }else if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
             
-            NSArray *tempArray = [[pushElement stringValue] objectFromJSONString];
-            
-            [self transFormDataWithArray:tempArray];
-            
+            [self groupInfoPushElement:pushElement];
         }
         
         [multicastDelegate xmppChatRoom:self didReceiveSeiverPush:message];
     }
+}
+
+- (void)groupInfoPushElement:(NSXMLElement *)push
+{
+    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]) return;
+    
+    dispatch_block_t block = ^{
+        @autoreleasepool {
+            
+            NSArray *tempArray = [[push stringValue] objectFromJSONString];
+            
+            [self transFormDataWithArray:tempArray];
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)groupMemberPushElement:(NSXMLElement *)push
+{
+    if (![[push attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]) return;
+    
+    BOOL isChatRoomExisted = [self existChatRoomWithBareJidStr:[push attributeStringValueForName:@"groupid"]];
+    
+    dispatch_block_t block = ^{
+        @autoreleasepool {
+            
+            NSString *chatRoomID = [push attributeStringValueForName:@"groupid"];
+            NSString *chatRoomNickName = [push attributeStringValueForName:@"groupname"];
+            NSString *master = [push attributeStringValueForName:@"master"];
+            NSString *jsonStr = [push stringValue];
+            
+            NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionary];
+            if (chatRoomID) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
+            if (chatRoomNickName) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
+            if (master) [tempDictionary setObject:master forKey:@"master"];
+            
+            //If this chat room has already in the core data system
+            if (isChatRoomExisted) {
+                //update the chat room info
+                [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
+                
+                //update the user info of this chat room
+                if (jsonStr) {
+                    
+                    [self transChatRoomUserDataWithJsonStr:jsonStr];
+                }
+            //If this chat room info is new to us
+            }else{
+                //down the group info and the user info
+                
+                //If there is a full chat room info,we will insert it into the coredata system
+                if (chatRoomID && chatRoomNickName && master) {
+                    //Insert the chat room info to the coredata syetem
+                    [xmppChatRoomStorage InsertOrUpdateChatRoomWith:tempDictionary xmppStream:xmppStream];
+                    
+                    //only download the user list info from server
+                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
+                    
+                }else{
+                    //download the chat room info and the user list info both
+                    [self downloadChatRoomInfoWith:chatRoomID];
+                    [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomID];
+                }
+            }
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 @end
