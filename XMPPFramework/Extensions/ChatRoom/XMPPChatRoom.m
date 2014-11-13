@@ -1095,7 +1095,7 @@ enum XMPPChatRoomUserListFlags
 {
     /*
      <iq to="13412345678@localhost/caoyue-PC" type="result" id="aad5a">
-        <query xmlns="aft:groupchat" query_type="set_nickname" groupid="1" nickname=”testnick”>
+        <query xmlns="aft:groupchat" query_type="set_nickname" groupid="1" groupname=”testnick”>
         </query>
      </iq>
      */
@@ -1114,13 +1114,16 @@ enum XMPPChatRoomUserListFlags
             if (query && [[query attributeStringValueForName:@"query_type"] isEqualToString:@"set_nickname"])
             {
                 NSString *groupid = [query attributeStringValueForName:@"groupid"];
-                NSString *nickname = [query attributeStringValueForName:@"nickname"];
+                NSString *nickname = [query attributeStringValueForName:@"groupname"];
                 NSString *userid = [[iq to] bare];
-                NSDictionary *tempDic = @{
-                                          @"bareJidStr":userid,
+                if (!nickname || !userid || !groupid){
+                    return;
+                }
+                NSDictionary *tempDic = @{@"bareJidStr":userid,
                                           @"nicknameStr":nickname,
                                           @"RoomBareJidStr":groupid
                                           };
+                NSDictionary* temp1 = [NSDictionary dictionaryWithObjectsAndKeys:userid,@"bareJidStr",nickname, @"nicknameStr",groupid, @"RoomBareJidStr",nil];
                 NSArray *array = [NSArray arrayWithObjects:tempDic, nil];
 
                 //Transfor the room user list info
