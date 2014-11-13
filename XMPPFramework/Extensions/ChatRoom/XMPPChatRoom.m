@@ -1663,15 +1663,14 @@ enum XMPPChatRoomUserListFlags
             //???:what's this?
             //!!!!:how to do this here?
             NSString *chatRoomID = [pushElement attributeStringValueForName:@"groupid"];
-            NSString *chatRoomNickName = [pushElement attributeStringValueForName:@"groupidname"];
-            NSString *master = [pushElement attributeStringValueForName:@"master"];
+            NSString *chatRoomNickName = [pushElement attributeStringValueForName:@"groupname"];
+           // NSString *master = [pushElement attributeStringValueForName:@"master"];
             NSString *jsonStr = [pushElement stringValue];
             
             if (chatRoomID && chatRoomNickName) {
                 NSDictionary *dic = @{
                                       @"jid":chatRoomID,
                                       @"nickname":chatRoomNickName,
-                                      @"master":master
                                       };
                 [xmppChatRoomStorage InsertOrUpdateChatRoomWith:dic xmppStream:xmppStream];
             }

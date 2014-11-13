@@ -489,9 +489,10 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
                                                                  withID:chatRoomBareJidStr
                                                        streamBareJidStr:[[stream myJID] bare]];
-        //Delete the user in the chat room
-        [self clearAllUserForBareChatRoomJidStr:chatRoomBareJidStr xmppStream:stream];
+       
     }];
+    //Delete the user in the chat room
+    [self clearAllUserForBareChatRoomJidStr:chatRoomBareJidStr xmppStream:stream];
 
 }
 
