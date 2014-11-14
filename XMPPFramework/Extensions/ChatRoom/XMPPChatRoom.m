@@ -1288,7 +1288,7 @@ enum XMPPChatRoomUserListFlags
                                           @"nicknameStr":nickname,
                                           @"RoomBareJidStr":groupid
                                           };
-                NSDictionary* temp1 = [NSDictionary dictionaryWithObjectsAndKeys:userid,@"bareJidStr",nickname, @"nicknameStr",groupid, @"RoomBareJidStr",nil];
+                
                 NSArray *array = [NSArray arrayWithObjects:tempDic, nil];
 
                 //Transfor the room user list info
