@@ -182,7 +182,9 @@
     chatRoom = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomCoreDataStorageObject"
                                             inManagedObjectContext:moc];
     
-    chatRoom.streamBareJidStr = streamBareJidStr;
+    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]){
+        chatRoom.streamBareJidStr = streamBareJidStr;
+    }
     chatRoom.jid = id;
     chatRoom.nickName = nil;
     chatRoom.subscription = nil;
@@ -206,8 +208,9 @@
     XMPPChatRoomCoreDataStorageObject *chatRoom;
     chatRoom = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomCoreDataStorageObject"
                                              inManagedObjectContext:moc];
-    
-    chatRoom.streamBareJidStr = streamBareJidStr;
+    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]){
+        chatRoom.streamBareJidStr = streamBareJidStr;
+    }
     
     [chatRoom updateWithDictionary:Dic];
 
