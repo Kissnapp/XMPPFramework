@@ -199,7 +199,7 @@
  *  @param bareChatRoomJidStr The chat room bare jid string
  *  @param newNickName        Your new nick name
  */
-- (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName;
+- (void)setMyNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName;
 /**
  *  Delete some users from the chat room which is created by yourself,
  *  Note.you must been the master of the chat room

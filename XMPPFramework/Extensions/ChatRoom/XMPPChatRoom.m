@@ -553,7 +553,7 @@ enum XMPPChatRoomUserListFlags
     
     return results;
 }
-- (void)setSelfNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName
+- (void)setMyNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName
 {
     dispatch_block_t block = ^{
         //The resquest xml as below
