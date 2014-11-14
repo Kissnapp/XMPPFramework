@@ -443,9 +443,9 @@ enum XMPPChatRoomUserListFlags
             NSString *jsonStr = [push stringValue];
             
             NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionary];
-            if (chatRoomID) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
-            if (chatRoomNickName) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
-            if (master) [tempDictionary setObject:master forKey:@"master"];
+            if (chatRoomID && ![chatRoomID isEqualToString:@""]) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
+            if (chatRoomNickName && ![chatRoomNickName isEqualToString:@""]) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
+            if (master && ![master isEqualToString:@""]) [tempDictionary setObject:master forKey:@"master"];
             
             //If this chat room has already in the core data system
             if (isChatRoomExisted) {
