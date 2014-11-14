@@ -585,7 +585,7 @@ enum XMPPChatRoomUserListFlags
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
         [query addAttributeWithName:@"query_type" stringValue:@"set_nickname"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
-        [query addAttributeWithName:@"groupname" stringValue:newNickName];
+        [query addAttributeWithName:@"nickname" stringValue:newNickName];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
