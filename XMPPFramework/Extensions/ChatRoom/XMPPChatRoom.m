@@ -863,7 +863,7 @@ enum XMPPChatRoomUserListFlags
     
     NSArray *tempArray = [jsonStr objectFromJSONString];
     
-    if (![tempArray count] <= 0) return;
+    if ([tempArray count] <= 0) return;
     
     [tempArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         

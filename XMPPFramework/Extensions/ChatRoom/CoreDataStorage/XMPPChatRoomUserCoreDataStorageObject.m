@@ -98,9 +98,13 @@
     chatRoomuser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomUserCoreDataStorageObject"
                                              inManagedObjectContext:moc];
     
-    chatRoomuser.streamBareJidStr = streamBareJidStr;
+    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]) {
+        chatRoomuser.streamBareJidStr = streamBareJidStr;
+    }
+    if (roomJid && ![roomJid isEqualToString:@""] ) {
+        chatRoomuser.chatRoomBareJidStr = roomJid;
+    }
     chatRoomuser.bareJidStr = id;
-    chatRoomuser.chatRoomBareJidStr = roomJid;
     chatRoomuser.nickName = nil;
     
    
@@ -123,9 +127,12 @@
     chatRoomUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomUserCoreDataStorageObject"
                                              inManagedObjectContext:moc];
     
-    
-    chatRoomUser.streamBareJidStr = streamBareJidStr;
-    chatRoomUser.chatRoomBareJidStr = roomJid;
+    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]) {
+        chatRoomUser.streamBareJidStr = streamBareJidStr;
+    }
+    if (roomJid && ![roomJid isEqualToString:@""] ) {
+        chatRoomUser.chatRoomBareJidStr = roomJid;
+    }
     [chatRoomUser updateWithDictionary:Dic];
     
     return chatRoomUser;
@@ -265,20 +272,20 @@
     NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
     NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
     NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
-    if (bareJidStr == nil){
+    if (bareJidStr == nil && [bareJidStr isEqualToString:@""]){
         NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
-    if (bareJidStr) {
+    if (bareJidStr && ![bareJidStr isEqualToString:@""]) {
         self.bareJidStr = bareJidStr;
     }
-    if (roomBareJidStr) {
+    if (roomBareJidStr && ![roomBareJidStr isEqualToString:@""]) {
         self.chatRoomBareJidStr = roomBareJidStr;
     }
-    if (nickNameStr) {
+    if (nickNameStr && ![nickNameStr isEqualToString:@""]) {
         self.nickName = nickNameStr;
     }
-    if (streamBareJidStr) {
+    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]) {
         self.streamBareJidStr = streamBareJidStr;
     }
   
