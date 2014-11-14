@@ -311,15 +311,15 @@ streamBareJidStr:(NSString *)streamBareJidStr
     NSString *nickNameStr = [Dic objectForKey:@"groupname"];
     NSString *subscriptionStr = [Dic objectForKey:@"subscription"];
     NSString *masterBareJidStr = [Dic objectForKey:@"master"];
-    if (jidStr == nil){
+    if (jidStr == nil && [jidStr isEqualToString:@""]){
         NSLog(@"XMPPUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
     
     self.jid = jidStr;
-    if (nickNameStr) self.nickName = nickNameStr;
-    if (subscriptionStr) self.subscription = subscriptionStr;
-    if (masterBareJidStr) self.masterBareJidStr = masterBareJidStr;
+    if (nickNameStr && ![nickNameStr isEqualToString:@""]) self.nickName = nickNameStr;
+    if (subscriptionStr && ![subscriptionStr isEqualToString:@""]) self.subscription = subscriptionStr;
+    if (masterBareJidStr && ![masterBareJidStr isEqualToString:@""]) self.masterBareJidStr = masterBareJidStr;
     //TODO:这里需要处理photo属性
 }
 
