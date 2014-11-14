@@ -288,8 +288,6 @@
     if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]) {
         self.streamBareJidStr = streamBareJidStr;
     }
-  
-
 }
 
 @end
