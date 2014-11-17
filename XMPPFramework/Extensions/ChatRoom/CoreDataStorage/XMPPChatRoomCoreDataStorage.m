@@ -102,31 +102,38 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     //???:Your code here ...
     XMPPLogTrace();
     
-    [self scheduleBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        //@"bareJidStr":obj,
-        //@"chatRoomBareJidStr":[roomID copy]
-        NSString *action = [dictionary objectForKey:@"action"];
-        NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
-        NSString *chatRoomBareJidStr = [dictionary objectForKey:@"RoomBareJidStr"];
-        NSString *streamBarJidStr = [[stream myJID] bare];
-        //When we add or update a object in the coredata system,we all use the updateOrInsert... method
-        if (![action isEqualToString:@"remove"]) {
+    NSString *action = [dictionary objectForKey:@"action"];
+    NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
+    NSString *chatRoomBareJidStr = [dictionary objectForKey:@"RoomBareJidStr"];
+    NSString *streamBarJidStr = [[stream myJID] bare];
+    
+    if ([bareJidStr isEqualToString:streamBarJidStr] && [action isEqualToString:@"remove"]) {
+        
+        [self deleteChatRoomWithBareJidStr:chatRoomBareJidStr xmppStream:stream];
+        
+    }else {
+        
+        [self scheduleBlock:^{
+            
+            NSManagedObjectContext *moc = [self managedObjectContext];
+           
+            //When we add or update a object in the coredata system,we all use the updateOrInsert... method
+            if ([action isEqualToString:@"remove"]){
+                
+                [XMPPChatRoomUserCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                             withID:bareJidStr
+                                                                        chatRoomJid:chatRoomBareJidStr
+                                                                   streamBareJidStr:streamBarJidStr];
+            }else/* if (![action isEqualToString:@"remove"]) */{
             //action in coredata
             [XMPPChatRoomUserCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                              withNSDictionary:dictionary
                                                                                   chatRoomJid:chatRoomBareJidStr
                                                                              streamBareJidStr:streamBarJidStr];
-        }else if ([action isEqualToString:@"remove"]){
+            }
             
-            [XMPPChatRoomUserCoreDataStorageObject deleteInManagedObjectContext:moc
-                                                                         withID:bareJidStr
-                                                                    chatRoomJid:chatRoomBareJidStr
-                                                               streamBareJidStr:streamBarJidStr];
-        }
-        
-    }];
-    
+        }];
+    }
 }
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
@@ -151,7 +158,9 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                          managedObjectContext:moc];
             
             if (chatRoom) {
+                
                 [chatRoom updateWithDictionary:dic];
+                
             }else{
                 NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
                 
@@ -232,10 +241,19 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                            withNSDictionary:dic
                                                            streamBareJidStr:streamBareJidStr];
         }else{
+            
             NSString *jid = [dic objectForKey:@"groupid"];
             NSString *action = [dic objectForKey:@"action"];
             
-            if (![action isEqualToString:@"dismiss"]) {
+            if ([action isEqualToString:@"dismiss"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                
+                [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                         withID:jid
+                                                               streamBareJidStr:streamBareJidStr];
+                
+            }else /*if (![action isEqualToString:@"dismiss"]) */{
                 
                 XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
                                                                        xmppStream:stream
@@ -251,15 +269,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                                    streamBareJidStr:streamBareJidStr];
                 }
 
-            }else if ([action isEqualToString:@"dismiss"]){
-                
-                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-                
-                [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
-                                                                         withID:jid
-                                                               streamBareJidStr:streamBareJidStr];
             }
-            
         }
         
     }];

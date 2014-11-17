@@ -443,9 +443,9 @@ enum XMPPChatRoomUserListFlags
             NSString *jsonStr = [push stringValue];
             
             NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionary];
-            if (chatRoomID) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
-            if (chatRoomNickName) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
-            if (master) [tempDictionary setObject:master forKey:@"master"];
+            if (chatRoomID && ![chatRoomID isEqualToString:@""]) [tempDictionary setObject:chatRoomID forKey:@"groupid"];
+            if (chatRoomNickName && ![chatRoomNickName isEqualToString:@""]) [tempDictionary setObject:chatRoomNickName forKey:@"groupname"];
+            if (master && ![master isEqualToString:@""]) [tempDictionary setObject:master forKey:@"master"];
             
             //If this chat room has already in the core data system
             if (isChatRoomExisted) {
@@ -454,8 +454,28 @@ enum XMPPChatRoomUserListFlags
                 
                 //update the user info of this chat room
                 if (jsonStr) {
+                    NSMutableArray *tempArray = [NSMutableArray array];
+                    [(NSArray *)[jsonStr objectFromJSONString] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                        NSDictionary *dic = obj;
+                        NSString *bareJidStr = [dic objectForKey:@"userjid"];
+                        NSString *nickNameStr = [dic objectForKey:@"nickname"];
+                        NSString *action = [dic objectForKey:@"action"];
+                        /*
+                         NSString *action = [dictionary objectForKey:@"action"];
+                         NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
+                         NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
+                         NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
+                         */
+                        NSDictionary *userDic = @{
+                                                  @"action":action,
+                                                  @"bareJidStr":bareJidStr,
+                                                  @"nicknameStr":nickNameStr,
+                                                  @"RoomBareJidStr":chatRoomID
+                                                  };
+                        [tempArray addObject:userDic];
+                    }];
                     
-                    [self transChatRoomUserDataWithJsonStr:jsonStr];
+                    [self transChatRoomUserDataWithArray:tempArray];
                 }
                 //If this chat room info is new to us
             }else{
@@ -565,7 +585,7 @@ enum XMPPChatRoomUserListFlags
         NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"aft:groupchat"];
         [query addAttributeWithName:@"query_type" stringValue:@"set_nickname"];
         [query addAttributeWithName:@"groupid" stringValue:bareChatRoomJidStr];
-        [query addAttributeWithName:@"groupname" stringValue:newNickName];
+        [query addAttributeWithName:@"nickname" stringValue:newNickName];
         
         XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
         [iq addChild:query];
@@ -771,49 +791,6 @@ enum XMPPChatRoomUserListFlags
 
 }
 
-- (void)transFormDataAndFetchUseListWithArray:(NSArray *)array
-{
-    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
-    
-    if (!array) return;
-    
-    //BOOL hasChatRoom = [self hasChatRoomList];
-    
-    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        NSDictionary *dic = obj;
-        
-        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
-        
-        //If the autoFetchChatRoomUserList == YES,we should fetch the user list
-        if ([self autoFetchChatRoomUserList]) {
-            [self fetchUserListFromServerWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
-        }
-        
-    }];
-
-}
-/**
- *  transfrom the array to the xmppChatRoomStorage
- *
- *  @param array The info array
- */
-- (void)transFormDataWithArray:(NSArray *)array
-{
-    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
-    
-    if (!array) return;
-    
-    //BOOL hasChatRoom = [self hasChatRoomList];
-    
-    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        NSDictionary *dic = obj;
-        
-        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
-        
-    }];
-}
 
 - (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr
 {
@@ -838,7 +815,54 @@ enum XMPPChatRoomUserListFlags
                                            xmppStream:xmppStream];
     }];
 }
-
+- (void)transFormDataAndFetchUseListWithArray:(NSArray *)array
+{
+    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    
+    if (!array) return;
+    
+    //BOOL hasChatRoom = [self hasChatRoomList];
+    
+    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        NSDictionary *dic = obj;
+        
+        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
+        
+        //If the autoFetchChatRoomUserList == YES,we should fetch the user list
+        if ([self autoFetchChatRoomUserList]) {
+            [self fetchUserListFromServerWithBareChatRoomJidStr:[[dic objectForKey:@"groupid"] copy]];
+        }
+        
+    }];
+    
+}
+/**
+ *  transfrom the array to the xmppChatRoomStorage
+ *
+ *  @param array The info array
+ */
+- (void)transFormDataWithArray:(NSArray *)array
+{
+    NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
+    
+    if (!array) return;
+    
+    //BOOL hasChatRoom = [self hasChatRoomList];
+    
+    [array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        NSDictionary *dic = obj;
+        
+        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
+        
+    }];
+}
+/**
+ *  Trans a user info array
+ *
+ *  @param array The user info array
+ */
 - (void)transChatRoomUserDataWithArray:(NSArray *)array
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
@@ -854,7 +878,11 @@ enum XMPPChatRoomUserListFlags
     }];
  
 }
-
+/**
+ *  Trans a user info array json string
+ *
+ *  @param jsonStr The user array json string
+ */
 - (void)transChatRoomUserDataWithJsonStr:(NSString *)jsonStr
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
@@ -1288,7 +1316,7 @@ enum XMPPChatRoomUserListFlags
                                           @"nicknameStr":nickname,
                                           @"RoomBareJidStr":groupid
                                           };
-                NSDictionary* temp1 = [NSDictionary dictionaryWithObjectsAndKeys:userid,@"bareJidStr",nickname, @"nicknameStr",groupid, @"RoomBareJidStr",nil];
+                
                 NSArray *array = [NSArray arrayWithObjects:tempDic, nil];
 
                 //Transfor the room user list info
