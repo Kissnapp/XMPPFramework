@@ -69,33 +69,48 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
 }
 
-+ (XMPPExtendMessageObject *)xmppExtendMessageObjectFromElement:(NSXMLElement *)element
-{
-    object_setClass(element, [XMPPExtendMessageObject class]);
-    return (XMPPExtendMessageObject *)element;
-}
-
 + (XMPPExtendMessageObject *)xmppExtendMessageObject
 {
     NSXMLElement *xmppExtendMessageElement = [NSXMLElement elementWithName:XMPP_MESSAGE_EXTEND];
     return [XMPPExtendMessageObject xmppExtendMessageObjectFromElement:xmppExtendMessageElement];
 }
 
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectFromElement:(NSXMLElement *)element
+{
+    object_setClass(element, [XMPPExtendMessageObject class]);
+    return (XMPPExtendMessageObject *)element;
+}
 
 + (XMPPExtendMessageObject *)xmppExtendMessageObjectFromXMPPMessage:(XMPPMessage *)message
 {
-    NSXMLElement *xmppExtendMessageElement = [NSXMLElement elementWithName:XMPP_MESSAGE_EXTEND];
-    NSXMLElement *infoElement = [message elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
-    [xmppExtendMessageElement addChild:infoElement];
-    XMPPExtendMessageObject *xmppExtendMessageObject = [XMPPExtendMessageObject xmppExtendMessageObjectFromElement:xmppExtendMessageElement];
-    [xmppExtendMessageObject setFromUser:message.from.bare];
-    [xmppExtendMessageObject setToUser:message.to.bare];
+    XMPPExtendMessageObject *xmppExtendMessageObject = [XMPPExtendMessageObject xmppExtendMessageObject];
+    [xmppExtendMessageObject fromXMPPMessage:message];
     return xmppExtendMessageObject;
 }
 
 + (XMPPExtendMessageObject *)xmppExtendMessageObjectCopyFromMessage:(XMPPMessage *)message
 {
     return [self xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+}
+
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
+{
+    XMPPExtendMessageObject *object = [XMPPExtendMessageObject xmppExtendMessageObject];
+    
+    
+    return object;
+}
+
+- (void)fromXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
+{
+    [self setFromUser:(xmppMessageCoreDataStorageObject.sendFromMe > 0 ? xmppMessageCoreDataStorageObject.streamBareJidStr: xmppMessageCoreDataStorageObject.bareJidStr)];
+    [self setToUser:(xmppMessageCoreDataStorageObject.sendFromMe > 0 ? xmppMessageCoreDataStorageObject.bareJidStr: xmppMessageCoreDataStorageObject.streamBareJidStr)];
+    [self setHasBeenRead:(xmppMessageCoreDataStorageObject.hasBeenRead > 0)];
+    [self setSendFromMe:(xmppMessageCoreDataStorageObject.sendFromMe > 0)];
+    [self setMessageType:[xmppMessageCoreDataStorageObject.messageType unsignedIntegerValue]];
+    [self setMessageID:xmppMessageCoreDataStorageObject.messageID];
+    [self setIsGroupChat:(xmppMessageCoreDataStorageObject.isGroupChat > 0)];
+    [self setMessageTime:<#(NSDate *)#>];
 }
 
 #pragma mark - object class method
@@ -187,7 +202,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 - (void)setToUser:(NSString *)toUser
 {
-   [self addAttributeWithName:EXTEND_MESSAGE_TO_USER_ATTRIBUTE_NAME stringValue:toUser];
+    if (toUser) {
+        [self addAttributeWithName:EXTEND_MESSAGE_TO_USER_ATTRIBUTE_NAME stringValue:toUser];
+    }
 }
 
 - (NSString *)fromUser
@@ -197,7 +214,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 - (void)setFromUser:(NSString *)fromUser
 {
-    [self addAttributeWithName:EXTEND_MESSAGE_FROM_USER_ATTRIBUTE_NAME stringValue:fromUser];
+    if (fromUser) {
+        [self addAttributeWithName:EXTEND_MESSAGE_FROM_USER_ATTRIBUTE_NAME stringValue:fromUser];
+    }
 }
 
 - (BOOL)hasBeenRead
@@ -221,27 +240,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 }
 
 //The info element
-
-
-- (void)setEmailAddress:(NSString *)emailAddress {
-    if (emailAddress == nil) {
-        return;
-    }
-    //如果存在EMAIL节点，则先删除节点
-    NSXMLElement *oldEmail = [self elementForName:@"EMAIL"];
-    if(oldEmail){
-        [self removeChildAtIndex:[[self children] indexOfObject:oldEmail]];
-    }
-    //创建新的email节点
-    NSXMLElement *email = [NSXMLElement elementWithName:@"EMAIL"];
-    [self addChild:email];
-    
-    //创建email节点的名为USERID的子节点
-    NSXMLElement *userid = [NSXMLElement elementWithName:@"USERID"];
-    [email addChild:userid];
-    [userid setStringValue:emailAddress];
-}
-
 - (NSUInteger)messageType
 {
     NSUInteger result = 0;
@@ -258,17 +256,44 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 - (void)setMessageType:(NSUInteger)messageType
 {
     NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    //If the info element is already existed,wo should add the value to it
     if (infoElement) {
         [infoElement addAttributeWithName:MESSAGE_TYPE_ATTRIBUTE_NAME unsignedIntegerValue:messageType];
         return;
     }
-    
+    //Otherwise,we should create a new info element
     infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
     [infoElement addAttributeWithName:MESSAGE_TYPE_ATTRIBUTE_NAME unsignedIntegerValue:messageType];
     [self addChild:infoElement];
 }
 
-- (
+- (NSString *)messageID
+{
+    NSString *result = nil;
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (infoElement != nil) {
+        
+        result = [infoElement attributeStringValueForName:MESSAGE_ID_ATTRIBUTE_NAME];
+    }
+    
+    return result;
+}
+
+- (void)setMessageID:(NSString *)messageID
+{
+    if (messageID) {
+        NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        //If the info element is already existed,wo should add the value to it
+        if (infoElement) {
+            [infoElement addAttributeWithName:MESSAGE_ID_ATTRIBUTE_NAME stringValue:messageID];
+            return;
+        }
+        //Otherwise,we should create a new info element
+        infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        [infoElement addAttributeWithName:MESSAGE_ID_ATTRIBUTE_NAME stringValue:messageID];
+        [self addChild:infoElement];
+    }
+}
 
 /*
 -(NSMutableDictionary *)toDictionary
@@ -329,32 +354,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     return message;
 }
 //This method has no Parameter hasBeenRead,sendFromMe...
--(void)fromXMPPMessage:(XMPPMessage *)message
+- (void)fromXMPPMessage:(XMPPMessage *)message
 {
-    NSXMLElement *info = [message elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
-    
-    if (!info) return;
-    
-    self.fromUser = [[message from] bare];
-    self.toUser = [[message to] bare];
-    
-    self.messageTime = [self getLocalDateWithUTCString:[info attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME]];
-    self.messageType = [info attributeUnsignedIntegerValueForName:MESSAGE_TYPE_ATTRIBUTE_NAME];
-    self.isGroupChat = [info attributeBoolValueForName:MESSAGE_IS_GROUP_CHAT_ATTRIBUTE_NAME];
-    
-    self.messageID = [info attributeStringValueForName:MESSAGE_ID_ATTRIBUTE_NAME];
-    
-    NSXMLElement *additionMessageInfo = [info elementForName:ADDITION_ELEMENT_NAME xmlns:ADDITION_ELEMENT_XMLNS];
-    
-    if (additionMessageInfo) {
-        self.xmppAdditionalMessageObject = [[XMPPAdditionalMessageObject alloc] init];
-        [self.xmppAdditionalMessageObject fromXMLElement:additionMessageInfo];
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    //If this element is existed,we should remove it brefore
+    if (infoElement) {
+        [self removeChildAtIndex:[[self children] indexOfObject:infoElement]];
     }
-    
-    if (self.isGroupChat) {
-        NSXMLElement *sender = [info elementForName:MESSAGE_SENDER_ELEMENT_NAME];
-        self.xmppAdditionalMessageObject.groupUserJid = [sender stringValue];
-    }
+    infoElement = [message elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    [self addChild:infoElement];
+    [self setFromUser:message.from.bare];
+    [self setToUser:message.to.bare];
 }
 
 

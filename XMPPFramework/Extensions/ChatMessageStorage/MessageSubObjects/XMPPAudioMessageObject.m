@@ -104,7 +104,6 @@
 }
 
 #pragma mark - getters and setters
-
 - (NSString *)fileName
 {
     return [self attributeStringValueForName:FILE_NAME_ATTRIBUTE_NAME];
