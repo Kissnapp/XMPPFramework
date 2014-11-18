@@ -201,7 +201,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     
     switch (self.messageType) {
         case XMPPExtendMessageTextType:
-            self.text = [XMPPTextMessageObject xmpp];
+            self.text = [XMPPTextMessageObject ];
             break;
         case XMPPExtendMessageAudioType:
             self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];

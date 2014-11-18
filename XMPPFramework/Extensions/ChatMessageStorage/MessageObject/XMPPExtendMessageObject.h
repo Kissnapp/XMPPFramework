@@ -66,6 +66,9 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (strong, nonatomic) XMPPTextMessageObject             *text;            //The text object which has all the text info
 @property (strong, nonatomic) XMPPAudioMessageObject            *audio;           //The audio object which has all the audio info
 
+
++ (XMPPExtendMessageObject *)xmppExtendMessageObject;
+
 /**
  *  When we using this method the messageID has been setted and the sendFromMe has been setted to YES,
  *
