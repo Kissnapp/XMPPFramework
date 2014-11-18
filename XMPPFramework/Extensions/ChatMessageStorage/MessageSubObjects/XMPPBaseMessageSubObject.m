@@ -47,7 +47,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
 }
 
-
 #if ! TARGET_OS_IPHONE
 - (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
 {

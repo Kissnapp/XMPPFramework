@@ -18,6 +18,32 @@
 
 #define XMPP_SUB_MSG_SET_STRING_VALUE(Value) [self setStringValue:Value]
 
+#define XMPP_SUB_MSG_SET_EMPTY_CHILD(Set, Name)                                                                 \
+                    if (Set) {                                                                                  \
+                        [self addChild:[NSXMLElement elementWithName:(Name)]];                                  \
+                    }                                                                                           \
+                    else if (!(Set)) {                                                                          \
+                        [self removeChildAtIndex:[[self children] indexOfObject:[self elementForName:(Name)]]]; \
+                    }
+
+
+#define XMPP_SUB_MSG_SET_STRING_CHILD(elementName , attributeKeys, attributeValues, Value)                                                                                                 \
+                    NSXMLElement *elem = [self elementForName:(Name)];                                          \
+                    if (elem != nil) {                                                                          \
+                        [self removeChildAtIndex:[[self children] indexOfObject:elem]];                         \
+                    }                                                                                           \
+                    elem = [NSXMLElement elementWithName:(Name)];                                               \
+                    if (attributeKeys && attributeValues)                                                       \
+                    {                                                                                           \
+                        for (int index = 0; index < [attributeKeys count]; ++index) {                           \
+                            [elem addAttributeWithName:[attributeKeys objectAtIndex:index] objectValue:[attributeValues objectAtIndex:index]];\
+                        }                                                                                       \
+                    }                                                                                           \
+                    if ((Value) != nil)                                                                         \
+                    {                                                                                           \
+                        [elem setStringValue:(Value)];                                                          \
+                    }                                                                                           \
+                    [self addChild:elem];                                                                       \
 
 
 @interface XMPPBaseMessageSubObject : NSXMLElement<NSCoding, NSCopying>
