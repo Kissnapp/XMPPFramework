@@ -1,12 +1,12 @@
 //
-//  XMPPImageMessageObject.m
+//  XMPPPictureMessageObject.m
 //  XMPP_Project
 //
 //  Created by carl on 14-11-18.
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
-#define IMAGE_ELEMENT_NAME                  @"image"
-#import "XMPPImageMessageObject.h"
+#define Picture_ELEMENT_NAME                  @"Picture"
+#import "XMPPPictureMessageObject.h"
 #import <objc/runtime.h>
 #import "NSData+XMPP.h"
 
@@ -15,58 +15,59 @@
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_PATH_ATTRIBUTE_NAME            @"filePath"
 
-@implementation XMPPImageMessageObject
+@implementation XMPPPictureMessageObject
 
-+(XMPPImageMessageObject*)xmppImageMessageObjectFromElement:(NSXMLElement *)element
++(XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element
 {
-    object_setClass(element, [XMPPImageMessageObject class]);
-    return (XMPPImageMessageObject *)element;
+    object_setClass(element, [XMPPPictureMessageObject class]);
+    return (XMPPPictureMessageObject *)element;
 }
-+ (XMPPImageMessageObject *)xmppAudioMessageObjectFromInfoElement:(NSXMLElement *)infoElement
++ (XMPPPictureMessageObject *)xmppAudioMessageObjectFromInfoElement:(NSXMLElement *)infoElement
 {
-    XMPPImageMessageObject *xmppAudioMessageObject = nil;
+    XMPPPictureMessageObject *xmppAudioMessageObject = nil;
     
-    NSXMLElement *element = [infoElement elementForName:IMAGE_ELEMENT_NAME];
+    NSXMLElement *element = [infoElement elementForName:Picture_ELEMENT_NAME];
     if (element) {
-        xmppAudioMessageObject = [XMPPImageMessageObject xmppImageMessageObjectFromElement:element];
+        xmppAudioMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
     }
     
     return xmppAudioMessageObject;
 }
 
-+ (XMPPImageMessageObject *)xmppAudioMessageObject
++ (XMPPPictureMessageObject *)xmppAudioMessageObject
 {
-    NSXMLElement *audioElement = [NSXMLElement elementWithName:IMAGE_ELEMENT_NAME];
-    return [XMPPImageMessageObject xmppImageMessageObjectFromElement:audioElement];
+    NSXMLElement *audioElement = [NSXMLElement elementWithName:Picture_ELEMENT_NAME];
+    return [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:audioElement];
 }
 
-+ (XMPPImageMessageObject *)xmppImageMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
-    XMPPImageMessageObject *xmppImageMessageObject = nil;
-    NSXMLElement *element = [NSXMLElement elementWithName:IMAGE_ELEMENT_NAME];
+    XMPPPictureMessageObject *xmppPictureMessageObject = nil;
+    NSXMLElement *element = [NSXMLElement elementWithName:Picture_ELEMENT_NAME];
     
-    xmppImageMessageObject = [XMPPImageMessageObject xmppImageMessageObjectFromElement:element];
+    xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
     
-    [xmppImageMessageObject setName:fileName];
-    [xmppImageMessageObject setFilePath:filePath];
-    [xmppImageMessageObject setFileData:fileData];
+    [xmppPictureMessageObject setName:fileName];
+    [xmppPictureMessageObject setFilePath:filePath];
+    [xmppPictureMessageObject setFileData:fileData];
+    [xmppPictureMessageObject]
     
     
     
-    return xmppImageMessageObject;
+    return xmppPictureMessageObject;
 }
-+ (XMPPImageMessageObject *)xmppImageMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
-    return [self xmppImageMessageObjectWithFileName:nil filePath:filePath fileData:fileData aspectRatio:aspectRatio];
+    return [self xmppPictureMessageObjectWithFileName:nil filePath:filePath fileData:fileData aspectRatio:aspectRatio];
 }
-+ (XMPPImageMessageObject *)xmppImageMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
-    return [self xmppImageMessageObjectWithFileName:nil filePath:nil fileData:fileData aspectRatio:aspectRatio];
+    return [self xmppPictureMessageObjectWithFileName:nil filePath:nil fileData:fileData aspectRatio:aspectRatio];
 }
 - (instancetype)initWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 
 {
-    self = [super initWithName:IMAGE_ELEMENT_NAME];
+    self = [super initWithName:Picture_ELEMENT_NAME];
     if (self) {
         [self setFileName:fileName];
         [self setFilePath:filePath];
@@ -137,6 +138,7 @@
 }
 -(void)setAspectRatio:(CGFloat)aspectRatio
 {
+    
     [self setAspectRatio:aspectRatio];
 }
 -(CGFloat)aspectRatio
