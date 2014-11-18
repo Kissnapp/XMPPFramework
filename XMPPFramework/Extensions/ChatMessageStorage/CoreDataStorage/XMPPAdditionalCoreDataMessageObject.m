@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPAdditionalMessageObject.h"
+#import "XMPPAdditionalCoreDataMessageObject.h"
 #import "XMPPFramework.h"
 
 #define MESSAGE_TEXT_ELEMENT_NAME           @"messageText"
@@ -20,7 +20,7 @@
 #define ASPECT_RATIO_USERJID_ELEMENT_NAME   @"aspectRatio"
 #define MESSAGE_TAG_ELEMENT_NAME            @"messageTag"
 
-@implementation XMPPAdditionalMessageObject
+@implementation XMPPAdditionalCoreDataMessageObject
 
 #pragma mark -
 #pragma mark - Public  Methods
@@ -166,7 +166,7 @@
 #pragma mark NSCopying Methods
 - (id)copyWithZone:(NSZone *)zone
 {
-    XMPPAdditionalMessageObject *newObject = [[[self class] allocWithZone:zone] init];
+    XMPPAdditionalCoreDataMessageObject *newObject = [[[self class] allocWithZone:zone] init];
     
     [newObject setMessageText:self.messageText];
     [newObject setMessageTag:self.messageTag];

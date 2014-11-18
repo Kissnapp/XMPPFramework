@@ -10,8 +10,6 @@
 #import "NSData+XMPP.h"
 #import <objc/runtime.h>
 
-#define AUDIO_ELEMENT_NAME                  @"audio"
-
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_PATH_ATTRIBUTE_NAME            @"filePath"

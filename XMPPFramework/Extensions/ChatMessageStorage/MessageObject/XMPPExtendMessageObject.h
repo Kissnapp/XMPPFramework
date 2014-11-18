@@ -10,8 +10,10 @@
 #import "DDXML.h"
 #import "XMPPMessage.h"
 #import "XMPPBaseMessageObject.h"
-#import "XMPPAdditionalMessageObject.h"
+#import "XMPPAdditionalCoreDataMessageObject.h"
 #import "XMPPMessageCoreDataStorageObject.h"
+
+#import "XMPPAudioMessageObject.h"
 /**
  *  The type of a message
  */
@@ -23,7 +25,7 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
     /**
      *  a voice message
      */
-    XMPPExtendMessageVoiceType,
+    XMPPExtendMessageAudioType,
     /**
      *  a video file message
      */
@@ -53,12 +55,14 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (strong, nonatomic) NSString                          *messageID;       //message ID,used to find the appointed message
 @property (strong, nonatomic) NSString                          *fromUser;        //The user id of Who send the message
 @property (strong, nonatomic) NSString                          *toUser;          //The user id of who the message will been send to
-@property (strong, nonatomic) NSDate                            *messageTime;        //The message send time
-//@property (assign, nonatomic) BOOL                              isPrivate;        //The mark to  distinguish the message whether is a private message
+@property (strong, nonatomic) NSDate                            *messageTime;     //The message send time,this message is a local time
+//@property (assign, nonatomic) BOOL                              isPrivate;      //The mark to  distinguish the message whether is a private message
 @property (assign, nonatomic) BOOL                              hasBeenRead;      //The mark to  distinguish whether the message has been read
 @property (assign, nonatomic) BOOL                              isGroupChat; //Mark value 4,Wether is a chat room chat
 @property (assign, nonatomic) BOOL                              sendFromMe;       //Whether the message is send from myself
 @property (strong, nonatomic) NSString                          *sender;          //The user in the chat room who sender this message
+
+@property (strong, nonatomic) XMPPAudioMessageObject            *audio;           //The audio object which has all the audio info
 
 /**
  *  When we using this method the messageID has been setted and the sendFromMe has been setted to YES,

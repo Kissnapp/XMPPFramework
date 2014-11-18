@@ -8,6 +8,8 @@
 
 #import "XMPPBaseMessageSubObject.h"
 
+#define AUDIO_ELEMENT_NAME                  @"audio"
+
 @interface XMPPAudioMessageObject : XMPPBaseMessageSubObject
 
 @property (strong, nonatomic) NSString          *fileName;

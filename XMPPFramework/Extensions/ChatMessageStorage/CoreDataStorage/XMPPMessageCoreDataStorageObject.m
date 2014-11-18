@@ -66,15 +66,15 @@
     [self setPrimitiveValue:value forKey:@"isChatRoomMessage"];
     [self didChangeValueForKey:@"isChatRoomMessage"];
 }
-- (XMPPAdditionalMessageObject *)messageBody
+- (XMPPAdditionalCoreDataMessageObject *)messageBody
 {
     [self willAccessValueForKey:@"messageBody"];
-    XMPPAdditionalMessageObject *value = [self primitiveValueForKey:@"messageBody"];
+    XMPPAdditionalCoreDataMessageObject *value = [self primitiveValueForKey:@"messageBody"];
     [self didAccessValueForKey:@"messageBody"];
     return value;
 }
 
-- (void)setMessageBody:(XMPPAdditionalMessageObject *)value
+- (void)setMessageBody:(XMPPAdditionalCoreDataMessageObject *)value
 {
     [self willChangeValueForKey:@"messageBody"];
     [self setPrimitiveValue:value forKey:@"messageBody"];

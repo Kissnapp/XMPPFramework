@@ -12,7 +12,7 @@
 #define ADDITION_ELEMENT_NAME               @"additionMessage"
 #define ADDITION_ELEMENT_XMLNS              @"aft:message"
 
-@interface XMPPAdditionalMessageObject : NSObject<NSCopying,NSCoding>
+@interface XMPPAdditionalCoreDataMessageObject : NSObject<NSCopying,NSCoding>
 
 //Text message
 @property (strong, nonatomic) NSString    *messageText;     //The text type message's text body
