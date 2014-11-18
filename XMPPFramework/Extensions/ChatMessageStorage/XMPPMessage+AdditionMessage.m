@@ -7,7 +7,7 @@
 //
 
 #import "XMPPMessage+AdditionMessage.h"
-#import "XMPPAdditionalMessageObject.h"
+#import "XMPPAdditionalCoreDataMessageObject.h"
 
 @implementation XMPPMessage (AdditionMessage)
 
@@ -78,6 +78,42 @@
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
     NSString *dateString = [dateFormatter stringFromDate:localDate];
     return dateString;
+}
+
+- (NSDate *)getUTCDateWithLocalDate:(NSDate *)localDate
+{
+    //设置源日期时区
+    NSTimeZone* sourceTimeZone = [NSTimeZone localTimeZone];
+    //设置转换后的目标日期时区
+    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"UTC"];//或GMT
+
+    //得到源日期与世界标准时间的偏移量
+    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:localDate];
+    //目标日期与本地时区的偏移量
+    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:localDate];
+    //得到时间偏移量的差值
+    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+    //转为现在时间
+    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:localDate];
+    
+    return destinationDate;
+}
+
+- (NSDate *)getLocalDateWithUTCDate:(NSDate *)utcDate
+{
+    //设置源日期时区
+    NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"UTC"];//或GMT
+    //设置转换后的目标日期时区
+    NSTimeZone* destinationTimeZone = [NSTimeZone localTimeZone];
+    //得到源日期与世界标准时间的偏移量
+    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:utcDate];
+    //目标日期与本地时区的偏移量
+    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:utcDate];
+    //得到时间偏移量的差值
+    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+    //转为现在时间
+    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:utcDate];
+    return destinationDate;
 }
 /**
  *  Get the local date object with the given UTC date string
@@ -166,7 +202,7 @@
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
     NSUInteger messageType = [[body elementForName:@"messageType"] stringValueAsNSUInteger];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[body elementForName:@"messageTime"] stringValue]];
-    XMPPAdditionalMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalMessageObject alloc] initWithXMLElement:[body elementForName:ADDITION_ELEMENT_NAME]];
+    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithXMLElement:[body elementForName:ADDITION_ELEMENT_NAME]];
     
     [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];
