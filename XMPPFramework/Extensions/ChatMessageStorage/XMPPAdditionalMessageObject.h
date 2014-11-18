@@ -40,7 +40,7 @@
  *
  *  @return self
  */
--(instancetype)initWithXMLElement:(NSXMLElement *)element;
+-(instancetype)initWithXMLElement:(NSXMLElement *)element ;
 /**
  *  Init with a dictionary
  *
@@ -66,7 +66,7 @@
  *
  *  @return The XML element we will get
  */
--(NSXMLElement *)toXMLElement;
+-(NSXMLElement *)toXMLElementWithType:(NSUInteger)type isGroupChat:(BOOL)isGroupChat;
 /**
  *  Get the XMPPSimpleMessageObject from a xml element
  *
