@@ -5,7 +5,7 @@
 //  Created by carl on 14-11-18.
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
-#define Picture_ELEMENT_NAME                  @"Picture"
+
 #import "XMPPPictureMessageObject.h"
 #import <objc/runtime.h>
 #import "NSData+XMPP.h"
@@ -14,60 +14,61 @@
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_PATH_ATTRIBUTE_NAME            @"filePath"
+#define ASPECT__RATIO_ATTRIBUTE_NAME        @"aspectRatio"
 
 @implementation XMPPPictureMessageObject
+//class init methods
 
++ (XMPPPictureMessageObject *)xmppAudioMessageObject
+{
+    NSXMLElement *audioElement = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
+    return [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:audioElement];
+}
 +(XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element
 {
     object_setClass(element, [XMPPPictureMessageObject class]);
     return (XMPPPictureMessageObject *)element;
 }
-+ (XMPPPictureMessageObject *)xmppAudioMessageObjectFromInfoElement:(NSXMLElement *)infoElement
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectFromInfoElement:(NSXMLElement *)infoElement
 {
-    XMPPPictureMessageObject *xmppAudioMessageObject = nil;
+    XMPPPictureMessageObject *xmppPictureMessageObject = nil;
     
-    NSXMLElement *element = [infoElement elementForName:Picture_ELEMENT_NAME];
+    NSXMLElement *element = [infoElement elementForName:PICTURE_ELEMENT_NAME];
     if (element) {
-        xmppAudioMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
+        xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
     }
     
-    return xmppAudioMessageObject;
+    return xmppPictureMessageObject;
 }
 
-+ (XMPPPictureMessageObject *)xmppAudioMessageObject
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
-    NSXMLElement *audioElement = [NSXMLElement elementWithName:Picture_ELEMENT_NAME];
-    return [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:audioElement];
+    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil filePath:filePath fileData:fileData aspectRatio:aspectRatio];
+}
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
+{
+    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil filePath:nil fileData:fileData aspectRatio:aspectRatio];
 }
 
 + (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
     XMPPPictureMessageObject *xmppPictureMessageObject = nil;
-    NSXMLElement *element = [NSXMLElement elementWithName:Picture_ELEMENT_NAME];
+    NSXMLElement *element = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
     
     xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
-    
     [xmppPictureMessageObject setName:fileName];
     [xmppPictureMessageObject setFilePath:filePath];
     [xmppPictureMessageObject setFileData:fileData];
-    [xmppPictureMessageObject]
-    
-    
+    [xmppPictureMessageObject setAspectRatio:aspectRatio];
     
     return xmppPictureMessageObject;
 }
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
-{
-    return [self xmppPictureMessageObjectWithFileName:nil filePath:filePath fileData:fileData aspectRatio:aspectRatio];
-}
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
-{
-    return [self xmppPictureMessageObjectWithFileName:nil filePath:nil fileData:fileData aspectRatio:aspectRatio];
-}
+
+//object init objects
 - (instancetype)initWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 
 {
-    self = [super initWithName:Picture_ELEMENT_NAME];
+    self = [super initWithName:PICTURE_ELEMENT_NAME];
     if (self) {
         [self setFileName:fileName];
         [self setFilePath:filePath];
@@ -138,12 +139,12 @@
 }
 -(void)setAspectRatio:(CGFloat)aspectRatio
 {
-    
-    [self setAspectRatio:aspectRatio];
+   
+    XMPP_SUB_MSG_SET_FLOAT_ATTRIBUTE(aspectRatio, ASPECT__RATIO_ATTRIBUTE_NAME);
 }
 -(CGFloat)aspectRatio
 {
-    return [self aspectRatio];
+    return [self attributeFloatValueForName:ASPECT__RATIO_ATTRIBUTE_NAME];
 }
 
 

@@ -201,7 +201,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     
     switch (self.messageType) {
         case XMPPExtendMessageTextType:
-            self.text = [XMPPTextMessageObject ];
+            self.text = [XMPPTextMessageObject initWithText:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.messageText];
             break;
         case XMPPExtendMessageAudioType:
             self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
@@ -251,8 +251,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      if (self.text) {
          [dictionary setObject:self.text forKey:@"text"];
      }
+<<<<<<< HEAD
      
      
+=======
+     
+     
+>>>>>>> FETCH_HEAD
      //TODO:text here
      [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
      [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
@@ -627,5 +632,45 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
         [self addChild:infoElement];
     }
 }
+- (XMPPTextMessageObject *)text
+{
+    XMPPAudioMessageObject *result = nil;
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (infoElement != nil) {
+        
+        result = [XMPPTextMessageObject xmppTextMessageObjectFromElement:[infoElement elementForName:TEXT_ELEMENT_NAME]];
+    }
+    
+    return result;
+}
+
+- (void)setText:(XMPPTextMessageObject *)text
+{
+    if (text) {
+        
+        NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        //If the info element is already existed,wo should add the value to it
+        if (infoElement) {
+            
+            NSXMLElement *textElement = [infoElement elementForName:TEXT_ELEMENT_NAME];
+            
+            if (textElement) {
+                [infoElement removeChildAtIndex:[[infoElement children] indexOfObject:textElement]];
+            }
+            
+            [infoElement addChild:text];
+            
+            return;
+        }
+        //Otherwise,we should create a new info element
+        //init a new info XML element
+        infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        [infoElement addChild:text];
+        [self addChild:infoElement];
+    }
+}
+
 
 @end

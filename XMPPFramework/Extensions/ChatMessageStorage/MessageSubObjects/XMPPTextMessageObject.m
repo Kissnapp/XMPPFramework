@@ -5,7 +5,7 @@
 //  Created by carl on 14-11-18.
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
-#define TEXT_ELEMENT_NAME                  @"text"
+
 #import "XMPPTextMessageObject.h"
 #import <objc/runtime.h>
 
@@ -14,6 +14,12 @@
 
 @implementation XMPPTextMessageObject
 
+
++ (XMPPTextMessageObject *)xmppTextMessageObject
+{
+    NSXMLElement *textElement = [NSXMLElement elementWithName:TEXT_ELEMENT_NAME];
+    return [XMPPTextMessageObject xmppTextMessageObjectFromElement:textElement];
+}
 + (XMPPTextMessageObject *)xmppTextMessageObjectFromElement:(NSXMLElement *)element
 {
     object_setClass(element, [XMPPTextMessageObject class]);
@@ -30,22 +36,18 @@
     
     return xmppTextMessageObject;
 }
-+ (XMPPTextMessageObject *)xmppTextMessageObject
-{
-    NSXMLElement *textElement = [NSXMLElement elementWithName:TEXT_ELEMENT_NAME];
-    return [XMPPTextMessageObject xmppTextMessageObjectFromElement:textElement];
-}
 -(instancetype)initWithText:(NSString*)text
 {
-    self = [super init];
+    self = [super initWithName:TEXT_ELEMENT_NAME];
     if (self) {
         
+        [self setText:text];
     }
     return self;
 }
 +(instancetype)initWithText:(NSString*)text
 {
-    return [self initWithText:text];
+    return [[XMPPTextMessageObject alloc ]initWithText:text];
 }
 
 #pragma mark - getters and setters

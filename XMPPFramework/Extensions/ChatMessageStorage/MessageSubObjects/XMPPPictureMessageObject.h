@@ -7,6 +7,7 @@
 //
 
 #import "XMPPBaseMessageSubObject.h"
+#define PICTURE_ELEMENT_NAME                  @"picture"
 
 @interface XMPPPictureMessageObject : XMPPBaseMessageSubObject
 @property (strong, nonatomic) NSString          *fileName;
@@ -14,5 +15,16 @@
 @property (strong, nonatomic) NSData            *fileData;
 @property (assign, nonatomic) CGFloat           aspectRatio;      //Picture width&height
 
-+(XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element;
+//class init methods
++ (XMPPPictureMessageObject *)xmppAudioMessageObject;
++ (XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData  aspectRatio:(CGFloat)aspectRatio;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
+
+//object init objects
+- (instancetype)initWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
+- (instancetype)initWithFlePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
+- (instancetype)initWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
 @end
