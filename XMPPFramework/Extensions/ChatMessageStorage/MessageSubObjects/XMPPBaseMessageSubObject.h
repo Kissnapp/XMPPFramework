@@ -27,7 +27,7 @@
                     }
 
 
-#define XMPP_SUB_MSG_SET_STRING_CHILD(elementName , attributeKeys, attributeValues, Value)                                                                                                 \
+#define XMPP_SUB_MSG_SET_STRING_CHILD(elementName , attributeKeys, attributeValues, Value)                                                                                           \
                     NSXMLElement *elem = [self elementForName:(Name)];                                          \
                     if (elem != nil) {                                                                          \
                         [self removeChildAtIndex:[[self children] indexOfObject:elem]];                         \
