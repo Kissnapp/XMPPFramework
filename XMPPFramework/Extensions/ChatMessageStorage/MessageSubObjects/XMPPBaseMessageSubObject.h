@@ -17,8 +17,6 @@
 
 #define XMPP_SUB_MSG_SET_STRING_VALUE(Value) [self setStringValue:Value]
 
-
-
 @interface XMPPBaseMessageSubObject : NSXMLElement<NSCoding, NSCopying>
 
 @end
