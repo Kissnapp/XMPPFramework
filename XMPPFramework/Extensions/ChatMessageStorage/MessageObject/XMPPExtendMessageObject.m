@@ -196,15 +196,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     [self setMessageTime:[self getLocalDateWithUTCDate:xmppMessageCoreDataStorageObject.messageTime]];
     
     if (self.isGroupChat) {
-        [self setSender:xmppMessageCoreDataStorageObject.messageBody.groupUserJid];
+        [self setSender:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.groupUserJid];
     }
     
     switch (self.messageType) {
         case XMPPExtendMessageTextType:
-            
+            self.text = [XMPPTextMessageObject xmpp];
             break;
         case XMPPExtendMessageAudioType:
-            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.messageBody.filePath time:xmppMessageCoreDataStorageObject.messageBody.timeLength];
+            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
             break;
         case XMPPExtendMessageVideoType:
             
@@ -245,14 +245,20 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      if (self.toUser) {
          [dictionary setObject:self.messageTime forKey:@"toUser"];
      }
+     if (self.audio) {
+         [dictionary setObject:self.audio forKey:@"audio"];
+     }
+     if (self.text) {
+         [dictionary setObject:self.text forKey:@"text"];
+     }
      
+     
+     //TODO:text here
      [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
      [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
      [dictionary setObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
      [dictionary setObject:[NSNumber numberWithUnsignedInteger:self.messageType] forKey:@"messageType"];
-     [dictionary setObject:self.audio forKey:@"audio"];
-     
-     //TODO:text here
+    
      return dictionary;
 }
 
@@ -264,6 +270,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     self.fromUser = [message objectForKey:@"fromUser"];
     self.toUser = [message objectForKey:@"toUser"];
     self.audio = [message objectForKey:@"audio"];
+    self.text = [message objectForKey:@"text"];
  
     self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] boolValue];
     self.sendFromMe = [(NSNumber *)[message objectForKey:@"sendFromMe"] boolValue];

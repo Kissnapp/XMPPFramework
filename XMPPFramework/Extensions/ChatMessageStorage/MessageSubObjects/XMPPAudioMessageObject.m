@@ -45,7 +45,7 @@
 
 + (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFilePath:(NSString *)filePath time:(NSTimeInterval)time
 {
-    return [self xmppAudioMessageObjectWithFilePath:filePath fileData:nil time:time];
+    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:filePath fileData:nil time:time];
 }
 + (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileData:(NSData *)fileData time:(NSTimeInterval)time
 {
