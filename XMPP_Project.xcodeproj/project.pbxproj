@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63E9E1331A1AF1AE009114CB /* XMPPTextMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 63E9E1311A1AF1AE009114CB /* XMPPTextMessageObject.h */; };
+		63E9E1341A1AF1AE009114CB /* XMPPTextMessageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E9E1321A1AF1AE009114CB /* XMPPTextMessageObject.m */; };
 		63F3B15F1960F8B400BD8134 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63F3B15E1960F8B400BD8134 /* UIKit.framework */; };
 		63F3B46D1960F91700BD8134 /* XMPPAnonymousAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 63F3B1631960F91500BD8134 /* XMPPAnonymousAuthentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		63F3B46E1960F91700BD8134 /* XMPPAnonymousAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F3B1641960F91500BD8134 /* XMPPAnonymousAuthentication.m */; };
@@ -317,6 +319,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		63E9E1311A1AF1AE009114CB /* XMPPTextMessageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPTextMessageObject.h; sourceTree = "<group>"; };
+		63E9E1321A1AF1AE009114CB /* XMPPTextMessageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTextMessageObject.m; sourceTree = "<group>"; };
 		63F3B1231960F7BA00BD8134 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		63F3B14D1960F80900BD8134 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F3B1561960F80900BD8134 /* XMPPFramework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "XMPPFramework-Info.plist"; sourceTree = "<group>"; };
@@ -1596,6 +1600,8 @@
 			children = (
 				E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */,
 				E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */,
+				63E9E1311A1AF1AE009114CB /* XMPPTextMessageObject.h */,
+				63E9E1321A1AF1AE009114CB /* XMPPTextMessageObject.m */,
 			);
 			path = MessageSubObjects;
 			sourceTree = "<group>";
@@ -1687,6 +1693,7 @@
 				63F3B52E1960F91700BD8134 /* XMPPMessage+XEP_0184.h in Headers */,
 				63F3B4BD1960F91700BD8134 /* XMPPJabberRPCModule.h in Headers */,
 				63F3B4DC1960F91700BD8134 /* XMPPMUC.h in Headers */,
+				63E9E1331A1AF1AE009114CB /* XMPPTextMessageObject.h in Headers */,
 				63F3B4E81960F91700BD8134 /* XMPPvCardCoreDataStorageObject.h in Headers */,
 				63F3B5601960F91700BD8134 /* DDLog+LOGV.h in Headers */,
 				63F3B5791960F91700BD8134 /* stringprep.h in Headers */,
@@ -1907,6 +1914,7 @@
 				63F3B5471960F91700BD8134 /* XMPPMessage+XEP_0308.m in Sources */,
 				63F3B4B81960F91700BD8134 /* XMPPSystemInputActivityMonitor.m in Sources */,
 				E703D07D19D908CF00D8E3A4 /* XMPPAllMessage.m in Sources */,
+				63E9E1341A1AF1AE009114CB /* XMPPTextMessageObject.m in Sources */,
 				63F3B4C91960F91700BD8134 /* XMPPRoomMessageCoreDataStorageObject.m in Sources */,
 				63F3B4C01960F91700BD8134 /* XMPPIQ+LastActivity.m in Sources */,
 				E77A2FF619E5033C00995769 /* XMPPAdditionalMessageObject.m in Sources */,
