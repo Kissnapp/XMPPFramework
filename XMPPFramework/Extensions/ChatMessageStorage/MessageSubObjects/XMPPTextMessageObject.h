@@ -19,5 +19,5 @@
 
 //object init objects
 -(instancetype)initWithText:(NSString*)text;
-+(instancetype)initWithText:(NSString*)text;
++(XMPPTextMessageObject *)initWithText:(NSString*)text;
 @end

@@ -14,6 +14,7 @@
 #import "XMPPMessageCoreDataStorageObject.h"
 
 #import "XMPPAudioMessageObject.h"
+#import "XMPPTextMessageObject.h"
 /**
  *  The type of a message
  */
@@ -62,7 +63,11 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (assign, nonatomic) BOOL                              sendFromMe;       //Whether the message is send from myself
 @property (strong, nonatomic) NSString                          *sender;          //The user in the chat room who sender this message
 
+@property (strong, nonatomic) XMPPTextMessageObject             *text;            //The text object which has all the text info
 @property (strong, nonatomic) XMPPAudioMessageObject            *audio;           //The audio object which has all the audio info
+
+
++ (XMPPExtendMessageObject *)xmppExtendMessageObject;
 
 /**
  *  When we using this method the messageID has been setted and the sendFromMe has been setted to YES,

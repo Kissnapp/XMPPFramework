@@ -16,7 +16,7 @@
 @dynamic messageType;
 @dynamic isGroupChat;
 @dynamic messageID;
-@dynamic messageBody;
+@dynamic additionalCoreDataMessageObject;
 @dynamic messageTime;
 @dynamic sendFromMe;
 @dynamic streamBareJidStr;
@@ -66,19 +66,19 @@
     [self setPrimitiveValue:value forKey:@"isChatRoomMessage"];
     [self didChangeValueForKey:@"isChatRoomMessage"];
 }
-- (XMPPAdditionalCoreDataMessageObject *)messageBody
+- (XMPPAdditionalCoreDataMessageObject *)additionalCoreDataMessageObject
 {
-    [self willAccessValueForKey:@"messageBody"];
-    XMPPAdditionalCoreDataMessageObject *value = [self primitiveValueForKey:@"messageBody"];
-    [self didAccessValueForKey:@"messageBody"];
+    [self willAccessValueForKey:@"additionalCoreDataMessageObject"];
+    XMPPAdditionalCoreDataMessageObject *value = [self primitiveValueForKey:@"additionalCoreDataMessageObject"];
+    [self didAccessValueForKey:@"additionalCoreDataMessageObject"];
     return value;
 }
 
-- (void)setMessageBody:(XMPPAdditionalCoreDataMessageObject *)value
+- (void)setAdditionalCoreDataMessageObject:(XMPPAdditionalCoreDataMessageObject *)value
 {
-    [self willChangeValueForKey:@"messageBody"];
-    [self setPrimitiveValue:value forKey:@"messageBody"];
-    [self didChangeValueForKey:@"messageBody"];
+    [self willChangeValueForKey:@"additionalCoreDataMessageObject"];
+    [self setPrimitiveValue:value forKey:@"additionalCoreDataMessageObject"];
+    [self didChangeValueForKey:@"additionalCoreDataMessageObject"];
 }
 - (NSNumber *)sendFromMe
 {
@@ -288,7 +288,7 @@
     [self setMessageType:[messageDic objectForKey:@"messageType"]];
     [self setStreamBareJidStr:streamBareJidStr];
     [self setIsGroupChat:[messageDic objectForKey:@"isChatRoomMessage"]];
-    [self setMessageBody:[messageDic objectForKey:@"messageBody"]];
+    [self setAdditionalCoreDataMessageObject:[messageDic objectForKey:@"messageBody"]];
 }
 
 @end

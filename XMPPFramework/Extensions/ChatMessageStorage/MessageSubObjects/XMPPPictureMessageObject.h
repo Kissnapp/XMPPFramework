@@ -7,7 +7,7 @@
 //
 
 #import "XMPPBaseMessageSubObject.h"
-#define Picture_ELEMENT_NAME                  @"Picture"
+#define PICTURE_ELEMENT_NAME                  @"picture"
 
 @interface XMPPPictureMessageObject : XMPPBaseMessageSubObject
 @property (strong, nonatomic) NSString          *fileName;
