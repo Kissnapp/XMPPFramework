@@ -58,7 +58,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 + (XMPPvCardTemp *)vCardTempFromElement:(NSXMLElement *)elem {
     
 	object_setClass(elem, [XMPPvCardTemp class]);
-    //NSLog(@"结果是：%@",((XMPPvCardTemp *)elem).phoneNumber);
 	return (XMPPvCardTemp *)elem;
 }
 
@@ -99,14 +98,6 @@ NSString *const kXMPPvCardTempElement = @"vCard";
 #pragma mark -
 #pragma mark Identification Types
 
-//- (NSString *)sex {
-//    return [[self elementForName:@"SEX"] stringValue];
-//}
-//
-//
-//- (void)setSex:(NSString *)sex {
-//    XMPP_VCARD_SET_STRING_CHILD(sex, @"SEX");
-//}
 
 - (NSString *)emailAddress {
     NSString *result = nil;

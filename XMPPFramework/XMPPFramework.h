@@ -85,7 +85,7 @@
 #import "XMPPChatRoomUserCoreDataStorageObject.h"
 
 #import "XMPPAdditionalMessageObject.h"
-#import "XMPPChatMessageObject.h"
+#import "XMPPExtendMessageObject.h"
 #import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
 
