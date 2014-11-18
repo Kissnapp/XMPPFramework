@@ -14,10 +14,11 @@
 //class init methods
 
 + (XMPPTextMessageObject *)xmppTextMessageObject;
++ (XMPPTextMessageObject *)xmppTextMessageObjectWithText:(NSString*)text;
 + (XMPPTextMessageObject *)xmppTextMessageObjectFromElement:(NSXMLElement *)element;
 + (XMPPTextMessageObject *)xmppTextMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
 
 //object init objects
 -(instancetype)initWithText:(NSString*)text;
-+(XMPPTextMessageObject *)initWithText:(NSString*)text;
+
 @end

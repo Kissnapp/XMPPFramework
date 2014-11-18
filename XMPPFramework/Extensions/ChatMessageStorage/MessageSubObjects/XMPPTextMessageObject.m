@@ -45,9 +45,9 @@
     }
     return self;
 }
-+(instancetype)initWithText:(NSString*)text
++(instancetype)xmppTextMessageObjectWithText:(NSString*)text
 {
-    return [[XMPPTextMessageObject alloc ]initWithText:text];
+    return [[XMPPTextMessageObject alloc ]xmppTextMessageObjectWithText:text];
 }
 
 #pragma mark - getters and setters
