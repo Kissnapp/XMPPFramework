@@ -1,5 +1,5 @@
 //
-//  XMPPImageMessageObject.h
+//  XMPPPictureMessageObject.h
 //  XMPP_Project
 //
 //  Created by carl on 14-11-18.
@@ -8,11 +8,11 @@
 
 #import "XMPPBaseMessageSubObject.h"
 
-@interface XMPPImageMessageObject : XMPPBaseMessageSubObject
+@interface XMPPPictureMessageObject : XMPPBaseMessageSubObject
 @property (strong, nonatomic) NSString          *fileName;
 @property (strong, nonatomic) NSString          *filePath;
 @property (strong, nonatomic) NSData            *fileData;
-@property (assign, nonatomic) CGFloat          aspectRatio;      //image width&height
+@property (assign, nonatomic) CGFloat           aspectRatio;      //Picture width&height
 
-+(XMPPImageMessageObject*)xmppImageMessageObjectFromElement:(NSXMLElement *)element;
++(XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element;
 @end
