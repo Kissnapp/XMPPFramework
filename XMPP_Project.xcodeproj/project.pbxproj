@@ -607,6 +607,7 @@
 		63F3B6C41960F94800BD8134 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		63F3B6C61960F9A800BD8134 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		63F3B6C81960F9F300BD8134 /* XMPPFramework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPFramework.h; sourceTree = "<group>"; };
+		842084A21A1B329F00DC6CCF /* XMPPVideoMessageObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPVideoMessageObject.h; sourceTree = "<group>"; };
 		E703D01D19D5771100D8E3A4 /* XMPPMessage+ChatRoomMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XMPPMessage+ChatRoomMessage.h"; sourceTree = "<group>"; };
 		E703D01E19D5771100D8E3A4 /* XMPPMessage+ChatRoomMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XMPPMessage+ChatRoomMessage.m"; sourceTree = "<group>"; };
 		E703D07A19D908CF00D8E3A4 /* XMPPAllMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAllMessage.h; sourceTree = "<group>"; };
@@ -1611,6 +1612,7 @@
 				E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */,
 				E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */,
 				E7E3F12D1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m */,
+				842084A21A1B329F00DC6CCF /* XMPPVideoMessageObject.h */,
 			);
 			path = MessageSubObjects;
 			sourceTree = "<group>";
