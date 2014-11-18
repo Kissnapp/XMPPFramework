@@ -310,6 +310,8 @@
 		E7E02CBF1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */; };
 		E7E3F12A1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */; };
 		E7E3F12B1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */; };
+		E7E3F12E1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */; };
+		E7E3F12F1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3F12D1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m */; };
 		E7E3FFFB1A19DA6800E13610 /* XMPPBaseMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3FFF91A19DA6800E13610 /* XMPPBaseMessageObject.h */; };
 		E7E3FFFC1A19DA6800E13610 /* XMPPBaseMessageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3FFFA1A19DA6800E13610 /* XMPPBaseMessageObject.m */; };
 		E7EAE3DE19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -634,6 +636,8 @@
 		E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomUserCoreDataStorageObject.m; sourceTree = "<group>"; };
 		E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBaseMessageSubObject.h; sourceTree = "<group>"; };
 		E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPBaseMessageSubObject.m; sourceTree = "<group>"; };
+		E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAudioMessageObject.h; sourceTree = "<group>"; };
+		E7E3F12D1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAudioMessageObject.m; sourceTree = "<group>"; };
 		E7E3FFF91A19DA6800E13610 /* XMPPBaseMessageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBaseMessageObject.h; sourceTree = "<group>"; };
 		E7E3FFFA1A19DA6800E13610 /* XMPPBaseMessageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPBaseMessageObject.m; sourceTree = "<group>"; };
 		E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomCoreDataStorage.h; sourceTree = "<group>"; };
@@ -1596,6 +1600,8 @@
 			children = (
 				E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */,
 				E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */,
+				E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */,
+				E7E3F12D1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m */,
 			);
 			path = MessageSubObjects;
 			sourceTree = "<group>";
@@ -1666,6 +1672,7 @@
 				63F3B5691960F91700BD8134 /* DDMultiFormatter.h in Headers */,
 				E7EAE3DE19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h in Headers */,
 				63F3B4B21960F91700BD8134 /* XMPPResource.h in Headers */,
+				E7E3F12E1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h in Headers */,
 				63F3B4BF1960F91700BD8134 /* XMPPIQ+LastActivity.h in Headers */,
 				63F3B4D41960F91700BD8134 /* XMPPRoomMemoryStorage.h in Headers */,
 				63F3B4B61960F91700BD8134 /* XMPPUser.h in Headers */,
@@ -1843,6 +1850,7 @@
 				63F3B5451960F91700BD8134 /* NSXMLElement+XEP_0297.m in Sources */,
 				63F3B55B1960F91700BD8134 /* DDAbstractDatabaseLogger.m in Sources */,
 				63F3B5131960F91700BD8134 /* XMPPTransports.m in Sources */,
+				E7E3F12F1A1AF2D9000B68E8 /* XMPPAudioMessageObject.m in Sources */,
 				63F3B4D11960F91700BD8134 /* XMPPRoomMessageHybridCoreDataStorageObject.m in Sources */,
 				63F3B5231960F91700BD8134 /* XMPPMessageArchiving_Message_CoreDataObject.m in Sources */,
 				E7AE674519FE4E97008546EA /* XMPPMessage+AdditionMessage.m in Sources */,

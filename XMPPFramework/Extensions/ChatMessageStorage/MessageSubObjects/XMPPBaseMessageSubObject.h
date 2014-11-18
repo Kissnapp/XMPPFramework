@@ -11,6 +11,7 @@
 
 #define XMPP_SUB_MSG_SET_BOOL_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name boolValue:Value]
 #define XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name  stringValue:Value]
+#define XMPP_SUB_MSG_SET_DOUBLE_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name  doubleValue:Value]
 #define XMPP_SUB_MSG_SET_UNSIGEND_INREGER_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name  unsignedIntegerValue:Value]
 #define XMPP_SUB_MSG_SET_INREGER_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name  integerValue:Value]
 #define XMPP_SUB_MSG_SET_OBJECT_ATTRIBUTE(Value, Name) [self addAttributeWithName:Name  objectValue:Value]
