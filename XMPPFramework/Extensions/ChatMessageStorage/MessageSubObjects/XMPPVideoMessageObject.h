@@ -22,7 +22,7 @@
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileData:(NSData *)fileData time:(NSTimeInterval)time;
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath time:(NSTimeInterval)time;
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time;
-+ (XMPPVideoMessageObject *)xmppVideoMessageObject:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time;
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time;
 
 
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectFromElement:(NSXMLElement *)element;

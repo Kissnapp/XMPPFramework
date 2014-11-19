@@ -67,6 +67,8 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 
 @property (strong, nonatomic) XMPPTextMessageObject             *text;            //The text object which has all the text info
 @property (strong, nonatomic) XMPPAudioMessageObject            *audio;           //The audio object which has all the audio info
+@property (strong, nonatomic) XMPPVideoMessageObject            *video;           //The video object which has all the audio info
+@property (strong, nonatomic) XMPPPictureMessageObject          *picture;         //The picture object which has all the audio info
 
 
 + (XMPPExtendMessageObject *)xmppExtendMessageObject;

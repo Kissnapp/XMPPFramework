@@ -207,10 +207,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
             self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
             break;
         case XMPPExtendMessageVideoType:
-            
+            self.video = [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileName
+                                                                           filePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath
+                                                                           fileData:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileData
+                                                                               time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
             break;
         case XMPPExtendMessagePictureType:
-            
+            self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileName filePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath fileData:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.aspectRatio];
             break;
         case XMPPExtendMessagePositionType:
             
@@ -251,6 +254,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      if (self.text) {
          [dictionary setObject:self.text forKey:@"text"];
      }
+     if (self.video) {
+         [dictionary setObject:self.video forKey:@"video"];
+     }
+     if (self.picture) {
+         [dictionary setObject:self.picture forKey:@"picture"];
+     }
+     
 
      //TODO:text here
      [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
@@ -270,6 +280,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     self.toUser = [message objectForKey:@"toUser"];
     self.audio = [message objectForKey:@"audio"];
     self.text = [message objectForKey:@"text"];
+    self.video = [message objectForKey:@"video"];
+    self.picture = [message objectForKey:@"picture"];
  
     self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] boolValue];
     self.sendFromMe = [(NSNumber *)[message objectForKey:@"sendFromMe"] boolValue];
@@ -628,7 +640,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 }
 - (XMPPTextMessageObject *)text
 {
-    XMPPAudioMessageObject *result = nil;
+    XMPPTextMessageObject *result = nil;
     NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
     if (infoElement != nil) {
         
@@ -666,5 +678,85 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
 }
 
+- (XMPPVideoMessageObject *)video
+{
+    XMPPVideoMessageObject *result = nil;
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (infoElement != nil) {
+        
+        result = [XMPPVideoMessageObject xmppVideoMessageObjectFromElement:[infoElement elementForName:VIDEO_ELEMENT_NAME]];
+    }
+    
+    return result;
+}
+
+- (void)setVideo:(XMPPVideoMessageObject *)video
+{
+    if (video) {
+        
+        NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        //If the info element is already existed,wo should add the value to it
+        if (infoElement) {
+            
+            NSXMLElement *videoElement = [infoElement elementForName:VIDEO_ELEMENT_NAME];
+            
+            if (videoElement) {
+                [infoElement removeChildAtIndex:[[infoElement children] indexOfObject:videoElement]];
+            }
+            
+            [infoElement addChild:video];
+            
+            return;
+        }
+        //Otherwise,we should create a new info element
+        //init a new info XML element
+        infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        [infoElement addChild:video];
+        [self addChild:infoElement];
+    }
+}
+
+
+- (XMPPPictureMessageObject *)picture
+{
+    XMPPPictureMessageObject *result = nil;
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (infoElement != nil) {
+        
+        result = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:[infoElement elementForName:PICTURE_ELEMENT_NAME]];
+    }
+    
+    return result;
+}
+
+- (void)setPicture:(XMPPPictureMessageObject *)picture
+{
+    if (picture) {
+        
+        NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        //If the info element is already existed,wo should add the value to it
+        if (infoElement) {
+            
+            NSXMLElement *pictureElement = [infoElement elementForName:PICTURE_ELEMENT_NAME];
+            
+            if (pictureElement) {
+                [infoElement removeChildAtIndex:[[infoElement children] indexOfObject:pictureElement]];
+            }
+            
+            [infoElement addChild:picture];
+            
+            return;
+        }
+        //Otherwise,we should create a new info element
+        //init a new info XML element
+        infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        [infoElement addChild:picture];
+        [self addChild:infoElement];
+    }
+}
 
 @end

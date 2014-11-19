@@ -53,10 +53,10 @@
 }
 
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
-    return [XMPPVideoMessageObject xmppVideoMessageObject:nil filePath:filePath fileData:fileData time:time];
+    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:nil filePath:filePath fileData:fileData time:time];
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObject:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
     
     XMPPVideoMessageObject *xmppVideoMessageObject = nil;
     NSXMLElement *element = [NSXMLElement elementWithName:VIDEO_ELEMENT_NAME];
