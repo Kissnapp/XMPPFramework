@@ -5,4 +5,4 @@ XMPPFramework
 结束！
 
 This a simple Test project
-end
+end!
