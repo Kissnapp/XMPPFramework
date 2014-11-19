@@ -6,11 +6,12 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPBaseMessageObject.h"
+#import "XMPPBaseMessageSubObject.h"
+
 
 #define LOCATION_ELEMENT_NAME @"location"
 
-@interface XMPPLocationMessageObject : XMPPBaseMessageObject
+@interface XMPPLocationMessageObject : XMPPBaseMessageSubObject
 
 @property (strong, nonatomic) NSString    *longitude;
 @property (strong, nonatomic) NSString    *latitude;
@@ -23,7 +24,7 @@
 
 
 + (XMPPLocationMessageObject *)xmppLocationMessageObjectFromElement:(NSXMLElement *)element;
-+ (XMPPLocationMessageObject *)xmppLocationMessageObjectInfoElement:(NSXMLElement *)infoElement;
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
 
 - (instancetype)init;
 - (instancetype)initWithLocation:(NSString *)longitude latitude:(NSString *)latitude;
