@@ -17,7 +17,6 @@
 + (XMPPTextMessageObject *)xmppTextMessageObjectWithText:(NSString*)text;
 + (XMPPTextMessageObject *)xmppTextMessageObjectFromElement:(NSXMLElement *)element;
 + (XMPPTextMessageObject *)xmppTextMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
-+(XMPPTextMessageObject *)xmppTextMessageObjectWithText:(NSString*)text;
 
 //object init objects
 -(instancetype)initWithText:(NSString*)text ;
