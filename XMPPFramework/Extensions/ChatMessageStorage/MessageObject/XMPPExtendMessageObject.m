@@ -251,13 +251,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      if (self.text) {
          [dictionary setObject:self.text forKey:@"text"];
      }
-<<<<<<< HEAD
-     
-     
-=======
-     
-     
->>>>>>> FETCH_HEAD
+
      //TODO:text here
      [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
      [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];

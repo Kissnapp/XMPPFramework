@@ -15,6 +15,7 @@
 
 #import "XMPPAudioMessageObject.h"
 #import "XMPPTextMessageObject.h"
+#import "XMPPVideoMessageObject.h"
 #import "XMPPPictureMessageObject.h"
 /**
  *  The type of a message
