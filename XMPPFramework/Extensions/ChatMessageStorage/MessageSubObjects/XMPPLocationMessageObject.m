@@ -11,7 +11,7 @@
 #import <objc/runtime.h>
 
 #define LONGITUDE_ATTRIBUTE_NAME          @"longitude"
-#define LATITUDE_ATTRIBUTE_NAME            @"latitude"
+#define LATITUDE_ATTRIBUTE_NAME           @"latitude"
 #define CONTENT_ATTRIBUTE_NAME            @"content"
 
 //longitude atitude;  content
@@ -34,7 +34,7 @@
     NSXMLElement *element = [infoElement elementForName:LOCATION_ELEMENT_NAME];
     if (element) {
         
-        xmppLocationMessageObject =         [XMPPLocationMessageObject xmppLocationMessageObjectFromInfoElement:element];
+        xmppLocationMessageObject = [XMPPLocationMessageObject xmppLocationMessageObjectFromElement:element];
     }
     
     return xmppLocationMessageObject;
@@ -57,7 +57,7 @@
     
     XMPPLocationMessageObject *xmppLocationMessageObject = nil;
     NSXMLElement *element = [NSXMLElement elementWithName:LOCATION_ELEMENT_NAME];
-    xmppLocationMessageObject = [XMPPLocationMessageObject xmppLocationMessageObjectFromInfoElement:element];
+    xmppLocationMessageObject = [XMPPLocationMessageObject xmppLocationMessageObjectFromElement:element];
     
     [xmppLocationMessageObject setLongitude:longitude ];
     [xmppLocationMessageObject setLatitude:latitude];
@@ -117,7 +117,7 @@
 
 - (NSString *)content
 {
-    return [self attributeStringValueForName:CONTENT_ATTRIBUTE_NAME];
+    return [self stringValue];
 }
 
 - (void)setContent:(NSString *)content
@@ -125,7 +125,7 @@
     if (!content) {
         return;
     }
-    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(content, CONTENT_ATTRIBUTE_NAME);
+    [self setStringValue:content];
 }
 
 @end
