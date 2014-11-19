@@ -13,20 +13,20 @@
 
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
 
-@property (nonatomic, retain) NSString                  * bareJidStr;
-@property (nonatomic, retain) NSNumber                  * messageType;
-@property (nonatomic, retain) NSNumber                  * hasBeenRead;
-@property (nonatomic, retain) NSNumber                  * isGroupChat;
+@property (nonatomic, retain) NSString                              * bareJidStr;
+@property (nonatomic, retain) NSNumber                              * messageType;
+@property (nonatomic, retain) NSNumber                              * hasBeenRead;
+@property (nonatomic, retain) NSNumber                              * isGroupChat;
+@property (nonatomic, retain) NSString                              * messageID;
+@property (nonatomic, retain) NSDate                                * messageTime;
+@property (nonatomic, retain) NSNumber                              * sendFromMe;
+@property (nonatomic, retain) NSString                              * streamBareJidStr;
 @property (nonatomic, retain) XMPPAdditionalCoreDataMessageObject   * additionalCoreDataMessageObject;
-@property (nonatomic, retain) NSString                  * messageID;
-@property (nonatomic, retain) NSDate                    * messageTime;
-@property (nonatomic, retain) NSNumber                  * sendFromMe;
-@property (nonatomic, retain) NSString                  * streamBareJidStr;
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withPredicate:(NSPredicate *)predicate;
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withMessageID:(NSString *)messageID
                   streamBareJidStr:(NSString *)streamBareJidStr;
 

@@ -23,10 +23,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #endif
 
-#define XMPP_MESSAGE_EXTEND                     @"ExtendMessage"
-
-#define MESSAGE_ELEMENT_NAME                    @"info"
-#define MESSAGE_ELEMENT_XMLNS                   @"aft:message"
 #define MESSAGE_SENDER_ELEMENT_NAME             @"sender"
 
 #define MESSAGE_ID_ATTRIBUTE_NAME               @"id"

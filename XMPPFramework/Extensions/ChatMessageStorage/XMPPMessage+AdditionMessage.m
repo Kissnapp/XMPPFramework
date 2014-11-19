@@ -170,8 +170,8 @@
 //MARK:There is no fromUser,toUser,sendFromMe,hasBeenRead
 -(NSMutableDictionary *)toDictionary
 {
-    NSXMLElement *body = [self elementForName:@"body"];
-    if (!body)  return nil;
+    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (!info)  return nil;
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     //TODO:Here we should
@@ -192,17 +192,17 @@
     //[self setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
     [self setMessageBody:[messageDic objectForKey:@"messageBody"]];
      */
-    NSXMLElement *body = [self elementForName:@"body"];
-    if (!body)  return nil;
+    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (!info)  return nil;
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     
     NSString *myBareJidStr = sendFromMe ? [[self from] bare]:[[self to] bare];
     NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
-    NSUInteger messageType = [[body elementForName:@"messageType"] stringValueAsNSUInteger];
-    NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[body elementForName:@"messageTime"] stringValue]];
-    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithXMLElement:[body elementForName:ADDITION_ELEMENT_NAME]];
+    NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
+    NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[info attributeStringValueForName:@"timestamp"]];
+    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithXMLElement:[info elementForName:ADDITION_ELEMENT_NAME]];
     
     [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];
@@ -216,8 +216,8 @@
     //If the unread message count is equal to zero,we will know that this message has been readed
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
     
-    [dictionary setObject:[[body elementForName:@"messageID"] stringValue] forKey:@"messageID"];
-    [dictionary setObject:[NSNumber numberWithBool:[[body elementForName:@"isChatRoomMessage"] stringValueAsBool]] forKey:@"isChatRoomMessage"];
+    [dictionary setObject:[[info elementForName:@"messageID"] stringValue] forKey:@"messageID"];
+    [dictionary setObject:[NSNumber numberWithBool:[[info elementForName:@"isChatRoomMessage"] stringValueAsBool]] forKey:@"isChatRoomMessage"];
     
     if (xmppSimpleMessageObject)
         [dictionary setObject:xmppSimpleMessageObject forKey:@"messageBody"];

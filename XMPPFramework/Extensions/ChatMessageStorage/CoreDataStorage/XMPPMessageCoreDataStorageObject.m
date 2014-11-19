@@ -158,7 +158,7 @@
 #pragma mark -
 #pragma mark - Public Methods
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withPredicate:(NSPredicate *)predicate
 {
     if (moc == nil) return nil;
@@ -178,7 +178,7 @@
     return (XMPPMessageCoreDataStorageObject *)[results lastObject];
 }
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withMessageID:(NSString *)messageID
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
@@ -215,16 +215,6 @@
     XMPPMessageCoreDataStorageObject *newObject = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPMessageCoreDataStorageObject"
                                               inManagedObjectContext:moc];
     
-//    newObject.messageID = messageID;
-//    newObject.streamBareJidStr = streamBareJidStr;
-//    newObject.bareJidStr = [messageDic objectForKey:@"bareJidStr"];
-//    newObject.sendFromMe = [messageDic objectForKey:@"sendFromMe"];
-//    newObject.messageTime = [messageDic objectForKey:@"messageTime"];
-//    newObject.hasBeenRead = [messageDic objectForKey:@"hasBeenRead"];
-//    newObject.isChatRoomMessage = [messageDic objectForKey:@"isChatRoomMessage"];
-//    newObject.messageBody = [messageDic objectForKey:@"messageBody"];
-//    newObject.messageType = [messageDic objectForKey:@"messageType"];
-    
     [newObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
     
     //Add the unread message count or insert a new unread message info
@@ -245,20 +235,10 @@
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+    XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                       withMessageID:messageID streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (updateObject){
-        
-//        [updateObject setMessageID:messageID];
-//        [updateObject setMessageTime:[messageDic objectForKey:@"messageTime"]];
-//        [updateObject setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
-//        [updateObject setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
-//        [updateObject setStreamBareJidStr:streamBareJidStr];
-//        [updateObject setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
-//        [updateObject setMessageBody:[messageDic objectForKey:@"messageBody"]];
-//        [updateObject setMessageType:[messageDic objectForKey:@"messageType"]];
-//        [updateObject setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
         
         [updateObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
         

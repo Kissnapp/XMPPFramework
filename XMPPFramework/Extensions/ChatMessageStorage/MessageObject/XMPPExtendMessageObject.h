@@ -19,6 +19,12 @@
 #import "XMPPPictureMessageObject.h"
 #import "XMPPLocationMessageObject.h"
 
+
+#define XMPP_MESSAGE_EXTEND                     @"ExtendMessage"
+
+#define MESSAGE_ELEMENT_NAME                    @"info"
+#define MESSAGE_ELEMENT_XMLNS                   @"aft:message"
+
 /**
  *  The type of a message
  */

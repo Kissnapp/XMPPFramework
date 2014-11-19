@@ -192,25 +192,8 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 {
     [self scheduleBlock:^{
         
-//        XMPPMessage *newMessage = [message copy];
-        
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
-//        NSString *userJidStr = sendFromMe ? [[message to] bare]:[[message from] bare];
-//        NSUInteger unReadMessageCount = sendFromMe ? 0:([[[message from] bare] isEqualToString:activeUser] ? 0:1);
-//        NSUInteger messageType = [[[[message elementForName:@"body"] elementForName:@"messageType"] stringValue] integerValue];
-//        NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[message elementForName:@"messageTime"] stringValue]];//System time:Server time
-//        NSString *jsonString = [message body];
-//        //This Dictionary has no from,to,sendFromMe,unReadMessageCount
-//        NSMutableDictionary *messageDic = [jsonString objectFromJSONString];
-//        [messageDic setObject:myBareJidStr forKey:@"streamBareJidStr"];
-//        [messageDic setObject:userJidStr forKey:@"bareJidStr"];
-//        [messageDic setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
-//        [messageDic setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
-//        [messageDic setObject:[NSNumber numberWithBool:(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
-//        [messageDic setObject:messageTime forKey:@"messageTime"];
-//        //If the unread message count is equal to zero,we will know that this message has been readed
-//        [messageDic setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
         
         [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe activeUser:activeUser]
@@ -314,7 +297,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
                          streamBareJidStr];
             
-            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                               withPredicate:predicate];
             if (!updateObject) return;
             [updateObject setHasBeenRead:[NSNumber numberWithBool:YES]];
@@ -330,7 +313,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         if (xmppStream){
             
-            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                               withMessageID:messageID
                                                                                                            streamBareJidStr:streamBareJidStr];
             if (!updateObject) return;
@@ -347,7 +330,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         if (xmppStream){
             
-            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                               withMessageID:messageID
                                                                                                            streamBareJidStr:streamBareJidStr];
             if (!updateObject) return;

@@ -12,5 +12,4 @@
 
 @interface XMPPBaseMessageObject : NSXMLElement<NSCoding, NSCopying>
 
-
 @end
