@@ -29,7 +29,7 @@
     
     XMPPVideoMessageObject *xmppVideoMessageObject = nil;
     
-    NSXMLElement *element = [infoElement elementsForName:VIDEO_ELEMENT_NAME];
+    NSXMLElement *element = [infoElement elementForName:VIDEO_ELEMENT_NAME];
     if (element) {
     
         xmppVideoMessageObject =         [XMPPVideoMessageObject xmppVideoMessageObjectFromInfoElement:element];
@@ -154,26 +154,5 @@
 {
     XMPP_SUB_MSG_SET_DOUBLE_ATTRIBUTE(timeLength, TIME_LENGTH_ATTRIBUTE_NAME);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @end
