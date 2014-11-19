@@ -104,6 +104,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 
 #pragma mark - object class method
+
 - (instancetype)init
 {
     return [[XMPPExtendMessageObject alloc] initWithType:XMPPExtendMessageTextType];
@@ -111,7 +112,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 - (instancetype)initWithType:(XMPPExtendMessageType)messageType
 {
-    self = [super init];
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
         [self createMessageID];
         [self setMessageType:messageType];
@@ -119,18 +120,27 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     return self;
 }
 
--(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary
 {
-    self = [super init];
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
         [self fromDictionary:dictionary];
     }
     return self;
 }
 
--(instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead
+- (instancetype)initWithXMPPMessage:(XMPPMessage *)message
 {
-    self = [super init];
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
+    if (self) {
+        [self fromXMPPMessage:message];
+    }
+    return self;
+}
+
+- (instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead
+{
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
         self.hasBeenRead = hasBeenRead;
         self.sendFromMe = sendFromMe;
@@ -139,9 +149,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     return self;
 }
 
--(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary from:(NSString *)from to:(NSString *)to hasBeenRead:(BOOL)hasBeenRead
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary from:(NSString *)from to:(NSString *)to hasBeenRead:(BOOL)hasBeenRead
 {
-    self = [super init];
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
         self.fromUser = from;
         self.toUser = to;
@@ -152,16 +162,47 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 }
 
 
--(instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
+- (instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
 {
-    self = [super init];
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
         [self setUpWithXMPPMessageCoreDataStorageObject:xmppMessageCoreDataStorageObject];
     }
     return self;
 }
+- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject
+{
+    self = [super initWithName:XMPP_MESSAGE_EXTEND];
+    if (self) {
+        [self createMessageID];
+        [self setMessageType:type];
+        [self setFromUser:fromUser];
+        [self setToUser:self.toUser];
+        [self setSendFromMe:sendFromMe];
+        [self setIsGroupChat:groupChat];
+        [self setHasBeenRead:hasBeenRead];
+        [self setSender:sender];
+        [self setMessageTime:time];
+        
+        if (subObject != nil) {
+            
+            if ([subObject isKindOfClass:[XMPPTextMessageObject class]]) {
+                [self setText:subObject];
+            }else if ([subObject isKindOfClass:[XMPPAudioMessageObject class]]){
+                [self setAudio:subObject];
+            }else if ([subObject isKindOfClass:[XMPPVideoMessageObject class]]) {
+                [self setVideo:subObject];
+            }else if ([subObject isKindOfClass:[XMPPPictureMessageObject class]]){
+                [self setPicture:subObject];
+            }else if ([subObject isKindOfClass:[XMPPLocationMessageObject class]]){
+                [self setLocation:subObject];
+            }
+        }
+    }
+    return self;
+}
 #pragma mark - switch methods
--(XMPPMessage *)toXMPPMessage
+- (XMPPMessage *)toXMPPMessage
 {
     NSXMLElement *info = [[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS] copy];
     
@@ -216,7 +257,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
             self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileName filePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath fileData:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.aspectRatio];
             break;
         case XMPPExtendMessagePositionType:
-            
+            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.longitude latitude:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.latitude];
             break;
         case XMPPExtendMessageControlType:
             
@@ -230,7 +271,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
     
 }
-
 
  -(NSMutableDictionary *)toDictionary
  {
@@ -260,6 +300,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      if (self.picture) {
          [dictionary setObject:self.picture forKey:@"picture"];
      }
+     if (self.location) {
+         [dictionary setObject:self.location forKey:@"location"];
+     }
      
 
      //TODO:text here
@@ -282,6 +325,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     self.text = [message objectForKey:@"text"];
     self.video = [message objectForKey:@"video"];
     self.picture = [message objectForKey:@"picture"];
+    self.location = [message objectForKey:@"location"];
  
     self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] boolValue];
     self.sendFromMe = [(NSNumber *)[message objectForKey:@"sendFromMe"] boolValue];
@@ -758,5 +802,46 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
         [self addChild:infoElement];
     }
 }
+
+- (XMPPLocationMessageObject *)location
+{
+    XMPPLocationMessageObject *result = nil;
+    NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (infoElement != nil) {
+        
+        result = [XMPPLocationMessageObject xmppLocationMessageObjectFromElement:[infoElement elementForName:LOCATION_ELEMENT_NAME]];
+    }
+    
+    return result;
+}
+
+- (void)setLocation:(XMPPLocationMessageObject *)location
+{
+    if (location) {
+        
+        NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        //If the info element is already existed,wo should add the value to it
+        if (infoElement) {
+            
+            NSXMLElement *locationElement = [infoElement elementForName:LOCATION_ELEMENT_NAME];
+            
+            if (locationElement) {
+                [infoElement removeChildAtIndex:[[infoElement children] indexOfObject:locationElement]];
+            }
+            
+            [infoElement addChild:location];
+            
+            return;
+        }
+        //Otherwise,we should create a new info element
+        //init a new info XML element
+        infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+        
+        [infoElement addChild:location];
+        [self addChild:infoElement];
+    }
+}
+
 
 @end

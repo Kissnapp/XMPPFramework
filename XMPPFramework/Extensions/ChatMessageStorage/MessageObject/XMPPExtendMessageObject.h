@@ -17,6 +17,8 @@
 #import "XMPPTextMessageObject.h"
 #import "XMPPVideoMessageObject.h"
 #import "XMPPPictureMessageObject.h"
+#import "XMPPLocationMessageObject.h"
+
 /**
  *  The type of a message
  */
@@ -59,7 +61,7 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (strong, nonatomic) NSString                          *fromUser;        //The user id of Who send the message
 @property (strong, nonatomic) NSString                          *toUser;          //The user id of who the message will been send to
 @property (strong, nonatomic) NSDate                            *messageTime;     //The message send time,this message is a local time
-//@property (assign, nonatomic) BOOL                              isPrivate;      //The mark to  distinguish the message whether is a private message
+
 @property (assign, nonatomic) BOOL                              hasBeenRead;      //The mark to  distinguish whether the message has been read
 @property (assign, nonatomic) BOOL                              isGroupChat; //Mark value 4,Wether is a chat room chat
 @property (assign, nonatomic) BOOL                              sendFromMe;       //Whether the message is send from myself
@@ -69,79 +71,51 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (strong, nonatomic) XMPPAudioMessageObject            *audio;           //The audio object which has all the audio info
 @property (strong, nonatomic) XMPPVideoMessageObject            *video;           //The video object which has all the audio info
 @property (strong, nonatomic) XMPPPictureMessageObject          *picture;         //The picture object which has all the audio info
+@property (strong, nonatomic) XMPPLocationMessageObject         *location;        //The location object which has all the audio info
 
 
 + (XMPPExtendMessageObject *)xmppExtendMessageObject;
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectFromElement:(NSXMLElement *)element;
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectFromXMPPMessage:(XMPPMessage *)message;
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectCopyFromMessage:(XMPPMessage *)message;
++ (XMPPExtendMessageObject *)xmppExtendMessageObjectWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject;
 
-/**
- *  When we using this method the messageID has been setted and the sendFromMe has been setted to YES,
- *
- *  @return Message Object
- */
 - (instancetype)init;
-/**
- *  init a message obejct with the type you needed
- *
- *  @param messageType The type of the message
- *
- *  @return The message object
- */
 - (instancetype)initWithType:(XMPPExtendMessageType)messageType;
-/**
- *  Init method
- *  Please be careful here,because we will don't have the fromUser,toUser,sendFromMe,hasBeenRead
- *
- *  @param dictionary The information dictionary
- *
- *  @return The message object
- */
--(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
-/**
- *  This the main method we will use to create a XMPPChatMessageObject object ,Plesase this method mainly
- *
- *  @param xmppMessageCoreDataStorageObject The object fethched from the coredata
- *
- *  @return The Message Object
- */
--(instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject;
-/**
- *  Create a XMPPChatMessageObject object with the XMPPMessage object,
- *
- *  @param message     The XMPPMessage object
- *  @param sendFromMe  sendFromMe
- *  @param hasBeenRead hasBeenRead
- *
- *  @return The Message object
- */
--(instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead;
+- (instancetype)initWithXMPPMessage:(XMPPMessage *)message;
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
+- (instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject;
+- (instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead;
+
+- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject;
 
 /**
  *  Create the message id,we must do this before send this message
  */
--(void)createMessageID;
+- (void)createMessageID;
 /**
  *  Transform the Message object into a Dictionary Object
  *
  *  @return A message dictionary
  */
--(NSMutableDictionary *)toDictionary;
+- (NSMutableDictionary *)toDictionary;
 /**
  *  Get the message object from the Dictionary which contains the whole info of the message
  *
  *  @param message The message object
  */
--(void)fromDictionary:(NSMutableDictionary*)message;
+- (void)fromDictionary:(NSMutableDictionary*)message;
 /**
  *  Get a XMPPMessage from the XMPPChatMessageObject
  *
  *  @return The XMPPMessage element we will get
  */
--(XMPPMessage *)toXMPPMessage;
+- (XMPPMessage *)toXMPPMessage;
 /**
  *  Get the XMPPChatMessageObject from a xml element
  *
  *  @param xmlElement The xml element
  */
--(void)fromXMPPMessage:(XMPPMessage *)message;
+- (void)fromXMPPMessage:(XMPPMessage *)message;
 
 @end

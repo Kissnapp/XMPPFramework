@@ -19,16 +19,16 @@
 
 
 + (XMPPLocationMessageObject *)xmppLocationMessageObject;
-+ (XMPPLocationMessageObject *)xmppLocationMessageObject:(NSString *)longitude latitude:(NSString *)latitude;
-+ (XMPPLocationMessageObject *)xmppLocationMessageObject:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content;
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectWithLongitude:(NSString *)longitude latitude:(NSString *)latitude;
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectWithLongitude:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content;
 
 
 + (XMPPLocationMessageObject *)xmppLocationMessageObjectFromElement:(NSXMLElement *)element;
 + (XMPPLocationMessageObject *)xmppLocationMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
 
 - (instancetype)init;
-- (instancetype)initWithLocation:(NSString *)longitude latitude:(NSString *)latitude;
-- (instancetype)initWithLocation:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content;
+- (instancetype)initWithLongitude:(NSString *)longitude latitude:(NSString *)latitude;
+- (instancetype)initWithLongitude:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content;
 
 @end
 

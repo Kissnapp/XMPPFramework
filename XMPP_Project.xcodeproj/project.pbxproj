@@ -323,6 +323,7 @@
 		E7EAE3DE19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7EAE3DF19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E7EAE3DD19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m */; };
 		E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 842084A21A1B329F00DC6CCF /* XMPPVideoMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 84CA94781A1C43D6009824A7 /* XMPPLocationMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1806,6 +1807,7 @@
 				E7C4DFA919D2AAB1000CB916 /* XMPPChatRoom.h in Headers */,
 				E712D8B51994D51400287CD6 /* GCDAsyncSocket.h in Headers */,
 				E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */,
+				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2068,7 +2070,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -2099,7 +2101,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};

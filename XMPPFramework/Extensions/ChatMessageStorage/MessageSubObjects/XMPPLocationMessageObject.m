@@ -19,13 +19,15 @@
 
 @implementation XMPPLocationMessageObject
 
-+ (XMPPLocationMessageObject *)xmppLocationMessageObjectFromElement:(NSXMLElement *)element{
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectFromElement:(NSXMLElement *)element
+{
     
     object_setClass(element, [XMPPLocationMessageObject class]);
     return (XMPPLocationMessageObject *)element;
 }
 
-+ (XMPPLocationMessageObject *)xmppLocationMessageObjectFromInfoElement:(NSXMLElement *)infoElement{
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectFromInfoElement:(NSXMLElement *)infoElement
+{
     
     XMPPLocationMessageObject *xmppLocationMessageObject = nil;
     
@@ -38,18 +40,20 @@
     return xmppLocationMessageObject;
 }
 
-+ (XMPPLocationMessageObject *)xmppLocationMessageObject{
++ (XMPPLocationMessageObject *)xmppLocationMessageObject
+{
     
     NSXMLElement *locationElement = [NSXMLElement elementWithName:LOCATION_ELEMENT_NAME];
     return [XMPPLocationMessageObject xmppLocationMessageObjectFromInfoElement:locationElement];
 }
 
-+ (XMPPLocationMessageObject *)xmppLocationMessageObject:(NSString *)longitude latitude:(NSString *)latitude{
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectWithLongitude:(NSString *)longitude latitude:(NSString *)latitude
+{
     
-    return [XMPPLocationMessageObject xmppLocationMessageObject:longitude latitude:latitude content:nil];
+    return [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:longitude latitude:latitude content:nil];
 }
 
-+ (XMPPLocationMessageObject *)xmppLocationMessageObject:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content{
++ (XMPPLocationMessageObject *)xmppLocationMessageObjectWithLongitude:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content{
     
     XMPPLocationMessageObject *xmppLocationMessageObject = nil;
     NSXMLElement *element = [NSXMLElement elementWithName:LOCATION_ELEMENT_NAME];
@@ -61,17 +65,20 @@
     return xmppLocationMessageObject;
     
 }
-- (instancetype)init{
-    return  [self initWithLocation:nil latitude:nil content:nil];
+- (instancetype)init
+{
+    return  [self initWithLongitude:nil latitude:nil content:nil];
 }
 
-- (instancetype)initWithLocation:(NSString *)longitude latitude:(NSString *)latitude{
+- (instancetype)initWithLongitude:(NSString *)longitude latitude:(NSString *)latitude
+{
     
-    return  [self initWithLocation:longitude latitude:latitude content:nil];
+    return  [self initWithLongitude:longitude latitude:latitude content:nil];
     
 }
 
-- (instancetype)initWithLocation:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content{
+- (instancetype)initWithLongitude:(NSString *)longitude latitude:(NSString *)latitude content:(NSString *)content
+{
     self = [super initWithName:LONGITUDE_ATTRIBUTE_NAME];
     if (self) {
         [self setLongitude:longitude];
