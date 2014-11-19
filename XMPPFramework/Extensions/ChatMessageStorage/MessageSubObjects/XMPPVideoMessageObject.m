@@ -62,7 +62,7 @@
     NSXMLElement *element = [NSXMLElement elementWithName:VIDEO_ELEMENT_NAME];
     xmppVideoMessageObject = [XMPPVideoMessageObject xmppVideoMessageObjectFromElement:element];
     
-    [xmppVideoMessageObject setName:fileName ];
+    [xmppVideoMessageObject setFileName:fileName ];
     [xmppVideoMessageObject setFilePath:filePath];
     [xmppVideoMessageObject setFileData:fileData];
     [xmppVideoMessageObject setTimeLength:time];

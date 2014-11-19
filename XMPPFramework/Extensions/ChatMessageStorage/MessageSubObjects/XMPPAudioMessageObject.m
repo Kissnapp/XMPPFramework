@@ -65,7 +65,7 @@
     
     xmppAudioMessageObject = [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:element];
     
-    [xmppAudioMessageObject setName:fileName];
+    [xmppAudioMessageObject setFileName:fileName];
     [xmppAudioMessageObject setFilePath:filePath];
     [xmppAudioMessageObject setFileData:fileData];
     [xmppAudioMessageObject setTimeLength:time];

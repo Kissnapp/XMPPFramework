@@ -56,7 +56,7 @@
     NSXMLElement *element = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
     
     xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
-    [xmppPictureMessageObject setName:fileName];
+    [xmppPictureMessageObject setFileName:fileName];
     [xmppPictureMessageObject setFilePath:filePath];
     [xmppPictureMessageObject setFileData:fileData];
     [xmppPictureMessageObject setAspectRatio:aspectRatio];
