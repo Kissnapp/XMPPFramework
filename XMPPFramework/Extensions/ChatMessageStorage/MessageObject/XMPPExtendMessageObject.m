@@ -163,7 +163,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #pragma mark - switch methods
 -(XMPPMessage *)toXMPPMessage
 {
-    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    NSXMLElement *info = [[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS] copy];
     
     XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:[XMPPJID jidWithString:self.toUser] elementID:nil child:info];
     
@@ -178,7 +178,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     if (infoElement) {
         [self removeChildAtIndex:[[self children] indexOfObject:infoElement]];
     }
-    infoElement = [message elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    infoElement = [[message elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS] copy];
     [self addChild:infoElement];
     [self setFromUser:message.from.bare];
     [self setToUser:message.to.bare];
