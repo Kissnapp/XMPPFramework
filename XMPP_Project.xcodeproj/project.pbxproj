@@ -321,6 +321,7 @@
 		E7E3F13C1A1B3145000B68E8 /* XMPPAdditionalCoreDataMessageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3F13A1A1B3145000B68E8 /* XMPPAdditionalCoreDataMessageObject.m */; };
 		E7EAE3DE19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7EAE3DF19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E7EAE3DD19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m */; };
+		E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 842084A21A1B329F00DC6CCF /* XMPPVideoMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1799,6 +1800,7 @@
 				63F3B56F1960F91700BD8134 /* DDXMLDocument.h in Headers */,
 				E7C4DFA919D2AAB1000CB916 /* XMPPChatRoom.h in Headers */,
 				E712D8B51994D51400287CD6 /* GCDAsyncSocket.h in Headers */,
+				E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
