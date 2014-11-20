@@ -56,7 +56,6 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     autoRemovePreviousDatabaseFile = YES;
     autoRecreateDatabaseFile = YES;
     
-    //chatRoomPopulationSet = [[NSMutableSet alloc] init];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
