@@ -8,6 +8,7 @@
 
 #import "XMPPAdditionalCoreDataMessageObject.h"
 #import "XMPPFramework.h"
+#import "NSData+XMPP.h"
 
 #define MESSAGE_TEXT_ELEMENT_NAME           @"messageText"
 #define FILE_PATH_ELEMENT_NAME              @"filePath"
@@ -33,11 +34,11 @@
     }
     return self;
 }
--(instancetype)initWithXMLElement:(NSXMLElement *)element
+-(instancetype)initWithInfoXMLElement:(NSXMLElement *)element
 {
     self = [super init];
     if (self) {
-        [self fromXMLElement:element];
+        [self fromInfoXMLElement:element];
     }
     return self;
 }
@@ -86,80 +87,86 @@
     self.messageTag = [(NSNumber *)[message objectForKey:@"messageTag"] boolValue];
 }
 
--(NSXMLElement *)toXMLElement
+-(void)fromInfoXMLElement:(NSXMLElement *)infoXMLElement
 {
-    NSXMLElement *additionalElement = [NSXMLElement elementWithName:ADDITION_ELEMENT_NAME xmlns:ADDITION_ELEMENT_XMLNS];
-    
-    if (self.messageText) {
-        NSXMLElement *messageText = [NSXMLElement elementWithName:MESSAGE_TEXT_ELEMENT_NAME stringValue:self.messageText];
-        [additionalElement addChild:messageText];
-    }
-    if (self.filePath) {
-        NSXMLElement *filePath = [NSXMLElement elementWithName:FILE_PATH_ELEMENT_NAME stringValue:self.filePath];
-        [additionalElement addChild:filePath];
-    }
-    
-    if (self.fileName) {
-        NSXMLElement *fileName = [NSXMLElement elementWithName:FILE_NAME_ELEMENT_NAME stringValue:self.filePath];
-        [additionalElement addChild:fileName];
-    }
-    
-    if (self.fileData) {
-        NSXMLElement *fileData = [NSXMLElement elementWithName:FILE_DATA_ELEMENT_NAME stringValue:[self.fileData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength]];
-        [additionalElement addChild:fileData];
-    }
-    
-    if (self.latitude) {
-        NSXMLElement *latitude = [NSXMLElement elementWithName:LATITUDE_ELEMENT_NAME stringValue:self.latitude];
-        [additionalElement addChild:latitude];
-    }
-    
-    if (self.longitude) {
-        NSXMLElement *longitude = [NSXMLElement elementWithName:LONGITUDE_ELEMENT_NAME stringValue:self.longitude];
-        [additionalElement addChild:longitude];
-    }
-    
-    if (self.groupUserJid) {
-        NSXMLElement *chatRoomUserJid = [NSXMLElement elementWithName:GROUP_USERJID_ELEMENT_NAME stringValue:self.groupUserJid];
-        [additionalElement addChild:chatRoomUserJid];
-    }
-    
-    if (self.timeLength > 0.0) {
-        NSXMLElement *timeLength = [NSXMLElement elementWithName:TIME_LENGTH_ELEMENT_NAME numberValue:[NSNumber numberWithDouble:self.timeLength]];
-        [additionalElement addChild:timeLength];
-    }
-    
-    if (self.aspectRatio > 0.0) {
-        NSXMLElement *aspectRatio = [NSXMLElement elementWithName:ASPECT_RATIO_USERJID_ELEMENT_NAME numberValue:[NSNumber numberWithFloat:self.aspectRatio]];
-        [additionalElement addChild:aspectRatio];
-    }
-    
-    if (self.messageTag) {
-        NSXMLElement *messageTag = [NSXMLElement elementWithName:MESSAGE_TAG_ELEMENT_NAME numberValue:[NSNumber numberWithBool:self.messageTag]];
-        [additionalElement addChild:messageTag];
-    }
-    
-    return additionalElement;
-}
--(void)fromXMLElement:(NSXMLElement *)xmlElement
-{
-    if (![[xmlElement name] isEqualToString:ADDITION_ELEMENT_NAME] || ![[xmlElement xmlns] isEqualToString:ADDITION_ELEMENT_XMLNS]) {
+    if (![[infoXMLElement name] isEqualToString:MESSAGE_ELEMENT_NAME] || ![[infoXMLElement xmlns] isEqualToString:MESSAGE_ELEMENT_XMLNS]) {
         return;
     }
-    self.messageTag = [[xmlElement elementForName:MESSAGE_TAG_ELEMENT_NAME] stringValueAsBool];
-    self.aspectRatio = [[xmlElement elementForName:ASPECT_RATIO_USERJID_ELEMENT_NAME] stringValueAsFloat];
-    self.timeLength = [[xmlElement elementForName:TIME_LENGTH_ELEMENT_NAME] stringValueAsDouble];
     
-    self.messageText = [[xmlElement elementForName:MESSAGE_TEXT_ELEMENT_NAME] stringValue];
+    NSUInteger messageType = [infoXMLElement attributeUnsignedIntegerValueForName:@"type"];
+    BOOL isGroupChat = [infoXMLElement attributeBoolValueForName:@"groupChat"];
     
-    NSString *tempString = [[xmlElement elementForName:FILE_DATA_ELEMENT_NAME] stringValue];
-    if (tempString)
-        self.fileData = [[NSData alloc] initWithBase64EncodedString:tempString options:NSDataBase64DecodingIgnoreUnknownCharacters];
-    self.fileName = [[xmlElement elementForName:FILE_NAME_ELEMENT_NAME] stringValue];
-    self.filePath = [[xmlElement elementForName:FILE_PATH_ELEMENT_NAME] stringValue];
-    self.latitude = [[xmlElement elementForName:LATITUDE_ELEMENT_NAME] stringValue];
-    self.longitude = [[xmlElement elementForName:LONGITUDE_ELEMENT_NAME] stringValue];
-    self.groupUserJid = [[xmlElement elementForName:GROUP_USERJID_ELEMENT_NAME] stringValue];
+    if (isGroupChat) {
+        self.groupUserJid = [[infoXMLElement elementForName:@"sender"] stringValue];
+    }
+    
+    switch (messageType) {
+        case XMPPExtendMessageTextType:
+        {
+        
+            NSXMLElement *text = [infoXMLElement elementForName:TEXT_ELEMENT_NAME];
+            self.messageText = [text stringValue];
+        }
+            break;
+        case XMPPExtendMessageAudioType:
+        {
+            NSXMLElement *audio = [infoXMLElement elementForName:AUDIO_ELEMENT_NAME];
+            self.fileName = [audio attributeStringValueForName:@"fileName"];
+            self.filePath = [audio attributeStringValueForName:@"filePath"];
+            self.timeLength = [audio attributeDoubleValueForName:@"timeLength"];
+            
+            NSString *dataString = [audio stringValue];
+            
+            if (dataString) {
+                NSData *base64Data = [dataString dataUsingEncoding:NSASCIIStringEncoding];
+                self.fileData = [base64Data xmpp_base64Decoded];
+            }
+        }
+            break;
+        case XMPPExtendMessageVideoType:
+        {
+            
+            NSXMLElement *video = [infoXMLElement elementForName:VIDEO_ELEMENT_NAME];
+            self.fileName = [video attributeStringValueForName:@"fileName"];
+            self.filePath = [video attributeStringValueForName:@"filePath"];
+            self.timeLength = [video attributeDoubleValueForName:@"timeLength"];
+            
+            NSString *dataString = [video stringValue];
+            
+            if (dataString) {
+                NSData *base64Data = [dataString dataUsingEncoding:NSASCIIStringEncoding];
+                self.fileData = [base64Data xmpp_base64Decoded];
+            }
+        }
+            break;
+        case XMPPExtendMessagePictureType:
+        {
+            
+            NSXMLElement *picture = [infoXMLElement elementForName:PICTURE_ELEMENT_NAME];
+            self.fileName = [picture attributeStringValueForName:@"fileName"];
+            self.filePath = [picture attributeStringValueForName:@"filePath"];
+            self.aspectRatio = [picture attributeDoubleValueForName:@"aspectRatio"];
+            
+            NSString *dataString = [picture stringValue];
+            
+            if (dataString) {
+                NSData *base64Data = [dataString dataUsingEncoding:NSASCIIStringEncoding];
+                self.fileData = [base64Data xmpp_base64Decoded];
+            }
+        }
+            break;
+        case XMPPExtendMessagePositionType:
+        {
+            
+            NSXMLElement *location = [infoXMLElement elementForName:LOCATION_ELEMENT_NAME];
+            self.longitude = [location attributeStringValueForName:@"longitude"];
+            self.latitude = [location attributeStringValueForName:@"latitude"];
+            self.messageText = [location attributeStringValueForName:@"messageText"];
+        }
+            break;
+        default:
+            break;
+    }
 }
 
 #pragma mark -

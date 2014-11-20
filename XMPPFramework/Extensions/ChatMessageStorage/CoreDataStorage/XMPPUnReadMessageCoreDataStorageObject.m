@@ -95,7 +95,7 @@
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPUnReadMessageCoreDataStorageObject *deleteObject = [XMPPUnReadMessageCoreDataStorageObject obejctInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    XMPPUnReadMessageCoreDataStorageObject *deleteObject = [XMPPUnReadMessageCoreDataStorageObject objectInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
     
     if (!deleteObject) return NO;
     
@@ -105,7 +105,7 @@
 }
 
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDStr:(NSString *)jidStr
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
@@ -140,7 +140,7 @@
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPUnReadMessageCoreDataStorageObject *updateObject = [XMPPUnReadMessageCoreDataStorageObject obejctInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    XMPPUnReadMessageCoreDataStorageObject *updateObject = [XMPPUnReadMessageCoreDataStorageObject objectInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (updateObject){
         
@@ -170,7 +170,7 @@
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPUnReadMessageCoreDataStorageObject *readObject = [XMPPUnReadMessageCoreDataStorageObject obejctInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    XMPPUnReadMessageCoreDataStorageObject *readObject = [XMPPUnReadMessageCoreDataStorageObject objectInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (!readObject) return NO;
     

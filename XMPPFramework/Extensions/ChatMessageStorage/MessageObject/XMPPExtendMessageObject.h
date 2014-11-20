@@ -59,6 +59,12 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
     XMPPExtendMessageMediaRequestType
 };
 
+typedef NS_ENUM(NSInteger, XMPPMessageSendStatusType)
+{
+    XMPPMessageSendFailedType = -1,
+    XMPPMessageSendingType = 0,
+    XMPPMessageSendSucceedType = 1
+};
 
 @interface XMPPExtendMessageObject : XMPPBaseMessageObject
 
@@ -68,8 +74,8 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 @property (strong, nonatomic) NSString                          *toUser;          //The user id of who the message will been send to
 @property (strong, nonatomic) NSDate                            *messageTime;     //The message send time,this message is a local time
 
-@property (assign, nonatomic) BOOL                              hasBeenRead;      //The mark to  distinguish whether the message has been read
-@property (assign, nonatomic) BOOL                              isGroupChat; //Mark value 4,Wether is a chat room chat
+@property (assign, nonatomic) NSInteger                         hasBeenRead;      //The mark to  distinguish whether the message has been read
+@property (assign, nonatomic) BOOL                              isGroupChat;      //Mark value 4,Wether is a chat room chat
 @property (assign, nonatomic) BOOL                              sendFromMe;       //Whether the message is send from myself
 @property (strong, nonatomic) NSString                          *sender;          //The user in the chat room who sender this message
 
@@ -93,24 +99,12 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
 - (instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject;
 - (instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead;
 
-- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject;
+- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(NSInteger)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject;
 
 /**
  *  Create the message id,we must do this before send this message
  */
 - (void)createMessageID;
-/**
- *  Transform the Message object into a Dictionary Object
- *
- *  @return A message dictionary
- */
-- (NSMutableDictionary *)toDictionary;
-/**
- *  Get the message object from the Dictionary which contains the whole info of the message
- *
- *  @param message The message object
- */
-- (void)fromDictionary:(NSMutableDictionary*)message;
 /**
  *  Get a XMPPMessage from the XMPPChatMessageObject
  *
@@ -123,5 +117,19 @@ typedef NS_ENUM(NSUInteger, XMPPExtendMessageType){
  *  @param xmlElement The xml element
  */
 - (void)fromXMPPMessage:(XMPPMessage *)message;
+
+///**
+// *  Transform the Message object into a Dictionary Object
+// *
+// *  @return A message dictionary
+// */
+//- (NSMutableDictionary *)toDictionary;
+///**
+// *  Get the message object from the Dictionary which contains the whole info of the message
+// *
+// *  @param message The message object
+// */
+//- (void)fromDictionary:(NSMutableDictionary*)message;
+
 
 @end

@@ -35,7 +35,7 @@
                        nReadMessageCount:(NSUInteger)unReadCount
                         streamBareJidStr:(NSString *)streamBareJidStr;
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDStr:(NSString *)jidStr
                   streamBareJidStr:(NSString *)streamBareJidStr;
 

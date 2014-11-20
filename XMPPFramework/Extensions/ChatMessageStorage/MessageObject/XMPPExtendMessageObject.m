@@ -166,7 +166,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
     return self;
 }
-- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject
+- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(NSInteger)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject
 {
     self = [super initWithName:XMPP_MESSAGE_EXTEND];
     if (self) {
@@ -302,7 +302,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
      
 
      //TODO:text here
-     [dictionary setObject:[NSNumber numberWithBool:self.hasBeenRead] forKey:@"hasBeenRead"];
+     [dictionary setObject:[NSNumber numberWithInteger:self.hasBeenRead] forKey:@"hasBeenRead"];
      [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
      [dictionary setObject:[NSNumber numberWithBool:self.isGroupChat] forKey:@"isGroupChat"];
      [dictionary setObject:[NSNumber numberWithUnsignedInteger:self.messageType] forKey:@"messageType"];
@@ -323,7 +323,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     self.picture = [message objectForKey:@"picture"];
     self.location = [message objectForKey:@"location"];
  
-    self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] boolValue];
+    self.hasBeenRead = [(NSNumber *)[message objectForKey:@"hasBeenRead"] integerValue];
     self.sendFromMe = [(NSNumber *)[message objectForKey:@"sendFromMe"] boolValue];
     self.isGroupChat = [(NSNumber *)[message objectForKey:@"isGroupChat"] boolValue];
     self.messageType = [(NSNumber *)[message objectForKey:@"messageType"] unsignedIntegerValue];
@@ -462,14 +462,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     }
 }
 
-- (BOOL)hasBeenRead
+- (NSInteger)hasBeenRead
 {
-    return [self attributeBoolValueForName:EXTEND_MESSAGE_READ_STATUS_ATTRIBUTE_NAME];
+    return [self attributeIntegerValueForName:EXTEND_MESSAGE_READ_STATUS_ATTRIBUTE_NAME];
 }
 
-- (void)setHasBeenRead:(BOOL)hasBeenRead
+- (void)setHasBeenRead:(NSInteger)hasBeenRead
 {
-    [self addAttributeWithName:EXTEND_MESSAGE_READ_STATUS_ATTRIBUTE_NAME boolValue:hasBeenRead];
+    [self addAttributeWithName:EXTEND_MESSAGE_READ_STATUS_ATTRIBUTE_NAME integerValue:hasBeenRead];
 }
 
 - (BOOL)sendFromMe

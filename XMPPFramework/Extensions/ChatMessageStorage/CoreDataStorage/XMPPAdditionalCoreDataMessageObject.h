@@ -40,39 +40,33 @@
  *
  *  @return self
  */
--(instancetype)initWithXMLElement:(NSXMLElement *)element ;
-/**
- *  Init with a dictionary
- *
- *  @param dictionary dictionary
- *
- *  @return self
- */
--(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
-/**
- *  Transform the Message object into a Dictionary Object
- *
- *  @return A message dictionary
- */
--(NSMutableDictionary *)toDictionary;
-/**
- *  Get the message object from the Dictionary which contains the whole info of the message
- *
- *  @param message The message object
- */
--(void)fromDictionary:(NSMutableDictionary*)message;
-/**
- *  Get a xmlElement from the XMPPSimpleMessageObject
- *
- *  @return The XML element we will get
- */
--(NSXMLElement *)toXMLElementWithType:(NSUInteger)type isGroupChat:(BOOL)isGroupChat;
+-(instancetype)initWithInfoXMLElement:(NSXMLElement *)element ;
 /**
  *  Get the XMPPSimpleMessageObject from a xml element
  *
  *  @param xmlElement The xml element
  */
--(void)fromXMLElement:(NSXMLElement *)xmlElement;
+-(void)fromInfoXMLElement:(NSXMLElement *)infoXMLElement;
 
+///**
+// *  Init with a dictionary
+// *
+// *  @param dictionary dictionary
+// *
+// *  @return self
+// */
+//-(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
+///**
+// *  Transform the Message object into a Dictionary Object
+// *
+// *  @return A message dictionary
+// */
+//-(NSMutableDictionary *)toDictionary;
+///**
+// *  Get the message object from the Dictionary which contains the whole info of the message
+// *
+// *  @param message The message object
+// */
+//-(void)fromDictionary:(NSMutableDictionary*)message;
 
 @end

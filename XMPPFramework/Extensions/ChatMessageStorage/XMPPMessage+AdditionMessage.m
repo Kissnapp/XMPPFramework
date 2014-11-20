@@ -202,7 +202,7 @@
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
     NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[info attributeStringValueForName:@"timestamp"]];
-    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithXMLElement:[info elementForName:ADDITION_ELEMENT_NAME]];
+    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
     
     [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];
