@@ -322,7 +322,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
     }];
 }
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID success:(BOOL)success xmppStream:(XMPPStream *)xmppStream
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -334,7 +334,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                                                                                                               withMessageID:messageID
                                                                                                            streamBareJidStr:streamBareJidStr];
             if (!updateObject) return;
-            [updateObject setHasBeenRead:[NSNumber numberWithBool:success]];
+            [updateObject setHasBeenRead:[NSNumber numberWithInteger:sendType]];
         }
 
     }];

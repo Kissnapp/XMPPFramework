@@ -11,7 +11,6 @@
 @interface XMPPMessage (AdditionMessage)
 
 - (NSString *)messageID;
-- (NSMutableDictionary *)toDictionary;
 - (NSMutableDictionary *)toDictionaryWithSendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser;
 
 @end

@@ -167,69 +167,55 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//MARK:There is no fromUser,toUser,sendFromMe,hasBeenRead
--(NSMutableDictionary *)toDictionary
-{
-    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
-    if (!info)  return nil;
-    
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-    //TODO:Here we should
-    
-    return dictionary;
-}
+
 //In this method there is no streamBareJidStr
 -(NSMutableDictionary *)toDictionaryWithSendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser
 {
-    /*
-    //[self setMessageID:[messageDic objectForKey:@"messageID"]];
-    //[self setMessageTime:[messageDic objectForKey:@"messageTime"]];
-    //[self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
-    //[self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
-    //[self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
-    //[self setMessageType:[messageDic objectForKey:@"messageType"]];
-    //[self setStreamBareJidStr:streamBareJidStr];
-    //[self setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
-    [self setMessageBody:[messageDic objectForKey:@"messageBody"]];
-     */
     NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    
     if (!info)  return nil;
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     
     NSString *myBareJidStr = sendFromMe ? [[self from] bare]:[[self to] bare];
     NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
+    NSString *messageID = [info attributeStringValueForName:@"id"];
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
     NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[info attributeStringValueForName:@"timestamp"]];
-    XMPPAdditionalCoreDataMessageObject *xmppSimpleMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
+    NSNumber *hasBeenRead = [NSNumber numberWithBool:(sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))];
+    NSNumber *isGroupChat = [NSNumber numberWithBool:[info attributeBoolValueForName:@"groupChat"]];
+    
+    XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
+    
     
     [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];
     [dictionary setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
+    
     //The readed message's hasBeenRead is 1,unread is 0
     //When is sent from me,we should note that this message is been sent failed as default 0
     //After being sent succeed,we should modify this value into 1
-    [dictionary setObject:[NSNumber numberWithBool:(sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))] forKey:@"hasBeenRead"];
+    [dictionary setObject:hasBeenRead forKey:@"hasBeenRead"];
     [dictionary setObject:messageTime forKey:@"messageTime"];
     //If the unread message count is equal to zero,we will know that this message has been readed
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
     
-    [dictionary setObject:[[info elementForName:@"messageID"] stringValue] forKey:@"messageID"];
-    [dictionary setObject:[NSNumber numberWithBool:[[info elementForName:@"isChatRoomMessage"] stringValueAsBool]] forKey:@"isChatRoomMessage"];
+    [dictionary setObject:messageID forKey:@"messageID"];
+    [dictionary setObject:isGroupChat forKey:@"isGroupChat"];
     
-    if (xmppSimpleMessageObject)
-        [dictionary setObject:xmppSimpleMessageObject forKey:@"messageBody"];
+    if (xmppAdditionalCoreDataMessageObject)
+        [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalCoreDataMessageObject"];
     
     return dictionary;
 }
 
 - (NSString *)messageID
 {
-    NSXMLElement *body = [self elementForName:@"body"];
-    if (!body)  return nil;
+    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    if (!info)  return nil;
     
-    return [[body elementForName:@"messageID"] stringValue];
+    return [info attributeStringValueForName:@"id"];
 }
 @end

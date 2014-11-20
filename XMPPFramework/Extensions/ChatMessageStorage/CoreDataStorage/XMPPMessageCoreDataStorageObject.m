@@ -236,7 +236,8 @@
     if (moc == nil) return NO;
     
     XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                      withMessageID:messageID streamBareJidStr:streamBareJidStr];
+                                                                                                      withMessageID:messageID
+                                                                                                   streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (updateObject){
         
@@ -267,8 +268,8 @@
     [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
     [self setMessageType:[messageDic objectForKey:@"messageType"]];
     [self setStreamBareJidStr:streamBareJidStr];
-    [self setIsGroupChat:[messageDic objectForKey:@"isChatRoomMessage"]];
-    [self setAdditionalCoreDataMessageObject:[messageDic objectForKey:@"messageBody"]];
+    [self setIsGroupChat:[messageDic objectForKey:@"isGroupChat"]];
+    [self setAdditionalCoreDataMessageObject:[messageDic objectForKey:@"additionalCoreDataMessageObject"]];
 }
 
 @end

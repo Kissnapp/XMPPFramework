@@ -53,8 +53,10 @@
 
 - (BOOL)isChatMessage;
 - (BOOL)isChatMessageWithBody;
+- (BOOL)isChatMessageWithInfo;
 - (BOOL)isErrorMessage;
 - (BOOL)isMessageWithBody;
+- (BOOL)isMessageWithInfo;
 
 - (NSError *)errorMessage;
 

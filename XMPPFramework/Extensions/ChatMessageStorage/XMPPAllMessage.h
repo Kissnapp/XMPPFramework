@@ -11,6 +11,7 @@
 #import "NSXMLElement+XMPP.h"
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPMessageCoreDataStorageObject.h"
+#import "XMPPExtendMessageObject.h"
 /**
  *  When we send a message,we should observer this notice for
  *  distinguishing the message has been send succeed or not
@@ -109,7 +110,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @param messageID The given message id
  */
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID;
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType;
 /**
  *  Set a message's hasBeenRead status into YES;
  *
@@ -148,6 +149,14 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  */
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset;
 
+/**
+ *  send  a message with the given XMPPExtendMessageObject object
+ *
+ *  @param message The given XMPPExtendMessageObject object
+ */
+- (void)sendMessageWithXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+
+
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
@@ -179,7 +188,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream;
 - (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream;
 
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
 - (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream;
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate xmppStream:(XMPPStream *)xmppStream;

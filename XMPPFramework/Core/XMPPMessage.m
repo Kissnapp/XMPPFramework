@@ -237,6 +237,16 @@
 	return NO;
 }
 
+- (BOOL)isChatMessageWithInfo
+{
+    if ([self isChatMessage])
+    {
+        return [self isMessageWithInfo];
+    }
+    
+    return NO;
+}
+
 - (BOOL)isErrorMessage
 {
     return [[[self attributeForName:@"type"] stringValue] isEqualToString:@"error"];
@@ -253,6 +263,11 @@
                                code:[error attributeIntValueForName:@"code"]
                            userInfo:[NSDictionary dictionaryWithObject:[error compactXMLString] forKey:NSLocalizedDescriptionKey]];
     
+}
+
+- (BOOL)isMessageWithInfo
+{
+    return ([self elementForName:@"info" xmlns:@"aft:message"] != nil);
 }
 
 - (BOOL)isMessageWithBody

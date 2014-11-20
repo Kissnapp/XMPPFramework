@@ -372,13 +372,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType
 {
     if (!messageID) return;
     
     dispatch_block_t block = ^{
         NSString *messageid = [messageID copy];
-        [self updateMessageSendStatusFromStorgeWithMessageID:messageid xmppStream:xmppStream];
+        [self updateMessageSendStatusFromStorgeWithMessageID:messageid sendSucceed:sendType xmppStream:xmppStream];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -462,6 +462,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_sync(moduleQueue, block);
     return  results;
 }
+
+- (void)sendMessageWithXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+{
+    dispatch_block_t block = ^{
+        
+        XMPPMessage *newMessage = [[message toXMPPMessage] copy];
+        //we should stroage this message firstly
+        [self saveMessageActionWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
+        //send the message
+        [xmppStream sendElement:newMessage];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,7 +486,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    if ([message isChatMessageWithBody]) {
+    if ([message isChatMessageWithInfo]) {
         //save the message
         [xmppMessageStorage archiveMessage:message sendFromMe:sendFromMe activeUser:[self activeUser] xmppStream:sender];
     }
@@ -500,10 +517,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if (!dispatch_get_specific(moduleQueueTag)) return;
     [xmppMessageStorage deleteMessageWithMessageID:messageID xmppStream:stream];
 }
-- (void)updateMessageSendStatusFromStorgeWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)stream
+- (void)updateMessageSendStatusFromStorgeWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)stream
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
-    [xmppMessageStorage updateMessageSendStatusWithMessageID:messageID success:YES xmppStream:stream];
+    [xmppMessageStorage updateMessageSendStatusWithMessageID:messageID sendSucceed:sendType xmppStream:stream];
 }
 
 - (void)readMessageFromStorgeWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)stream
@@ -581,9 +598,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     dispatch_block_t block = ^{
         @autoreleasepool{
             
-            if ([message isChatMessage]) {
+            if ([message isChatMessageWithInfo]) {
                 
-                [self updateMessageSendStatusWithMessageID:[message messageID]];
+                [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendFailedType];
                 [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_SUCCEED object:message];
             }
         }
@@ -601,8 +618,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     XMPPLogTrace();
     
     dispatch_block_t block = ^{
-        //TODO:Here should note the unsend message
-        if ([message isChatMessage]) {
+        if ([message isChatMessageWithInfo]) {
+            
+            [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendSucceedType];
             [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_FAILED object:message];
         }
     };
@@ -620,7 +638,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         
-        if ([message isChatMessage]) {
+        if ([message isChatMessageWithInfo]) {
             //save the message
             [self saveMessageActionWithXMPPStream:sender message:message sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self receiveMessage:message];
