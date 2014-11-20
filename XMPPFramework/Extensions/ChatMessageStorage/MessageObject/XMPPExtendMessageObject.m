@@ -223,14 +223,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 - (void)setUpWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
 {
-    [self setFromUser:(xmppMessageCoreDataStorageObject.sendFromMe > 0 ? xmppMessageCoreDataStorageObject.streamBareJidStr: xmppMessageCoreDataStorageObject.bareJidStr)];
-    [self setToUser:(xmppMessageCoreDataStorageObject.sendFromMe > 0 ? xmppMessageCoreDataStorageObject.bareJidStr: xmppMessageCoreDataStorageObject.streamBareJidStr)];
-    [self setHasBeenRead:(xmppMessageCoreDataStorageObject.hasBeenRead > 0)];
-    [self setSendFromMe:(xmppMessageCoreDataStorageObject.sendFromMe > 0)];
+    BOOL sendfromme = [xmppMessageCoreDataStorageObject.sendFromMe boolValue];
+    [self setFromUser:(sendfromme ? xmppMessageCoreDataStorageObject.streamBareJidStr: xmppMessageCoreDataStorageObject.bareJidStr)];
+    [self setToUser:(sendfromme ? xmppMessageCoreDataStorageObject.bareJidStr: xmppMessageCoreDataStorageObject.streamBareJidStr)];
+    [self setHasBeenRead:[xmppMessageCoreDataStorageObject.hasBeenRead integerValue]];
+    [self setSendFromMe:sendfromme];
     [self setMessageType:[xmppMessageCoreDataStorageObject.messageType unsignedIntegerValue]];
     [self setMessageID:xmppMessageCoreDataStorageObject.messageID];
-    [self setIsGroupChat:(xmppMessageCoreDataStorageObject.isGroupChat > 0)];
-    [self setMessageTime:[self getLocalDateWithUTCDate:xmppMessageCoreDataStorageObject.messageTime]];
+    [self setIsGroupChat:[xmppMessageCoreDataStorageObject.isGroupChat boolValue]];
+    [self setMessageTime:xmppMessageCoreDataStorageObject.messageTime];
     
     if (self.isGroupChat) {
         [self setSender:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.groupUserJid];

@@ -62,7 +62,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         //setting the dafault data
         receiveSystemPushMessage = YES;
         receiveUserRequestMessage = YES;
-        clientSideMessageArchivingOnly = YES;
+        clientSideMessageArchivingOnly = NO;
         
         activeUser = nil;
         
@@ -444,7 +444,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
-- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset isPrivate:(BOOL)isPrivate
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset
 {
     if (!bareJidStr) return nil;
     
@@ -452,7 +452,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         
-        results = [xmppMessageStorage fetchMessagesWithBareJidStr:bareJidStr fetchSize:fetchSize fetchOffset:fetchOffset isPrivate:isPrivate xmppStream:xmppStream];
+        results = [xmppMessageStorage fetchMessagesWithBareJidStr:bareJidStr fetchSize:fetchSize fetchOffset:fetchOffset xmppStream:xmppStream];
         
     };
     
@@ -548,7 +548,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
     XMPPLogTrace();
-    
+    /*
     if (clientSideMessageArchivingOnly) return;
     
     // Fetch most recent preferences
@@ -570,6 +570,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:nil elementID:nil child:pref];
     
     [sender sendElement:iq];
+     */
 }
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq

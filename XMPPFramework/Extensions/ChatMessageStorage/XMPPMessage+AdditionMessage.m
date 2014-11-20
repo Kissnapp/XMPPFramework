@@ -127,8 +127,9 @@
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     NSTimeZone *timeZone = [NSTimeZone localTimeZone];
     [dateFormatter setTimeZone:timeZone];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
     NSDate *ldate = [dateFormatter dateFromString:utc];
+//    NSString *str = [self dateToString:ldate];
     return ldate;
 }
 /**
@@ -198,7 +199,9 @@
     //When is sent from me,we should note that this message is been sent failed as default 0
     //After being sent succeed,we should modify this value into 1
     [dictionary setObject:hasBeenRead forKey:@"hasBeenRead"];
-    [dictionary setObject:messageTime forKey:@"messageTime"];
+    if (messageTime) {
+        [dictionary setObject:messageTime forKey:@"messageTime"];
+    }
     //If the unread message count is equal to zero,we will know that this message has been readed
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
     

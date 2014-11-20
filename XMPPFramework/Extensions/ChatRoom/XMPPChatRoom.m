@@ -102,30 +102,6 @@ enum XMPPChatRoomUserListFlags
         
         xmppIDTracker = [[XMPPIDTracker alloc] initWithStream:xmppStream dispatchQueue:moduleQueue];
         
-//#ifdef _XMPP_VCARD_AVATAR_MODULE_H
-//        {
-//            // Automatically tie into the vCard system so we can store user photos.
-//            
-//            [xmppStream autoAddDelegate:self
-//                          delegateQueue:moduleQueue
-//                       toModulesOfClass:[XMPPvCardAvatarModule class]];
-//        }
-//#endif
-//        
-//#ifdef _XMPP_MUC_H
-//        {
-//            // Automatically tie into the MUC system so we can ignore non-roster presence stanzas.
-//            
-//            [xmppStream enumerateModulesWithBlock:^(XMPPModule *module, NSUInteger idx, BOOL *stop) {
-//                
-//                if ([module isKindOfClass:[XMPPMUC class]])
-//                {
-//                    [mucModules add:(__bridge void *)module];
-//                }
-//            }];
-//        }
-//#endif
-//        
         return YES;
     }
     
@@ -148,11 +124,6 @@ enum XMPPChatRoomUserListFlags
     else
         dispatch_sync(moduleQueue, block);
     
-//#ifdef _XMPP_VCARD_AVATAR_MODULE_H
-//    {
-//        [xmppStream removeAutoDelegate:self delegateQueue:moduleQueue fromModulesOfClass:[XMPPvCardAvatarModule class]];
-//    }
-//#endif
     
     [super deactivate];
 }

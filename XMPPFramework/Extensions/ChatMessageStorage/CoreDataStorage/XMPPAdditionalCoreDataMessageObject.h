@@ -48,25 +48,4 @@
  */
 -(void)fromInfoXMLElement:(NSXMLElement *)infoXMLElement;
 
-///**
-// *  Init with a dictionary
-// *
-// *  @param dictionary dictionary
-// *
-// *  @return self
-// */
-//-(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
-///**
-// *  Transform the Message object into a Dictionary Object
-// *
-// *  @return A message dictionary
-// */
-//-(NSMutableDictionary *)toDictionary;
-///**
-// *  Get the message object from the Dictionary which contains the whole info of the message
-// *
-// *  @param message The message object
-// */
-//-(void)fromDictionary:(NSMutableDictionary*)message;
-
 @end

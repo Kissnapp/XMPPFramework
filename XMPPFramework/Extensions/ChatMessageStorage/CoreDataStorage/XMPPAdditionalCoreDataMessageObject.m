@@ -193,13 +193,13 @@
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:self.messageText forKey:@"messageText"];
-    [aCoder encodeObject:[NSNumber numberWithBool:self.messageTag] forKey:@"messageTag"];
     [aCoder encodeObject:self.fileData forKey:@"fileData"];
     [aCoder encodeObject:self.fileName forKey:@"fileName"];
     [aCoder encodeObject:self.filePath forKey:@"filePath"];
     [aCoder encodeObject:self.latitude forKey:@"latitude"];
     [aCoder encodeObject:self.longitude forKey:@"longitude"];
     [aCoder encodeObject:self.groupUserJid forKey:@"groupUserJid"];
+    [aCoder encodeObject:[NSNumber numberWithBool:self.messageTag] forKey:@"messageTag"];
     [aCoder encodeObject:[NSNumber numberWithDouble:self.timeLength] forKey:@"timeLength"];
     [aCoder encodeObject:[NSNumber numberWithFloat:self.aspectRatio] forKey:@"aspectRatio"];
 }
@@ -213,9 +213,9 @@
         self.latitude = [aDecoder decodeObjectForKey:@"latitude"];
         self.longitude = [aDecoder decodeObjectForKey:@"longitude"];
         self.groupUserJid = [aDecoder decodeObjectForKey:@"groupUserJid"];
-        self.messageTag = [(NSNumber *)[aDecoder decodeObjectForKey:@"messageTag"] boolValue];
-        self.timeLength = [(NSNumber *)[aDecoder decodeObjectForKey:@"timeLength"] doubleValue];
-        self.aspectRatio = [(NSNumber *)[aDecoder decodeObjectForKey:@"aspectRatio"] floatValue];
+        self.messageTag = [((NSNumber *)[aDecoder decodeObjectForKey:@"messageTag"]) boolValue];
+        self.timeLength = [((NSNumber *)[aDecoder decodeObjectForKey:@"timeLength"]) doubleValue];
+        self.aspectRatio = [((NSNumber *)[aDecoder decodeObjectForKey:@"aspectRatio"]) floatValue];
     }
     return  self;
 }

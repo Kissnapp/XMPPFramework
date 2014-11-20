@@ -54,17 +54,17 @@
 }
 - (NSNumber *)isGroupChat
 {
-    [self willAccessValueForKey:@"isChatRoomMessage"];
-    NSNumber *value = [self primitiveValueForKey:@"isChatRoomMessage"];
-    [self didAccessValueForKey:@"isChatRoomMessage"];
+    [self willAccessValueForKey:@"isGroupChat"];
+    NSNumber *value = [self primitiveValueForKey:@"isGroupChat"];
+    [self didAccessValueForKey:@"isGroupChat"];
     return value;
 }
 
 - (void)setIsGroupChat:(NSNumber *)value
 {
-    [self willChangeValueForKey:@"isChatRoomMessage"];
-    [self setPrimitiveValue:value forKey:@"isChatRoomMessage"];
-    [self didChangeValueForKey:@"isChatRoomMessage"];
+    [self willChangeValueForKey:@"isGroupChat"];
+    [self setPrimitiveValue:value forKey:@"isGroupChat"];
+    [self didChangeValueForKey:@"isGroupChat"];
 }
 - (XMPPAdditionalCoreDataMessageObject *)additionalCoreDataMessageObject
 {
@@ -154,6 +154,12 @@
     [self willChangeValueForKey:@"messageID"];
     [self setPrimitiveValue:value forKey:@"messageID"];
     [self didChangeValueForKey:@"messageID"];
+}
+
+- (void)awakeFromInsert
+{
+    [super awakeFromInsert];
+    
 }
 #pragma mark -
 #pragma mark - Public Methods
@@ -250,6 +256,7 @@
         updateObject = [XMPPMessageCoreDataStorageObject insertInManagedObjectContext:moc
                                                                 withMessageDictionary:messageDic
                                                                      streamBareJidStr:streamBareJidStr];
+        
         if(updateObject != nil) return YES;
     }
     
@@ -261,10 +268,12 @@
 #pragma mark - Private Methods
 - (void)updateWithDictionary:(NSDictionary *)messageDic streamBareJidStr:(NSString *)streamBareJidStr
 {
+    NSDate *messageSendTime = [messageDic objectForKey:@"messageTime"];
+    
     [self setMessageID:[messageDic objectForKey:@"messageID"]];
-    [self setMessageTime:[messageDic objectForKey:@"messageTime"]];
     [self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
     [self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
+    [self setMessageTime:(messageSendTime ? messageSendTime:[NSDate date])];
     [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
     [self setMessageType:[messageDic objectForKey:@"messageType"]];
     [self setStreamBareJidStr:streamBareJidStr];
