@@ -234,16 +234,42 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
+        NSString *jid = [dic objectForKey:@"groupid"];
+        NSString *action = [dic objectForKey:@"action"];
+        
         if ([chatRoomPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]]){
             NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
             
-            [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
-                                                           withNSDictionary:dic
-                                                           streamBareJidStr:streamBareJidStr];
+//            [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
+//                                                           withNSDictionary:dic
+//                                                           streamBareJidStr:streamBareJidStr];
+            if ([action isEqualToString:@"dismiss"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                
+                [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                         withID:jid
+                                                               streamBareJidStr:streamBareJidStr];
+                
+            }else /*if (![action isEqualToString:@"dismiss"]) */{
+                
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
+                                                                       xmppStream:stream
+                                                             managedObjectContext:moc];
+                
+                if (chatRoom) {
+                    [chatRoom updateWithDictionary:dic];
+                }else{
+                    NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                    
+                    [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                   withNSDictionary:dic
+                                                                   streamBareJidStr:streamBareJidStr];
+                }
+                
+            }
+
         }else{
-            
-            NSString *jid = [dic objectForKey:@"groupid"];
-            NSString *action = [dic objectForKey:@"action"];
             
             if ([action isEqualToString:@"dismiss"]) {
                 

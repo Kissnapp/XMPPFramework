@@ -601,7 +601,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             
             if ([message isChatMessageWithInfo]) {
                 
-                [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendFailedType];
+                [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendSucceedType];
                 [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_SUCCEED object:message];
             }
         }
@@ -621,7 +621,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     dispatch_block_t block = ^{
         if ([message isChatMessageWithInfo]) {
             
-            [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendSucceedType];
+            [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendFailedType];
             [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_FAILED object:message];
         }
     };
