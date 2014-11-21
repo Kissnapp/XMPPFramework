@@ -203,7 +203,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     NSXMLElement *info = [[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS] copy];
     
     XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:[XMPPJID jidWithString:self.toUser] elementID:nil child:info];
-    
+
     return message;
 }
 

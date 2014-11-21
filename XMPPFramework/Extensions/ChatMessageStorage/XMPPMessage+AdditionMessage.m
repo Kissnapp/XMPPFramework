@@ -190,8 +190,15 @@
     XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
     
     
-    [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
-    [dictionary setObject:userJidStr forKey:@"bareJidStr"];
+    
+    if (myBareJidStr) {
+        [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
+    }
+    
+    if (userJidStr) {
+        [dictionary setObject:userJidStr forKey:@"bareJidStr"];
+    }
+    
     [dictionary setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
     
