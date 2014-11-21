@@ -178,7 +178,6 @@
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     
-    NSString *myBareJidStr = sendFromMe ? [[self from] bare]:[[self to] bare];
     NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
     NSString *messageID = [info attributeStringValueForName:@"id"];
     NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
@@ -189,15 +188,13 @@
     
     XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
     
+    if (userJidStr) [dictionary setObject:userJidStr forKey:@"bareJidStr"];
+    
+    if (messageTime) [dictionary setObject:messageTime forKey:@"messageTime"];
+    
+    if (xmppAdditionalCoreDataMessageObject) [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalMessage"];
     
     
-    if (myBareJidStr) {
-        [dictionary setObject:myBareJidStr forKey:@"streamBareJidStr"];
-    }
-    
-    if (userJidStr) {
-        [dictionary setObject:userJidStr forKey:@"bareJidStr"];
-    }
     
     [dictionary setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
@@ -206,17 +203,12 @@
     //When is sent from me,we should note that this message is been sent failed as default 0
     //After being sent succeed,we should modify this value into 1
     [dictionary setObject:hasBeenRead forKey:@"hasBeenRead"];
-    if (messageTime) {
-        [dictionary setObject:messageTime forKey:@"messageTime"];
-    }
+    
     //If the unread message count is equal to zero,we will know that this message has been readed
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
     
     [dictionary setObject:messageID forKey:@"messageID"];
     [dictionary setObject:isGroupChat forKey:@"isGroupChat"];
-    
-    if (xmppAdditionalCoreDataMessageObject)
-        [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalMessage"];
     
     return dictionary;
 }
