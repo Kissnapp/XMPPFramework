@@ -172,9 +172,9 @@
 //In this method there is no streamBareJidStr
 -(NSMutableDictionary *)toDictionaryWithSendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser
 {
-    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
+    NSXMLElement *info = nil;
     
-    if (!info)  return nil;
+    if (!(info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]))  return nil;
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     
@@ -215,8 +215,8 @@
 
 - (NSString *)messageID
 {
-    NSXMLElement *info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
-    if (!info)  return nil;
+    NSXMLElement *info = nil;
+    if (!(info = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]))  return nil;
     
     return [info attributeStringValueForName:@"id"];
 }

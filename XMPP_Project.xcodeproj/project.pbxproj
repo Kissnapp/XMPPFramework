@@ -323,7 +323,7 @@
 		E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 842084A21A1B329F00DC6CCF /* XMPPVideoMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 84CA94781A1C43D6009824A7 /* XMPPLocationMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7EF53FD1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7EF53FB1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.m */; };
-		E7EF53FE1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EF53FC1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h */; };
+		E7EF53FE1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EF53FC1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1743,7 +1743,6 @@
 				63F3B49E1960F91700BD8134 /* XMPPProcessOne.h in Headers */,
 				63F3B5561960F91700BD8134 /* XMPPStringPrep.h in Headers */,
 				63F3B4D01960F91700BD8134 /* XMPPRoomMessageHybridCoreDataStorageObject.h in Headers */,
-				E7EF53FE1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h in Headers */,
 				63F3B4881960F91700BD8134 /* XMPPIQ.h in Headers */,
 				63F3B4B71960F91700BD8134 /* XMPPSystemInputActivityMonitor.h in Headers */,
 				63F3B5261960F91700BD8134 /* XMPPMessageArchiving.h in Headers */,
@@ -1807,6 +1806,7 @@
 				E7C4DFA919D2AAB1000CB916 /* XMPPChatRoom.h in Headers */,
 				E712D8B51994D51400287CD6 /* GCDAsyncSocket.h in Headers */,
 				E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */,
+				E7EF53FE1A1DFAC900F0C268 /* XMPPMessageCoreDataStorageObject.h in Headers */,
 				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
