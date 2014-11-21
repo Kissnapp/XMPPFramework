@@ -614,6 +614,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
 }
 
+
+
 - (void)xmppStream:(XMPPStream *)sender didFailToSendMessage:(XMPPMessage *)message error:(NSError *)error
 {
     XMPPLogTrace();
