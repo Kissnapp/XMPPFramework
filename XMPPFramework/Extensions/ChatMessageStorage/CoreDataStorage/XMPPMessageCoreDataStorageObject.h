@@ -10,7 +10,6 @@
 #import <CoreData/CoreData.h>
 #import "XMPPAdditionalCoreDataMessageObject.h"
 
-
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString                              * bareJidStr;

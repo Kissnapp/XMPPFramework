@@ -16,8 +16,10 @@
  *  When we send a message,we should observer this notice for
  *  distinguishing the message has been send succeed or not
  */
-#define SEND_MESSAGE_SUCCEED @"send_message_succeed"   /*When a message has been sent succeed,we will send a this notice to the notification center*/
-#define SEND_MESSAGE_FAILED @"send_message_failed"    /*When a message has been sent failed,we will send a this notice to the notification center*/
+#define SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED @"send_xmpp_extend_chat_message_succeed"   /*When a message has been sent succeed,we will send a this notice to the notification center*/
+#define SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED @"send_xmpp_extend_chat_message_failed"    /*When a message has been sent failed,we will send a this notice to the notification center*/
+#define RECEIVE_NEW_XMPP_EXTEND_CHAT_MESSAGE @"receive_new_xmpp_extend_chat_message"
+
 
 typedef NS_ENUM(NSUInteger, XMPPMessageType){
     XMPPMessageDefaultType = 0,

@@ -472,6 +472,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [self saveMessageActionWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
         //send the message
         [xmppStream sendElement:newMessage];
+        
+        //Call the delegate
+        [multicastDelegate xmppAllMessage:self receiveMessage:newMessage];
+        [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_EXTEND_CHAT_MESSAGE object:newMessage];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -601,8 +605,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             
             if ([message isChatMessageWithInfo]) {
                 
-                [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendSucceedType];
-                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_SUCCEED object:message];
+                NSString *messageID = [message messageID];
+                [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceedType];
+                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:messageID];
             }
         }
     };
@@ -623,8 +628,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     dispatch_block_t block = ^{
         if ([message isChatMessageWithInfo]) {
             
-            [self updateMessageSendStatusWithMessageID:[message messageID] sendSucceed:XMPPMessageSendFailedType];
-            [[NSNotificationCenter defaultCenter] postNotificationName:SEND_MESSAGE_FAILED object:message];
+            NSString *messageID = [message messageID];
+            
+            [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailedType];
+            [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:messageID];
         }
     };
     
@@ -645,6 +652,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             //save the message
             [self saveMessageActionWithXMPPStream:sender message:message sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self receiveMessage:message];
+            [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_EXTEND_CHAT_MESSAGE object:message];
         }
     };
     
