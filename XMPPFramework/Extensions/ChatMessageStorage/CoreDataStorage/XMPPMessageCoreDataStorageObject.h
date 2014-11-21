@@ -21,7 +21,7 @@
 @property (nonatomic, retain) NSDate                                * messageTime;
 @property (nonatomic, retain) NSNumber                              * sendFromMe;
 @property (nonatomic, retain) NSString                              * streamBareJidStr;
-@property (nonatomic, retain) XMPPAdditionalCoreDataMessageObject   * additionalCoreDataMessageObject;
+@property (nonatomic, retain) XMPPAdditionalCoreDataMessageObject   * additionalMessage;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withPredicate:(NSPredicate *)predicate;

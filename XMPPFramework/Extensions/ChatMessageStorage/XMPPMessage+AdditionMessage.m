@@ -209,7 +209,7 @@
     [dictionary setObject:isGroupChat forKey:@"isGroupChat"];
     
     if (xmppAdditionalCoreDataMessageObject)
-        [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalCoreDataMessageObject"];
+        [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalMessage"];
     
     return dictionary;
 }

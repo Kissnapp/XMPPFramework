@@ -234,27 +234,27 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     [self setMessageTime:xmppMessageCoreDataStorageObject.messageTime];
     
     if (self.isGroupChat) {
-        [self setSender:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.groupUserJid];
+        [self setSender:xmppMessageCoreDataStorageObject.additionalMessage.groupUserJid];
     }
     
     switch (self.messageType) {
         case XMPPExtendMessageTextType:
-            self.text = [XMPPTextMessageObject xmppTextMessageObjectWithText:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.messageText];
+            self.text = [XMPPTextMessageObject xmppTextMessageObjectWithText:xmppMessageCoreDataStorageObject.additionalMessage.messageText];
             break;
         case XMPPExtendMessageAudioType:
-            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
+            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath time:xmppMessageCoreDataStorageObject.additionalMessage.timeLength];
             break;
         case XMPPExtendMessageVideoType:
-            self.video = [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileName
-                                                                           filePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath
-                                                                           fileData:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileData
-                                                                               time:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.timeLength];
+            self.video = [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName
+                                                                           filePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath
+                                                                           fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData
+                                                                               time:xmppMessageCoreDataStorageObject.additionalMessage.timeLength];
             break;
         case XMPPExtendMessagePictureType:
-            self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileName filePath:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.filePath fileData:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.aspectRatio];
+            self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName filePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalMessage.aspectRatio];
             break;
         case XMPPExtendMessagePositionType:
-            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.longitude latitude:xmppMessageCoreDataStorageObject.additionalCoreDataMessageObject.latitude];
+            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalMessage.longitude latitude:xmppMessageCoreDataStorageObject.additionalMessage.latitude];
             break;
         case XMPPExtendMessageControlType:
             

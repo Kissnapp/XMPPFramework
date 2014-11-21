@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6244" systemVersion="14A389" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="XMPPMessageCoreDataStorageObject" representedClassName="XMPPMessageCoreDataStorageObject" syncable="YES">
-        <attribute name="additionalCoreDataMessageObject" optional="YES" transient="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="additionalMessage" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="hasBeenRead" optional="YES" attributeType="Boolean" defaultValueString="0" syncable="YES"/>
         <attribute name="isGroupChat" optional="YES" attributeType="Boolean" syncable="YES"/>
@@ -25,9 +25,9 @@
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPMessageCoreDataStorageObject" positionX="0" positionY="0" width="128" height="180"/>
-        <element name="XMPPServerPushCoreDataStorageObject" positionX="0" positionY="0" width="128" height="45"/>
-        <element name="XMPPUnReadMessageCoreDataStorageObject" positionX="0" positionY="0" width="128" height="90"/>
-        <element name="XMPPUserRequestCoreDataStorageObject" positionX="0" positionY="0" width="128" height="120"/>
+        <element name="XMPPMessageCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="XMPPServerPushCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="XMPPUnReadMessageCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="XMPPUserRequestCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
     </elements>
 </model>
