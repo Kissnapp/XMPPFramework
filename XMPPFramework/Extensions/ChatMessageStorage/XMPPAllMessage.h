@@ -20,6 +20,9 @@
 #define SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED @"send_xmpp_extend_chat_message_failed"    /*When a message has been sent failed,we will send a this notice to the notification center*/
 #define RECEIVE_NEW_XMPP_EXTEND_CHAT_MESSAGE @"receive_new_xmpp_extend_chat_message"
 
+#define RECEIVE_NEW_XMPP_MESSAGE @"receive_new_xmpp_message"
+
+
 
 typedef NS_ENUM(NSUInteger, XMPPMessageType){
     XMPPMessageDefaultType = 0,
@@ -203,8 +206,9 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @required
 
 @optional
-- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage receiveMessage:(XMPPMessage *)message;
-- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage willSendMessage:(XMPPMessage *)message;
+- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPMessage:(XMPPMessage *)message;
+- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage willSendXMPPMessage:(XMPPMessage *)message;
+- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPExtendMessage:(XMPPExtendMessageObject *)message;
 
 @end
 
