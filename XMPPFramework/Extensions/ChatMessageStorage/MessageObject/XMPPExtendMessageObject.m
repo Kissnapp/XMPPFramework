@@ -11,6 +11,8 @@
 #import "XMPPLogging.h"
 #import "XMPPDateTimeProfiles.h"
 #import "NSData+XMPP.h"
+#import "NSDate+NSString.h"
+#import "NSString+NSDate.h"
 #import <objc/runtime.h>
 
 #if ! __has_feature(objc_arc)
@@ -354,90 +356,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     return (__bridge NSString *)uuidStringRef;
 }
 
-/**
- *  Get The local date obejct from the UTC string
- *
- *  @param utc UTC date string
- *
- *  @return The local date obejct
- */
-- (NSDate *)getLocalDateWithUTCString:(NSString *)utc
-{
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    NSTimeZone *timeZone = [NSTimeZone localTimeZone];
-    [dateFormatter setTimeZone:timeZone];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
-    NSDate *ldate = [dateFormatter dateFromString:utc];
-    return ldate;
-}
-
-/**
- *  Get the UTC date string from the local date object
- *
- *  @param localDate The local date object
- *
- *  @return The UTC date string we will get
- */
-- (NSString *)getUTCStringWithLocalDate:(NSDate *)localDate
-{
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
-    [dateFormatter setTimeZone:timeZone];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
-    NSString *dateString = [dateFormatter stringFromDate:localDate];
-    return dateString;
-}
-- (NSDate *)getLocalDateWithUTCDate:(NSDate *)utcDate
-{
-    //设置源日期时区
-    NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"UTC"];//或GMT
-    //设置转换后的目标日期时区
-    NSTimeZone* destinationTimeZone = [NSTimeZone localTimeZone];
-    //得到源日期与世界标准时间的偏移量
-    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:utcDate];
-    //目标日期与本地时区的偏移量
-    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:utcDate];
-    //得到时间偏移量的差值
-    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-    //转为现在时间
-    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:utcDate];
-    return destinationDate;
-}
-
-/**
- *  Get the date string with the given date object
- *
- *  @param date The given object
- *
- *  @return The string we will get
- */
-- (NSString *)dateToString:(NSDate *)date
-{
-    //NSDate 2 NSString
-    
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSString *strDate = [dateFormatter stringFromDate:date];
-    return strDate;
-}
-
-/**
- *  Get the date obejct With the given date string
- *
- *  @param strdate The given date string
- *
- *  @return The Date object we will get
- */
-- (NSDate *)stringToDate:(NSString *)strdate
-{
-    //NSString 2 NSDate
-    
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSDate *retdate = [dateFormatter dateFromString:strdate];
-    return retdate;
-}
-
 #pragma mark - Setters and getters
 
 - (NSString *)toUser
@@ -547,7 +465,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
     if (infoElement != nil) {
         
-        result = [self stringToDate:[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME]];
+        result = [[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME] StringToDate];
     }
     
     return result;
@@ -560,12 +478,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
         NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
         //If the info element is already existed,wo should add the value to it
         if (infoElement) {
-            [infoElement addAttributeWithName:MESSAGE_TIME_ATTRIBUTE_NAME stringValue:[self dateToString:messageTime]];
+            [infoElement addAttributeWithName:MESSAGE_TIME_ATTRIBUTE_NAME stringValue:[messageTime DateToString]];
             return;
         }
         //Otherwise,we should create a new info element
         infoElement = [NSXMLElement elementWithName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
-        [infoElement addAttributeWithName:MESSAGE_ID_ATTRIBUTE_NAME stringValue:[self dateToString:messageTime]];
+        [infoElement addAttributeWithName:MESSAGE_ID_ATTRIBUTE_NAME stringValue:[messageTime DateToString]];
         [self addChild:infoElement];
     }
 }

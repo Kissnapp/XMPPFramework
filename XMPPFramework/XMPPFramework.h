@@ -79,6 +79,9 @@
 
 //#import "XMPPElement+Delay.h"
 #import "JSONKit.h"
+#import "NSString+NSDate.h"
+#import "NSDate+NSString.h"
+
 #import "XMPPChatRoom.h"
 #import "XMPPChatRoomCoreDataStorage.h"
 #import "XMPPChatRoomCoreDataStorageObject.h"
