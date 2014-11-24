@@ -63,12 +63,8 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Public API
+#pragma mark Public API (XMPPAllMessageStorage Methods)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-#pragma mark -
-#pragma mark - XMPPAllMessageStorage Methods
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue
 {
     return [super configureWithParent:aParent queue:queue];
@@ -85,6 +81,47 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                                                                withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe active:active]
                                                                     streamBareJidStr:myBareJidStr];
         
+    }];
+}
+
+//When read the message ,we should -1 for the unread message table
+- (void)readMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        
+        [message setHasBeenRead:[NSNumber numberWithBool:YES]];
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPUnReadMessageCoreDataStorageObject readOneObjectInManagedObjectContext:moc
+                                                                     withUserJIDstr:message.bareJidStr
+                                                                   streamBareJidStr:message.bareJidStr];
+        
+    }];
+}
+
+//we should -1 to the unread message table
+- (void)readMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
+                                      streamBareJidStr];
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              withPredicate:predicate];
+            if (!updateObject) return;
+            
+            [updateObject setHasBeenRead:[NSNumber numberWithBool:YES]];
+            [XMPPUnReadMessageCoreDataStorageObject readOneObjectInManagedObjectContext:moc
+                                                                         withUserJIDstr:updateObject.bareJidStr
+                                                                       streamBareJidStr:updateObject.streamBareJidStr];
+        }
     }];
 }
 
@@ -133,6 +170,82 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
     }];
 }
+//When there is only one message ,we should delete the unread message history
+- (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              withMessageID:messageID
+                                                                                                           streamBareJidStr:streamBareJidStr];
+            if (!updateObject) return;
+        
+            //The all message count
+            NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                      inManagedObjectContext:moc];
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",updateObject.bareJidStr,@"streamBareJidStr",
+                                      updateObject.streamBareJidStr];
+            
+            NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+            [fetchRequest setEntity:entity];
+            [fetchRequest setFetchLimit:2];
+            [fetchRequest setPredicate:predicate];
+            [fetchRequest setFetchBatchSize:saveThreshold];
+            
+            NSArray *allMessages = [moc executeFetchRequest:fetchRequest error:nil];
+            
+            //When the all message count is only one,we should delete the chat history
+            if ([allMessages count] < 2) {
+                [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc
+                                                                            withUserJIDstr:updateObject.bareJidStr
+                                                                          streamBareJidStr:streamBareJidStr];
+            }
+            
+            //Delete the message
+            [moc deleteObject:updateObject];
+        }
+
+    }];
+}
+
+//When there is only one message ,we should delete the unread message history
+- (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        //The all message count
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",message.bareJidStr,@"streamBareJidStr",
+                                  message.streamBareJidStr];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:2];
+        [fetchRequest setPredicate:predicate];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        NSArray *allMessages = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        //When the all message count is only one,we should delete the chat history
+        if ([allMessages count] < 2) {
+            [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc
+                                                                        withUserJIDstr:message.bareJidStr
+                                                                      streamBareJidStr:streamBareJidStr];
+        }
+        
+        //Delete the message
+        [moc deleteObject:message];
+    }];
+}
 
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
 {
@@ -172,41 +285,58 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
     }];
 }
-//FIXME:we should -1 to the unread message table
-- (void)readMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+
+- (void)clearAllChatHistoryAndMessageWithXMPPStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
-        
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
+        NSEntityDescription *messageEntity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                         inManagedObjectContext:moc];
+        NSEntityDescription *historyEntity = [NSEntityDescription entityForName:@"XMPPUnReadMessageCoreDataStorageObject"
+                                                         inManagedObjectContext:moc];
+        
+        NSFetchRequest *messageFetchRequest = [[NSFetchRequest alloc] init];
+        NSFetchRequest *historyFetchRequest = [[NSFetchRequest alloc] init];
+        
+        [messageFetchRequest setEntity:messageEntity];
+        [messageFetchRequest setFetchBatchSize:saveThreshold];
+        
+        [historyFetchRequest setEntity:historyEntity];
+        [historyFetchRequest setFetchBatchSize:saveThreshold];
+        
         if (xmppStream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",
                          streamBareJidStr];
             
-            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                              withPredicate:predicate];
-            if (!updateObject) return;
-            [updateObject setHasBeenRead:[NSNumber numberWithBool:YES]];
+            [messageFetchRequest setPredicate:predicate];
+            [historyFetchRequest setPredicate:predicate];
         }
-    }];
-}
-//FIXME:When there is only one message ,we should delete the unread message history
-- (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
-{
-    [self scheduleBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
-        if (xmppStream){
+        NSArray *allMessages = [moc executeFetchRequest:messageFetchRequest error:nil];
+        NSArray *allChatHistorys = [moc executeFetchRequest:historyFetchRequest error:nil];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPMessageCoreDataStorageObject *message in allMessages){
+            [moc deleteObject:message];
             
-            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                              withMessageID:messageID
-                                                                                                           streamBareJidStr:streamBareJidStr];
-            if (!updateObject) return;
-            [moc deleteObject:updateObject];
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
         }
-
+        
+        for (XMPPUnReadMessageCoreDataStorageObject *history in allChatHistorys){
+            [moc deleteObject:history];
+            
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
+        }
     }];
 }
 - (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)xmppStream
@@ -224,21 +354,6 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             [updateObject setHasBeenRead:[NSNumber numberWithInteger:sendType]];
         }
 
-    }];
-}
-//FIXME:When read the message ,we should -1 for the unread message table
-- (void)readMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
-{
-    [self scheduleBlock:^{
-        [message setHasBeenRead:[NSNumber numberWithBool:YES]];
-    }];
-}
-//FIXME:When there is only one message ,we should delete the unread message history
-- (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
-{
-    [self scheduleBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        [moc deleteObject:message];
     }];
 }
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream

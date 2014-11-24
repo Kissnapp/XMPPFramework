@@ -179,10 +179,26 @@
     return YES;
 }
 
-- (void)updateWithBareJid:(NSString *)bareJid unReadCount:(NSUInteger)unReadCount streamBareJidStr:(NSString *)streamBareJidStr
++ (BOOL)readOneObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withUserJIDstr:(NSString *)jidStr
+                           streamBareJidStr:(NSString *)streamBareJidStr
 {
+    if (jidStr == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
     
+    XMPPUnReadMessageCoreDataStorageObject *readObject = [XMPPUnReadMessageCoreDataStorageObject objectInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    //if the object we find alreadly in the coredata system ,we should update it
+    if (!readObject) return NO;
+    
+    NSUInteger oldUnreadCount = [readObject.unReadCount unsignedIntegerValue];
+    
+    if (oldUnreadCount > 0) {
+        -- oldUnreadCount;
+    }
+    readObject.unReadCount = [NSNumber numberWithUnsignedInteger:oldUnreadCount];
+    
+    return YES;
 }
-
 
 @end

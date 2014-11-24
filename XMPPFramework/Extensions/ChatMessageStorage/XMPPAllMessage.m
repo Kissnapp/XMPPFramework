@@ -314,6 +314,19 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)clearAllChatHistorysAndMessages
+{
+    dispatch_block_t block = ^{
+
+        [xmppMessageStorage clearAllChatHistoryAndMessageWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 - (void)clearChatHistoryWithUserJid:(XMPPJID *)userJid
 {
     if (!userJid) return;

@@ -42,4 +42,12 @@
 + (BOOL)readObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                             withUserJIDstr:(NSString *)jidStr
                           streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)readOneObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withUserJIDstr:(NSString *)jidStr
+                           streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)clearAllObjectsInInManagedObjectContext:(NSManagedObjectContext *)moc
+                               streamBareJidStr:(NSString *)streamBareJidStr;
+
 @end
