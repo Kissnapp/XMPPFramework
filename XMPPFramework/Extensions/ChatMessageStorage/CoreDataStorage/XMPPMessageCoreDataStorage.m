@@ -70,7 +70,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return [super configureWithParent:aParent queue:queue];
 }
 
-- (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe active:(BOOL)active xmppStream:(XMPPStream *)xmppStream
+- (void)archiveMessage:(XMPPExtendMessageObject *)message active:(BOOL)active xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
         
@@ -78,7 +78,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
         [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                               withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe active:active]
+                                                               withMessageDictionary:[message toDictionaryWithActive:active]
                                                                     streamBareJidStr:myBareJidStr];
         
     }];
@@ -155,7 +155,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSUInteger unsavedCount = [self numberOfUnsavedChanges];
         
         for (XMPPMessageCoreDataStorageObject *message in allMessages){
-            //[moc deleteObject:message];
+
             //update the hasBeenRead attribute
             message.hasBeenRead = [NSNumber numberWithBool:YES];
             
@@ -439,32 +439,4 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return results;
 }
 
-////查询
-//- (NSMutableArray*)selectData:(int)pageSize andOffset:(int)currentPage
-//{
-//    NSManagedObjectContext *moc = [self managedObjectContext];
-//    
-//    // 限定查询结果的数量
-//    //setFetchLimit
-//    // 查询的偏移量
-//    //setFetchOffset
-//    
-//    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-//    
-//    [fetchRequest setFetchLimit:pageSize];
-//    [fetchRequest setFetchOffset:currentPage];
-//    
-//    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject" inManagedObjectContext:moc];
-//    [fetchRequest setEntity:entity];
-//    NSError *error;
-//    NSArray *fetchedObjects = [moc executeFetchRequest:fetchRequest error:&error];
-//    NSMutableArray *resultArray = [NSMutableArray array];
-//    
-//    for (News *info in fetchedObjects) {
-//        NSLog(@"id:%@", info.newsid);
-//        NSLog(@"title:%@", info.title);
-//        [resultArray addObject:info];
-//    }
-//    return resultArray;
-//}
 @end

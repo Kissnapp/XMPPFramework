@@ -131,5 +131,6 @@ typedef NS_ENUM(NSInteger, XMPPMessageSendStatusType)
 // */
 //- (void)fromDictionary:(NSMutableDictionary*)message;
 
+- (NSMutableDictionary *)toDictionaryWithActive:(BOOL)active;
 
 @end

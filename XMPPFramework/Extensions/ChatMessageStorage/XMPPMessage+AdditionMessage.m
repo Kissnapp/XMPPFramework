@@ -24,7 +24,7 @@
     
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     
-    NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
+    NSString *bareJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
     NSString *messageID = [info attributeStringValueForName:@"id"];
     NSNumber *unReadMessageCount = [NSNumber numberWithBool:(sendFromMe ? NO:!active)];//if read is 0(NO), unread is 1(YES)
     NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
@@ -34,7 +34,7 @@
     
     XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
     
-    if (userJidStr) [dictionary setObject:userJidStr forKey:@"bareJidStr"];
+    if (bareJidStr) [dictionary setObject:bareJidStr forKey:@"bareJidStr"];
     
     if (messageTime) [dictionary setObject:messageTime forKey:@"messageTime"];
     

@@ -333,6 +333,42 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     self.messageType = [(NSNumber *)[message objectForKey:@"messageType"] unsignedIntegerValue];
 }
 
+- (NSMutableDictionary *)toDictionaryWithActive:(BOOL)active
+{
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+    
+    NSString *bareJidStr = self.sendFromMe ? self.toUser:self.fromUser;
+    NSNumber *unReadMessageCount = [NSNumber numberWithBool:(self.sendFromMe ? NO:!active)];//if read is 0(NO), unread is 1(YES)
+    NSDate  *messageTime = self.sendFromMe ? [NSDate date]:[self.messageTime UTCDateToLocalDate];
+    NSNumber *hasBeenRead = [NSNumber numberWithBool:(self.sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))];
+    NSNumber *isGroupChat = [NSNumber numberWithBool:self.isGroupChat];
+    
+    XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
+    
+    if (bareJidStr) [dictionary setObject:bareJidStr forKey:@"bareJidStr"];
+    
+    if (messageTime) [dictionary setObject:messageTime forKey:@"messageTime"];
+    
+    if (xmppAdditionalCoreDataMessageObject) [dictionary setObject:xmppAdditionalCoreDataMessageObject forKey:@"additionalMessage"];
+    
+    
+    [dictionary setObject:[NSNumber numberWithBool:self.sendFromMe] forKey:@"sendFromMe"];
+    [dictionary setObject:[NSNumber numberWithUnsignedInteger:self.messageType] forKey:@"messageType"];
+    
+    //The readed message's hasBeenRead is 1,unread is 0
+    //When is sent from me,we should note that this message is been sent failed as default 0
+    //After being sent succeed,we should modify this value into 1
+    [dictionary setObject:hasBeenRead forKey:@"hasBeenRead"];
+    
+    //If the unread message count is equal to zero,we will know that this message has been readed
+    [dictionary setObject:unReadMessageCount forKey:@"unReadMessageCount"];
+    
+    [dictionary setObject:self.messageID forKey:@"messageID"];
+    [dictionary setObject:isGroupChat forKey:@"isGroupChat"];
+    
+    return dictionary;
+}
+
 #pragma mark - tools methods
 -(void)createMessageID
 {
