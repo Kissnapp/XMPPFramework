@@ -293,7 +293,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)removeActiveUserAndDelegate:(id)delegate
 {
     [self setActiveUser:nil];
-    [self removeDelegate:self];
+    [self removeDelegate:delegate];
 }
 
 - (void)saveBeforeSendingWithMessage:(XMPPMessage *)message

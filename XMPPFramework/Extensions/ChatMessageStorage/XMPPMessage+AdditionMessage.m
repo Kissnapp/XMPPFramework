@@ -180,7 +180,7 @@
     
     NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
     NSString *messageID = [info attributeStringValueForName:@"id"];
-    NSNumber *unReadMessageCount = [NSNumber numberWithBool:active];
+    NSNumber *unReadMessageCount = [NSNumber numberWithBool:(sendFromMe ? NO:!active)];
     NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[info attributeStringValueForName:@"timestamp"]];
     NSNumber *hasBeenRead = [NSNumber numberWithBool:(sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))];

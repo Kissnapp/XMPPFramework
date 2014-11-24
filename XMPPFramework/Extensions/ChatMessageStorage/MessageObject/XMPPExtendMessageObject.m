@@ -219,6 +219,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     [self addChild:infoElement];
     [self setFromUser:message.from.bare];
     [self setToUser:message.to.bare];
+  
 }
 
 - (void)setUpWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
