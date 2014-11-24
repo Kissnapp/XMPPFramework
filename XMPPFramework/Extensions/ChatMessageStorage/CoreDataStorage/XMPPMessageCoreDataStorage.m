@@ -415,7 +415,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
                                                   inManagedObjectContext:moc];
         
-        NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:YES];
+        NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:NO];
         
         NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor1, nil];
         
