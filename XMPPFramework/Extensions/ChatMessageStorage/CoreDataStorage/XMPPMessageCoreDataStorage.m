@@ -74,7 +74,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return [super configureWithParent:aParent queue:queue];
 }
 
-- (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser xmppStream:(XMPPStream *)xmppStream
+- (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe active:(BOOL)active xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
         
@@ -82,7 +82,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
         [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                               withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe activeUser:activeUser]
+                                                               withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe active:active]
                                                                     streamBareJidStr:myBareJidStr];
         
     }];
@@ -107,8 +107,8 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         if (stream){
             NSPredicate *predicate;
             //!!!!:Notice:This method should not read the voice message
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@ && %K != %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
-                         streamBareJidStr,@"hasBeenRead",@0,@"messageType",@1];
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@ && %K == %@ && %K != %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
+                         streamBareJidStr,@"sendFromMe",@0,@"hasBeenRead",@0,@"messageType",@1];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -127,6 +127,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                 unsavedCount = 0;
             }
         }
+        
         //Update the unread message object
         [XMPPUnReadMessageCoreDataStorageObject readObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
 
@@ -171,7 +172,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
     }];
 }
-
+//FIXME:we should -1 to the unread message table
 - (void)readMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
@@ -190,7 +191,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         }
     }];
 }
-
+//FIXME:When there is only one message ,we should delete the unread message history
 - (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
@@ -225,12 +226,14 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
     }];
 }
+//FIXME:When read the message ,we should -1 for the unread message table
 - (void)readMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
         [message setHasBeenRead:[NSNumber numberWithBool:YES]];
     }];
 }
+//FIXME:When there is only one message ,we should delete the unread message history
 - (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{

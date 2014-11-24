@@ -178,7 +178,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @required
 
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
-- (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser xmppStream:(XMPPStream *)stream;
+- (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe active:(BOOL)active xmppStream:(XMPPStream *)stream;
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 

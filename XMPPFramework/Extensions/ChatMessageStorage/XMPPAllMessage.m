@@ -303,7 +303,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     dispatch_block_t block = ^{
         @autoreleasepool {
             XMPPMessage *newMessage = [message copy];
-            [self saveMessageActionWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
+            [self saveMessageWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
             [multicastDelegate xmppAllMessage:self willSendMessage:newMessage];
         }
     };
@@ -469,7 +469,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         
         XMPPMessage *newMessage = [[message toXMPPMessage] copy];
         //we should stroage this message firstly
-        [self saveMessageActionWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
+        [self saveMessageWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
         //send the message
         [xmppStream sendElement:newMessage];
         
@@ -486,13 +486,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)saveMessageActionWithXMPPStream:(XMPPStream *)sender message:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe
+- (void)saveMessageWithXMPPStream:(XMPPStream *)sender message:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
     if ([message isChatMessageWithInfo]) {
         //save the message
-        [xmppMessageStorage archiveMessage:message sendFromMe:sendFromMe activeUser:[self activeUser] xmppStream:sender];
+        [xmppMessageStorage archiveMessage:message sendFromMe:sendFromMe active:(sendFromMe ? NO:[[self activeUser] isEqualToString:message.from.bare]) xmppStream:sender];
     }
 }
 
@@ -650,7 +650,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         
         if ([message isChatMessageWithInfo]) {
             //save the message
-            [self saveMessageActionWithXMPPStream:sender message:message sendFromMe:NO];
+            [self saveMessageWithXMPPStream:sender message:message sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self receiveMessage:message];
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_EXTEND_CHAT_MESSAGE object:message];
         }

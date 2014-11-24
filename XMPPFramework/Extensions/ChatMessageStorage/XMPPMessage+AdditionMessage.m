@@ -170,7 +170,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //In this method there is no streamBareJidStr
--(NSMutableDictionary *)toDictionaryWithSendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser
+-(NSMutableDictionary *)toDictionaryWithSendFromMe:(BOOL)sendFromMe active:(BOOL)active
 {
     NSXMLElement *info = nil;
     
@@ -180,7 +180,7 @@
     
     NSString *userJidStr = sendFromMe ? [[self to] bare]:[[self from] bare];
     NSString *messageID = [info attributeStringValueForName:@"id"];
-    NSUInteger unReadMessageCount = sendFromMe ? 0:([[[self from] bare] isEqualToString:activeUser] ? 0:1);
+    NSNumber *unReadMessageCount = [NSNumber numberWithBool:active];
     NSUInteger messageType = [info attributeUnsignedIntegerValueForName:@"type"];
     NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[info attributeStringValueForName:@"timestamp"]];
     NSNumber *hasBeenRead = [NSNumber numberWithBool:(sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))];
@@ -205,7 +205,7 @@
     [dictionary setObject:hasBeenRead forKey:@"hasBeenRead"];
     
     //If the unread message count is equal to zero,we will know that this message has been readed
-    [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
+    [dictionary setObject:unReadMessageCount forKey:@"unReadMessageCount"];
     
     [dictionary setObject:messageID forKey:@"messageID"];
     [dictionary setObject:isGroupChat forKey:@"isGroupChat"];
