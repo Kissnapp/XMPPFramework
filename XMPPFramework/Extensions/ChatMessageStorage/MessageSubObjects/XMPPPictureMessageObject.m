@@ -19,7 +19,7 @@
 @implementation XMPPPictureMessageObject
 //class init methods
 
-+ (XMPPPictureMessageObject *)xmppAudioMessageObject
++ (XMPPPictureMessageObject *)xmppPictureMessageObject
 {
     NSXMLElement *audioElement = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
     return [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:audioElement];
@@ -55,7 +55,8 @@
     XMPPPictureMessageObject *xmppPictureMessageObject = nil;
     NSXMLElement *element = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
     
-    xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
+   // xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
+    xmppPictureMessageObject = [[XMPPPictureMessageObject alloc] initWithFileName:fileName filePath:filePath fileData:fileData aspectRatio:aspectRatio];
     [xmppPictureMessageObject setFileName:fileName];
     [xmppPictureMessageObject setFilePath:filePath];
     [xmppPictureMessageObject setFileData:fileData];

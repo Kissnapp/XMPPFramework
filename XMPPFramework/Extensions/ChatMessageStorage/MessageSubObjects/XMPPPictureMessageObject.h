@@ -16,7 +16,7 @@
 @property (assign, nonatomic) CGFloat           aspectRatio;      //Picture width&height
 
 //class init methods
-+ (XMPPPictureMessageObject *)xmppAudioMessageObject;
++ (XMPPPictureMessageObject *)xmppPictureMessageObject;
 + (XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element;
 + (XMPPPictureMessageObject *)xmppPictureMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
 + (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;

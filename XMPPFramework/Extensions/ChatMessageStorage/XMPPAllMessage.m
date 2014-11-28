@@ -489,6 +489,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         //Call the delegate
         [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:newMessage];
         [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:newMessage];
+      
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -676,6 +677,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             [self saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:message];
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
+         
+
+            
         }
     };
     
