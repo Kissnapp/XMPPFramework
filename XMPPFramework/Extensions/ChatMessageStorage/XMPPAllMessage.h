@@ -12,6 +12,8 @@
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPPExtendMessageObject.h"
+
+
 /**
  *  When we send a message,we should observer this notice for
  *  distinguishing the message has been send succeed or not
@@ -239,6 +241,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @required
 
 @optional
+
 - (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPMessage:(XMPPMessage *)message;
 - (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage willSendXMPPMessage:(XMPPMessage *)message;
 - (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPExtendMessage:(XMPPExtendMessageObject *)message;
