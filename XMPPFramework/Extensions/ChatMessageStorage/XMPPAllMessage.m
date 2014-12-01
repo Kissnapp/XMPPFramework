@@ -437,6 +437,32 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+{
+    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.messageID];
+}
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID
+{
+    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:messageID];
+}
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+{
+    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.messageID];
+}
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID
+{
+    if (!messageID || !filePath) return;
+    
+    dispatch_block_t block = ^{
+        
+        [self updateNewFilePath:filePath toMessageWithID:messageID xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 - (XMPPMessageCoreDataStorageObject *)lastMessageWithBareJidStr:(NSString *)bareJidStr
 {
     if (!bareJidStr) return nil;
@@ -566,6 +592,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     [xmppMessageStorage updateMessageSendStatusWithMessage:message success:YES xmppStream:stream];
+}
+
+- (void)updateNewFilePath:(NSString *)filePath toMessageWithID:(NSString *)messageID xmppStream:(XMPPStream *)stream
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    [xmppMessageStorage updateMessageWithNewFilePath:filePath messageID:messageID xmppStream:stream];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

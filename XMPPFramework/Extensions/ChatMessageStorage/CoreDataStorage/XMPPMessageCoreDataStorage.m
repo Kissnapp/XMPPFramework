@@ -351,6 +351,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                                                                                                               withMessageID:messageID
                                                                                                            streamBareJidStr:streamBareJidStr];
             if (!updateObject) return;
+            
             [updateObject setHasBeenRead:[NSNumber numberWithInteger:sendType]];
         }
 
@@ -360,6 +361,26 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 {
     [self scheduleBlock:^{
         [message setHasBeenRead:[NSNumber numberWithBool:success]];
+    }];
+}
+
+- (void)updateMessageWithNewFilePath:(NSString *)newFilePath messageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              withMessageID:messageID
+                                                                                                           streamBareJidStr:streamBareJidStr];
+            if (!updateObject) return;
+            
+            [[updateObject additionalMessage] setFilePath:newFilePath];
+            [[updateObject additionalMessage] setFileData:nil];
+        }
+
     }];
 }
 

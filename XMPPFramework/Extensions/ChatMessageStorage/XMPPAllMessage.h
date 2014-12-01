@@ -139,6 +139,34 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  */
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message;
 /**
+ *  Add a file Path to the XMPPExtendMessageObject in CoreData system
+ *
+ *  @param filePath The given file path
+ *  @param message  The message which we will changed
+ */
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+/**
+ *  Add a file Path to the XMPPExtendMessageObject in CoreData system
+ *
+ *  @param filePath  The given file path
+ *  @param messageID The ID of a message which we will changed
+ */
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID;
+/**
+ *  update a file Path to the XMPPExtendMessageObject in CoreData system
+ *
+ *  @param filePath The given file path
+ *  @param message  The message which we will changed
+ */
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+/**
+ *  update a file Path to the XMPPExtendMessageObject in CoreData system
+ *
+ *  @param filePath  The given file path
+ *  @param messageID The ID of a message which we will changed
+ */
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID;
+/**
  *  Get the last chat message with the given user bare jid string
  *
  *  @param bareJidStr the given user bare jid string
@@ -165,7 +193,6 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  */
 - (void)sendMessageWithXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
 
-
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
@@ -179,7 +206,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @end
 
 
-//XMPPChatMessageStorage
+//XMPPAllMessageStorage
 @protocol XMPPAllMessageStorage <NSObject>
 
 @required
@@ -197,6 +224,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream;
 - (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream;
 
+- (void)updateMessageWithNewFilePath:(NSString *)newFilePath messageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
 - (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream;
@@ -205,7 +233,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @end
 
 
-//XMPPChatMessageDelegate
+//XMPPAllMessageDelegate
 @protocol XMPPAllMessageDelegate <NSObject>
 
 @required
