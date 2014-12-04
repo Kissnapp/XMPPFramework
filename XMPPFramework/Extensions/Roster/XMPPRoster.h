@@ -10,8 +10,8 @@
 
 #define _XMPP_ROSTER_H
 
-#define ADD_FRIEND_NICKNAME @"nickename"
-#define ADD_FRIEND_NICKNAME_XMLNS @"http://Kissnapp.com/protocol/nick"
+#define ADD_FRIEND_NICKNAME @"nick"
+#define ADD_FRIEND_NICKNAME_XMLNS @"http://jabber.org/protocol/nick"
 
 
 @protocol XMPPRosterStorage;
@@ -266,8 +266,21 @@
  * rejecting they subscription request will not affect your subscription to their presence.
 **/
 - (void)rejectPresenceSubscriptionRequestFrom:(XMPPJID *)jid;
-
+/**
+ *  request a user add self into the friend list
+ *
+ *  @param jid      The given user's jid
+ *  @param nickName self nick name
+ */
 - (void)subscribePresenceToUser:(XMPPJID *)jid withSelfNickName:(NSString *)nickName;
+/**
+ *  Accept one user's request to add the user as self friend
+ *
+ *  @param jid       The user jid
+ *  @param nickeName self nick name
+ *  @param userName  The user's nick name
+ *  @param flag      The tag whether to add this user to our roster
+ */
 - (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid  withSelfNickName:(NSString *)nickeName  userName:(NSString *)userName andAddToRoster:(BOOL)flag;
 
 // 

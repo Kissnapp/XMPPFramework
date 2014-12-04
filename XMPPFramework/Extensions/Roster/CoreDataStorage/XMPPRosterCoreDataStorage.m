@@ -523,5 +523,85 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     return results;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - XMPPRosterQueryModuleStorage
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%k == %@ && %k == %@",@"jidStr",[jid bare],@"streamBareJidStr",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPUserCoreDataStorageObject *user = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (user) result = user.nickname;
+    }];
+    
+    return result;
+}
+- (NSString *)displayNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%k == %@ && %k == %@",@"jidStr",[jid bare],@"streamBareJidStr",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPUserCoreDataStorageObject *user = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (user) result = user.displayName;
+    }];
+    
+    return result;
+}
+
+/*
+- (BOOL)privateModelForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    
+}
+- (void)clearRosterForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+ 
+}
+ */
 
 @end

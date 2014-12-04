@@ -34,6 +34,7 @@
 #import "XMPPReconnect.h"
 
 #import "XMPPRoster.h"
+#import "XMPPRosterQueryModule.h"
 #import "XMPPRosterMemoryStorage.h"
 #import "XMPPRosterCoreDataStorage.h"
 

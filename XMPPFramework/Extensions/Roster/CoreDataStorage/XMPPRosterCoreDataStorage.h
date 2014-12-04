@@ -3,6 +3,7 @@
 
 #import "XMPPRoster.h"
 #import "XMPPCoreDataStorage.h"
+#import "XMPPRosterQueryModule.h"
 #import "XMPPUserCoreDataStorageObject.h"
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "XMPPResourceCoreDataStorageObject.h"
@@ -12,7 +13,7 @@
  * You are free to substitute your own roster storage class.
 **/
 
-@interface XMPPRosterCoreDataStorage : XMPPCoreDataStorage <XMPPRosterStorage>
+@interface XMPPRosterCoreDataStorage : XMPPCoreDataStorage <XMPPRosterStorage,XMPPRosterQueryModuleStorage>
 {
 	// Inherits protected variables from XMPPCoreDataStorage
 	
