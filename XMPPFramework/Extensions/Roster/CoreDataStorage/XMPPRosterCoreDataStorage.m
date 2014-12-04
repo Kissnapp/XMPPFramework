@@ -579,7 +579,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         if (stream)
         {
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%k == %@ && %k == %@",@"jidStr",[jid bare],@"streamBareJidStr",
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"jidStr",[jid bare],@"streamBareJidStr",
                          [[self myJIDForXMPPStream:stream] bare]];
             
             [fetchRequest setPredicate:predicate];
