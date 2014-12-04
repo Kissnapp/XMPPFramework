@@ -500,7 +500,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
     if (infoElement != nil) {
         
-        result = [[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME] StringToDate];
+        result = [[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME] StringToDate];//UTCStringToLocalDate
     }
     
     return result;
