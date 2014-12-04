@@ -42,6 +42,12 @@ typedef NS_ENUM(NSUInteger, XMPPStreamStartTLSPolicy) {
     XMPPStreamStartTLSPolicyRequired   // TLS will be used if the server offers it, else the stream won't connect
 };
 
+typedef NS_ENUM(NSUInteger, XMPPLoginType) {
+    XMPPLoginTypeDefault = 0,       //login with a jid string
+    XMPPLoginTypePhone,             //login with a phone number string
+    XMPPLoginTypeEmail              //login with a email address string
+};
+
 extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
