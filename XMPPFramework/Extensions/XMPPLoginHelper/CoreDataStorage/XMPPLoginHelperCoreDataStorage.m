@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPLoginUserCoreDataStorage.h"
+#import "XMPPLoginHelperCoreDataStorage.h"
 #import "XMPP.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPLogging.h"
@@ -28,16 +28,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation XMPPLoginUserCoreDataStorage
+@implementation XMPPLoginHelperCoreDataStorage
 
-static XMPPLoginUserCoreDataStorage *sharedInstance;
+static XMPPLoginHelperCoreDataStorage *sharedInstance;
 
 + (instancetype)sharedInstance
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         
-        sharedInstance = [[XMPPLoginUserCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
+        sharedInstance = [[XMPPLoginHelperCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
     });
     
     return sharedInstance;
@@ -47,7 +47,7 @@ static XMPPLoginUserCoreDataStorage *sharedInstance;
 #pragma mark Setup
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)configureWithParent:(XMPPLoginUser *)aParent queue:(dispatch_queue_t)queue
+- (BOOL)configureWithParent:(XMPPLoginHelper *)aParent queue:(dispatch_queue_t)queue
 {
     return [super configureWithParent:aParent queue:queue];
 }

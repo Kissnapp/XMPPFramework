@@ -201,13 +201,13 @@ enum XMPPStreamConfig
 	
 	state = STATE_XMPP_DISCONNECTED;
 	
-	flags = 0;
-	config = 0;
+	flags = DAFAULT_ZERO_VALUE;
+	config = DAFAULT_ZERO_VALUE;
 	
-	numberOfBytesSent = 0;
-	numberOfBytesReceived = 0;
+	numberOfBytesSent = DAFAULT_ZERO_VALUE;
+	numberOfBytesReceived = DAFAULT_ZERO_VALUE;
 	
-	hostPort = 5222;
+	hostPort = DEFAULT_XMPP_STREAM_PORT;
 	keepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 	keepAliveData = [@" " dataUsingEncoding:NSUTF8StringEncoding];
 	
@@ -234,6 +234,23 @@ enum XMPPStreamConfig
 		asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
 	}
 	return self;
+}
+/**
+ * Standard XMPP initialization with a host name and host port
+ * The stream is a standard client to server connection.
+ **/
+- (id)initWithHostName:(NSString *)HostName hostPort:(NSUInteger)HostPort
+{
+    if ((self = [super init]))
+    {
+        // Common initialization
+        [self commonInit];
+        [self setHostName:HostName];
+        [self setHostPort:HostPort];
+        // Initialize socket
+        asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+    }
+    return self;
 }
 
 /**
@@ -336,7 +353,9 @@ enum XMPPStreamConfig
 
 - (void)setHostName:(NSString *)newHostName
 {
-	if (dispatch_get_specific(xmppQueueTag))
+    if (!newHostName) return;
+    
+    if (dispatch_get_specific(xmppQueueTag))
 	{
 		if (hostName != newHostName)
 		{
@@ -374,6 +393,8 @@ enum XMPPStreamConfig
 
 - (void)setHostPort:(UInt16)newHostPort
 {
+    if (newHostPort == DAFAULT_ZERO_VALUE) return;
+    
 	dispatch_block_t block = ^{
 		hostPort = newHostPort;
 	};
@@ -1832,26 +1853,26 @@ enum XMPPStreamConfig
 	return result;
 }
 
-- (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
-{
-	XMPPLogTrace();
-	
-	__block BOOL result = NO;
-	__block NSError *err = nil;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		if (state != STATE_XMPP_CONNECTED)
-		{
-			NSString *errMsg = @"Please wait until the stream is connected.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
-			
-			result = NO;
-			return_from_block;
-		}
-		
+//- (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
+//{
+//	XMPPLogTrace();
+//	
+//	__block BOOL result = NO;
+//	__block NSError *err = nil;
+//	
+//	dispatch_block_t block = ^{ @autoreleasepool {
+//		
+//		if (state != STATE_XMPP_CONNECTED)
+//		{
+//			NSString *errMsg = @"Please wait until the stream is connected.";
+//			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+//			
+//			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+//			
+//			result = NO;
+//			return_from_block;
+//		}
+//		
 //		if (myJID_setByClient == nil)
 //		{
 //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
@@ -1862,34 +1883,107 @@ enum XMPPStreamConfig
 //			result = NO;
 //			return_from_block;
 //		}
-		
-		// Change state.
-		// We do this now because when we invoke the start method below,
-		// it may in turn invoke our sendAuthElement method, which expects us to be in STATE_XMPP_AUTH.
-		state = STATE_XMPP_AUTH;
-		
-		if ([inAuth start:&err])
-		{
-			auth = inAuth;
-			result = YES;
-		}
-		else
-		{
-			// Unable to start authentication for some reason.
-			// Revert back to connected state.
-			state = STATE_XMPP_CONNECTED;
-		}
-	}};
-	
-	if (dispatch_get_specific(xmppQueueTag))
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	if (errPtr)
-		*errPtr = err;
-	
-	return result;
+//		
+//		// Change state.
+//		// We do this now because when we invoke the start method below,
+//		// it may in turn invoke our sendAuthElement method, which expects us to be in STATE_XMPP_AUTH.
+//		state = STATE_XMPP_AUTH;
+//		
+//		if ([inAuth start:&err])
+//		{
+//			auth = inAuth;
+//			result = YES;
+//		}
+//		else
+//		{
+//			// Unable to start authentication for some reason.
+//			// Revert back to connected state.
+//			state = STATE_XMPP_CONNECTED;
+//		}
+//	}};
+//	
+//	if (dispatch_get_specific(xmppQueueTag))
+//		block();
+//	else
+//		dispatch_sync(xmppQueue, block);
+//	
+//	if (errPtr)
+//		*errPtr = err;
+//	
+//	return result;
+//}
+
+- (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        result = [self _authenticate:inAuth error:&err];
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+    *errPtr = err;
+    
+    return result;
+}
+
+
+- (BOOL)_authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    BOOL result = NO;
+    NSError *err = nil;
+    
+    if (state != STATE_XMPP_CONNECTED)
+    {
+        NSString *errMsg = @"Please wait until the stream is connected.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+        
+        result = NO;
+        return result;
+    }
+    
+    //		if (myJID_setByClient == nil)
+    //		{
+    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+    //
+    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+    //
+    //			result = NO;
+    //			return_from_block;
+    //		}
+    
+    // Change state.
+    // We do this now because when we invoke the start method below,
+    // it may in turn invoke our sendAuthElement method, which expects us to be in STATE_XMPP_AUTH.
+    state = STATE_XMPP_AUTH;
+    
+    if ([inAuth start:&err])
+    {
+        auth = inAuth;
+        result = YES;
+    }
+    else
+    {
+        // Unable to start authentication for some reason.
+        // Revert back to connected state.
+        state = STATE_XMPP_CONNECTED;
+    }
+    
+    return result;
 }
 
 /**
@@ -1900,30 +1994,31 @@ enum XMPPStreamConfig
  * 
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
-- (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
-{
-	XMPPLogTrace();
-	
-	// The given password parameter could be mutable
-	NSString *password = [inPassword copy];
-	
-	
-	__block BOOL result = YES;
-	__block NSError *err = nil;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		if (state != STATE_XMPP_CONNECTED)
-		{
-			NSString *errMsg = @"Please wait until the stream is connected.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
-			
-			result = NO;
-			return_from_block;
-		}
-		
+
+//- (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
+//{
+//	XMPPLogTrace();
+//	
+//	// The given password parameter could be mutable
+//	NSString *password = [inPassword copy];
+//	
+//	
+//	__block BOOL result = YES;
+//	__block NSError *err = nil;
+//	
+//	dispatch_block_t block = ^{ @autoreleasepool {
+//		
+//		if (state != STATE_XMPP_CONNECTED)
+//		{
+//			NSString *errMsg = @"Please wait until the stream is connected.";
+//			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+//			
+//			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+//			
+//			result = NO;
+//			return_from_block;
+//		}
+//		
 //		if (myJID_setByClient == nil)
 //		{
 //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
@@ -1934,72 +2029,220 @@ enum XMPPStreamConfig
 //			result = NO;
 //			return_from_block;
 //		}
-		
-		// Choose the best authentication method.
-		// 
-		// P.S. - This method is deprecated.
-		
-		id <XMPPSASLAuthentication> someAuth = nil;
+//		
+//		// Choose the best authentication method.
+//		// 
+//		// P.S. - This method is deprecated.
+//		
+//		id <XMPPSASLAuthentication> someAuth = nil;
+//        
+//         if ([self supportsSCRAMSHA1Authentication])
+//         {
+//         someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
+//         result = [self authenticate:someAuth error:&err];
+//         }
+//         else if ([self supportsDigestMD5Authentication])
+//         {
+//         someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+//         result = [self authenticate:someAuth error:&err];
+//         }
+//        //TODO: 这里supportsSCRAMSHA1Authentication是最优先选择
+//        /*需要修改的
+//        if ([self supportsDigestMD5Authentication])
+//        {
+//            someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+//            result = [self authenticate:someAuth error:&err];
+//
+//        else if ([self supportsSCRAMSHA1Authentication])
+//        {
+//            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
+//            result = [self authenticate:someAuth error:&err];
+//        }
+//         */
+//		else if ([self supportsPlainAuthentication])
+//		{
+//			someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:password];
+//			result = [self authenticate:someAuth error:&err];
+//		}
+//		else if ([self supportsDeprecatedDigestAuthentication])
+//		{
+//			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
+//			result = [self authenticate:someAuth error:&err];
+//		}
+//		else if ([self supportsDeprecatedPlainAuthentication])
+//		{
+//			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
+//			result = [self authenticate:someAuth error:&err];
+//		}
+//		else
+//		{
+//			NSString *errMsg = @"No suitable authentication method found";
+//			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+//			
+//			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+//			
+//			result = NO;
+//		}
+//	}};
+//	
+//	
+//	if (dispatch_get_specific(xmppQueueTag))
+//		block();
+//	else
+//		dispatch_sync(xmppQueue, block);
+//	
+//	if (errPtr)
+//		*errPtr = err;
+//	
+//	return result;
+//}
+- (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    // The given password parameter could be mutable
+    NSString *password = [inPassword copy];
+    
+    
+    __block BOOL result = YES;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
         
-         if ([self supportsSCRAMSHA1Authentication])
-         {
-         someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
-         result = [self authenticate:someAuth error:&err];
-         }
-         else if ([self supportsDigestMD5Authentication])
-         {
-         someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
-         result = [self authenticate:someAuth error:&err];
-         }
-        //TODO: 这里supportsSCRAMSHA1Authentication是最优先选择
-        /*需要修改的
-        if ([self supportsDigestMD5Authentication])
-        {
-            someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
-            result = [self authenticate:someAuth error:&err];
+        result = [self _authenticateWithPassword:password error:&err];
+        
+    }};
+    
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+    *errPtr = err;
+    
+    return result;
+}
+/**
+ *  There is a private method here
+ *
+ *  @param inPassword The given password
+ *  @param errPtr     The error information
+ *
+ *  @return The authenticate result
+ */
+- (BOOL)_authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    BOOL result = YES;
+    NSError *err = nil;
+    
+    if (state != STATE_XMPP_CONNECTED)
+    {
+        NSString *errMsg = @"Please wait until the stream is connected.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+        
+        result = NO;
+        return result;
+    }
+    
+    //		if (myJID_setByClient == nil)
+    //		{
+    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+    //
+    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+    //
+    //			result = NO;
+    //			return_from_block;
+    //		}
+    
+    // Choose the best authentication method.
+    //
+    // P.S. - This method is deprecated.
+    
+    id <XMPPSASLAuthentication> someAuth = nil;
+    
+    if ([self supportsSCRAMSHA1Authentication])
+    {
+        someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth error:&err];
+    }
+    else if ([self supportsDigestMD5Authentication])
+    {
+        someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth error:&err];
+    }
+    //TODO: 这里supportsSCRAMSHA1Authentication是最优先选择
+    /*需要修改的
+     if ([self supportsDigestMD5Authentication])
+     {
+     someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
+     result = [self authenticate:someAuth error:&err];
+     
+     else if ([self supportsSCRAMSHA1Authentication])
+     {
+     someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
+     result = [self authenticate:someAuth error:&err];
+     }
+     */
+    else if ([self supportsPlainAuthentication])
+    {
+        someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth error:&err];
+    }
+    else if ([self supportsDeprecatedDigestAuthentication])
+    {
+        someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth error:&err];
+    }
+    else if ([self supportsDeprecatedPlainAuthentication])
+    {
+        someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth error:&err];
+    }
+    else
+    {
+        NSString *errMsg = @"No suitable authentication method found";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+        
+        result = NO;
+    }
+    
+    return result;
+}
 
-        else if ([self supportsSCRAMSHA1Authentication])
-        {
-            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
-            result = [self authenticate:someAuth error:&err];
-        }
-         */
-		else if ([self supportsPlainAuthentication])
-		{
-			someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:password];
-			result = [self authenticate:someAuth error:&err];
-		}
-		else if ([self supportsDeprecatedDigestAuthentication])
-		{
-			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
-			result = [self authenticate:someAuth error:&err];
-		}
-		else if ([self supportsDeprecatedPlainAuthentication])
-		{
-			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
-			result = [self authenticate:someAuth error:&err];
-		}
-		else
-		{
-			NSString *errMsg = @"No suitable authentication method found";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
-			
-			result = NO;
-		}
-	}};
-	
-	
-	if (dispatch_get_specific(xmppQueueTag))
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	if (errPtr)
-		*errPtr = err;
-	
-	return result;
+- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    // The given password parameter could be mutable
+    NSString *Password = [password copy];
+    
+    BOOL result = NO;
+    
+    switch (type) {
+        case XMPPLoginTypeDefault:
+            [self setMyJID:[XMPPJID jidWithString:loginName]];
+            result = [self authenticateWithPassword:Password error:errPtr];
+            break;
+        case XMPPLoginTypePhone:
+            
+            break;
+        case XMPPLoginTypeEmail:
+            
+            break;
+        default:
+            break;
+    }
+    
+    return result;
 }
 
 - (BOOL)isAuthenticating

@@ -26,6 +26,10 @@
   #define DEFAULT_KEEPALIVE_INTERVAL 300.0 //  5 Minutes
 #endif
 
+#define DEFAULT_XMPP_STREAM_PORT 5222
+
+#define DAFAULT_ZERO_VALUE 0
+
 extern NSString *const XMPPStreamErrorDomain;
 
 typedef NS_ENUM(NSUInteger, XMPPStreamErrorCode) {
@@ -60,6 +64,15 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * See the P2P section below.
 **/
 - (id)init;
+/**
+ *  Init a xmppStream with the given host name and host port
+ *
+ *  @param HostName The given host name
+ *  @param HostPort The given host port
+ *
+ *  @return A xmppStream object
+ */
+- (id)initWithHostName:(NSString *)HostName hostPort:(NSUInteger)HostPort;
 
 /**
  * Peer to Peer XMPP initialization.
@@ -501,6 +514,21 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
+/**
+ *  login the server with
+ *
+ *  @param loginName The name used for logining
+ *  @param password  The password used for logining
+ *  @param type      The login type which has been switch into three type
+ *      ##  XMPPLoginTypeDefault - login with a jid string
+ *      ##  XMPPLoginTypePhone - login with a phone number string
+ *      ##  XMPPLoginTypeEmail - login with a email address string
+ *  @param errPtr    Error information
+ *
+ *  @return YES,if logined succeed
+ *          NO,other case
+ */
+- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr;
 
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.

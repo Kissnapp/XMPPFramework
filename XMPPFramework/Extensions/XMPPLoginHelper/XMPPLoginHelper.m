@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPLoginUser.h"
+#import "XMPPLoginHelper.h"
 #import "XMPP.h"
 #import "XMPPIDTracker.h"
 #import "XMPPLogging.h"
@@ -25,31 +25,32 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-@implementation XMPPLoginUser
+@implementation XMPPLoginHelper
+@synthesize xmppLoginHelperStorage = _xmppLoginHelperStorage;
 
 - (id)init
 {
-    return [self initWithLoginUserStorage:nil dispatchQueue:NULL];
+    return [self initWithLoginHelperStorage:nil dispatchQueue:NULL];
 }
 
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue
 {
     
-    return [self initWithLoginUserStorage:nil dispatchQueue:queue];
+    return [self initWithLoginHelperStorage:nil dispatchQueue:queue];
 }
 
-- (id)initWithLoginUserStorage:(id <XMPPLoginUserStorage>)storage
+- (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage
 {
-    return [self initWithLoginUserStorage:storage dispatchQueue:NULL];
+    return [self initWithLoginHelperStorage:storage dispatchQueue:NULL];
 }
 
-- (id)initWithLoginUserStorage:(id <XMPPLoginUserStorage>)storage dispatchQueue:(dispatch_queue_t)queue
+- (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage dispatchQueue:(dispatch_queue_t)queue
 {
     NSParameterAssert(storage != nil);
     
     if ((self = [super initWithDispatchQueue:queue])){
         if ([storage configureWithParent:self queue:moduleQueue]){
-            xmppLoginUserStorage = storage;
+            _xmppLoginHelperStorage = storage;
         }else{
             XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
         }
@@ -101,16 +102,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #pragma mark Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPLoginUserStorage>)xmppLoginUserStorage
+- (id <XMPPLoginHelperStorage>)xmppLoginHelperStorage
 {
     // Note: The xmppRosterStorage variable is read-only (set in the init method)
     
-    return xmppLoginUserStorage;
+    return xmppLoginHelperStorage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - setter/getter
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
 - (void)setActiveUserID:(NSString *)activeuserid
 {
     dispatch_block_t block = ^{
@@ -130,10 +132,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return activeUserID;
 }
+ */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 - (NSString *)userIDWithBareJIDStr:(NSString *)bareJidStr
 {
     __block NSString *result = nil;
@@ -165,107 +168,32 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
+*/
+- (void)savePhoneNumber:(NSString *)phoneNumber streamBareJidStr:(NSString *)streamBareJidStr;
+- (void)saveEmailAddress:(NSString *)emailAddress streamBareJidStr:(NSString *)streamBareJidStr;
 
-- (void)saveLoginUserID:(NSString *)loginUserID
-{
-    [self saveLoginUserID:loginUserID bareJid:nil];
-}
+- (void)updatePhoneNumber:(NSString *)phoneNumber withStreamBareJidStr:(NSString *)streamBareJidStr;
+- (void)updateEmailAddress:(NSString *)emailAddress withStreamBareJidStr:(NSString *)streamBareJidStr;
+- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withPhoneNumber:(NSString *)phoneNumber;
+- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withEmailAddress:(NSString *)emailAddress;
 
-- (void)saveLoginUserID:(NSString *)loginUserID bareJid:(NSString *)bareJid
-{
-    [self setActiveUserID:loginUserID];
-    
-    dispatch_block_t block = ^{
-        @autoreleasepool {
-            
-            NSString *loginID = [loginUserID copy];
-            NSString *streamBareJidStr = [bareJid copy];
-            [xmppLoginUserStorage saveLoginUserID:loginID bareJid:streamBareJidStr];
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
-- (void)updatebareJidStr:(NSString *)bareJidStr withUserID:(NSString *)activeuserid
-{
-    dispatch_block_t block = ^{
-        @autoreleasepool {
-            
-            NSString *loginID = [activeuserid copy];
-            NSString *streamBareJidStr = [bareJidStr copy];
-            [xmppLoginUserStorage updatebareJidStr:streamBareJidStr withUserID:loginID];
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
-- (void)deleteLoginUserWithUserID:(NSString *)userID
-{
-    dispatch_block_t block = ^{
-        @autoreleasepool {
-            
-            NSString *loginID = [userID copy];
-            [xmppLoginUserStorage deleteLoginUserWithUserID:loginID];
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-- (void)deleteLoginUserWithUerBareJidStr:(NSString *)bareJidStr
-{
-    dispatch_block_t block = ^{
-        
-        @autoreleasepool {
-            
-            NSString *streamBareJidStr = [bareJidStr copy];
-            [xmppLoginUserStorage deleteLoginUserWithUerBareJidStr:streamBareJidStr];
-        }
-        
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
+- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
+- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
+- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-    [self updatebareJidStr:[[sender myJID] bare] withUserID:activeUserID];
-    if ([multicastDelegate respondsToSelector:@selector(xmppLoginUser:didLoginSucceedWith:)]) {
-        [multicastDelegate xmppLoginUser:self didLoginSucceedWith:sender];
-    }
+    
 }
-//- (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
-//{
-//    [self setActiveUserID:nil];
-//}
-//
-//- (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream
-//{
-//
-//}
-//- (void)xmppStreamConnectDidTimeout:(XMPPStream *)sender
-//{
-//
-//}
-//- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
-//{
-//    
-//}
+
+- (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream
+{
+
+}
+
 
 @end

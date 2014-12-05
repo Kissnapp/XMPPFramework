@@ -7,9 +7,9 @@
 //
 
 #import "XMPPCoreDataStorage.h"
-#import "XMPPLoginUser.h"
+#import "XMPPLoginHelper.h"
 
-@interface XMPPLoginUserCoreDataStorage : XMPPCoreDataStorage<XMPPLoginUserStorage>
+@interface XMPPLoginHelperCoreDataStorage : XMPPCoreDataStorage<XMPPLoginHelperStorage>
 {
     // Inherits protected variables from XMPPCoreDataStorage
 }
