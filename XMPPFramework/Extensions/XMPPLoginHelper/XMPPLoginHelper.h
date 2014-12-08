@@ -20,13 +20,13 @@
 - (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage;
 - (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-- (void)savePhoneNumber:(NSString *)phoneNumber streamBareJidStr:(NSString *)streamBareJidStr;
-- (void)saveEmailAddress:(NSString *)emailAddress streamBareJidStr:(NSString *)streamBareJidStr;
+- (void)savePhoneNumber:(NSString *)phoneNumber;
+- (void)saveEmailAddress:(NSString *)emailAddress;
 
-- (void)updatePhoneNumber:(NSString *)phoneNumber withStreamBareJidStr:(NSString *)streamBareJidStr;
-- (void)updateEmailAddress:(NSString *)emailAddress withStreamBareJidStr:(NSString *)streamBareJidStr;
-- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withPhoneNumber:(NSString *)phoneNumber;
-- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withEmailAddress:(NSString *)emailAddress;
+- (void)updatePhoneNumber:(NSString *)phoneNumber;
+- (void)updateEmailAddress:(NSString *)emailAddress;
+- (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
+- (void)updateStreamBareJidStrWithEmailAddress:(NSString *)emailAddress;
 
 - (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
@@ -46,12 +46,25 @@
 
 @optional
 
+- (void)savePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream;
+- (void)saveEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
+
+- (void)updatePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream;
+- (void)updateEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
+- (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber emailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
+
+- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
+- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
+
+- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr;
+
 @end
 
 @protocol XMPPLoginHelperDelegate <NSObject>
 
 @required
-@optional
 
+@optional
 
 @end

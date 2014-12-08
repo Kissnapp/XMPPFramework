@@ -92,9 +92,9 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     return (XMPPChatRoomCoreDataStorageObject *)[results lastObject];
 }
 
-
-#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPChatRoomStorage Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)handleChatRoomUserDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream
 {
@@ -697,6 +697,67 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                                                                                     withID:bareJidStr streamBareJidStr:[[stream myJID] bare]];
         if (chatRoom != nil) {
             result = YES;
+        }
+        
+    }];
+    
+    return result;
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - XMPPChatRoomQueryModuleStorage Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)privateChatRoomForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+//        NSManagedObjectContext *moc = [self managedObjectContext];
+//        
+//        XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+//                                                                                                                    withID:bareChatRoomJidStr streamBareJidStr:[[stream myJID] bare]];
+//        if (chatRoom != nil) {
+//            result = YES;
+//        }
+        
+    }];
+    
+    return result;
+}
+- (NSString *)chatRoomNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                    withID:bareChatRoomJidStr
+                                                                                                          streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        if (chatRoom) {
+            result = chatRoom.nickName;
+        }
+    }];
+    
+    return result;
+}
+- (NSString *)userNickNameForBareJidStr:(NSString *)bareJidStr withBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                withBareJidStr:bareJidStr
+                                                                                                                   chatRoomJid:bareChatRoomJidStr
+                                                                                                              streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        if (user) {
+            result = user.nickName;
         }
         
     }];

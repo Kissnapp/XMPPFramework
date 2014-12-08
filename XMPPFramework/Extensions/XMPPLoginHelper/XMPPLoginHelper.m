@@ -106,7 +106,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     // Note: The xmppRosterStorage variable is read-only (set in the init method)
     
-    return xmppLoginHelperStorage;
+    return _xmppLoginHelperStorage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,6 +136,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 - (NSString *)userIDWithBareJIDStr:(NSString *)bareJidStr
 {
@@ -169,18 +170,166 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 */
-- (void)savePhoneNumber:(NSString *)phoneNumber streamBareJidStr:(NSString *)streamBareJidStr;
-- (void)saveEmailAddress:(NSString *)emailAddress streamBareJidStr:(NSString *)streamBareJidStr;
+- (void)savePhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage savePhoneNumber:phoneNumber xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)saveEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveEmailAddress:emailAddress xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
-- (void)updatePhoneNumber:(NSString *)phoneNumber withStreamBareJidStr:(NSString *)streamBareJidStr;
-- (void)updateEmailAddress:(NSString *)emailAddress withStreamBareJidStr:(NSString *)streamBareJidStr;
-- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withPhoneNumber:(NSString *)phoneNumber;
-- (void)updateStreamBareJidStr:(NSString *)streamBareJidStr withEmailAddress:(NSString *)emailAddress;
+- (void)updatePhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updatePhoneNumber:phoneNumber xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)updateEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateEmailAddress:emailAddress xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
-- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
-- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
-- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
-- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateStreamBareJidStrWithPhoneNumber:phoneNumber emailAddress:nil xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)updateStreamBareJidStrWithEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateStreamBareJidStrWithPhoneNumber:nil emailAddress:emailAddress xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage streamBareJidStrWithPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage streamBareJidStrWithEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (NSString *)currentPhoneNumber
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage phoneNumberWithStreamBareJidStr:[[xmppStream myJID] bare]];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSString *)currentEmaiAddress
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage emailAddressWithStreamBareJidStr:[[xmppStream myJID] bare]];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage phoneNumberWithStreamBareJidStr:streamBareJidStr];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage emailAddressWithStreamBareJidStr:streamBareJidStr];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +341,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream
 {
-
+    
 }
 
 

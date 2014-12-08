@@ -8,14 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "xmppChatRoom.h"
+#import "XMPPChatRoom.h"
+#import "XMPPChatRoomQueryModule.h"
 #import "XMPPCoreDataStorage.h" 
 #import "XMPPChatRoomCoreDataStorageObject.h"
 #import "XMPPChatRoomUserCoreDataStorageObject.h"
 
 @protocol XMPPChatRoomStorage;
+@protocol XMPPChatRoomQueryModuleStorage;
 
-@interface XMPPChatRoomCoreDataStorage : XMPPCoreDataStorage<XMPPChatRoomStorage>
+@interface XMPPChatRoomCoreDataStorage : XMPPCoreDataStorage<XMPPChatRoomStorage,XMPPChatRoomQueryModuleStorage>
 {
     NSMutableSet *chatRoomPopulationSet;
 }

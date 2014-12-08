@@ -21,13 +21,13 @@
 @protocol XMPPChatRoomDelegate;
 
 @interface XMPPChatRoom : XMPPModule
-{/*	Inherited from XMPPModule:
-  
-  XMPPStream *xmppStream;
-  
-  dispatch_queue_t moduleQueue;
-  id multicastDelegate;
-  */
+{
+
+    /*	Inherited from XMPPModule:
+     XMPPStream *xmppStream;
+     dispatch_queue_t moduleQueue;
+     id multicastDelegate;
+     */
     __strong id <XMPPChatRoomStorage> xmppChatRoomStorage;
     
     XMPPIDTracker *xmppIDTracker;

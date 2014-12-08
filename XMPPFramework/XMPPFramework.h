@@ -84,6 +84,7 @@
 #import "NSDate+NSString.h"
 
 #import "XMPPChatRoom.h"
+#import "XMPPChatRoomQueryModule.h"
 #import "XMPPChatRoomCoreDataStorage.h"
 #import "XMPPChatRoomCoreDataStorageObject.h"
 #import "XMPPChatRoomUserCoreDataStorageObject.h"

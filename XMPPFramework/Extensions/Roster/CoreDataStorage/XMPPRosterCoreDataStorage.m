@@ -526,6 +526,38 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPRosterQueryModuleStorage
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)userExistInRosterForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"jidStr",[jid bare],@"streamBareJidStr",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPUserCoreDataStorageObject *user = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (user) result = YES;
+        
+    }];
+    
+    return result;
+}
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();

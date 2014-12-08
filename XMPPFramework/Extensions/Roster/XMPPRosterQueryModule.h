@@ -40,6 +40,7 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 - (id)initWithRoster:(XMPPRoster *)xmppRoster  dispatchQueue:(dispatch_queue_t)queue;
 
 - (BOOL)privateModelForJID:(XMPPJID *)jid;
+- (BOOL)userExistInRosterForJID:(XMPPJID *)jid;
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)displayNameForJID:(XMPPJID *)jid;
 
@@ -71,6 +72,7 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 @protocol XMPPRosterQueryModuleStorage <NSObject>
 
 - (BOOL)privateModelForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (BOOL)userExistInRosterForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)displayNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 

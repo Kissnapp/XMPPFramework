@@ -175,6 +175,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
+- (BOOL)userExistInRosterForJID:(XMPPJID *)jid
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        result = [_moduleStorage userExistInRosterForJID:jid xmppStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

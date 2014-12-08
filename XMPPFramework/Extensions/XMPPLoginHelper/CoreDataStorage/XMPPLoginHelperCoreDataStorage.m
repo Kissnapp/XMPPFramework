@@ -60,6 +60,7 @@ static XMPPLoginHelperCoreDataStorage *sharedInstance;
 {
     [super commonInit];
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,76 +68,136 @@ static XMPPLoginHelperCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPLoginUserStorage methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (NSString *)userIDWithBareJIDStr:(NSString *)bareJidStr
+- (void)savePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPLoginUserCoreDataStorageObject updatePhoneNumberOrInsertInManagedObjectContext:moc
+                                                                            withPhoneNumber:phoneNumber
+                                                                           streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+    }];
+}
+
+- (void)saveEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPLoginUserCoreDataStorageObject updateEmailAddressOrInsertInManagedObjectContext:moc
+                                                                            withEmailAddress:emailAddress
+                                                                            streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+    }];
+}
+
+- (void)updatePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPLoginUserCoreDataStorageObject updatePhoneNumberInManagedObjectContext:moc
+                                                                    withPhoneNumber:phoneNumber
+                                                                   streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+    }];
+}
+- (void)updateEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPLoginUserCoreDataStorageObject updateEmailAddressInManagedObjectContext:moc
+                                                                    withEmailAddress:emailAddress
+                                                                    streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+    }];
+}
+- (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber emailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPLoginUserCoreDataStorageObject updateAllInManagedObjectContext:moc
+                                                            withPhoneNumber:phoneNumber
+                                                           withEmailAddress:emailAddress
+                                                                   nickName:nil
+                                                                   password:nil
+                                                                  longitude:nil
+                                                                   latitude:nil
+                                                           streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+    }];
+}
+
+- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
 {
     __block NSString *result = nil;
     
     [self executeBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
-        XMPPLoginUserCoreDataStorageObject *loginUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                        streamBareJidStr:bareJidStr];
-        result = [loginUser.streamBareJidStr copy];
+        XMPPLoginUserCoreDataStorageObject *user = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                    withPhoneNumber:phoneNumber];
+        if (user) {
+            
+            result = user.streamBareJidStr;
+        }
+        
     }];
     
     return result;
 }
-- (NSString *)bareJidStrWithUserID:(NSString *)userID
+- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress
 {
     __block NSString *result = nil;
     
     [self executeBlock:^{
-        
         NSManagedObjectContext *moc = [self managedObjectContext];
-        XMPPLoginUserCoreDataStorageObject *loginUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                             withLoginID:userID];
-        result = [loginUser.streamBareJidStr copy];
+        XMPPLoginUserCoreDataStorageObject *user = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                   withEmailAddress:emailAddress];
+        if (user) {
+            result = user.streamBareJidStr;
+        }
+        
     }];
     
     return result;
 }
 
-- (void)saveLoginUserID:(NSString *)loginUserID bareJid:(NSString *)bareJid
+- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr
 {
-    [self scheduleBlock:^{
-        
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
-        [XMPPLoginUserCoreDataStorageObject updateOrInsertInManagedObjectContext:moc
-                                                                     withLoginID:loginUserID
-                                                                streamBareJidStr:bareJid];
+        XMPPLoginUserCoreDataStorageObject *user = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                   streamBareJidStr:streamBareJidStr];
+        if (user) {
+            result = user.phoneNumber;
+        }
         
     }];
+    
+    return result;
 }
-
-- (void)updatebareJidStr:(NSString *)bareJidStr withUserID:(NSString *)activeUserID
+- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr
 {
-    [self scheduleBlock:^{
-        
+    __block NSString *result = nil;
+    
+    [self executeBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
-        [XMPPLoginUserCoreDataStorageObject updateInManagedObjectContext:moc
-                                                             withLoginID:activeUserID
-                                                        streamBareJidStr:bareJidStr];
+        XMPPLoginUserCoreDataStorageObject *user = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                   streamBareJidStr:streamBareJidStr];
+        if (user) {
+            result = user.emailAddress;
+        }
         
     }];
-}
-
-- (void)deleteLoginUserWithUserID:(NSString *)userID
-{
-    [self scheduleBlock:^{
-        
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        [XMPPLoginUserCoreDataStorageObject deleteFromManagedObjectContext:moc
-                                                               withLoginID:userID];
-        
-    }];
-}
-- (void)deleteLoginUserWithUerBareJidStr:(NSString *)bareJidStr
-{
-    [self scheduleBlock:^{
-        
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        [XMPPLoginUserCoreDataStorageObject deleteFromManagedObjectContext:moc
-                                                          streamBareJidStr:bareJidStr];
-        
-    }];
+    
+    return result;
 }
 @end
