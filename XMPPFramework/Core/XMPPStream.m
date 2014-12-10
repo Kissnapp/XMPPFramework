@@ -139,6 +139,10 @@ enum XMPPStreamConfig
 	NSMutableArray *receipts;
 	
 	id userTag;
+    
+    NSString *authenticateInputStr;
+    XMPPLoginType authenticateInputType;
+    BOOL hasMyJidFromServer;
 }
 
 - (void)setIsSecure:(BOOL)flag;
@@ -177,6 +181,8 @@ enum XMPPStreamConfig
 @implementation XMPPStream
 
 @synthesize tag = userTag;
+@synthesize authenticateStr = authenticateInputStr;
+@synthesize authenticateType = authenticateInputType;
 
 /**
  * Shared initialization between the various init methods.
@@ -217,6 +223,7 @@ enum XMPPStreamConfig
     idTracker = [[XMPPIDTracker alloc] initWithStream:self dispatchQueue:xmppQueue];
 	
 	receipts = [[NSMutableArray alloc] init];
+    
 }
 
 /**
@@ -253,6 +260,20 @@ enum XMPPStreamConfig
     return self;
 }
 
+- (id)initWithWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType
+{
+    if ((self = [super init]))
+    {
+        // Common initialization
+        [self commonInit];
+        authenticateInputStr = authenticateStr;
+        authenticateInputType = authenticateType;
+        // Initialize socket
+        asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+    }
+    return self;
+}
+
 /**
  * Peer to Peer XMPP initialization.
  * The stream is a direct client to client connection as outlined in XEP-0174.
@@ -273,6 +294,12 @@ enum XMPPStreamConfig
         config = kP2PMode;
     }
 	return self;
+}
+
+- (void)configureHostName:(NSString *)HostName hostPort:(NSInteger)HostPort
+{
+    [self setHostName:HostName];
+    [self setHostPort:HostPort];
 }
 
 /**
@@ -443,6 +470,39 @@ enum XMPPStreamConfig
 			result = myJID_setByServer;
 		else
 			result = myJID_setByClient;
+        
+        if (!result && authenticateInputStr) {
+            __block NSString *myJidStr = nil;
+            
+            // Notify all interested delegates.
+            // This must be done serially to allow them to alter the element in a thread-safe manner.
+            
+            id delegate;
+            dispatch_queue_t dq;
+            
+            SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
+            
+            dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+            dispatch_group_t delegateGroup = dispatch_group_create();
+            
+            GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+            
+            while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+            {
+                dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+                    
+                    myJidStr = [delegate streamBareJidStrWithAuthenticateStr:authenticateInputStr authenticateType:authenticateInputType];
+                    dispatch_semaphore_signal(delegateSemaphore);
+                }});
+            }
+            
+            dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+            BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+            
+            if (handled) {
+                result = [XMPPJID jidWithString:myJidStr];
+            }
+        }
 	};
 	
 	if (dispatch_get_specific(xmppQueueTag))
@@ -451,6 +511,23 @@ enum XMPPStreamConfig
 		dispatch_sync(xmppQueue, block);
 	
 	return result;
+}
+
+- (BOOL)hasMyJIDFromServer
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        
+        result = hasMyJidFromServer;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
 }
 
 - (void)setMyJID_setByClient:(XMPPJID *)newMyJID
@@ -496,6 +573,7 @@ enum XMPPStreamConfig
 			
 			if (![oldMyJID isEqualToJID:newMyJID])
 			{
+                hasMyJidFromServer = YES;
 				[[NSNotificationCenter defaultCenter] postNotificationName:XMPPStreamDidChangeMyJIDNotification
 				                                                    object:self];
                 [multicastDelegate xmppStreamDidChangeMyJID:self];
@@ -530,6 +608,41 @@ enum XMPPStreamConfig
 		
 		return result;
 	}
+}
+
+- (NSString *)authenticateStr
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        
+        result = authenticateInputStr;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
+}
+
+- (XMPPLoginType )authenticateType
+{
+    __block XMPPLoginType result = XMPPLoginTypeDefault;
+    
+    dispatch_block_t block = ^{
+        
+        result = authenticateInputType;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
+
 }
 
 - (XMPPPresence *)myPresence
@@ -1913,6 +2026,8 @@ enum XMPPStreamConfig
 //	return result;
 //}
 
+
+
 - (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth error:(NSError **)errPtr
 {
     XMPPLogTrace();
@@ -1932,6 +2047,29 @@ enum XMPPStreamConfig
     
     if (errPtr)
     *errPtr = err;
+    
+    return result;
+}
+
+- (BOOL)authenticate:(id <XMPPSASLAuthentication>)inAuth type:(XMPPLoginType)type error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        result = [self _authenticate:inAuth type:type error:&err];
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
     
     return result;
 }
@@ -1985,6 +2123,56 @@ enum XMPPStreamConfig
     
     return result;
 }
+
+- (BOOL)_authenticate:(id <XMPPSASLAuthentication>)inAuth type:(XMPPLoginType)type error:(NSError **)errPtr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    BOOL result = NO;
+    NSError *err = nil;
+    
+    if (state != STATE_XMPP_CONNECTED)
+    {
+        NSString *errMsg = @"Please wait until the stream is connected.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+        
+        result = NO;
+        return result;
+    }
+    
+    //		if (myJID_setByClient == nil)
+    //		{
+    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+    //
+    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+    //
+    //			result = NO;
+    //			return_from_block;
+    //		}
+    
+    // Change state.
+    // We do this now because when we invoke the start method below,
+    // it may in turn invoke our sendAuthElement method, which expects us to be in STATE_XMPP_AUTH.
+    state = STATE_XMPP_AUTH;
+    
+    if ([inAuth startWithType:type error:&err])
+    {
+        auth = inAuth;
+        result = YES;
+    }
+    else
+    {
+        // Unable to start authentication for some reason.
+        // Revert back to connected state.
+        state = STATE_XMPP_CONNECTED;
+    }
+    
+    return result;
+}
+
 
 /**
  * This method applies to standard password authentication schemes only.
@@ -2096,6 +2284,15 @@ enum XMPPStreamConfig
 //	
 //	return result;
 //}
+
+/**
+ * This method applies to standard password authentication schemes only.
+ * This is NOT the primary authentication method.
+ *
+ * @see authenticate:error:
+ *
+ * This method exists for backwards compatibility, and may disappear in future versions.
+ **/
 - (BOOL)authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
 {
     XMPPLogTrace();
@@ -2124,14 +2321,7 @@ enum XMPPStreamConfig
     
     return result;
 }
-/**
- *  There is a private method here
- *
- *  @param inPassword The given password
- *  @param errPtr     The error information
- *
- *  @return The authenticate result
- */
+
 - (BOOL)_authenticateWithPassword:(NSString *)inPassword error:(NSError **)errPtr
 {
     NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
@@ -2150,17 +2340,6 @@ enum XMPPStreamConfig
         return result;
     }
     
-    //		if (myJID_setByClient == nil)
-    //		{
-    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
-    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-    //
-    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-    //
-    //			result = NO;
-    //			return_from_block;
-    //		}
-    
     // Choose the best authentication method.
     //
     // P.S. - This method is deprecated.
@@ -2177,19 +2356,6 @@ enum XMPPStreamConfig
         someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:inPassword];
         result = [self authenticate:someAuth error:&err];
     }
-    //TODO: 这里supportsSCRAMSHA1Authentication是最优先选择
-    /*需要修改的
-     if ([self supportsDigestMD5Authentication])
-     {
-     someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
-     result = [self authenticate:someAuth error:&err];
-     
-     else if ([self supportsSCRAMSHA1Authentication])
-     {
-     someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:password];
-     result = [self authenticate:someAuth error:&err];
-     }
-     */
     else if ([self supportsPlainAuthentication])
     {
         someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:inPassword];
@@ -2218,6 +2384,76 @@ enum XMPPStreamConfig
     return result;
 }
 
+/**
+ *  There is a private method here
+ *
+ *  @param inPassword The given password
+ *  @param errPtr     The error information
+ *
+ *  @return The authenticate result
+ */
+- (BOOL)_authenticateWithPassword:(NSString *)inPassword type:(XMPPLoginType)type error:(NSError **)errPtr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    BOOL result = YES;
+    NSError *err = nil;
+    
+    if (state != STATE_XMPP_CONNECTED)
+    {
+        NSString *errMsg = @"Please wait until the stream is connected.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+        
+        result = NO;
+        return result;
+    }
+    
+    // Choose the best authentication method.
+    //
+    // P.S. - This method is deprecated.
+    
+    id <XMPPSASLAuthentication> someAuth = nil;
+    
+    if ([self supportsSCRAMSHA1Authentication])
+    {
+        someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth type:type error:&err];
+    }
+    else if ([self supportsDigestMD5Authentication])
+    {
+        someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth type:type error:&err];
+    }
+    else if ([self supportsPlainAuthentication])
+    {
+        someAuth = [[XMPPPlainAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth type:type error:&err];
+    }
+    else if ([self supportsDeprecatedDigestAuthentication])
+    {
+        someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth type:type error:&err];
+    }
+    else if ([self supportsDeprecatedPlainAuthentication])
+    {
+        someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:inPassword];
+        result = [self authenticate:someAuth type:type error:&err];
+    }
+    else
+    {
+        NSString *errMsg = @"No suitable authentication method found";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+        
+        result = NO;
+    }
+    
+    return result;
+}
+
 - (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr
 {
     XMPPLogTrace();
@@ -2225,22 +2461,69 @@ enum XMPPStreamConfig
     // The given password parameter could be mutable
     NSString *Password = [password copy];
     
-    BOOL result = NO;
+    __block BOOL    result = NO;
+    __block NSError   *err = nil;
+    __block XMPPLoginType loginType = XMPPLoginTypeDefault;
     
-    switch (type) {
-        case XMPPLoginTypeDefault:
-            [self setMyJID:[XMPPJID jidWithString:loginName]];
-            result = [self authenticateWithPassword:Password error:errPtr];
-            break;
-        case XMPPLoginTypePhone:
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        __block NSString *myJidStr = nil;
+        authenticateInputType = type;
+        authenticateInputStr = [loginName copy];
+        
+        
+        // Notify all interested delegates.
+        // This must be done serially to allow them to alter the element in a thread-safe manner.
+        
+        id delegate;
+        dispatch_queue_t dq;
+        
+        SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
+        
+        dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+        dispatch_group_t delegateGroup = dispatch_group_create();
+    
+        GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+        
+        while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+        {
+            dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+                
+                myJidStr = [delegate streamBareJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
+                dispatch_semaphore_signal(delegateSemaphore);
+            }});
+        }
+        
+        dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+        BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+        
+        if (handled) {
+            //If the myJidStr is nil
+            if (!myJidStr) {
+                myJidStr = [loginName copy];
+                loginType = type;
+            }
             
-            break;
-        case XMPPLoginTypeEmail:
-            
-            break;
-        default:
-            break;
-    }
+            //authenticate form server
+            [self setMyJID:[XMPPJID jidWithString:myJidStr]];
+            result = [self _authenticateWithPassword:Password type:loginType error:&err];
+        }
+        
+#if !OS_OBJECT_USE_OBJC
+        dispatch_release(delegateSemaphore);
+        dispatch_release(delegateGroup);
+#endif
+        
+    }};
+    
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
     
     return result;
 }

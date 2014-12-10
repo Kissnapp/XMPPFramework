@@ -92,5 +92,10 @@ typedef enum XMPPHandleAuthResponse XMPPHandleAuthResponse;
  * The default value is YES.
 **/
 - (BOOL)shouldResendOpeningNegotiationAfterSuccessfulAuthentication;
+/**
+ * Optionally implement this method to override the default start method.
+ * The default value is YES.
+ **/
+- (BOOL)startWithType:(NSInteger)type error:(NSError **)errPtr;
 
 @end

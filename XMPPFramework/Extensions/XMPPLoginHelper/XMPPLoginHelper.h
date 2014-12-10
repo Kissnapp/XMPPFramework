@@ -28,6 +28,10 @@
 - (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (void)updateStreamBareJidStrWithEmailAddress:(NSString *)emailAddress;
 
+- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber;
+- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress;
+- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr;
+
 - (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
 - (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
@@ -52,6 +56,10 @@
 - (void)updatePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream;
 - (void)updateEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
 - (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber emailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
+
+- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber;
+- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress;
+- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr;
 
 - (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;

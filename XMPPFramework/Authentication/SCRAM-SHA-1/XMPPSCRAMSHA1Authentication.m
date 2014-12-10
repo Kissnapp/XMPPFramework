@@ -94,6 +94,48 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - the new addation method 2014-12-10 modified by Peter Lee
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)startWithType:(NSInteger)type error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    if(self.username.length || self.password.length) {
+        
+        NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
+        [auth addAttributeWithName:@"mechanism" stringValue:@"SCRAM-SHA-1"];
+        [auth setStringValue:[self clientMessage_kisnappWithType:type]];
+        
+        [xmppStream sendAuthElement:auth];
+        self.awaitingChallenge = YES;
+        
+        return YES;
+    }
+    else {
+        return NO;
+    }
+
+}
+
+- (NSString *)clientMessage_kisnappWithType:(NSInteger)type
+{
+    self.clientNonce = [XMPPStream generateUUID];
+    
+    self.clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@",self.username,self.clientNonce];
+    
+    NSString *tempClientFirstMessageBare = [NSString stringWithFormat:@"%@,t=%d",self.clientFirstMessageBare,type];
+    
+    NSData *message1Data = [[NSString stringWithFormat:@"n,,%@",tempClientFirstMessageBare] dataUsingEncoding:NSUTF8StringEncoding];
+    return [message1Data xmpp_base64Encoded];
+    
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (XMPPHandleAuthResponse)handleAuth1:(NSXMLElement *)authResponse
 {
     XMPPLogTrace();

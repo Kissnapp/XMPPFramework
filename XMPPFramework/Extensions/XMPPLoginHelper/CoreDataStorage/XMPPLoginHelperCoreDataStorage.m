@@ -200,4 +200,26 @@ static XMPPLoginHelperCoreDataStorage *sharedInstance;
     
     return result;
 }
+
+- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPLoginUserCoreDataStorageObject deleteFromManagedObjectContext:moc withPhoneNumber:phoneNumber];
+    }];
+}
+- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPLoginUserCoreDataStorageObject deleteFromManagedObjectContext:moc withEmailAddress:emailAddress];
+    }];
+}
+- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [XMPPLoginUserCoreDataStorageObject deleteFromManagedObjectContext:moc streamBareJidStr:streamBareJidStr];
+    }];
+}
 @end

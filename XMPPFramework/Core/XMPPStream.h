@@ -73,12 +73,28 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  *  @return A xmppStream object
  */
 - (id)initWithHostName:(NSString *)HostName hostPort:(NSUInteger)HostPort;
+/**
+ *  Init a xmppStream with the given authenticateStr and authenticateType
+ *
+ *  @param authenticateStr  The given authenticateStr
+ *  @param authenticateType The given authenticateType
+ *
+ *  @return A xmppStream object
+ */
+- (id)initWithWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType;
 
 /**
  * Peer to Peer XMPP initialization.
  * The stream is a direct client to client connection as outlined in XEP-0174.
 **/
 - (id)initP2PFrom:(XMPPJID *)myJID;
+/**
+ *  set the server host name and host port
+ *
+ *  @param HostName The given host name
+ *  @param HostPort The given host port
+ */
+- (void)configureHostName:(NSString *)HostName hostPort:(NSInteger)HostPort;
 
 /**
  * XMPPStream uses a multicast delegate.
@@ -174,6 +190,12 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Only used in P2P streams.
 **/
 @property (strong, readonly) XMPPJID *remoteJID;
+
+@property (strong, readonly) NSString *authenticateStr;
+
+@property (assign, readonly) XMPPLoginType authenticateType;
+
+@property (assign, readonly) BOOL hasMyJIDFromServer;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
@@ -917,6 +939,11 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method is called if authentication fails.
 **/
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;
+
+/**
+ * we can get the strean bare jid str with this method
+ **/
+- (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice

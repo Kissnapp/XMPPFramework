@@ -74,6 +74,7 @@
 + (BOOL)deleteFromManagedObjectContext:(NSManagedObjectContext *)moc
                       streamBareJidStr:(NSString *)streamBareJidStr;
 
+
 //modify
 + (BOOL)updateStreamBareJidStrInManagedObjectContext:(NSManagedObjectContext *)moc
                                      withPhoneNumber:(NSString *)phonenumber

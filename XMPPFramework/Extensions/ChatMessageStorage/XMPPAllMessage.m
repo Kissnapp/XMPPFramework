@@ -704,13 +704,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     dispatch_block_t block = ^{
         
         if ([message isChatMessageWithInfo]) {
+            
             //save the message
             XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:message];
             [self saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:message];
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
-         
-
             
         }
     };

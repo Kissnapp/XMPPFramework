@@ -137,39 +137,6 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #pragma mark - public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-- (NSString *)userIDWithBareJIDStr:(NSString *)bareJidStr
-{
-    __block NSString *result = nil;
-    
-    dispatch_block_t block = ^{
-        result = [xmppLoginUserStorage userIDWithBareJIDStr:bareJidStr];
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-    return result;
-
-}
-- (NSString *)bareJidStrWithUserID:(NSString *)userID
-{
-    __block NSString *result = nil;
-    
-    dispatch_block_t block = ^{
-        result = [xmppLoginUserStorage bareJidStrWithUserID:userID];
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-    return result;
-}
-*/
 - (void)savePhoneNumber:(NSString *)phoneNumber
 {
     dispatch_block_t block = ^{
@@ -336,12 +303,53 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
-    
+    XMPPLogTrace();
+    switch (sender.authenticateType) {
+        case XMPPLoginTypePhone:
+            [self savePhoneNumber:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+            break;
+        case XMPPLoginTypeEmail:
+            [self saveEmailAddress:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+            break;
+        default:
+            break;
+    }
 }
 
-- (void)xmppStreamDidChangeMyJID:(XMPPStream *)xmppStream
+- (void)xmppStreamDidChangeMyJID:(XMPPStream *)sender
 {
+    XMPPLogTrace();
     
+    if (sender.hasMyJIDFromServer) {
+        switch (sender.authenticateType) {
+            case XMPPLoginTypePhone:
+                [self updateStreamBareJidStrWithPhoneNumber:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+                break;
+            case XMPPLoginTypeEmail:
+                [self updateStreamBareJidStrWithEmailAddress:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+- (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType
+{
+    NSString *result = nil;
+    
+    switch (authenticateType) {
+        case XMPPLoginTypePhone:
+            result = [self streamBareJidStrWithPhoneNumber:authenticateStr];
+            break;
+         case XMPPLoginTypeEmail:
+            result = [self streamBareJidStrWithEmailAddress:authenticateStr];
+            break;
+        default:
+            break;
+    }
+    
+    return result;
 }
 
 
