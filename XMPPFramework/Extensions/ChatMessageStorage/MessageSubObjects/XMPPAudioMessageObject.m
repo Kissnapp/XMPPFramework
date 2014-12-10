@@ -144,9 +144,6 @@
 
 - (void)setFileData:(NSData *)fileData
 {
-    if (!fileData) {
-        return;
-    }
     XMPP_SUB_MSG_SET_STRING_VALUE([fileData xmpp_base64Encoded]);
 }
 
