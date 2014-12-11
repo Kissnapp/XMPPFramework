@@ -25,6 +25,8 @@
   static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
+#define KISSNAPP_REGISTER_XMLNS @"aft:register"
+
 /**
  * Seeing a return statements within an inner block
  * can sometimes be mistaken for a return point of the enclosing method.
@@ -1842,6 +1844,75 @@ enum XMPPStreamConfig
 	return result;
     
 }
+//This is a methods write by Peter Lee
+- (BOOL)kissnapp_registerWithElements:(NSArray *)elements error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = YES;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        if (state != STATE_XMPP_CONNECTED)
+        {
+            NSString *errMsg = @"Please wait until the stream is connected.";
+            NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+            
+            err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+            
+            result = NO;
+            return_from_block;
+        }
+        
+        if (![self supportsInBandRegistration])
+        {
+            NSString *errMsg = @"The server does not support in band registration.";
+            NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+            
+            err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+            
+            result = NO;
+            return_from_block;
+        }
+        
+        NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:KISSNAPP_REGISTER_XMLNS];
+        
+        for(NSXMLElement *element in elements)
+        {
+            [queryElement addChild:element];
+        }
+        
+        XMPPIQ *iq = [XMPPIQ iqWithType:@"set"];
+        [iq addChild:queryElement];
+        
+        NSString *outgoingStr = [iq compactXMLString];
+        NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+        
+        XMPPLogSend(@"SEND: %@", outgoingStr);
+        numberOfBytesSent += [outgoingData length];
+        
+        [asyncSocket writeData:outgoingData
+                   withTimeout:TIMEOUT_XMPP_WRITE
+                           tag:TAG_XMPP_WRITE_STREAM];
+        
+        // Update state
+        state = STATE_XMPP_REGISTERING;
+        
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
+    
+    return result;
+    
+}
+
 
 /**
  * This method attempts to register a new user on the server using the given username and password.

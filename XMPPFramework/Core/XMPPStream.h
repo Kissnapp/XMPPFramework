@@ -52,6 +52,12 @@ typedef NS_ENUM(NSUInteger, XMPPLoginType) {
     XMPPLoginTypeEmail              //login with a email address string
 };
 
+typedef NS_ENUM(NSUInteger, XMPPRegisterType) {
+    XMPPRegisterTypeDefault = 0,       //regist with a jid string
+    XMPPRegisterTypePhone,             //regist with a phone number string
+    XMPPRegisterTypeEmail              //regist with a email address string
+};
+
 extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>

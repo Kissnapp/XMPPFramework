@@ -182,22 +182,42 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset;
 
 /**
- *  send  a message with the given XMPPExtendMessageObject object
+ *  Send and Save a message with the given XMPPExtendMessageObject object
  *
  *  @param message The given XMPPExtendMessageObject object
  */
 - (void)saveAndSendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+/**
+ *  Save a XMPPExtendMessageObject object
+ *
+ *  @param message The given message object
+ */
 - (void)saveXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+/**
+ *  Send a XMPPExtendMessageObject object
+ *
+ *  @param message The given message obejct
+ */
 - (void)sendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
 /**
- *  Save the message before sending
+ *  Save the XMPPMessage object
  *  Notice:When we send a message we should call this method first
  *
  *  @param message The message will been sent
  */
-- (void)saveBeforeSendingWithMessage:(XMPPMessage *)message;
-
-
+- (void)saveXMPPMessage:(XMPPMessage *)message;
+/**
+ *  Send a XMPPMessage object
+ *
+ *  @param message The given message
+ */
+- (void)sendXMPPMessage:(XMPPMessage *)message;
+/**
+ *  Save and send a XMPPMessage object
+ *
+ *  @param message The given message
+ */
+- (void)saveAndSendXMPPMessage:(XMPPMessage *)message;
 
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 

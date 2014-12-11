@@ -296,7 +296,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     [self removeDelegate:delegate];
 }
 
-- (void)saveBeforeSendingWithMessage:(XMPPMessage *)message
+- (void)saveXMPPMessage:(XMPPMessage *)message
 {
     XMPPLogTrace();
     
