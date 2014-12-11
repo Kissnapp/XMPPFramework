@@ -474,36 +474,7 @@ enum XMPPStreamConfig
 			result = myJID_setByClient;
         
         if (!result && authenticateInputStr) {
-            __block NSString *myJidStr = nil;
-            
-            // Notify all interested delegates.
-            // This must be done serially to allow them to alter the element in a thread-safe manner.
-            
-            id delegate;
-            dispatch_queue_t dq;
-            
-            SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
-            
-            dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
-            dispatch_group_t delegateGroup = dispatch_group_create();
-            
-            GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
-            
-            while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
-            {
-                dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
-                    
-                    myJidStr = [delegate streamBareJidStrWithAuthenticateStr:authenticateInputStr authenticateType:authenticateInputType];
-                    dispatch_semaphore_signal(delegateSemaphore);
-                }});
-            }
-            
-            dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-            BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
-            
-            if (handled) {
-                result = [XMPPJID jidWithString:myJidStr];
-            }
+            result = [XMPPJID jidWithString:[self myJidStrWithAuthenticateStr:authenticateInputStr authenticateType:authenticateInputType]];
         }
 	};
 	
@@ -514,6 +485,7 @@ enum XMPPStreamConfig
 	
 	return result;
 }
+
 
 - (BOOL)hasMyJIDFromServer
 {
@@ -1221,32 +1193,32 @@ enum XMPPStreamConfig
 			result = NO;
 			return_from_block;
 		}
-		
-//		if (myJID_setByClient == nil)
-//		{
-//			// Note: If you wish to use anonymous authentication, you should still set myJID prior to calling connect.
-//			// You can simply set it to something like "anonymous@<domain>", where "<domain>" is the proper domain.
-//			// After the authentication process, you can query the myJID property to see what your assigned JID is.
-//			// 
-//			// Setting myJID allows the framework to follow the xmpp protocol properly,
-//			// and it allows the framework to connect to servers without a DNS entry.
-//			// 
-//			// For example, one may setup a private xmpp server for internal testing on their local network.
-//			// The xmpp domain of the server may be something like "testing.mycompany.com",
-//			// but since the server is internal, an IP (192.168.1.22) is used as the hostname to connect.
-//			// 
-//			// Proper connection requires a TCP connection to the IP (192.168.1.22),
-//			// but the xmpp handshake requires the xmpp domain (testing.mycompany.com).
-//			
-//			NSString *errMsg = @"You must set myJID before calling connect.";
-//			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-//			
-//			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-//			
-//			result = NO;
-//			return_from_block;
-//		}
-
+		/*
+		if (myJID_setByClient == nil)
+		{
+			// Note: If you wish to use anonymous authentication, you should still set myJID prior to calling connect.
+			// You can simply set it to something like "anonymous@<domain>", where "<domain>" is the proper domain.
+			// After the authentication process, you can query the myJID property to see what your assigned JID is.
+			// 
+			// Setting myJID allows the framework to follow the xmpp protocol properly,
+			// and it allows the framework to connect to servers without a DNS entry.
+			// 
+			// For example, one may setup a private xmpp server for internal testing on their local network.
+			// The xmpp domain of the server may be something like "testing.mycompany.com",
+			// but since the server is internal, an IP (192.168.1.22) is used as the hostname to connect.
+			// 
+			// Proper connection requires a TCP connection to the IP (192.168.1.22),
+			// but the xmpp handshake requires the xmpp domain (testing.mycompany.com).
+			
+			NSString *errMsg = @"You must set myJID before calling connect.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+			
+			result = NO;
+			return_from_block;
+		}
+        */
 		// Notify delegates
 		[multicastDelegate xmppStreamWillConnect:self];
 
@@ -1844,7 +1816,59 @@ enum XMPPStreamConfig
 	return result;
     
 }
-//This is a methods write by Peter Lee
+
+/**
+ * This method attempts to register a new user on the server using the given username and password.
+ * The result of this action will be returned via the delegate methods.
+ * 
+ * If the XMPPStream is not connected, or the server doesn't support in-band registration, this method does nothing.
+**/
+- (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr
+{
+	XMPPLogTrace();
+	
+	__block BOOL result = YES;
+	__block NSError *err = nil;
+	
+	dispatch_block_t block = ^{ @autoreleasepool {
+		
+		if (myJID_setByClient == nil)
+		{
+			NSString *errMsg = @"You must set myJID before calling registerWithPassword:error:.";
+			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+			
+			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+			
+			result = NO;
+			return_from_block;
+		}
+		
+		NSString *username = [myJID_setByClient user];
+		
+		NSMutableArray *elements = [NSMutableArray array];
+		[elements addObject:[NSXMLElement elementWithName:@"username" stringValue:username]];
+		[elements addObject:[NSXMLElement elementWithName:@"password" stringValue:password]];
+        
+        [self registerWithElements:elements error:errPtr];
+        
+	}};
+	
+	if (dispatch_get_specific(xmppQueueTag))
+		block();
+	else
+		dispatch_sync(xmppQueue, block);
+	
+	if (errPtr)
+		*errPtr = err;
+	
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - This methods is added by Peter Lee for kissnapp project:2014-12-11
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//This is a methods write by Peter Lee - 2014-12-11
 - (BOOL)kissnapp_registerWithElements:(NSArray *)elements error:(NSError **)errPtr
 {
     XMPPLogTrace();
@@ -1913,52 +1937,52 @@ enum XMPPStreamConfig
     
 }
 
-
-/**
- * This method attempts to register a new user on the server using the given username and password.
- * The result of this action will be returned via the delegate methods.
- * 
- * If the XMPPStream is not connected, or the server doesn't support in-band registration, this method does nothing.
-**/
-- (BOOL)registerWithPassword:(NSString *)password error:(NSError **)errPtr
+- (BOOL)kissnapp_registerWithID:(NSString *)registerID
+                       nickname:(NSString *)nickname
+                           type:(XMPPRegisterType)type
+                       password:(NSString *)password
+                          error:(NSError **)errPtr
 {
-	XMPPLogTrace();
-	
-	__block BOOL result = YES;
-	__block NSError *err = nil;
-	
-	dispatch_block_t block = ^{ @autoreleasepool {
-		
-		if (myJID_setByClient == nil)
-		{
-			NSString *errMsg = @"You must set myJID before calling registerWithPassword:error:.";
-			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-			
-			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-			
-			result = NO;
-			return_from_block;
-		}
-		
-		NSString *username = [myJID_setByClient user];
-		
-		NSMutableArray *elements = [NSMutableArray array];
-		[elements addObject:[NSXMLElement elementWithName:@"username" stringValue:username]];
-		[elements addObject:[NSXMLElement elementWithName:@"password" stringValue:password]];
+    XMPPLogTrace();
+    
+    __block BOOL result = YES;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
         
-        [self registerWithElements:elements error:errPtr];
+
+        NSString *tempElementName = nil;
         
-	}};
-	
-	if (dispatch_get_specific(xmppQueueTag))
-		block();
-	else
-		dispatch_sync(xmppQueue, block);
-	
-	if (errPtr)
-		*errPtr = err;
-	
-	return result;
+        NSMutableArray *elements = [NSMutableArray array];
+        
+        switch (type) {
+            case XMPPRegisterTypePhone:
+                tempElementName = @"phone";
+                break;
+             case XMPPRegisterTypeEmail:
+                tempElementName = @"email";
+                break;
+            default:
+                break;
+        }
+        
+        [elements addObject:[NSXMLElement elementWithName:tempElementName stringValue:registerID]];
+        [elements addObject:[NSXMLElement elementWithName:@"nick" stringValue:nickname]];
+        [elements addObject:[NSXMLElement elementWithName:@"password" stringValue:password]];
+        
+        [self kissnapp_registerWithElements:elements error:errPtr];
+        
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
+    
+    return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2525,6 +2549,50 @@ enum XMPPStreamConfig
     return result;
 }
 
+- (NSString *)myJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSString *myJidStr = nil;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
+    
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delegateGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+            
+            myJidStr = [delegate streamBareJidStrWithAuthenticateStr:authenticateStr authenticateType:authenticateType];
+            dispatch_semaphore_signal(delegateSemaphore);
+        }});
+    }
+    
+    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    
+    if (handled) {
+        return myJidStr;
+    }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delegateGroup);
+#endif
+    
+    return myJidStr;
+}
+
+
 - (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr
 {
     XMPPLogTrace();
@@ -2542,49 +2610,17 @@ enum XMPPStreamConfig
         authenticateInputType = type;
         authenticateInputStr = [loginName copy];
         
+        myJidStr = [self myJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
         
-        // Notify all interested delegates.
-        // This must be done serially to allow them to alter the element in a thread-safe manner.
-        
-        id delegate;
-        dispatch_queue_t dq;
-        
-        SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
-        
-        dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
-        dispatch_group_t delegateGroup = dispatch_group_create();
-    
-        GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
-        
-        while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
-        {
-            dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
-                
-                myJidStr = [delegate streamBareJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
-                dispatch_semaphore_signal(delegateSemaphore);
-            }});
+        //If the myJidStr is nil
+        if (!myJidStr) {
+            myJidStr = [loginName copy];
+            loginType = type;
         }
         
-        dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-        BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
-        
-        if (handled) {
-            //If the myJidStr is nil
-            if (!myJidStr) {
-                myJidStr = [loginName copy];
-                loginType = type;
-            }
-            
-            //authenticate form server
-            [self setMyJID:[XMPPJID jidWithString:myJidStr]];
-            result = [self _authenticateWithPassword:Password type:loginType error:&err];
-        }
-        
-#if !OS_OBJECT_USE_OBJC
-        dispatch_release(delegateSemaphore);
-        dispatch_release(delegateGroup);
-#endif
-        
+        //authenticate form server
+        [self setMyJID:[XMPPJID jidWithString:myJidStr]];
+        result = [self _authenticateWithPassword:Password type:loginType error:&err];
     }};
     
     
