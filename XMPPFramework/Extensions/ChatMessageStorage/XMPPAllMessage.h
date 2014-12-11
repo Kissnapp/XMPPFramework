@@ -82,13 +82,6 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  */
 - (void)removeActiveUserAndDelegate:(id)delegate;
 /**
- *  Save the message before sending
- *  Notice:When we send a message we should call this method first
- *
- *  @param message The message will been sent
- */
-- (void)saveBeforeSendingWithMessage:(XMPPMessage *)message;
-/**
  *  Clear the Given user's chat history
  *
  *  @param userJid user JID
@@ -193,7 +186,18 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @param message The given XMPPExtendMessageObject object
  */
-- (void)sendMessageWithXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)saveAndSendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)saveXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)sendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+/**
+ *  Save the message before sending
+ *  Notice:When we send a message we should call this method first
+ *
+ *  @param message The message will been sent
+ */
+- (void)saveBeforeSendingWithMessage:(XMPPMessage *)message;
+
+
 
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 

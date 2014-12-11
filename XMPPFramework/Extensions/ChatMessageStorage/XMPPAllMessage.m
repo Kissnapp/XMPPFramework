@@ -502,7 +502,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return  results;
 }
 
-- (void)sendMessageWithXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)saveAndSendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
 {
     dispatch_block_t block = ^{
         
@@ -516,6 +516,42 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:newMessage];
         [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:newMessage];
       
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)saveXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+{
+    dispatch_block_t block = ^{
+        
+        BOOL sendFromMe = message.sendFromMe;
+        //we should stroage this message firstly
+        [self saveMessageWithXMPPStream:xmppStream message:[message copy] sendFromMe:sendFromMe];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
+}
+- (void)sendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+{
+    dispatch_block_t block = ^{
+        
+        XMPPMessage *newMessage = [[message toXMPPMessage] copy];
+        
+        //send the message
+        [xmppStream sendElement:newMessage];
+        
+        //Call the delegate
+        [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:newMessage];
+        [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:newMessage];
+        
     };
     
     if (dispatch_get_specific(moduleQueueTag))
