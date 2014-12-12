@@ -1952,21 +1952,28 @@ enum XMPPStreamConfig
         
 
         NSString *tempElementName = nil;
+        NSString *tempElementValue = nil;
         
         NSMutableArray *elements = [NSMutableArray array];
         
         switch (type) {
             case XMPPRegisterTypePhone:
+            {
                 tempElementName = @"phone";
+                tempElementValue = [[XMPPJID jidWithString:registerID] user];
+            }
                 break;
              case XMPPRegisterTypeEmail:
+            {
                 tempElementName = @"email";
+                tempElementValue = [[XMPPJID jidWithString:registerID] user];
+            }
                 break;
             default:
                 break;
         }
         
-        [elements addObject:[NSXMLElement elementWithName:tempElementName stringValue:registerID]];
+        [elements addObject:[NSXMLElement elementWithName:tempElementName stringValue:tempElementValue]];
         [elements addObject:[NSXMLElement elementWithName:@"nick" stringValue:nickname]];
         [elements addObject:[NSXMLElement elementWithName:@"password" stringValue:password]];
         
