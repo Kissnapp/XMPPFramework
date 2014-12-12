@@ -983,10 +983,13 @@ enum XMPPRosterFlags
             
             //write other's nickename to self roster
             NSXMLElement *nickeNameElement = [presence elementForName:ADD_FRIEND_NICKNAME];
+            
             if (nickeNameElement && [[nickeNameElement xmlns] isEqualToString:ADD_FRIEND_NICKNAME_XMLNS]) {
+                
                 NSString *nickName = [nickeNameElement stringValue];
+                
                 if (nickName) {
-                    [self setNickname:@"" forUser:userJID];
+                    [self setNickname:nickName forUser:userJID];
                 }
             }
             
