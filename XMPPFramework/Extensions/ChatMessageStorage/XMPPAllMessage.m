@@ -569,9 +569,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     //save the message
     BOOL activeMessage = sendFromMe ? NO:[[self activeUser] isEqualToString:message.fromUser];
     [message setSendFromMe:sendFromMe];
-    if (sendFromMe) {
-        [message setMessageTime:[NSDate date]];
-    }
+
     [xmppMessageStorage archiveMessage:message active:activeMessage xmppStream:sender];
     
     //send the message to the UI

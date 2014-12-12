@@ -63,11 +63,27 @@
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
+- (NSDate *)lastChatTime
+{
+    [self willAccessValueForKey:@"lastChatTime"];
+    NSDate *value = [self primitiveValueForKey:@"lastChatTime"];
+    [self didAccessValueForKey:@"lastChatTime"];
+    return value;
+}
+
+- (void)setLastChatTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"lastChatTime"];
+    [self setPrimitiveValue:value forKey:@"lastChatTime"];
+    [self didChangeValueForKey:@"lastChatTime"];
+}
+
 #pragma mark -
 #pragma mark - Public  Methods
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDstr:(NSString *)jidStr
                 unReadMessageCount:(NSUInteger)unReatCount
+                      lastChatTime:(NSDate *)lastMessageTime
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (jidStr == nil){
@@ -83,6 +99,7 @@
     newObject.bareJidStr = jidStr;
     newObject.streamBareJidStr = streamBareJidStr;
     newObject.unReadCount = [NSNumber numberWithUnsignedInteger:unReatCount];
+    newObject.lastChatTime = lastMessageTime;
     
     return newObject;
 }
@@ -133,6 +150,7 @@
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                     withUserJIDstr:(NSString *)jidStr
                                 unReadMessageCount:(NSUInteger)unReadCount
+                                      lastChatTime:(NSDate *)lastMessageTime
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     
@@ -147,6 +165,7 @@
         updateObject.bareJidStr = jidStr;
         updateObject.unReadCount = [NSNumber numberWithUnsignedInteger:([updateObject.unReadCount unsignedIntegerValue]+unReadCount)];
         updateObject.streamBareJidStr = streamBareJidStr;
+        updateObject.lastChatTime = lastMessageTime;
         
         return YES;
         
@@ -155,6 +174,7 @@
         updateObject = [XMPPUnReadMessageCoreDataStorageObject insertInManagedObjectContext:moc
                                                                              withUserJIDstr:jidStr
                                                                          unReadMessageCount:unReadCount
+                                                                               lastChatTime:lastMessageTime
                                                                            streamBareJidStr:streamBareJidStr];
         return YES;
     }
@@ -194,7 +214,7 @@
     NSUInteger oldUnreadCount = [readObject.unReadCount unsignedIntegerValue];
     
     if (oldUnreadCount > 0) {
-        -- oldUnreadCount;
+        --oldUnreadCount;
     }
     readObject.unReadCount = [NSNumber numberWithUnsignedInteger:oldUnreadCount];
     

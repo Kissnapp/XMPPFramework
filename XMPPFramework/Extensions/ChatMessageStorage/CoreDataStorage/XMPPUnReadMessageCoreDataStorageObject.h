@@ -12,6 +12,7 @@
 
 @interface XMPPUnReadMessageCoreDataStorageObject : NSManagedObject
 
+@property (nonatomic, retain) NSDate * lastChatTime;
 @property (nonatomic, retain) NSString * bareJidStr;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * unReadCount;
@@ -19,6 +20,7 @@
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDstr:(NSString *)jidStr
                 unReadMessageCount:(NSUInteger)unReatCount
+                      lastChatTime:(NSDate *)lastMessageTime
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
@@ -28,8 +30,9 @@
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                     withUserJIDstr:(NSString *)jidStr
                                 unReadMessageCount:(NSUInteger)unReadCount
+                                      lastChatTime:(NSDate *)lastMessageTime
                                   streamBareJidStr:(NSString *)streamBareJidStr;
-
+//The method is not implemented
 + (BOOL)editObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                           withUserJIDstr:(NSString *)jidStr
                        nReadMessageCount:(NSUInteger)unReadCount
@@ -47,6 +50,7 @@
                              withUserJIDstr:(NSString *)jidStr
                            streamBareJidStr:(NSString *)streamBareJidStr;
 
+//The method is not implemented
 + (BOOL)clearAllObjectsInInManagedObjectContext:(NSManagedObjectContext *)moc
                                streamBareJidStr:(NSString *)streamBareJidStr;
 

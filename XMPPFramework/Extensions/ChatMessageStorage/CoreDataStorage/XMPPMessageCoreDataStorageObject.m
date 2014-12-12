@@ -226,7 +226,7 @@
     //Add the unread message count or insert a new unread message info
     [XMPPUnReadMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                         withUserJIDstr:[messageDic objectForKey:@"bareJidStr"]
-                                                                    unReadMessageCount:[(NSNumber *)[messageDic objectForKey:@"unReadMessageCount"] unsignedIntegerValue]
+                                                                    unReadMessageCount:[(NSNumber *)[messageDic objectForKey:@"unReadMessageCount"] unsignedIntegerValue] lastChatTime:[messageDic objectForKey:@"messageTime"]
                                                                       streamBareJidStr:streamBareJidStr];
     
     return newObject;
