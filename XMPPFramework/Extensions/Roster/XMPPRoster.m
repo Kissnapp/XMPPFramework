@@ -619,7 +619,7 @@ enum XMPPRosterFlags
     if (nickName) {
         [presence addChild:nickNameXElement];
     }
-    //NSLog(@"XML是:%@",presence.description);
+    //NSLog(@"Send presence XML is:%@",presence.description);
 	[xmppStream sendElement:presence];
 }
 
