@@ -997,6 +997,7 @@ enum XMPPStreamConfig
     dispatch_block_t block = ^{
         authenticateInputStr = nil;
         authenticateInputType = XMPPLoginTypeDefault;
+        [self setMyJID_setByClient:nil];
         [self setMyJID_setByServer:nil];
     };
     
