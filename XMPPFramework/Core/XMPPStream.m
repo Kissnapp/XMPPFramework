@@ -46,6 +46,8 @@
 #define TAG_XMPP_WRITE_STREAM       201
 #define TAG_XMPP_WRITE_RECEIPT      202
 
+#define TAG_XMPP_SEND_MESSAGE       300
+
 // Define the timeouts (in seconds) for SRV
 #define TIMEOUT_SRV_RESOLUTION 30.0
 
@@ -3172,7 +3174,10 @@ enum XMPPStreamConfig
 	}
 	else if ([element isKindOfClass:[XMPPMessage class]])
 	{
+        /*
 		[self sendMessage:(XMPPMessage *)element withTag:tag];
+         */
+        [self sendMessage:(XMPPMessage *)element withTag:tag];
 	}
 	else if ([element isKindOfClass:[XMPPPresence class]])
 	{

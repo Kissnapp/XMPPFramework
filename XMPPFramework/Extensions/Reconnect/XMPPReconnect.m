@@ -76,6 +76,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 		reconnectTicket = 0;
 		
 		previousReachabilityFlags = IMPOSSIBLE_REACHABILITY_FLAGS;
+        
 	}
 	return self;
 }
