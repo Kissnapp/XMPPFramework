@@ -6,8 +6,8 @@
 @class XMPPStream;
 
 
-enum XMPPHandleAuthResponse
-{
+typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
+	
 	XMPP_AUTH_FAIL,     // Authentication failed.
 	                    // The delegate will be informed via xmppStream:didNotAuthenticate:
 	
@@ -15,9 +15,8 @@ enum XMPPHandleAuthResponse
 	                    // The delegate will be informed via xmppStreamDidAuthenticate:
 	
 	XMPP_AUTH_CONTINUE, // The authentication process is still ongoing.
-	
 };
-typedef enum XMPPHandleAuthResponse XMPPHandleAuthResponse;
+
 
 
 @protocol XMPPSASLAuthentication <NSObject>

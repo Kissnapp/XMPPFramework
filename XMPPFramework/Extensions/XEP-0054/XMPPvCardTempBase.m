@@ -41,7 +41,15 @@
 	NSString *xmlString;
 	if([coder allowsKeyedCoding])
 	{
-		xmlString = [coder decodeObjectForKey:@"xmlString"];
+		if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+           [coder requiresSecureCoding])
+        {
+            xmlString = [coder decodeObjectOfClass:[NSString class] forKey:@"xmlString"];
+        }
+        else
+        {
+            xmlString = [coder decodeObjectForKey:@"xmlString"];
+        }
 	}
 	else
 	{
@@ -78,6 +86,10 @@
 	}
 }
 
++ (BOOL) supportsSecureCoding
+{
+    return YES;
+}
 - (id)copyWithZone:(NSZone *)zone
 {
 	NSXMLElement *elementCopy = [super copyWithZone:zone];

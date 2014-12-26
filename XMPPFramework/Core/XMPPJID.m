@@ -57,7 +57,7 @@
 	NSString *rawDomain = nil;
 	NSString *rawResource = nil;
 	
-	NSRange atRange = [jidStr rangeOfString:@"@" options:NSBackwardsSearch];
+	NSRange atRange = [jidStr rangeOfString:@"@"];
 	
 	if (atRange.location != NSNotFound)
 	{
@@ -95,7 +95,7 @@
 	NSString *prepUser = [XMPPStringPrep prepNode:rawUser];
 	NSString *prepDomain = [XMPPStringPrep prepDomain:rawDomain];
 	NSString *prepResource = [XMPPStringPrep prepResource:rawResource];
-//	NSLog(@"信息是：%@\t%@\t%@",prepUser,prepDomain,prepResource);
+
 	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{
 		if(user)     *user = prepUser;
@@ -215,9 +215,19 @@
 	{
 		if ([coder allowsKeyedCoding])
 		{
-			user     = [[coder decodeObjectForKey:@"user"] copy];
-			domain   = [[coder decodeObjectForKey:@"domain"] copy];
-			resource = [[coder decodeObjectForKey:@"resource"] copy];
+			if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+               [coder requiresSecureCoding])
+            {
+                user     = [[coder decodeObjectOfClass:[NSString class] forKey:@"user"] copy];
+                domain   = [[coder decodeObjectOfClass:[NSString class] forKey:@"domain"] copy];
+                resource = [[coder decodeObjectOfClass:[NSString class] forKey:@"resource"] copy];
+            }
+            else
+            {
+                user     = [[coder decodeObjectForKey:@"user"] copy];
+                domain   = [[coder decodeObjectForKey:@"domain"] copy];
+                resource = [[coder decodeObjectForKey:@"resource"] copy];
+            }
 		}
 		else
 		{
@@ -243,6 +253,10 @@
 		[coder encodeObject:domain];
 		[coder encodeObject:resource];
 	}
+}
++ (BOOL) supportsSecureCoding
+{
+    return YES;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

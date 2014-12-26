@@ -96,7 +96,7 @@ enum XMPPStreamConfig
 	
 	GCDMulticastDelegate <XMPPStreamDelegate> *multicastDelegate;
 	
-	int state;
+	XMPPStreamState state;
 	
 	GCDAsyncSocket *asyncSocket;
 	
@@ -105,6 +105,7 @@ enum XMPPStreamConfig
 	
 	XMPPParser *parser;
 	NSError *parserError;
+    NSError *otherError;
 	
 	Byte flags;
 	Byte config;
@@ -117,6 +118,7 @@ enum XMPPStreamConfig
     BOOL validatesResponses;
 	
 	id <XMPPSASLAuthentication> auth;
+    id <XMPPCustomBinding> customBinding;
 	NSDate *authenticationDate;
 	
 	XMPPJID *myJID_setByClient;
@@ -141,6 +143,7 @@ enum XMPPStreamConfig
     XMPPIDTracker *idTracker;
 	
 	NSMutableArray *receipts;
+    NSCountedSet *customElementNames;
 	
 	id userTag;
     
@@ -3157,6 +3160,10 @@ enum XMPPStreamConfig
 	[asyncSocket writeData:outgoingData
 	           withTimeout:TIMEOUT_XMPP_WRITE
 	                   tag:tag];
+    if ([customElementNames countForObject:[element name]])
+    {
+        [multicastDelegate xmppStream:self didSendCustomElement:element];
+    }
 }
 
 /**
@@ -3707,6 +3714,10 @@ enum XMPPStreamConfig
 			{
 				[self receivePresence:[XMPPPresence presenceFromElement:element]];
 			}
+            else if ([customElementNames countForObject:elementName])
+            {
+                [multicastDelegate xmppStream:self didReceiveCustomElement:element];
+            }
 			else
 			{
 				[multicastDelegate xmppStream:self didReceiveError:element];
@@ -3719,6 +3730,42 @@ enum XMPPStreamConfig
 	else
 		dispatch_async(xmppQueue, block);
 }
+
+- (void)registerCustomElementNames:(NSSet *)names
+{
+    dispatch_block_t block = ^{
+        
+        if (customElementNames == nil)
+            customElementNames = [[NSCountedSet alloc] init];
+        
+        for (NSString *name in names)
+        {
+            [customElementNames addObject:name];
+        }
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+}
+
+- (void)unregisterCustomElementNames:(NSSet *)names
+{
+    dispatch_block_t block = ^{
+        
+        for (NSString *name in names)
+        {
+            [customElementNames removeObject:name];
+        }
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Stream Negotiation
@@ -4911,6 +4958,10 @@ enum XMPPStreamConfig
 		{
 			[multicastDelegate xmppStream:self didReceiveP2PFeatures:element];
 		}
+        else if ([customElementNames countForObject:elementName])
+        {
+            [multicastDelegate xmppStream:self didReceiveCustomElement:element];
+        }
 		else
 		{
 			[multicastDelegate xmppStream:self didReceiveError:element];

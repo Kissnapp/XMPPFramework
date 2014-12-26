@@ -811,7 +811,8 @@ static void xmpp_xmlEndElement(void *ctx, const xmlChar *localname,
 				}});
 			}
 		}
-		else{
+		else
+		{
 			if (delegateQueue && [delegate respondsToSelector:@selector(xmppParser:didFail:)])
 			{
 				NSError *error;

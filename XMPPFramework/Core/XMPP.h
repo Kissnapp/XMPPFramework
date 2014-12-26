@@ -13,7 +13,7 @@
 // 
 // Authentication
 // 
-
+#import "XMPPCustomBinding.h"
 #import "XMPPSASLAuthentication.h"
 #import "XMPPDigestMD5Authentication.h"
 #import "XMPPSCRAMSHA1Authentication.h"

@@ -74,6 +74,8 @@
 			
 			[xmppStream addDelegate:self delegateQueue:moduleQueue];
 			[xmppStream registerModule:self];
+			
+			[self didActivate];
 		}
 	};
 	
@@ -83,6 +85,18 @@
 		dispatch_sync(moduleQueue, block);
 	
 	return result;
+}
+
+/**
+ * It is recommended that subclasses override this method (instead of activate:)
+ * to perform tasks after the module has been activated.
+ * 
+ * This method is only invoked if the module is successfully activated.
+ * This method is always invoked on the moduleQueue.
+**/
+- (void)didActivate
+{
+	// Override me to do custom work after the module is activated
 }
 
 /**
@@ -99,6 +113,7 @@
 		
 		if (xmppStream)
 		{
+			[self willDeactivate];
 			[xmppStream removeDelegate:self delegateQueue:moduleQueue];
 			[xmppStream unregisterModule:self];
 			
@@ -110,6 +125,18 @@
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
+}
+
+/**
+ * It is recommended that subclasses override this method (instead of deactivate:)
+ * to perform tasks after the module has been deactivated.
+ *
+ * This method is only invoked if the module is transitioning from activated to deactivated.
+ * This method is always invoked on the moduleQueue.
+**/
+- (void)willDeactivate
+{
+	// Override me to do custom work after the module is deactivated
 }
 
 - (dispatch_queue_t)moduleQueue
