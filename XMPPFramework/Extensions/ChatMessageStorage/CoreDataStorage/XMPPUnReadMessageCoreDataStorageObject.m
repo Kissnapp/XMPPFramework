@@ -165,7 +165,9 @@
         updateObject.bareJidStr = jidStr;
         updateObject.unReadCount = [NSNumber numberWithUnsignedInteger:([updateObject.unReadCount unsignedIntegerValue]+unReadCount)];
         updateObject.streamBareJidStr = streamBareJidStr;
-        updateObject.lastChatTime = lastMessageTime;
+        if (lastMessageTime) {
+            updateObject.lastChatTime = lastMessageTime;
+        }
         
         return YES;
         

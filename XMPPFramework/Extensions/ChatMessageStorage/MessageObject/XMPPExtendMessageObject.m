@@ -245,7 +245,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
             self.text = [XMPPTextMessageObject xmppTextMessageObjectWithText:xmppMessageCoreDataStorageObject.additionalMessage.messageText];
             break;
         case XMPPExtendMessageAudioType:
-            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath time:xmppMessageCoreDataStorageObject.additionalMessage.timeLength];
+            self.audio = [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData  time:xmppMessageCoreDataStorageObject.additionalMessage.timeLength];
             break;
         case XMPPExtendMessageVideoType:
             self.video = [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName
@@ -500,7 +500,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
     if (infoElement != nil) {
         
-        result = [[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME] StringToDate];//UTCStringToLocalDate
+        result = [[infoElement attributeStringValueForName:MESSAGE_TIME_ATTRIBUTE_NAME] UTCStringToLocalDate];//UTCStringToLocalDate
     }
     
     return result;
@@ -513,7 +513,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
         NSXMLElement *infoElement = [self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS];
         //If the info element is already existed,wo should add the value to it
         if (infoElement) {
-            [infoElement addAttributeWithName:MESSAGE_TIME_ATTRIBUTE_NAME stringValue:[messageTime DateToString]];
+            [infoElement addAttributeWithName:MESSAGE_TIME_ATTRIBUTE_NAME stringValue:[messageTime LocalDateToUTCString]];
             return;
         }
         //Otherwise,we should create a new info element
