@@ -340,9 +340,9 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 			
 			NSString *subscription = [item attributeStringValueForName:@"subscription"];
-            //MARK:I have changed this here
-			if ([subscription isEqualToString:@"remove"])
-//            if ([subscription isEqualToString:@"none"])
+            //MARK:I have changed this here,orgin value is @"remove",but our server will send us @"none" instead of the @"remove"
+			//if ([subscription isEqualToString:@"remove"])
+            if ([subscription isEqualToString:@"none"] || [subscription isEqualToString:@"remove"])
 			{
 				if (user)
 				{
