@@ -315,7 +315,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 - (void)handleRosterItem:(NSXMLElement *)itemSubElement xmppStream:(XMPPStream *)stream
 {
 	XMPPLogTrace();
-//	NSLog(@"NSXMLElement:%@",itemSubElement.description);
+	//NSLog(@"NSXMLElement:%@",itemSubElement.description);
 	// Remember XML heirarchy memory management rules.
 	// The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
 	NSXMLElement *item = [itemSubElement copy];

@@ -272,16 +272,16 @@
  *  @param jid      The given user's jid
  *  @param nickName self nick name
  */
-- (void)subscribePresenceToUser:(XMPPJID *)jid withSelfNickName:(NSString *)nickName;
+- (void)subscribePresenceToUser:(XMPPJID *)jid withSelfNickName:(NSString *)selfNickName;
 /**
  *  Accept one user's request to add the user as self friend
  *
  *  @param jid       The user jid
- *  @param nickeName self nick name
- *  @param userName  The user's nick name
+ *  @param selfNickName self nick name
+ *  @param otherNickName  The user's nick name
  *  @param flag      The tag whether to add this user to our roster
  */
-- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid  withSelfNickName:(NSString *)nickeName  userName:(NSString *)userName andAddToRoster:(BOOL)flag;
+- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid  withSelfNickName:(NSString *)selfNickName  otherNickName:(NSString *)otherNickName andAddToRoster:(BOOL)flag;
 
 // 
 // 

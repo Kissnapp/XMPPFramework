@@ -584,7 +584,7 @@ enum XMPPRosterFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //request for add frined
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)subscribePresenceToUser:(XMPPJID *)jid withSelfNickName:(NSString *)nickName
+- (void)subscribePresenceToUser:(XMPPJID *)jid withSelfNickName:(NSString *)selfNickName
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -604,7 +604,7 @@ enum XMPPRosterFlags
     
     NSXMLElement *nickNameXElement = [NSXMLElement elementWithName:ADD_FRIEND_NICKNAME xmlns:ADD_FRIEND_NICKNAME_XMLNS];
     //[presence elementForName: xmlns:]
-    [nickNameXElement setStringValue:nickName];
+    [nickNameXElement setStringValue:selfNickName];
     
     //If there is already a nickname element then remove it
     if(nickNameXElement)
@@ -616,14 +616,14 @@ enum XMPPRosterFlags
             [presence removeChildAtIndex:nickNameXElementIndex];
         }
     }
-    if (nickName) {
+    if (selfNickName) {
         [presence addChild:nickNameXElement];
     }
     //NSLog(@"Send presence XML is:%@",presence.description);
 	[xmppStream sendElement:presence];
 }
 
-- (void)addUser:(XMPPJID *)jid withSelfNickname:(NSString *)nickName userName:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe{
+- (void)addUser:(XMPPJID *)jid withSelfNickname:(NSString *)selfNickname otherNickName:(NSString *)optionalName groups:(NSArray *)groups subscribeToPresence:(BOOL)subscribe{
 	
 	if (jid == nil) return;
     
@@ -667,11 +667,14 @@ enum XMPPRosterFlags
     
 	if(subscribe)
 	{
-		[self subscribePresenceToUser:jid withSelfNickName:nickName];
+		[self subscribePresenceToUser:jid withSelfNickName:selfNickname];
 	}
 }
 //接受并将对方的nickname写进自己的roster
-- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid  withSelfNickName:(NSString *)nickeName  userName:(NSString *)userName andAddToRoster:(BOOL)flag
+- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid
+                             withSelfNickName:(NSString *)selfNickName
+                                otherNickName:(NSString *)otherNickName
+                               andAddToRoster:(BOOL)flag
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
@@ -685,7 +688,7 @@ enum XMPPRosterFlags
 	// Add optionally add user to our roster
 	if (flag)
 	{
-		[self addUser:jid withSelfNickname:nickeName userName:userName groups:nil subscribeToPresence:YES];
+		[self addUser:jid withSelfNickname:selfNickName otherNickName:otherNickName groups:nil subscribeToPresence:YES];
 	}
 }
 
