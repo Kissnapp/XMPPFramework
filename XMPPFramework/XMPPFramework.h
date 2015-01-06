@@ -101,3 +101,7 @@
 #import "XMPPLoginHelper.h"
 #import "XMPPLoginHelperCoreDataStorage.h"
 #import "XMPPLoginUserCoreDataStorageObject.h"
+
+#import "XMPPStreamManagement.h"
+#import "XMPPStreamManagementStanzas.h"
+#import "XMPPStreamManagementMemoryStorage.h"

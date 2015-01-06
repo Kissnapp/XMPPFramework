@@ -978,6 +978,8 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * Return nil (or don't implement this method) if you wish to use the standard binding procedure.
 **/
 
+- (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
+
 /**
  * we can get the strean bare jid str with this method
  **/
