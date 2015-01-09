@@ -57,7 +57,9 @@
 	NSString *rawDomain = nil;
 	NSString *rawResource = nil;
 	
-	NSRange atRange = [jidStr rangeOfString:@"@"];
+	//NSRange atRange = [jidStr rangeOfString:@"@"];
+    //Here search should be NSBackwardsSearch type, Because there will been a email which also contain a char "@"
+    NSRange atRange = [jidStr rangeOfString:@"@" options:NSBackwardsSearch];
 	
 	if (atRange.location != NSNotFound)
 	{
@@ -95,6 +97,9 @@
 	NSString *prepUser = [XMPPStringPrep prepNode:rawUser];
 	NSString *prepDomain = [XMPPStringPrep prepDomain:rawDomain];
 	NSString *prepResource = [XMPPStringPrep prepResource:rawResource];
+    
+    //Debug model
+    //NSLog(@"All JID Info IS：user = %@\tdomain = %@\tresource = %@",prepUser,prepDomain,prepResource);
 
 	if ([XMPPJID validateUser:prepUser domain:prepDomain resource:prepResource])
 	{

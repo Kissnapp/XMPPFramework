@@ -2218,16 +2218,17 @@ enum XMPPStreamConfig
         return result;
     }
     
-    //		if (myJID_setByClient == nil)
-    //		{
-    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
-    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-    //
-    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-    //
-    //			result = NO;
-    //			return_from_block;
-    //		}
+    if (myJID_setByClient == nil)
+    {
+        NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+
+        result = NO;
+        
+        return  result;
+    }
     
     // Change state.
     // We do this now because when we invoke the start method below,
@@ -2267,16 +2268,17 @@ enum XMPPStreamConfig
         return result;
     }
     
-    //		if (myJID_setByClient == nil)
-    //		{
-    //			NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
-    //			NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
-    //
-    //			err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
-    //
-    //			result = NO;
-    //			return_from_block;
-    //		}
+    if (myJID_setByClient == nil)
+    {
+        NSString *errMsg = @"You must set myJID before calling authenticate:error:.";
+        NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+        
+        err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidProperty userInfo:info];
+        
+        result = NO;
+        
+        return  result;
+    }
     
     // Change state.
     // We do this now because when we invoke the start method below,
