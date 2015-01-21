@@ -161,7 +161,7 @@
             NSXMLElement *location = [infoXMLElement elementForName:LOCATION_ELEMENT_NAME];
             self.longitude = [location attributeStringValueForName:@"longitude"];
             self.latitude = [location attributeStringValueForName:@"latitude"];
-            self.messageText = [location attributeStringValueForName:@"messageText"];
+            self.messageText = [location stringValue];
         }
             break;
         default:
