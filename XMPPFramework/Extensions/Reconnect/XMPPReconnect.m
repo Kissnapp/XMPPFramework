@@ -206,7 +206,7 @@ typedef SCNetworkConnectionFlags SCNetworkReachabilityFlags;
 {
 	dispatch_block_t block = ^{ @autoreleasepool {
 		
-		if (/*[xmppStream isDisconnected] &&*/ [self manuallyStarted] == NO)
+		if ([xmppStream isDisconnected] && [self manuallyStarted] == NO)
 		{
 			[self setManuallyStarted:YES];
 			
@@ -537,7 +537,7 @@ static void XMPPReconnectReachabilityCallback(SCNetworkReachabilityRef target, S
 	
 	if (([self manuallyStarted]) || ([self autoReconnect] && [self shouldReconnect])) 
 	{
-		if (/*[xmppStream isDisconnected] && */([self queryingDelegates] == NO))
+		if ([xmppStream isDisconnected] && ([self queryingDelegates] == NO))
 		{
 			// The xmpp stream is disconnected, and is not attempting reconnection
 			

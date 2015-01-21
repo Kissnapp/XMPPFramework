@@ -33,7 +33,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 };
 
 @protocol XMPPAllMessageStorage;
-@protocol XMPPChatMessageDelegate;
+@protocol XMPPAllMessageDelegate;
 
 
 @interface XMPPAllMessage : XMPPModule

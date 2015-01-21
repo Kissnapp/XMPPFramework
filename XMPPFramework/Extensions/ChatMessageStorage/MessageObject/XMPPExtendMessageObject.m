@@ -257,7 +257,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
             self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName filePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalMessage.aspectRatio];
             break;
         case XMPPExtendMessagePositionType:
-            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalMessage.longitude latitude:xmppMessageCoreDataStorageObject.additionalMessage.latitude];
+            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalMessage.longitude latitude:xmppMessageCoreDataStorageObject.additionalMessage.latitude content:xmppMessageCoreDataStorageObject.additionalMessage.messageText];
             break;
         case XMPPExtendMessageControlType:
             
