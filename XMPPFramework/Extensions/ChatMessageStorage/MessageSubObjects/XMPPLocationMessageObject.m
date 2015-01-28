@@ -59,7 +59,7 @@
     NSXMLElement *element = [NSXMLElement elementWithName:LOCATION_ELEMENT_NAME];
     xmppLocationMessageObject = [XMPPLocationMessageObject xmppLocationMessageObjectFromElement:element];
     
-    [xmppLocationMessageObject setLongitude:longitude ];
+    [xmppLocationMessageObject setLongitude:longitude];
     [xmppLocationMessageObject setLatitude:latitude];
     [xmppLocationMessageObject setContent:content];
     return xmppLocationMessageObject;

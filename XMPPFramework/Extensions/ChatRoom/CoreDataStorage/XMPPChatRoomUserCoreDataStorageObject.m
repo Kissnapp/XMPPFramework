@@ -212,7 +212,7 @@
         
     }else{//if not find the object in the CoreData system ,we should insert the new object to it
         //FIXME:There is a bug maybe here
-        updateOrInsertObject   = [XMPPChatRoomUserCoreDataStorageObject insertInManagedObjectContext:moc
+        updateOrInsertObject  = [XMPPChatRoomUserCoreDataStorageObject insertInManagedObjectContext:moc
                                                                       withNSDictionary:Dic
                                                                       chatRoomJid: roomJid
                                                                       streamBareJidStr:streamBareJidStr];

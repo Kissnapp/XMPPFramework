@@ -254,12 +254,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
                                                                                time:xmppMessageCoreDataStorageObject.additionalMessage.timeLength];
             break;
         case XMPPExtendMessagePictureType:
-            self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName filePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData aspectRatio:xmppMessageCoreDataStorageObject.additionalMessage.aspectRatio];
+            self.picture = [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:xmppMessageCoreDataStorageObject.additionalMessage.fileName
+                                                                                 filePath:xmppMessageCoreDataStorageObject.additionalMessage.filePath
+                                                                                 fileData:xmppMessageCoreDataStorageObject.additionalMessage.fileData
+                                                                              aspectRatio:xmppMessageCoreDataStorageObject.additionalMessage.aspectRatio];
             break;
         case XMPPExtendMessagePositionType:
-            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalMessage.longitude latitude:xmppMessageCoreDataStorageObject.additionalMessage.latitude content:xmppMessageCoreDataStorageObject.additionalMessage.messageText];
+            self.location = [XMPPLocationMessageObject xmppLocationMessageObjectWithLongitude:xmppMessageCoreDataStorageObject.additionalMessage.longitude
+                                                                                     latitude:xmppMessageCoreDataStorageObject.additionalMessage.latitude
+                                                                                      content:xmppMessageCoreDataStorageObject.additionalMessage.messageText];
             break;
-        case XMPPExtendMessageControlType:
+        case XMPPExtendMessageControlType: 
             
             break;
         case XMPPExtendMessageMediaRequestType:

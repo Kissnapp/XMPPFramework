@@ -238,11 +238,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         NSString *action = [dic objectForKey:@"action"];
         
         if ([chatRoomPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]]){
-            NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-            
-//            [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
-//                                                           withNSDictionary:dic
-//                                                           streamBareJidStr:streamBareJidStr];
+          
             if ([action isEqualToString:@"dismiss"]) {
                 
                 NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
