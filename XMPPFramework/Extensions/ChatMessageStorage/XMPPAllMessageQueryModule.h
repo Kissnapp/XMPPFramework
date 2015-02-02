@@ -32,7 +32,7 @@
 - (id)initWithAllMessage:(XMPPAllMessage *)xmppAllMessage  dispatchQueue:(dispatch_queue_t)queue;
 
 - (XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObjectWithMessageID:(NSString *)messageID;
-- (XMPPMessageSendStatusType)XMPPMessageSendStatusWithMessageID:(NSString *)messageID;
+- (XMPPMessageSendStatusType)xmppMessageSendStatusWithMessageID:(NSString *)messageID;
 
 
 @end
