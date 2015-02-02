@@ -95,6 +95,7 @@
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
 
 #import "XMPPAllMessage.h"
+#import "XMPPAllMessageQueryModule.h"
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPMessage+AdditionMessage.h"
 

@@ -53,9 +53,6 @@
 + (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
 {
     XMPPPictureMessageObject *xmppPictureMessageObject = nil;
-    NSXMLElement *element = [NSXMLElement elementWithName:PICTURE_ELEMENT_NAME];
-    
-   // xmppPictureMessageObject = [XMPPPictureMessageObject xmppPictureMessageObjectFromElement:element];
     xmppPictureMessageObject = [[XMPPPictureMessageObject alloc] initWithFileName:fileName filePath:filePath fileData:fileData aspectRatio:aspectRatio];
     [xmppPictureMessageObject setFileName:fileName];
     [xmppPictureMessageObject setFilePath:filePath];

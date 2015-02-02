@@ -24,8 +24,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 #define XMLNS_XMPP_ARCHIVE @"urn:xmpp:archive"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+#pragma clang diagnostic ignored "-Wunused-variable"
 
 @implementation XMPPAllMessage
+
 
 - (id)init
 {
@@ -755,3 +761,5 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 }
 
 @end
+
+#pragma clang diagnostic pop

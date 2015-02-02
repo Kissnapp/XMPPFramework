@@ -13,6 +13,8 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
+#import "XMPPAllMessage.h"
+#import "XMPPAllMessageQueryModule.h"
 #import "XMPPMessage+AdditionMessage.h"
 
 #if ! __has_feature(objc_arc)
@@ -460,4 +462,69 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return results;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - XMPPAllMessageQueryModuleStorage
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (NSInteger)messageSendStateWithID:(NSString *)messageID xmppStream:(XMPPStream *)stream
+{
+    __block NSInteger result = 0;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPMessageCoreDataStorageObject *message = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (message) result = [message.hasBeenRead integerValue];
+    }];
+    
+    return result;
+}
+- (id)messageWithID:(NSString *)messageID xmppStream:(XMPPStream *)stream
+{
+    __block XMPPMessageCoreDataStorageObject *result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPMessageCoreDataStorageObject *message = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (message) result = message;
+    }];
+    
+    return result;
+}
 @end

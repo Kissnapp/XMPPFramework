@@ -7,11 +7,12 @@
 //
 
 #import "XMPPCoreDataStorage.h"
-#import "XMPPAllMessage.h"
 
 @protocol XMPPAllMessageStorage;
+@protocol XMPPAllMessageQueryModuleStorage;
 
-@interface XMPPMessageCoreDataStorage : XMPPCoreDataStorage<XMPPAllMessageStorage>
+
+@interface XMPPMessageCoreDataStorage : XMPPCoreDataStorage<XMPPAllMessageStorage, XMPPAllMessageQueryModuleStorage>
 
 + (instancetype)sharedInstance;
 

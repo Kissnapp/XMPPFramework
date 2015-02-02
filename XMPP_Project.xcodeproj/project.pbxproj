@@ -321,6 +321,8 @@
 		E7C4DFAF19D3A3D5000CB916 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = E7C4DFAD19D3A3D5000CB916 /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E7D2C59D19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7D2C59E19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7D2C59C19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m */; };
+		E7D92F211A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h in Headers */ = {isa = PBXBuildFile; fileRef = E7D92F1F1A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E7D92F221A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E7D92F201A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m */; };
 		E7E02CBE1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E02CBF1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */; };
 		E7E3F12A1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -676,6 +678,8 @@
 		E7C4DFAD19D3A3D5000CB916 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomCoreDataStorageObject.h; sourceTree = "<group>"; };
 		E7D2C59C19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomCoreDataStorageObject.m; sourceTree = "<group>"; };
+		E7D92F1F1A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAllMessageQueryModule.h; sourceTree = "<group>"; };
+		E7D92F201A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAllMessageQueryModule.m; sourceTree = "<group>"; };
 		E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomUserCoreDataStorageObject.h; sourceTree = "<group>"; };
 		E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomUserCoreDataStorageObject.m; sourceTree = "<group>"; };
 		E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBaseMessageSubObject.h; sourceTree = "<group>"; };
@@ -1573,6 +1577,8 @@
 				E75D0EE319DAA53400E8AD30 /* CoreDataStorage */,
 				E703D07A19D908CF00D8E3A4 /* XMPPAllMessage.h */,
 				E703D07B19D908CF00D8E3A4 /* XMPPAllMessage.m */,
+				E7D92F1F1A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h */,
+				E7D92F201A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m */,
 				E7AE674219FE4E97008546EA /* XMPPMessage+AdditionMessage.h */,
 				E7AE674319FE4E97008546EA /* XMPPMessage+AdditionMessage.m */,
 			);
@@ -1894,6 +1900,7 @@
 				E779165B1A4D7F3000279156 /* XMPPTimer.h in Headers */,
 				E731BB4C1A30391200B1CD81 /* XMPPRosterQueryModule.h in Headers */,
 				E77916581A4D7DD500279156 /* XMPPCustomBinding.h in Headers */,
+				E7D92F211A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h in Headers */,
 				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2098,6 +2105,7 @@
 				E75E907419F645A7000F2CE9 /* XMPPUnReadMessageCoreDataStorageObject.m in Sources */,
 				E779165C1A4D7F3000279156 /* XMPPTimer.m in Sources */,
 				63F3B5251960F91700BD8134 /* XMPPMessageArchivingCoreDataStorage.m in Sources */,
+				E7D92F221A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m in Sources */,
 				63F3B4BC1960F91700BD8134 /* XMPPIQ+JabberRPCResonse.m in Sources */,
 				63F3B5071960F91700BD8134 /* XMPPIQ+XEP_0066.m in Sources */,
 				63F3B4761960F91700BD8134 /* XMPPPlainAuthentication.m in Sources */,

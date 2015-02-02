@@ -182,9 +182,7 @@
     
     if (id == nil) return NO;
     if (moc == nil) return NO;
-    
-    NSError *error = nil;
-    
+        
     XMPPChatRoomUserCoreDataStorageObject *updateObject = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc withBareJidStr:id chatRoomJid:roomJid streamBareJidStr:streamBareJidStr];
     //if we find the object we will update for,we update it with the new obejct
     if (updateObject){
