@@ -344,7 +344,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     
     NSString *bareJidStr = self.sendFromMe ? self.toUser:self.fromUser;
     NSNumber *unReadMessageCount = [NSNumber numberWithBool:(self.sendFromMe ? NO:!active)];//if read is 0(NO), unread is 1(YES)
-    NSNumber *hasBeenRead = [NSNumber numberWithBool:(self.sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))];
+    NSNumber *hasBeenRead = [NSNumber numberWithBool:(self.sendFromMe ? ([unReadMessageCount integerValue] > 0):!([unReadMessageCount integerValue] > 0))];
     NSNumber *isGroupChat = [NSNumber numberWithBool:self.isGroupChat];
     
     XMPPAdditionalCoreDataMessageObject *xmppAdditionalCoreDataMessageObject = [[XMPPAdditionalCoreDataMessageObject alloc] initWithInfoXMLElement:[self elementForName:MESSAGE_ELEMENT_NAME xmlns:MESSAGE_ELEMENT_XMLNS]];
