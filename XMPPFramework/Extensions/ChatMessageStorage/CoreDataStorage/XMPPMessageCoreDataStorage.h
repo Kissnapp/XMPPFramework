@@ -12,7 +12,7 @@
 @protocol XMPPAllMessageQueryModuleStorage;
 
 
-@interface XMPPMessageCoreDataStorage : XMPPCoreDataStorage<XMPPAllMessageStorage, XMPPAllMessageQueryModuleStorage>
+@interface XMPPMessageCoreDataStorage : XMPPCoreDataStorage
 
 + (instancetype)sharedInstance;
 

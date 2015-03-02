@@ -16,6 +16,7 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+/*
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
@@ -23,7 +24,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #else
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
-
+*/
 
 @implementation XMPPAllMessageQueryModule
 
@@ -66,7 +67,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         
         // we don't need to call the storage configureWithParent:queue: method,
         // because the vCardTempModule already did that.
-        _moduleStorage = (id <XMPPAllMessageStorage>)xmppAllMessage.xmppMessageStorage;
+        _moduleStorage = (id <XMPPAllMessageQueryModuleStorage>)xmppAllMessage.xmppMessageStorage;
         
         [_xmppAllMessage addDelegate:self delegateQueue:moduleQueue];
         

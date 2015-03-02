@@ -159,7 +159,9 @@ enum XMPPStreamConfig
 - (void)startNegotiation;
 - (void)sendOpeningNegotiation;
 - (void)continueStartTLS:(NSMutableDictionary *)settings;
-- (void)continueHandleBinding:(NSString *)alternativeResource;
+/*
+ - (void)continueHandleBinding:(NSString *)alternativeResource;
+ */
 - (void)setupKeepAliveTimer;
 - (void)keepAlive;
 
@@ -752,6 +754,26 @@ enum XMPPStreamConfig
 		return result;
 	}
 }
+
+- (void)getNumberOfBytesSent:(uint64_t *)bytesSentPtr numberOfBytesReceived:(uint64_t *)bytesReceivedPtr
+{
+    __block uint64_t bytesSent = 0;
+    __block uint64_t bytesReceived = 0;
+    
+    dispatch_block_t block = ^{
+        bytesSent = numberOfBytesSent;
+        bytesReceived = numberOfBytesReceived;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (bytesSentPtr) *bytesSentPtr = bytesSent;
+    if (bytesReceivedPtr) *bytesReceivedPtr = bytesReceived;
+}
+
 
 - (BOOL)resetByteCountPerConnection
 {

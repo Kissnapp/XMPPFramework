@@ -258,7 +258,7 @@
 - (void)endChatRoomPopulationForXMPPStream:(XMPPStream *)stream;
 
 - (void)handleChatRoomDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream;
-- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
+//- (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
 - (BOOL)chatRoomExistsWithID:(NSString *)id xmppStream:(XMPPStream *)stream;
 - (BOOL)isMasterForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;

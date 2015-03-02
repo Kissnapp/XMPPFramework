@@ -14,10 +14,7 @@
 #import "XMPPChatRoomCoreDataStorageObject.h"
 #import "XMPPChatRoomUserCoreDataStorageObject.h"
 
-@protocol XMPPChatRoomStorage;
-@protocol XMPPChatRoomQueryModuleStorage;
-
-@interface XMPPChatRoomCoreDataStorage : XMPPCoreDataStorage<XMPPChatRoomStorage,XMPPChatRoomQueryModuleStorage>
+@interface XMPPChatRoomCoreDataStorage : XMPPCoreDataStorage 
 {
     NSMutableSet *chatRoomPopulationSet;
 }

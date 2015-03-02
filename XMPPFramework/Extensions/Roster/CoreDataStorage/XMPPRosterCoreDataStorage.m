@@ -674,15 +674,14 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     return result;
 }
 
-/*
+
 - (BOOL)privateModelForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
-    
+    return YES;
 }
 - (void)clearRosterForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
  
 }
- */
 
 @end

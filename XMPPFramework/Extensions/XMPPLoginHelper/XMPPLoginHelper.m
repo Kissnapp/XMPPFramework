@@ -206,6 +206,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber
+{}
+- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress
+{}
+- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr
+{}
+
 - (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
 {
     __block NSString *result = nil;

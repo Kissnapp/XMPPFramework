@@ -33,10 +33,12 @@
                                       lastChatTime:(NSDate *)lastMessageTime
                                   streamBareJidStr:(NSString *)streamBareJidStr;
 //The method is not implemented
+/*
 + (BOOL)editObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                           withUserJIDstr:(NSString *)jidStr
                        nReadMessageCount:(NSUInteger)unReadCount
                         streamBareJidStr:(NSString *)streamBareJidStr;
+ */
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDStr:(NSString *)jidStr
@@ -51,7 +53,9 @@
                            streamBareJidStr:(NSString *)streamBareJidStr;
 
 //The method is not implemented
+/*
 + (BOOL)clearAllObjectsInInManagedObjectContext:(NSManagedObjectContext *)moc
                                streamBareJidStr:(NSString *)streamBareJidStr;
+ */
 
 @end

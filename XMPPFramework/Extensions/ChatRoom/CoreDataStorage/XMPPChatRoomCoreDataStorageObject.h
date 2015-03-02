@@ -142,9 +142,11 @@
 - (NSComparisonResult)compareByName:(XMPPChatRoomCoreDataStorageObject *)another;
 - (NSComparisonResult)compareByName:(XMPPChatRoomCoreDataStorageObject *)another options:(NSStringCompareOptions)mask;
 
+/*
 - (NSComparisonResult)compareByAvailabilityName:(XMPPChatRoomCoreDataStorageObject *)another;
 - (NSComparisonResult)compareByAvailabilityName:(XMPPChatRoomCoreDataStorageObject *)another
                                         options:(NSStringCompareOptions)mask;
+ */
 
 
 @end

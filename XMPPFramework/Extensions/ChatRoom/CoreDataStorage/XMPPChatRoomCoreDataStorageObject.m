@@ -260,9 +260,7 @@ streamBareJidStr:(NSString *)streamBareJidStr
     
     if (id == nil) return NO;
     if (moc == nil) return NO;
-    
-    NSError *error = nil;
-    
+        
     XMPPChatRoomCoreDataStorageObject *updateObject = [XMPPChatRoomCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                                withID:id
                                                                                                      streamBareJidStr:streamBareJidStr];
@@ -310,20 +308,20 @@ streamBareJidStr:(NSString *)streamBareJidStr
 
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *jidStr = [Dic objectForKey:@"groupid"];
-    NSString *nickNameStr = [Dic objectForKey:@"groupname"];
-    NSString *subscriptionStr = [Dic objectForKey:@"subscription"];
-    NSString *masterBareJidStr = [Dic objectForKey:@"master"];
+    NSString *tempJidStr = [Dic objectForKey:@"groupid"];
+    NSString *tempNickNameStr = [Dic objectForKey:@"groupname"];
+    NSString *tempSubscriptionStr = [Dic objectForKey:@"subscription"];
+    NSString *tempMasterBareJidStr = [Dic objectForKey:@"master"];
     
-    if (jidStr == nil && [jidStr isEqualToString:@""]){
+    if (tempJidStr == nil && [tempJidStr isEqualToString:@""]){
         NSLog(@"XMPPUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
     
-    self.jid = jidStr;
-    if (nickNameStr && ![nickNameStr isEqualToString:@""]) self.nickName = nickNameStr;
-    if (subscriptionStr && ![subscriptionStr isEqualToString:@""]) self.subscription = subscriptionStr;
-    if (masterBareJidStr && ![masterBareJidStr isEqualToString:@""]) self.masterBareJidStr = masterBareJidStr;
+    self.jid = tempJidStr;
+    if (tempNickNameStr && ![tempNickNameStr isEqualToString:@""]) self.nickName = tempNickNameStr;
+    if (tempSubscriptionStr && ![tempSubscriptionStr isEqualToString:@""]) self.subscription = tempSubscriptionStr;
+    if (tempMasterBareJidStr && ![tempMasterBareJidStr isEqualToString:@""]) self.masterBareJidStr = tempMasterBareJidStr;
     
     //TODO:这里需要处理photo属性
 }

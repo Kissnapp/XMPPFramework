@@ -31,6 +31,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #define AssertPrivateQueue() \
 NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
+@interface XMPPMessageCoreDataStorage () <XMPPAllMessageStorage, XMPPAllMessageQueryModuleStorage>
+{
+
+}
+@end
+
 @implementation XMPPMessageCoreDataStorage
 static XMPPMessageCoreDataStorage *sharedInstance;
 
