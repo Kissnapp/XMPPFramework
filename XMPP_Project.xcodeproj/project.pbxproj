@@ -306,6 +306,9 @@
 		E77916581A4D7DD500279156 /* XMPPCustomBinding.h in Headers */ = {isa = PBXBuildFile; fileRef = E77916571A4D7DD500279156 /* XMPPCustomBinding.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E779165B1A4D7F3000279156 /* XMPPTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = E77916591A4D7F3000279156 /* XMPPTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E779165C1A4D7F3000279156 /* XMPPTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = E779165A1A4D7F3000279156 /* XMPPTimer.m */; };
+		E78EEFBF1ABABEA000C902C3 /* NSString+ChineseToPinYin.m in Sources */ = {isa = PBXBuildFile; fileRef = E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */; };
+		E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */ = {isa = PBXBuildFile; fileRef = E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */; };
+		E78EEFC21ABABED000C902C3 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E78EEFC11ABABED000C902C3 /* CoreFoundation.framework */; };
 		E796C4081A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E796C4011A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E796C4091A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E796C4021A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m */; };
 		E796C40C1A318431004F7CB0 /* XMPPLoginHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = E796C4051A318431004F7CB0 /* XMPPLoginHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -659,6 +662,9 @@
 		E77916591A4D7F3000279156 /* XMPPTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPTimer.h; sourceTree = "<group>"; };
 		E779165A1A4D7F3000279156 /* XMPPTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPTimer.m; sourceTree = "<group>"; };
 		E77943C319D3BE6D00514E38 /* XMPPChatRoom.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPChatRoom.xcdatamodel; sourceTree = "<group>"; };
+		E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+ChineseToPinYin.m"; sourceTree = "<group>"; };
+		E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+ChineseToPinYin.h"; sourceTree = "<group>"; };
+		E78EEFC11ABABED000C902C3 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		E796C4001A318431004F7CB0 /* XMPPLoginHelper.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPLoginHelper.xcdatamodel; sourceTree = "<group>"; };
 		E796C4011A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPLoginHelperCoreDataStorage.h; sourceTree = "<group>"; };
 		E796C4021A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPLoginHelperCoreDataStorage.m; sourceTree = "<group>"; };
@@ -703,6 +709,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E78EEFC21ABABED000C902C3 /* CoreFoundation.framework in Frameworks */,
 				63F3B6C71960F9A800BD8134 /* CoreData.framework in Frameworks */,
 				63F3B6C51960F94800BD8134 /* SystemConfiguration.framework in Frameworks */,
 				63F3B6C31960F93A00BD8134 /* CoreLocation.framework in Frameworks */,
@@ -737,6 +744,7 @@
 		63F3B1221960F7BA00BD8134 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E78EEFC11ABABED000C902C3 /* CoreFoundation.framework */,
 				63F3B6C61960F9A800BD8134 /* CoreData.framework */,
 				63F3B6C41960F94800BD8134 /* SystemConfiguration.framework */,
 				63F3B6C21960F93A00BD8134 /* CoreLocation.framework */,
@@ -864,6 +872,8 @@
 		63F3B17B1960F91500BD8134 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */,
+				E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */,
 				63F3B17C1960F91500BD8134 /* NSData+XMPP.h */,
 				63F3B17D1960F91500BD8134 /* NSData+XMPP.m */,
 				63F3B17E1960F91500BD8134 /* NSNumber+XMPP.h */,
@@ -1529,6 +1539,7 @@
 			isa = PBXGroup;
 			children = (
 				63F3B2A31960F91500BD8134 /* Categories */,
+				63F3B2AD1960F91500BD8134 /* Private */,
 				63F3B2A61960F91500BD8134 /* DDXML.h */,
 				63F3B2A71960F91500BD8134 /* DDXMLDocument.h */,
 				63F3B2A81960F91500BD8134 /* DDXMLDocument.m */,
@@ -1536,7 +1547,6 @@
 				63F3B2AA1960F91500BD8134 /* DDXMLElement.m */,
 				63F3B2AB1960F91500BD8134 /* DDXMLNode.h */,
 				63F3B2AC1960F91500BD8134 /* DDXMLNode.m */,
-				63F3B2AD1960F91500BD8134 /* Private */,
 			);
 			path = KissXML;
 			sourceTree = "<group>";
@@ -1778,6 +1788,7 @@
 				63F3B5341960F91700BD8134 /* XMPPAutoPing.h in Headers */,
 				63F3B46F1960F91700BD8134 /* XMPPDeprecatedDigestAuthentication.h in Headers */,
 				63F3B4731960F91700BD8134 /* XMPPDigestMD5Authentication.h in Headers */,
+				E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */,
 				63F3B47E1960F91700BD8134 /* NSData+XMPP.h in Headers */,
 				63F3B55E1960F91700BD8134 /* DDFileLogger.h in Headers */,
 				63F3B4F41960F91700BD8134 /* XMPPvCardTempEmail.h in Headers */,
@@ -2063,6 +2074,7 @@
 				63F3B50F1960F91700BD8134 /* XMPPMessage+XEP_0085.m in Sources */,
 				63F3B4DB1960F91700BD8134 /* XMPPMessage+XEP0045.m in Sources */,
 				63F3B4C21960F91700BD8134 /* XMPPLastActivity.m in Sources */,
+				E78EEFBF1ABABEA000C902C3 /* NSString+ChineseToPinYin.m in Sources */,
 				63F3B4C71960F91700BD8134 /* XMPPRoomCoreDataStorage.m in Sources */,
 				63F3B51A1960F91700BD8134 /* XMPPCapsCoreDataStorageObject.m in Sources */,
 				63F3B47C1960F91700BD8134 /* XMPPXOAuth2Google.m in Sources */,

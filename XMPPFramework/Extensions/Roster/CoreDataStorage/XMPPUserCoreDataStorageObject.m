@@ -4,6 +4,7 @@
 #import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPGroupCoreDataStorageObject.h"
 #import "NSNumber+XMPP.h"
+#import "NSString+ChineseToPinYin.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -18,6 +19,7 @@
 @property(nonatomic,strong) NSString *primitiveDisplayName;
 @property(nonatomic,assign) NSInteger primitiveSection;
 @property(nonatomic,strong) NSString *primitiveSectionName;
+@property(nonatomic,strong) NSString *primitiveEnglishName;
 @property(nonatomic,strong) NSNumber *primitiveSectionNum;
 
 @end
@@ -54,6 +56,7 @@
 
 @dynamic phoneNumber;
 @dynamic emailAddress;
+@dynamic englishName, primitiveEnglishName;
 
 - (XMPPJID *)jid
 {
@@ -109,15 +112,13 @@
 
 - (NSInteger)primitiveSection
 {
-  return section;
+    return section;
 }
 
 - (void)setPrimitiveSection:(NSInteger)primitiveSection
 {
-  section = primitiveSection;
+    section = primitiveSection;
 }
-
-
 
 - (void)setSectionNum:(NSNumber *)sectionNum
 {
@@ -129,7 +130,38 @@
   // section uses zero, so to distinguish unset values, use NSNotFound
   [self setPrimitiveSection:NSNotFound];
 }
-
+/*
+- (void)setEnglishName:(NSString *)englishName
+{
+    [self willChangeValueForKey:@"englishName"];
+    [self setPrimitiveEnglishName:englishName];
+    [self didChangeValueForKey:@"englishName"];
+    
+    // If the englishName changes, the sectionName becomes invalid.
+    // section uses zero, so to distinguish unset values, use NSNotFound
+    //[self setPrimitiveSectionName:nil];
+}
+*/
+- (NSString *)englishName
+{
+    [self willAccessValueForKey:@"englishName"];
+    NSString *tmp = [self primitiveEnglishName];
+    [self didAccessValueForKey:@"englishName"];
+    
+    if (tmp == nil) {
+        tmp = [self.nickname chineseToPinYin];
+        [self setPrimitiveEnglishName:tmp];
+    }
+    return tmp;
+}
+/*
+- (void)setSectionName:(NSString *)sectionName
+{
+    [self willChangeValueForKey:@"sectionName"];
+    [self setPrimitiveSectionName:sectionName];
+    [self didChangeValueForKey:@"sectionName"];
+}
+*/
 - (NSString *)sectionName
 {
   // Create and cache the sectionName on demand
@@ -139,13 +171,15 @@
   [self didAccessValueForKey:@"sectionName"];
   
   if (tmp == nil) {
+    /*
     // Section names are organized by capitalizing the first letter of the displayName
     
     NSString *upperCase = [self.displayName uppercaseString];
     
     // return the first character with support UTF-16:
     tmp = [upperCase substringWithRange:[upperCase rangeOfComposedCharacterSequenceAtIndex:0]];
-
+    */
+    tmp = [self.englishName pinyin_firstLetter];
     [self setPrimitiveSectionName:tmp];
   }
   return tmp;
@@ -304,9 +338,15 @@
 	
     //旧代码：self.displayName = (self.nickname != nil) ? self.nickname : jidStr;
 	self.displayName = (self.nickname != nil) ? self.nickname : [jid user];
-	
+    
 	self.subscription = [item attributeStringValueForName:@"subscription"];
 	self.ask = [item attributeStringValueForName:@"ask"];
+    
+    // Here we must store the englishName and sectionName for using later,otherwise wo can not get those two value
+    if (self.nickname) {
+        self.englishName = [self.nickname chineseToPinYin];
+        self.sectionName = [self.nickname firstLetter];
+    }
 	
 	[self updateGroupsWithItem:item];
 }
@@ -507,14 +547,24 @@
 	// If the value of sectionNum changes, the section may change as well.
 	return [NSSet setWithObject:@"sectionNum"];
 }
-
+/*
 + (NSSet *)keyPathsForValuesAffectingSectionName {
 	// If the value of displayName changes, the sectionName may change as well.
 	return [NSSet setWithObject:@"displayName"];
 }
-
+*/
 + (NSSet *)keyPathsForValuesAffectingAllResources {
 	return [NSSet setWithObject:@"resources"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingSectionName {
+    // If the value of englishName changes, the sectionName may change as well.
+    return [NSSet setWithObject:@"englishName"];
+}
+
++ (NSSet *)keyPathsForValuesAffectingEnglishName {
+    // If the value of nickname changes, the englishName may change as well.
+    return [NSSet setWithObject:@"nickname"];
 }
 
 @end

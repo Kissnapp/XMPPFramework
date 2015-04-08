@@ -30,6 +30,7 @@
 //user phonerNumber and emailAddress
 @property (strong, nonatomic) NSString *phoneNumber;
 @property (strong, nonatomic) NSString *emailAddress;
+@property (strong, nonatomic) NSString *englishName;
 
 #if TARGET_OS_IPHONE
 @property (nonatomic, strong) UIImage *photo;
