@@ -106,3 +106,5 @@
 #import "XMPPStreamManagement.h"
 #import "XMPPStreamManagementStanzas.h"
 #import "XMPPStreamManagementMemoryStorage.h"
+
+#import "XMPPMmsRequest.h"

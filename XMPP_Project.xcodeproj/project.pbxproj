@@ -307,8 +307,10 @@
 		E779165B1A4D7F3000279156 /* XMPPTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = E77916591A4D7F3000279156 /* XMPPTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E779165C1A4D7F3000279156 /* XMPPTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = E779165A1A4D7F3000279156 /* XMPPTimer.m */; };
 		E78EEFBF1ABABEA000C902C3 /* NSString+ChineseToPinYin.m in Sources */ = {isa = PBXBuildFile; fileRef = E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */; };
-		E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */ = {isa = PBXBuildFile; fileRef = E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */; };
+		E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */ = {isa = PBXBuildFile; fileRef = E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E78EEFC21ABABED000C902C3 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E78EEFC11ABABED000C902C3 /* CoreFoundation.framework */; };
+		E78F0E061AD66245004DE419 /* XMPPMmsRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = E78F0E041AD66245004DE419 /* XMPPMmsRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E78F0E071AD66245004DE419 /* XMPPMmsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E78F0E051AD66245004DE419 /* XMPPMmsRequest.m */; };
 		E796C4081A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E796C4011A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E796C4091A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E796C4021A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m */; };
 		E796C40C1A318431004F7CB0 /* XMPPLoginHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = E796C4051A318431004F7CB0 /* XMPPLoginHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -665,6 +667,8 @@
 		E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+ChineseToPinYin.m"; sourceTree = "<group>"; };
 		E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+ChineseToPinYin.h"; sourceTree = "<group>"; };
 		E78EEFC11ABABED000C902C3 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		E78F0E041AD66245004DE419 /* XMPPMmsRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMmsRequest.h; sourceTree = "<group>"; };
+		E78F0E051AD66245004DE419 /* XMPPMmsRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMmsRequest.m; sourceTree = "<group>"; };
 		E796C4001A318431004F7CB0 /* XMPPLoginHelper.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPLoginHelper.xcdatamodel; sourceTree = "<group>"; };
 		E796C4011A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPLoginHelperCoreDataStorage.h; sourceTree = "<group>"; };
 		E796C4021A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPLoginHelperCoreDataStorage.m; sourceTree = "<group>"; };
@@ -917,6 +921,7 @@
 		63F3B1961960F91500BD8134 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E78F0E031AD65F39004DE419 /* MMS */,
 				E796C3FD1A318431004F7CB0 /* XMPPLoginHelper */,
 				E703D07919D9088600D8E3A4 /* ChatMessageStorage */,
 				E7C4DF9D19D2A68B000CB916 /* ChatRoom */,
@@ -1640,6 +1645,15 @@
 			path = Private;
 			sourceTree = "<group>";
 		};
+		E78F0E031AD65F39004DE419 /* MMS */ = {
+			isa = PBXGroup;
+			children = (
+				E78F0E041AD66245004DE419 /* XMPPMmsRequest.h */,
+				E78F0E051AD66245004DE419 /* XMPPMmsRequest.m */,
+			);
+			path = MMS;
+			sourceTree = "<group>";
+		};
 		E796C3FD1A318431004F7CB0 /* XMPPLoginHelper */ = {
 			isa = PBXGroup;
 			children = (
@@ -1788,7 +1802,6 @@
 				63F3B5341960F91700BD8134 /* XMPPAutoPing.h in Headers */,
 				63F3B46F1960F91700BD8134 /* XMPPDeprecatedDigestAuthentication.h in Headers */,
 				63F3B4731960F91700BD8134 /* XMPPDigestMD5Authentication.h in Headers */,
-				E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */,
 				63F3B47E1960F91700BD8134 /* NSData+XMPP.h in Headers */,
 				63F3B55E1960F91700BD8134 /* DDFileLogger.h in Headers */,
 				63F3B4F41960F91700BD8134 /* XMPPvCardTempEmail.h in Headers */,
@@ -1911,6 +1924,8 @@
 				E779165B1A4D7F3000279156 /* XMPPTimer.h in Headers */,
 				E731BB4C1A30391200B1CD81 /* XMPPRosterQueryModule.h in Headers */,
 				E77916581A4D7DD500279156 /* XMPPCustomBinding.h in Headers */,
+				E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */,
+				E78F0E061AD66245004DE419 /* XMPPMmsRequest.h in Headers */,
 				E7D92F211A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h in Headers */,
 				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);
@@ -2105,6 +2120,7 @@
 				63F3B4861960F91700BD8134 /* XMPPElement.m in Sources */,
 				63F3B52B1960F91700BD8134 /* XMPPMessage+XEP_0172.m in Sources */,
 				63F3B4941960F91700BD8134 /* XMPPPresence.m in Sources */,
+				E78F0E071AD66245004DE419 /* XMPPMmsRequest.m in Sources */,
 				84CA947A1A1C4705009824A7 /* XMPPLocationMessageObject.m in Sources */,
 				63F3B52D1960F91700BD8134 /* XMPPPresence+XEP_0172.m in Sources */,
 				63F3B53F1960F91700BD8134 /* XEP_0223.m in Sources */,
