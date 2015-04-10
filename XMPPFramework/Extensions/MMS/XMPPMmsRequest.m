@@ -8,7 +8,6 @@
 
 #import "XMPPMmsRequest.h"
 #import "XMPPStream.h"
-#import "XMPPIDTracker.h"
 
 static const NSString *MMS_REQUEST_XMLNS = @"aft:mms";
 static const NSString *MMS_ERROR_DOMAIN = @"com.afusion.mms.error";
@@ -18,8 +17,6 @@ static const NSInteger MMS_ERROR_CODE = 9999;
 typedef void(^CompletionBlock)(NSString *string, NSError *error);
 
 @interface XMPPMmsRequest ()
-
-@property (strong, nonatomic) XMPPIDTracker *xmppIDTracker;
 
 @property (strong, nonatomic) NSMutableDictionary *uploadCompletionBlockDcitionary;
 @property (strong, nonatomic) NSMutableDictionary *downloadCompletionBlockDcitionary;
@@ -33,7 +30,6 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
 
 
 @implementation XMPPMmsRequest
-@synthesize xmppIDTracker;
 @synthesize uploadCompletionBlockDcitionary;
 @synthesize downloadCompletionBlockDcitionary;
 @synthesize canSendRequest;
@@ -60,8 +56,6 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     {
         // Reserved for possible future use.
         
-        xmppIDTracker = [[XMPPIDTracker alloc] initWithStream:xmppStream dispatchQueue:moduleQueue];
-        
         return YES;
     }
     
@@ -74,9 +68,6 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     dispatch_block_t block = ^{
         
         canSendRequest = NO;
-        
-        [xmppIDTracker removeAllIDs];
-        xmppIDTracker = nil;
         
         [uploadCompletionBlockDcitionary removeAllObjects];
         [downloadCompletionBlockDcitionary removeAllObjects];
@@ -180,12 +171,9 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             
-            [xmppIDTracker addElement:iq
-                               target:self
-                             selector:@selector(handleMmsRequestIQ:withInfo:)
-                              timeout:60];
-            
             [[self xmppStream] sendElement:iq];
+            
+            [self _removeCompletionBlockWithDictionary:uploadCompletionBlockDcitionary requestKey:requestKey];
         }
     }};
     
@@ -194,6 +182,7 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     else
         dispatch_async(moduleQueue, block);
 }
+
 
 - (void)requestDownloadURLWithToken:(NSString *)token completionBlock:(void (^)(NSString *token, NSError *error))completionBlock
 {
@@ -230,12 +219,9 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             
-            [xmppIDTracker addElement:iq
-                               target:self
-                             selector:@selector(handleMmsRequestIQ:withInfo:)
-                              timeout:60];
-            
             [[self xmppStream] sendElement:iq];
+            
+            [self _removeCompletionBlockWithDictionary:downloadCompletionBlockDcitionary requestKey:requestKey];
         }
     }};
     
@@ -246,55 +232,45 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPIDTracker
+#pragma mark Private methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (void)handleMmsRequestIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
+- (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey
+{
+    NSTimeInterval delayInSeconds = 60.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, moduleQueue, ^(void){@autoreleasepool{
     
-    dispatch_block_t block = ^{ @autoreleasepool {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"request from server with no response for a long time!" forKey:NSLocalizedDescriptionKey];
+        NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
         
-        NSXMLElement *query = [iq elementForName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
-        
-        if (query)
-        {
-            NSString *key = [iq elementID];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"send iq out time" forKey:NSLocalizedDescriptionKey];
+        if ([dic isEqual:uploadCompletionBlockDcitionary]) {
             
-            NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
+            CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:requestKey];
             
-            if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
-            {
-                CompletionBlock completionBlock = (CompletionBlock)[uploadCompletionBlockDcitionary objectForKey:key];
+            if (completionBlock) {
                 completionBlock(nil, _error);
-                
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:key];
-                
-                [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
-            else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
-            {
-                //[xmppIDTracker invokeForElement:iq withObject:iq];
-                
-                NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
-                NSString *token = [[blockDic allKeys] firstObject];
-                
-                CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+            
+            [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:requestKey];
+            
+        }else if ([dic isEqual:downloadCompletionBlockDcitionary]){
+            
+            NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:requestKey];
+            NSString *token = [[blockDic allKeys] firstObject];
+            
+            CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+            
+            if (completionBlock) {
                 completionBlock(nil, _error);
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:key];
-                
-                [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
+            
+            [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:requestKey];
         }
-    }};
-
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+        
+        [dic removeObjectForKey:requestKey];
     
+    }});
 }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,21 +296,26 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
             {
                 CompletionBlock completionBlock = (CompletionBlock)[uploadCompletionBlockDcitionary objectForKey:key];
-                completionBlock(nil, _error);
                 
+                if (completionBlock) {
+                    completionBlock(nil, _error);
+                }
+
                 [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:key];
                 
                 [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
             else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
-                //[xmppIDTracker invokeForElement:iq withObject:iq];
-                
                 NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
                 NSString *token = [[blockDic allKeys] firstObject];
                 
                 CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
-                completionBlock(nil, _error);
+                
+                if (completionBlock) {
+                    completionBlock(nil, _error);
+                }
+            
                 [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:key];
                 
                 [downloadCompletionBlockDcitionary removeObjectForKey:key];
@@ -367,7 +348,10 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
             {
                 CompletionBlock completionBlock = (CompletionBlock)[uploadCompletionBlockDcitionary objectForKey:key];
-                completionBlock([query stringValue], nil);
+                
+                if (completionBlock) {
+                    completionBlock([query stringValue], nil);
+                }
                 
                 [multicastDelegate xmppMmsRequest:self didReceivedUploadToken:[query stringValue] forRequestKey:key];
                 
@@ -375,19 +359,20 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             }
             else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
-                //[xmppIDTracker invokeForElement:iq withObject:iq];
-                
                 NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
                 NSString *token = [[blockDic allKeys] firstObject];
                 
                 CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
-                completionBlock([query stringValue], nil);
+                
+                if (completionBlock) {
+                    completionBlock([query stringValue], nil);
+                }
+                
                 [multicastDelegate xmppMmsRequest:self didReceivedDownloadURL:[query stringValue] forDownloadToken:token requestKey:key];
                 
                 [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
-            
-            [xmppIDTracker invokeForElement:iq withObject:iq];
+
             
             return YES;
         }
@@ -410,7 +395,9 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
         
         CompletionBlock completionBlock = (CompletionBlock)obj;
         
-        completionBlock(nil, _error);
+        if (completionBlock) {
+            completionBlock(nil, _error);
+        }
         
         [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:(NSString *)key];
         
@@ -422,7 +409,9 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
         NSString *token = [[dic allKeys] firstObject];
         CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:token];
         
-        completionBlock(nil, _error);
+        if (completionBlock) {
+            completionBlock(nil, _error);
+        }
         
         [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:(NSString *)key];
     }];
