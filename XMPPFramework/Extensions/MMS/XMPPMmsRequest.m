@@ -240,34 +240,36 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
     dispatch_after(popTime, moduleQueue, ^(void){@autoreleasepool{
     
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"request from server with no response for a long time!" forKey:NSLocalizedDescriptionKey];
-        NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-        
-        if ([dic isEqual:uploadCompletionBlockDcitionary]) {
+        if ([dic objectForKey:requestKey]) {
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"request from server with no response for a long time!" forKey:NSLocalizedDescriptionKey];
+            NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
             
-            CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:requestKey];
-            
-            if (completionBlock) {
-                completionBlock(nil, _error);
+            if ([dic isEqual:uploadCompletionBlockDcitionary]) {
+                
+                CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:requestKey];
+                
+                if (completionBlock) {
+                    completionBlock(nil, _error);
+                }
+                
+                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:requestKey];
+                
+            }else if ([dic isEqual:downloadCompletionBlockDcitionary]){
+                
+                NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:requestKey];
+                NSString *token = [[blockDic allKeys] firstObject];
+                
+                CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+                
+                if (completionBlock) {
+                    completionBlock(nil, _error);
+                }
+                
+                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:requestKey];
             }
             
-            [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:requestKey];
-            
-        }else if ([dic isEqual:downloadCompletionBlockDcitionary]){
-            
-            NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:requestKey];
-            NSString *token = [[blockDic allKeys] firstObject];
-            
-            CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
-            
-            if (completionBlock) {
-                completionBlock(nil, _error);
-            }
-            
-            [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:requestKey];
+            [dic removeObjectForKey:requestKey];
         }
-        
-        [dic removeObjectForKey:requestKey];
     
     }});
 }
