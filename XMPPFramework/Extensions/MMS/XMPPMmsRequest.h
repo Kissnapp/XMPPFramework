@@ -13,10 +13,14 @@
 @interface XMPPMmsRequest : XMPPModule
 
 - (void)requestUploadTokenWithCompletionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
-- (void)requestUploadTokenWithRequestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
+- (void)requestUploadTokenWithRequestKey:(NSString *)requestKey
+                         completionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
 
-- (void)requestDownloadURLWithToken:(NSString *)token completionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
-- (void)requestDownloadURLWithToken:(NSString *)token requestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
+- (void)requestDownloadURLWithToken:(NSString *)token
+                    completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
+- (void)requestDownloadURLWithToken:(NSString *)token
+                         requestKey:(NSString *)requestKey
+                    completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
 
 @end
 

@@ -184,7 +184,7 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
 }
 
 
-- (void)requestDownloadURLWithToken:(NSString *)token completionBlock:(void (^)(NSString *token, NSError *error))completionBlock
+- (void)requestDownloadURLWithToken:(NSString *)token completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{
         
