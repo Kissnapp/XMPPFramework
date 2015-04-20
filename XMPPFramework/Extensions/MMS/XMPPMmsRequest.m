@@ -206,11 +206,19 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                              requestKey:(NSString *)requestKey
                               completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    if (!file || !requestKey) return;
+    if (!requestKey) return;
     
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
+            
+            if (!file) {
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The upload file id can not been nil" forKey:NSLocalizedDescriptionKey];
+                NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
+                completionBlock(nil,nil,nil,_error);
+                
+                return;
+            }
             
             [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
             
@@ -262,11 +270,19 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 }
 - (void)requestDownloadURLWithFile:(NSString *)file requestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
 {
-    if (!file || !requestKey) return;
+    if (!requestKey) return;
     
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
+            
+            if (!file) {
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The download file id can not been nil" forKey:NSLocalizedDescriptionKey];
+                NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
+                completionBlock(nil,_error);
+                
+                return;
+            }
             
             NSDictionary *blockDic = [NSDictionary dictionaryWithObject:completionBlock forKey:file];
             [downloadCompletionBlockDcitionary setObject:blockDic forKey:requestKey];
@@ -342,6 +358,45 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
     
     }});
 }
+
+- (void)requestUploadErrorWithCode:(NSInteger)errorCode description:(NSString *)description key:(NSString *)key
+{
+    [self _errorWithCode:errorCode description:description isUploadRequest:YES key:key];
+}
+
+- (void)requestDownloadErrorWithCode:(NSInteger)errorCode description:(NSString *)description key:(NSString *)key
+{
+    [self _errorWithCode:errorCode description:description isUploadRequest:NO key:key];
+}
+
+- (void)_errorWithCode:(NSInteger)errorCode description:(NSString *)description isUploadRequest:(BOOL)isUploadRequest key:(NSString *)key
+{
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey];
+    
+    NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:errorCode userInfo:userInfo];
+    
+    if (isUploadRequest) {
+        
+        UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
+        
+        if (uploadBlock) {
+            uploadBlock(nil,nil,nil, _error);
+        }
+        
+        [uploadCompletionBlockDcitionary removeObjectForKey:key];
+    }else{
+        NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
+        NSString *file = [[blockDic allKeys] firstObject];
+        
+        DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
+        
+        if (downloadBlock) {
+            downloadBlock(nil, _error);
+        }
+        
+        [downloadCompletionBlockDcitionary removeObjectForKey:key];
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -360,32 +415,14 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         if (query)
         {
             NSString *key = [iq elementID];
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"send iq error" forKey:NSLocalizedDescriptionKey];
-            
-            NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
             
             if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
             {
-                UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
-                
-                if (uploadBlock) {
-                    uploadBlock(nil,nil,nil, _error);
-                }
-                
-                [uploadCompletionBlockDcitionary removeObjectForKey:key];
+                [self requestUploadErrorWithCode:MMS_ERROR_CODE description:@"send iq error" key:key];
             }
             else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
-                NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
-                NSString *file = [[blockDic allKeys] firstObject];
-                
-                DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
-                
-                if (downloadBlock) {
-                    downloadBlock(nil, _error);
-                }
-                
-                [downloadCompletionBlockDcitionary removeObjectForKey:key];
+                [self requestDownloadErrorWithCode:MMS_ERROR_CODE description:@"send iq error" key:key];
             }
             
             return YES;
