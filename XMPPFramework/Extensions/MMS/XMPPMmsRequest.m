@@ -14,7 +14,8 @@ static const NSString *MMS_ERROR_DOMAIN = @"com.afusion.mms.error";
 static const NSInteger MMS_ERROR_CODE = 9999;
 //static const NSString *MMS_DOWNLOAD_TOKEN_KEY = @"download_key_string";
 
-typedef void(^CompletionBlock)(NSString *string, NSError *error);
+typedef void(^DownloadBlock)(NSString *string, NSError *error);
+typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration, NSError *error);
 
 @interface XMPPMmsRequest ()
 
@@ -135,13 +136,14 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)requestUploadTokenWithCompletionBlock:(void (^)(NSString *token, NSError *error))completionBlock
+// upload new file
+- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{
         
         NSString *key = [[self xmppStream] generateUUID];
         
-        [self requestUploadTokenWithRequestKey:key completionBlock:completionBlock];
+        [self requestUploadInfoWithRequestKey:key completionBlock:completionBlock];
         
     };
     
@@ -150,19 +152,19 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)requestUploadTokenWithRequestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *token, NSError *error))completionBlock
+- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
+    if (!requestKey) return;
+    
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
-            
-            [multicastDelegate xmppMmsRequest:self willRequestUploadTokenForRequestKey:requestKey];
             
             [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
             
             /*
              <iq type="get" id="2115763">
-             <query xmlns="aft:mms" query_type="upload"></query>
+                <query xmlns="aft:mms" query_type="upload"></query>
              </iq>
              */
             
@@ -183,14 +185,16 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
         dispatch_async(moduleQueue, block);
 }
 
-
-- (void)requestDownloadURLWithToken:(NSString *)token completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
+// upload exists file
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{
         
         NSString *key = [[self xmppStream] generateUUID];
         
-        [self requestDownloadURLWithToken:token requestKey:key completionBlock:completionBlock];
+        [self requestExistsUploadInfoWithFile:file requestKey:key completionBlock:completionBlock];
+        
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -198,25 +202,92 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)requestDownloadURLWithToken:(NSString *)token requestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                             requestKey:(NSString *)requestKey
+                              completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
+    if (!file || !requestKey) return;
+    
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
-            [multicastDelegate xmppMmsRequest:self willRequestDownloadURLForDownloadToken:token requestKey:requestKey];
             
-            NSDictionary *blockDic = [NSDictionary dictionaryWithObject:completionBlock forKey:token];
+            [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            /*
+             <iq type="get" id="2115763">
+                <query xmlns="aft:mms" query_type="upload">
+                    <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
+                </query>
+             </iq>
+             */
+            
+            // query element
+            NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
+            [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
+            
+            // file element
+             NSXMLElement *fileElement = [NSXMLElement elementWithName:@"file" stringValue:file];
+            [queryElement addChild:fileElement];
+            
+            // iq element
+            XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
+            
+            [[self xmppStream] sendElement:iq];
+            
+            [self _removeCompletionBlockWithDictionary:uploadCompletionBlockDcitionary requestKey:requestKey];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+// download method
+- (void)requestDownloadURLWithFile:(NSString *)file completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        NSString *key = [[self xmppStream] generateUUID];
+        
+        [self requestDownloadURLWithFile:file requestKey:key completionBlock:completionBlock];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)requestDownloadURLWithFile:(NSString *)file requestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock
+{
+    if (!file || !requestKey) return;
+    
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {
+            
+            NSDictionary *blockDic = [NSDictionary dictionaryWithObject:completionBlock forKey:file];
             [downloadCompletionBlockDcitionary setObject:blockDic forKey:requestKey];
             
             /*
              <iq type="get" id="2115763">
-             <query xmlns="aft:mms" query_type="upload"></query>
+                <query xmlns="aft:mms" query_type="download">
+                    <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
+                </query>
              </iq>
              */
-            
+
+            // query element
             NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
             [queryElement addAttributeWithName:@"query_type" stringValue:@"download"];
             
+            // file element
+            NSXMLElement *fileElement = [NSXMLElement elementWithName:@"file" stringValue:file];
+            [queryElement addChild:fileElement];
+            
+            // iq element
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             
             [[self xmppStream] sendElement:iq];
@@ -246,26 +317,24 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             
             if ([dic isEqual:uploadCompletionBlockDcitionary]) {
                 
-                CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:requestKey];
+                UploadBlock uploadBlock = (UploadBlock)[dic objectForKey:requestKey];
                 
-                if (completionBlock) {
-                    completionBlock(nil, _error);
+                if (uploadBlock) {
+                    uploadBlock(nil, nil, nil, _error);
                 }
                 
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:requestKey];
                 
             }else if ([dic isEqual:downloadCompletionBlockDcitionary]){
                 
                 NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:requestKey];
-                NSString *token = [[blockDic allKeys] firstObject];
+                NSString *file = [[blockDic allKeys] firstObject];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+                DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
-                if (completionBlock) {
-                    completionBlock(nil, _error);
+                if (downloadBlock) {
+                    downloadBlock(nil, _error);
                 }
                 
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:requestKey];
             }
             
             [dic removeObjectForKey:requestKey];
@@ -297,28 +366,24 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             
             if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
             {
-                CompletionBlock completionBlock = (CompletionBlock)[uploadCompletionBlockDcitionary objectForKey:key];
+                UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
                 
-                if (completionBlock) {
-                    completionBlock(nil, _error);
+                if (uploadBlock) {
+                    uploadBlock(nil,nil,nil, _error);
                 }
-
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:key];
                 
                 [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
             else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
                 NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
-                NSString *token = [[blockDic allKeys] firstObject];
+                NSString *file = [[blockDic allKeys] firstObject];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+                DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
-                if (completionBlock) {
-                    completionBlock(nil, _error);
+                if (downloadBlock) {
+                    downloadBlock(nil, _error);
                 }
-            
-                [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:key];
                 
                 [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
@@ -349,28 +414,41 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
             
             if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
             {
-                CompletionBlock completionBlock = (CompletionBlock)[uploadCompletionBlockDcitionary objectForKey:key];
+                /*
+                 <iq from='alice@localhost' to='alice@localhost' id='2115763' type='result'>
+                    <query xmlns='aft:mms' query_type='upload'>
+                        <token>3e4963702884b4ddf72a696c81ee49b</token>
+                        <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
+                        <expiration>1428994820549535</expiration>
+                    </query>
+                 </iq>
+                 */
+                NSString *token = [[query elementForName:@"token"] stringValue];
+                NSString *file = [[query elementForName:@"file"] stringValue];
+                NSString *expiration = [[query elementForName:@"expiration"] stringValue];
+                UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
                 
-                if (completionBlock) {
-                    completionBlock([query stringValue], nil);
+                if (uploadBlock) {
+                    uploadBlock(token, file, expiration, nil);
                 }
-                
-                [multicastDelegate xmppMmsRequest:self didReceivedUploadToken:[query stringValue] forRequestKey:key];
                 
                 [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
             else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
+                /*
+                 <iq type="result" id="2115763">
+                    <query xmlns="aft:mms" query_type="download" >https://xxx.aft.s3.amazonaws.com/8e13373a-46e8-40c4-8f18-dc2c9cf21223?AWSAccessKeyId=AKIAIQJNLH5YIBB3LV4Q&amp;Signature=yXTcTAfMstsIQzN5Opx5xGM9ur8%3D&amp;Expires=1426237616</query>
+                 </iq>
+                 */
                 NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
-                NSString *token = [[blockDic allKeys] firstObject];
+                NSString *file = [[blockDic allKeys] firstObject];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[blockDic objectForKey:token];
+                DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
-                if (completionBlock) {
-                    completionBlock([query stringValue], nil);
+                if (downloadBlock) {
+                    downloadBlock([query stringValue], nil);
                 }
-                
-                [multicastDelegate xmppMmsRequest:self didReceivedDownloadURL:[query stringValue] forDownloadToken:token requestKey:key];
                 
                 [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
@@ -395,27 +473,24 @@ typedef void(^CompletionBlock)(NSString *string, NSError *error);
     
     [uploadCompletionBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         
-        CompletionBlock completionBlock = (CompletionBlock)obj;
+        UploadBlock uploadBlock = (UploadBlock)obj;
         
-        if (completionBlock) {
-            completionBlock(nil, _error);
+        if (uploadBlock) {
+            uploadBlock(nil, nil, nil, _error);
         }
-        
-        [multicastDelegate xmppMmsRequest:self didReceivedError:_error forUploadRequestKey:(NSString *)key];
         
     }];
     
     [downloadCompletionBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         
         NSDictionary *dic = (NSDictionary *)obj;
-        NSString *token = [[dic allKeys] firstObject];
-        CompletionBlock completionBlock = (CompletionBlock)[dic objectForKey:token];
+        NSString *file = [[dic allKeys] firstObject];
+        DownloadBlock downloadBlock = (DownloadBlock)[dic objectForKey:file];
         
-        if (completionBlock) {
-            completionBlock(nil, _error);
+        if (downloadBlock) {
+            downloadBlock(nil, _error);
         }
         
-        [multicastDelegate xmppMmsRequest:self didReceivedError:_error forDownloadToken:token requestKey:(NSString *)key];
     }];
     
     [uploadCompletionBlockDcitionary removeAllObjects];

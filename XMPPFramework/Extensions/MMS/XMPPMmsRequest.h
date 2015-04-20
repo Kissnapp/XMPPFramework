@@ -8,34 +8,26 @@
 
 #import <XMPPFramework/XMPPFramework.h>
 
-@protocol XMPPMmsRequestDelegate;
-
 @interface XMPPMmsRequest : XMPPModule
 
-- (void)requestUploadTokenWithCompletionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
-- (void)requestUploadTokenWithRequestKey:(NSString *)requestKey
-                         completionBlock:(void (^)(NSString *token, NSError *error))completionBlock;
+// upload new file
+- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey
+                         completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 
-- (void)requestDownloadURLWithToken:(NSString *)token
+// upload exists file
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                             requestKey:(NSString *)requestKey
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+
+
+- (void)requestDownloadURLWithFile:(NSString *)file
                     completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
-- (void)requestDownloadURLWithToken:(NSString *)token
+- (void)requestDownloadURLWithFile:(NSString *)file
                          requestKey:(NSString *)requestKey
                     completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
 
-@end
-
-@protocol XMPPMmsRequestDelegate <NSObject>
-
-@optional
-
-// upload request delegate notice
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest willRequestUploadTokenForRequestKey:(NSString *)requestKey;
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest didReceivedUploadToken:(NSString *)uploadToken forRequestKey:(NSString *)requestKey;
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest didReceivedError:(NSError *)error forUploadRequestKey:(NSString *)requestKey;
-
-// download request delegate notice
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest willRequestDownloadURLForDownloadToken:(NSString *)downloadToken requestKey:(NSString *)requestKey;
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest didReceivedDownloadURL:(NSString *)URLString forDownloadToken:(NSString *)downloadToken requestKey:(NSString *)requestKey;
-- (void)xmppMmsRequest:(XMPPMmsRequest *)xmppMmsRequest didReceivedError:(NSError *)error forDownloadToken:(NSString *)downloadToken requestKey:(NSString *)requestKey;
 
 @end
