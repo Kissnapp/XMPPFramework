@@ -483,6 +483,13 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - This methods is added by Peter Lee for kissnapp project:2014-12-11
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ *  Sends the given XML element before login
+ *
+ *  @param element The given XML element
+ */
+- (BOOL)kissnapp_sendElement:(DDXMLElement *)element error:(NSError **)errPtr;
+
 - (BOOL)kissnapp_registerWithElements:(NSArray *)elements error:(NSError **)errPtr;
 
 - (BOOL)kissnapp_registerWithID:(NSString *)registerID
