@@ -1,36 +1,30 @@
+//
+//  XMPPUserCoreDataStorageObject.h
+//  XMPP_Project
+//
+//  Created by Peter Lee on 15/5/19.
+//  Copyright (c) 2015年 Peter Lee. All rights reserved.
+//
+
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
 #if !TARGET_OS_IPHONE
-  #import <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h>
 #endif
 
 #import "XMPPUser.h"
 #import "XMPP.h"
 
-@class XMPPGroupCoreDataStorageObject;
-@class XMPPResourceCoreDataStorageObject;
+@class XMPPGroupCoreDataStorageObject, XMPPResourceCoreDataStorageObject;
 
-
-@interface XMPPUserCoreDataStorageObject : NSManagedObject <XMPPUser>
+@interface XMPPUserCoreDataStorageObject : NSManagedObject
 {
-	NSInteger section;
+    NSInteger section;
 }
-
-@property (nonatomic, strong) XMPPJID  *jid;
-@property (nonatomic, strong) NSString * jidStr;
-@property (nonatomic, strong) NSString * streamBareJidStr;
-
-@property (nonatomic, strong) NSString * nickname;
-@property (nonatomic, strong) NSString * displayName;
-@property (nonatomic, strong) NSString * subscription;
-@property (nonatomic, strong) NSString * ask;
-@property (nonatomic, strong) NSNumber * unreadMessages;
-
-//user phonerNumber and emailAddress
-@property (strong, nonatomic) NSString *phoneNumber;
-@property (strong, nonatomic) NSString *emailAddress;
-@property (strong, nonatomic) NSString *englishName;
+@property (nonatomic, retain) NSString * displayName;
+@property (nonatomic, assign) NSInteger section;
+@property (nonatomic, retain) NSString * emailAddress;
 
 #if TARGET_OS_IPHONE
 @property (nonatomic, strong) UIImage *photo;
@@ -38,13 +32,20 @@
 @property (nonatomic, strong) NSImage *photo;
 #endif
 
-@property (nonatomic, assign) NSInteger section;
-@property (nonatomic, strong) NSString * sectionName;
-@property (nonatomic, strong) NSNumber * sectionNum;
-
-@property (nonatomic, strong) NSSet * groups;
-@property (nonatomic, strong) XMPPResourceCoreDataStorageObject * primaryResource;
-@property (nonatomic, strong) NSSet * resources;
+@property (nonatomic, retain) NSString * sectionName;
+@property (nonatomic, retain) NSNumber * sectionNum;
+@property (nonatomic, retain) XMPPJID  * jid;
+@property (nonatomic, retain) NSNumber * unreadMessages;
+@property (nonatomic, retain) NSString * ask;
+@property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, retain) NSString * subscription;
+@property (nonatomic, retain) NSString * jidStr;
+@property (nonatomic, retain) NSString * nickname;
+@property (nonatomic, retain) NSString * phoneNumber;
+@property (nonatomic, retain) NSString * englishName;
+@property (nonatomic, retain) XMPPResourceCoreDataStorageObject *primaryResource;
+@property (nonatomic, retain) NSSet *resources;
+@property (nonatomic, retain) NSSet *groups;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withJID:(XMPPJID *)jid
