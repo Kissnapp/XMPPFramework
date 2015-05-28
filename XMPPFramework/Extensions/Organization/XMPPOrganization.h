@@ -22,8 +22,10 @@
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 
+
 @end
 
+// XMPPOrganizationDelegate
 @protocol XMPPOrganizationDelegate <NSObject>
 
 @required
@@ -32,6 +34,7 @@
 
 @end
 
+// XMPPOrganizationStorage
 @protocol XMPPOrganizationStorage <NSObject>
 
 @required

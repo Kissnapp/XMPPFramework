@@ -73,12 +73,6 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     
 }
 
-- (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue
-{
-    return [super configureWithParent:aParent queue:queue];
-}
-
-
 - (void)dealloc
 {
 #if !OS_OBJECT_USE_OBJC
@@ -87,6 +81,12 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 #endif
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - XMPPOrganizationStorage
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue
+{
+    return [super configureWithParent:aParent queue:queue];
+}
 
 @end
