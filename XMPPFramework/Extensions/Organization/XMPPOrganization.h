@@ -76,17 +76,19 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 -(void)subcribeProject:(NSString*)myID
                 target:(NSString*)targetID
-       completionBlock:(CompletionBlock)competionBlock;
+       completionBlock:(CompletionBlock)completionBlock;
 
 -(void)agreeSubcribeProject:(NSString*)myID
                      target:(NSString*)targetID
-            completionBlock:(CompletionBlock)competionBlock;
+            completionBlock:(CompletionBlock)completionBlock;
 
 -(void)dissagreeSubcribeProject:(NSString*)myID
                          target:(NSString*)targetID
-                completionBlock:(CompletionBlock)competionBlock;
+                completionBlock:(CompletionBlock)completionBlock;
 
-
+-(void)cancelSubcribeProject:(NSString*)myID
+                         target:(NSString*)targetID
+                completionBlock:(CompletionBlock)completionBlock;
 
 @end
 
