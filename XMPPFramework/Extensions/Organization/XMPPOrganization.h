@@ -8,28 +8,8 @@
 
 #import <XMPPFramework/XMPPFramework.h>
 
-typedef void(^allProjectBlock)(id data, NSError *error);
+
 typedef void(^CompletionBlock)(id data, NSError *error);
-
-typedef void (^allTemplateBlock)(id data, NSError *error);
-typedef void (^checkNameBlock)(id data, NSError *error);
-typedef void (^createBlock)(id data, NSError *error);
-typedef void (^endBlock)(id data, NSError *error);
-
-typedef void (^possibileBlock)(id data, NSError *error);
-typedef void (^customeBlock)(id data, NSError *error);
-
-typedef void (^addMemberBlock)(id data, NSError *error);
-typedef void (^deleteMemberBlock)(id data, NSError *error);
-typedef void (^memberListAndLinkBlock)(id data, NSError *error);
-typedef void (^memberListBlock)(id data, NSError *error);
-
-typedef void (^linkProjectListBlock)(id data, NSError *error);
-typedef void (^searchProjectBlock)(id data, NSError *error);
-
-typedef void (^subscribeProjectBlock)(id data, NSError *error);
-typedef void (^subscribedProjectBlock)(id data, NSError *error);
-typedef void (^unsubscribedProjectBlock)(id data, NSError *error);
 
 @protocol XMPPOrganizationDelegate;
 @protocol XMPPOrganizationStorage;
@@ -46,65 +26,65 @@ typedef void (^unsubscribedProjectBlock)(id data, NSError *error);
 
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
                               completionBlock:(CompletionBlock)completionBlock;
-- (void)allPorjectListWithBlock:(allProjectBlock)completionBlock;
+- (void)allPorjectListWithBlock:(CompletionBlock)completionBlock;
 
-- (void)requestAllTemplateWithBlock:(allTemplateBlock)block;
+- (void)requestAllTemplateWithBlock:(CompletionBlock)block;
 
 - (void)checkOrganizationName:(NSString *)name
-              completionBlock:(checkNameBlock)completionBlock;
+              completionBlock:(CompletionBlock)completionBlock;
 
 - (void)createOrganizationWithName:(NSString *)name
                         templateId:(NSString *)templateId
                              jobId:(NSString *)jobId
-                   completionBlock:(createBlock)completionBlock;
+                   completionBlock:(CompletionBlock)completionBlock;
 
 - (void)endOrganizationWithId:(NSString *)Id
-              completionBlock:(endBlock)completionBlock;
+              completionBlock:(CompletionBlock)completionBlock;
 
 -(void)getPossibleStaff:(NSString*)ID
-        completionBlock:(possibileBlock)completionBlock;
+        completionBlock:(CompletionBlock)completionBlock;
 
 -(void)addCustomJob:(NSString*)ID
            parentId:(NSString*)parentId
                name:(NSString*)jobName
                part:(NSString*)part
-    completionBlock:(customeBlock)completionBlock ;
+    completionBlock:(CompletionBlock)completionBlock ;
 
 -(void)addMemberToProject:(NSString*)ID
                     jodId:(NSString*)jobID
                      name:(NSString*)jobName
                       jid:(NSString*)jid
                      part:(NSString*)part
-          completionBlock:(addMemberBlock)completionBlock;
+          completionBlock:(CompletionBlock)completionBlock;
 
 -(void)deleteMemberFromPro:(NSString*)projectID
                        jid:(NSString*)jid
-           completionBlock:(deleteMemberBlock)completionBlock;
+           completionBlock:(CompletionBlock)completionBlock;
 
 
 -(void)memberListAndLinkPro:(NSString*)projectID
-            completionBlock:(memberListAndLinkBlock)completionBlock;
+            completionBlock:(CompletionBlock)completionBlock;
 
 -(void)allMemberList:(NSString*)projectID
-     completionBlock:(memberListBlock)completionBlock;
+     completionBlock:(CompletionBlock)completionBlock;
 
 -(void)allLinkProjectList:(NSString*)projectID
-          completionBlock:(linkProjectListBlock)completionBlock;
+          completionBlock:(CompletionBlock)completionBlock;
 
 -(void)searchProject:(NSString*)name
-     completionBlock:(searchProjectBlock)completionBlock;
+     completionBlock:(CompletionBlock)completionBlock;
 
 -(void)subcribeProject:(NSString*)myID
                 target:(NSString*)targetID
-       completionBlock:(subscribeProjectBlock)competionBlock;
+       completionBlock:(CompletionBlock)competionBlock;
 
 -(void)agreeSubcribeProject:(NSString*)myID
                      target:(NSString*)targetID
-            completionBlock:(subscribedProjectBlock)competionBlock;
+            completionBlock:(CompletionBlock)competionBlock;
 
 -(void)dissagreeSubcribeProject:(NSString*)myID
                          target:(NSString*)targetID
-                completionBlock:(unsubscribedProjectBlock)competionBlock;
+                completionBlock:(CompletionBlock)competionBlock;
 
 
 

@@ -249,7 +249,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
     else
         dispatch_async(moduleQueue, block);
 }
--(void)allPorjectListWithBlock:(allProjectBlock)completionBlock
+-(void)allPorjectListWithBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -264,26 +264,23 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             
             // 2. Listing the request iq XML
             /*
-             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
-             <project xmlns="aft.project" type="get_structure">
-             {"template":"xxx"}
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="list_project">
              </project>
              </iq>
              */
             
             // 3. Create the request iq
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"get_structure"}
-                                                                       stringValue:[templateDic JSONString]];
+                                                                             xmlns:@"aft:project"
+                                                                         attribute:@{@"type":@"list_project"}
+                                                                       stringValue:nil];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
                                                              to:nil
                                                            type:@"get"
                                                              id:requestKey
                                                    childElement:organizationElement];
-            
-            
             // 4. Send the request iq element to the server
             [[self xmppStream] sendElement:iqElement];
             
@@ -445,7 +442,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  </iq>
                  */
                 
-                NSString *data = [project stringValue];
+                id  data = [[project stringValue] objectFromJSONString];
                 
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
@@ -457,8 +454,49 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 
                 return YES;
                 
-            }else if([projectType isEqualToString:@"xxxxx"]){
+            }else if([projectType isEqualToString:@"list_project"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    /*
+                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
+                     <project xmlns="aft.project" type="get_structure"></project>
+                     <error code="10003"></error>
+                     </iq>
+                     */
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
                 
+                /*
+                 <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="result">
+                 <project xmlns="aft.project" type="get_structure">
+                 [{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}, {...}]
+                 </project>
+                 </iq>
+                 */
+                
+                id  data = [[project stringValue] objectFromJSONString];
+                
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                
+                if (completionBlock) {
+                    
+                    completionBlock(data, nil);
+                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                }
+                
+                return YES;
+
                 
             }
         }
