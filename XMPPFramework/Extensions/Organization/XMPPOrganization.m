@@ -190,7 +190,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(void (^)(NSString *JSONString, NSError *error))completionBlock
+- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -352,8 +352,8 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         
         NSXMLElement *project = [iq elementForName:@"project" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]];
         
-        if (project)
-        {
+        if (project){
+            
             NSString *requestkey = [iq elementID];
             NSString *projectType = [project attributeStringValueForName:@"type"];
             
