@@ -20,7 +20,10 @@
 @property (nonatomic, retain) NSDate * orgEndTime;
 @property (nonatomic, retain) NSString * orgAdminJidStr;
 @property (nonatomic, retain) NSString * orgDescription;
+@property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSSet *orgRelationShip;
+
+
 @end
 
 @interface XMPPOrgCoreDataStorageObject (CoreDataGeneratedAccessors)

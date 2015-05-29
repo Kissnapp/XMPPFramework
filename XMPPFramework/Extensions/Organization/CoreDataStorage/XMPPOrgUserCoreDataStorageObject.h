@@ -16,5 +16,14 @@
 @property (nonatomic, retain) NSString * userJidStr;
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * ptId;
+@property (nonatomic, retain) NSString * streamBareJidStr;
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr;
+
+- (void)updateWithDic:(NSDictionary *)dic;
+
+
 
 @end
