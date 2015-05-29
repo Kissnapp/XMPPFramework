@@ -8,6 +8,8 @@
 
 #import <XMPPFramework/XMPPFramework.h>
 
+typedef void(^CompletionBlock)(id data, NSError *error);
+
 @protocol XMPPOrganizationDelegate;
 @protocol XMPPOrganizationStorage;
 
@@ -21,7 +23,8 @@
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage;
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-
+- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
+                              completionBlock:(CompletionBlock)completionBlock;
 
 @end
 

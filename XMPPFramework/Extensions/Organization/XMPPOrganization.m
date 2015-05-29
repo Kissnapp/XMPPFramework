@@ -29,8 +29,6 @@ static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
 static const NSInteger ORG_ERROR_CODE = 9999;
 
-typedef void(^CompletionBlock)(id data, NSError *error);
-
 @interface XMPPOrganization ()
 
 @property (strong, nonatomic) NSMutableDictionary *requestBlockDcitionary;
@@ -190,8 +188,96 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Public API
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(void (^)(NSString *JSONString, NSError *error))completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            if (!templateId) {
+                [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
+            }
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
+             <project xmlns="aft.project" type="get_structure">
+             {"template":"xxx"}
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:templateId
+                                                                    forKey:@"template"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_structure"}
+                                                                       stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
+        NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",ORG_ERROR_DOMAIN] code:ORG_ERROR_CODE userInfo:userInfo];
+        completionBlock(nil, error);
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock
+{
+    // if not this queue we should return
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
+    NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",ORG_ERROR_DOMAIN] code:ORG_ERROR_CODE userInfo:userInfo];
+    completionBlock(nil, error);
+}
 
 // call back with error info to who had used it
 - (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey
@@ -218,7 +304,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark XMPPStream Delegate
+#pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
 {
@@ -226,132 +312,122 @@ typedef void(^CompletionBlock)(id data, NSError *error);
     
     [self setCanSendRequest:YES];
 }
-//- (BOOL)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error
-//{
-//    if ([[iq type] isEqualToString:@"get"]) {
-//        
-//        NSXMLElement *query = [iq elementForName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
-//        
-//        if (query)
-//        {
-//            NSString *key = [iq elementID];
-//            
-//            if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
-//            {
-//                [self requestUploadErrorWithCode:MMS_ERROR_CODE description:@"send iq error" key:key];
-//            }
-//            else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
-//            {
-//                [self requestDownloadErrorWithCode:MMS_ERROR_CODE description:@"send iq error" key:key];
-//            }
-//            
-//            return YES;
-//        }
-//    }
-//    
-//    return NO;
-//}
-//
-//- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
-//{
-//    // This method is invoked on the moduleQueue.
-//    
-//    
-//    // Note: Some jabber servers send an iq element with an xmlns.
-//    // Because of the bug in Apple's NSXML (documented in our elementForName method),
-//    // it is important we specify the xmlns for the query.
-//    
-//    if ([[iq type] isEqualToString:@"result"]) {
-//        
-//        NSXMLElement *query = [iq elementForName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
-//        
-//        if (query)
-//        {
-//            NSString *key = [iq elementID];
-//            
-//            if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"upload"])
-//            {
-//                /*
-//                 <iq from='alice@localhost' to='alice@localhost' id='2115763' type='result'>
-//                 <query xmlns='aft:mms' query_type='upload'>
-//                 <token>3e4963702884b4ddf72a696c81ee49b</token>
-//                 <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
-//                 <expiration>1428994820549535</expiration>
-//                 </query>
-//                 </iq>
-//                 */
-//                NSString *token = [[query elementForName:@"token"] stringValue];
-//                NSString *file = [[query elementForName:@"file"] stringValue];
-//                NSString *expiration = [[query elementForName:@"expiration"] stringValue];
-//                UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
-//                
-//                if (uploadBlock) {
-//                    uploadBlock(token, file, expiration, nil);
-//                }
-//                
-//                [uploadCompletionBlockDcitionary removeObjectForKey:key];
-//            }
-//            else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
-//            {
-//                /*
-//                 <iq type="result" id="2115763">
-//                 <query xmlns="aft:mms" query_type="download" >https://xxx.aft.s3.amazonaws.com/8e13373a-46e8-40c4-8f18-dc2c9cf21223?AWSAccessKeyId=AKIAIQJNLH5YIBB3LV4Q&amp;Signature=yXTcTAfMstsIQzN5Opx5xGM9ur8%3D&amp;Expires=1426237616</query>
-//                 </iq>
-//                 */
-//                NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
-//                NSString *file = [[blockDic allKeys] firstObject];
-//                
-//                DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
-//                
-//                if (downloadBlock) {
-//                    downloadBlock([query stringValue], nil);
-//                }
-//                
-//                [downloadCompletionBlockDcitionary removeObjectForKey:key];
-//            }
-//            
-//            
-//            return YES;
-//        }
-//    }
-//    
-//    return NO;
-//}
-//
-//- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
-//{
-//    // This method is invoked on the moduleQueue.
-//    
-//    [self setCanSendRequest:NO];
-//    
-//    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"You had disconnect with the server"                                                                      forKey:NSLocalizedDescriptionKey];
-//    
-//    NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-//    
-//    [uploadCompletionBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-//        
-//        UploadBlock uploadBlock = (UploadBlock)obj;
-//        
-//        if (uploadBlock) {
-//            uploadBlock(nil, nil, nil, _error);
-//        }
-//        
-//    }];
-//    
-//    [downloadCompletionBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-//        
-//        NSDictionary *dic = (NSDictionary *)obj;
-//        NSString *file = [[dic allKeys] firstObject];
-//        DownloadBlock downloadBlock = (DownloadBlock)[dic objectForKey:file];
-//        
-//        if (downloadBlock) {
-//            downloadBlock(nil, _error);
-//        }
-//        
-//    }];
-//    
-//    [uploadCompletionBlockDcitionary removeAllObjects];
-//    [downloadCompletionBlockDcitionary removeAllObjects];
-//}
+
+
+- (BOOL)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error
+{
+    if ([[iq type] isEqualToString:@"get"]) {
+        
+        NSXMLElement *project = [iq elementForName:@"project" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]];
+        
+        if (project)
+        {
+            NSString *requestkey = [iq elementID];
+            
+            CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+            
+            if (completionBlock) {
+                [requestBlockDcitionary removeObjectForKey:requestkey];
+                [self callBackWithMessage:@"send iq error" completionBlock:completionBlock];
+                
+                return YES;
+            }
+
+        }
+    }
+    
+    return NO;
+}
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+{
+    // This method is invoked on the moduleQueue.
+    
+    
+    // Note: Some jabber servers send an iq element with an xmlns.
+    // Because of the bug in Apple's NSXML (documented in our elementForName method),
+    // it is important we specify the xmlns for the query.
+    
+    if ([[iq type] isEqualToString:@"result"] || [[iq type] isEqualToString:@"error"]) {
+        
+        NSXMLElement *project = [iq elementForName:@"project" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]];
+        
+        if (project)
+        {
+            NSString *requestkey = [iq elementID];
+            NSString *projectType = [project attributeStringValueForName:@"type"];
+            
+            if([projectType isEqualToString:@"get_structure"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    /*
+                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
+                        <project xmlns="aft.project" type="get_structure"></project>
+                        <error code="10003"></error>
+                     </iq>
+                     */
+
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="result">
+                    <project xmlns="aft.project" type="get_structure">
+                        [{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}, {...}]
+                    </project>
+                 </iq>
+                 */
+                
+                NSString *data = [project stringValue];
+                
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                
+                if (completionBlock) {
+                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                    completionBlock(data, nil);
+                }
+                
+                return YES;
+                
+            }else if([projectType isEqualToString:@"xxxxx"]){
+                
+                
+            }
+        }
+    }
+    
+    return NO;
+}
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+    // This method is invoked on the moduleQueue.
+    
+    [self setCanSendRequest:NO];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    [requestBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        
+        CompletionBlock completionBlock = (CompletionBlock)obj;
+    
+        if (completionBlock) {
+            
+            [weakSelf callBackWithMessage:@"You had disconnect with the server"  completionBlock:completionBlock];
+        }
+        
+    }];
+    
+    [requestBlockDcitionary removeAllObjects];
+}
 
 @end
