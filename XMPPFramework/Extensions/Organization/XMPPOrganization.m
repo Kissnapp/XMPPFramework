@@ -294,10 +294,11 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             
             CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestKey];
             if (completionBlock) {
+                
                 completionBlock(nil, _error);
+                [dic removeObjectForKey:requestKey];
+                
             }
-
-            [dic removeObjectForKey:requestKey];
         }
         
     }});
@@ -327,8 +328,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
             
             if (completionBlock) {
-                [requestBlockDcitionary removeObjectForKey:requestkey];
+                
                 [self callBackWithMessage:@"send iq error" completionBlock:completionBlock];
+                [requestBlockDcitionary removeObjectForKey:requestkey];
                 
                 return YES;
             }
@@ -372,8 +374,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                        
                         [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
                     return YES;
@@ -392,8 +395,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
+    
                     completionBlock(data, nil);
+                    [requestBlockDcitionary removeObjectForKey:requestkey];
                 }
                 
                 return YES;
@@ -423,11 +427,10 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         if (completionBlock) {
             
             [weakSelf callBackWithMessage:@"You had disconnect with the server"  completionBlock:completionBlock];
+            [requestBlockDcitionary removeObjectForKey:key];
         }
         
     }];
-    
-    [requestBlockDcitionary removeAllObjects];
 }
 
 @end

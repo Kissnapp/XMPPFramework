@@ -380,10 +380,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
         
         if (uploadBlock) {
+            
             uploadBlock(nil,nil,nil, _error);
+            [uploadCompletionBlockDcitionary removeObjectForKey:key];
         }
         
-        [uploadCompletionBlockDcitionary removeObjectForKey:key];
     }else{
         NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
         NSString *file = [[blockDic allKeys] firstObject];
@@ -392,9 +393,8 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
         if (downloadBlock) {
             downloadBlock(nil, _error);
+            [downloadCompletionBlockDcitionary removeObjectForKey:key];
         }
-        
-        [downloadCompletionBlockDcitionary removeObjectForKey:key];
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,10 +466,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
                 
                 if (uploadBlock) {
+                    
                     uploadBlock(token, file, expiration, nil);
+                    [uploadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
-                [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
             else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
@@ -484,10 +485,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
                 if (downloadBlock) {
+                    
                     downloadBlock([query stringValue], nil);
+                    [downloadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
-                [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
 
             
