@@ -153,6 +153,7 @@
     return (XMPPOrgUserCoreDataStorageObject *)[results lastObject];
 }
 */
+
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                         withUserId:(NSString *)userId
                              orgId:(NSString *)orgId
@@ -213,8 +214,78 @@
     NSString *tempUserId = [dic objectForKey:@"userId"];
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     
+    if (tempUserId == nil)  return result;
+    if (tempOrgId == nil)  return result;
+    if (moc == nil)  return result;
+    
+    XMPPOrgUserCoreDataStorageObject *newUser = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                    withUserId:tempUserId
+                                                                                                         orgId:tempOrgId
+                                                                                              streamBareJidStr:streamBareJidStr];
+    if (newUser != nil) {
+        
+        [newUser updateWithDic:dic];
+        result = YES;
+        
+    }else{
+        [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                               withDic:dic
+                                                      streamBareJidStr:streamBareJidStr];
+        result = YES;
+    }
+    
     
     return result;
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withUserId:(NSString *)userId
+                               orgId:(NSString *)orgId
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (userId == nil) return NO;
+    if (orgId == nil) return NO;
+    if (moc == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    
+    XMPPOrgUserCoreDataStorageObject *deleteObject = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                         withUserId:userId
+                                                                                                              orgId:orgId
+                                                                                                   streamBareJidStr:streamBareJidStr];
+    if (deleteObject){
+        
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    
+    return NO;
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (dic == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
+    
+    NSString *tempUserId = [dic objectForKey:@"userId"];
+    NSString *tempOrgId = [dic objectForKey:@"orgId"];
+    
+    if (tempUserId == nil) return NO;
+    if (tempOrgId == nil) return NO;
+    
+    XMPPOrgUserCoreDataStorageObject *deleteObject = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                         withUserId:tempUserId
+                                                                                                              orgId:tempOrgId
+                                                                                                   streamBareJidStr:streamBareJidStr];
+    if (deleteObject){
+        
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (void)updateWithDic:(NSDictionary *)dic
@@ -223,11 +294,13 @@
     NSString *tempUserJidStr = [dic objectForKey:@"userJidStr"];
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempPtId = [dic objectForKey:@"ptId"];
+    NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
     if (tempUserId) self.userId = tempUserId;
     if (tempUserJidStr) self.userJidStr = tempUserJidStr;
     if (tempOrgId) self.orgId = tempOrgId;
     if (tempPtId) self.ptId = tempPtId;
+    if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
 @end

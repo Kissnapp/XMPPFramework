@@ -21,4 +21,23 @@
 @property (nonatomic, retain) NSString * dpName;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withPtId:(NSString *)ptId
+                             orgId:(NSString *)orgId
+                  streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr;
++ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr;
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                            withPtId:(NSString *)ptId
+                               orgId:(NSString *)orgId
+                    streamBareJidStr:(NSString *)streamBareJidStr;
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr;
+- (void)updateWithDic:(NSDictionary *)dic;
+
 @end
