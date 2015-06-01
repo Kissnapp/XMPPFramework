@@ -13,7 +13,7 @@
 
 @interface XMPPOrgRelationObject : NSManagedObject
 
-@property (nonatomic, retain) NSString * relationId;
+@property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;
 
 @end

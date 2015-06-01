@@ -11,6 +11,24 @@
 
 @class XMPPOrgRelationObject;
 
+/**
+ *  The org state tag
+ */
+typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
+    /**
+     *  This value indicating that the object is a templete
+     */
+    XMPPOrgCoreDataStorageObjectStateTemplate = -1,
+    /**
+     *  This value indicating that the object had been end
+     */
+    XMPPOrgCoreDataStorageObjectStateEnd,
+    /**
+     *  This value indicating that the object is during running
+     */
+    XMPPOrgCoreDataStorageObjectStateActive
+};
+
 @interface XMPPOrgCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString * orgId;
