@@ -1357,12 +1357,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_project"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+         
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1402,12 +1397,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_template"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+      
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1445,12 +1435,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"project_name_exist"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+       
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1488,13 +1473,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 
             }else if([projectType isEqualToString:@"create"]){
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+                
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1533,12 +1512,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"finish"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1576,12 +1549,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_children_jobs"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1618,12 +1586,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"add_job"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1661,12 +1623,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"add_member"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1704,12 +1660,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"delete_member"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1747,12 +1697,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_member_and_link"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+             
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1790,12 +1735,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_member"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+             
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1832,12 +1772,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"list_link_project"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1874,12 +1809,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"search_project"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1916,12 +1845,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"subscribe"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1957,12 +1881,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"subscribed"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1998,13 +1916,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"unsubscribed"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
-                    
+              
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
@@ -2039,12 +1951,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             }else if([projectType isEqualToString:@"unsubscribe"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    /*
-                     <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="error">
-                     <project xmlns="aft.project" type="get_structure"></project>
-                     <error code="10003"></error>
-                     </iq>
-                     */
+                  
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
