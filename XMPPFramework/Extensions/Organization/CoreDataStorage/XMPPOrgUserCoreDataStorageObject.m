@@ -191,12 +191,12 @@
 {
     
     if (moc == nil) return nil;
+    if (dic == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     
     
-    XMPPOrgUserCoreDataStorageObject *newUser;
-    newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPOrgUserCoreDataStorageObject"
-                                            inManagedObjectContext:moc];
+    XMPPOrgUserCoreDataStorageObject *newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPOrgUserCoreDataStorageObject"
+                                                                              inManagedObjectContext:moc];
     
     newUser.streamBareJidStr = streamBareJidStr;
     

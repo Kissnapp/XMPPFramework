@@ -8,6 +8,7 @@
 
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgRelationObject.h"
+#import "NSString+NSDate.h"
 
 
 @implementation XMPPOrgCoreDataStorageObject
@@ -223,9 +224,152 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                         withOrgId:(NSString *)orgId
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (orgId == nil) return nil;
+    if (moc == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+                                              inManagedObjectContext:moc];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND && %K == %@", @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    return (XMPPOrgCoreDataStorageObject *)[results lastObject];
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (dic == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    
+    XMPPOrgCoreDataStorageObject *newOrg = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPOrgCoreDataStorageObject"
+                                                                         inManagedObjectContext:moc];
+    
+    newOrg.streamBareJidStr = streamBareJidStr;
+    
+    [newOrg updateWithDic:dic];
+    
+    return newOrg;
+}
+
++ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    BOOL result = NO;
+    if (moc == nil) return result;
+    if (dic == nil) return result;
+    if (streamBareJidStr == nil) return result;
+    
+    NSString *tempOrgId = [dic objectForKey:@"orgId"];
+    
+    if (tempOrgId == nil)  return result;
+
+    
+    XMPPOrgCoreDataStorageObject *newOrg = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                            withOrgId:tempOrgId
+                                                                                     streamBareJidStr:streamBareJidStr];
+    if (newOrg != nil) {
+        
+        [newOrg updateWithDic:dic];
+        result = YES;
+        
+    }else{
+        [XMPPOrgCoreDataStorageObject insertInManagedObjectContext:moc
+                                                               withDic:dic
+                                                      streamBareJidStr:streamBareJidStr];
+        result = YES;
+    }
+    
+    return result;
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withOrgId:(NSString *)orgId
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (orgId == nil) return NO;
+    if (moc == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    
+    XMPPOrgCoreDataStorageObject *deleteObject = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                  withOrgId:orgId
+                                                                                           streamBareJidStr:streamBareJidStr];
+    if (deleteObject){
+        
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    
+    return NO;
+
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (dic == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
+    
+    NSString *tempOrgId = [dic objectForKey:@"orgId"];
+    
+    if (tempOrgId == nil) return NO;
+    
+    XMPPOrgCoreDataStorageObject *deleteObject = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                  withOrgId:tempOrgId
+                                                                                           streamBareJidStr:streamBareJidStr];
+    if (deleteObject){
+        
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    
+    return NO;
+}
+
 - (void)updateWithDic:(NSDictionary *)dic
 {
+    NSString *tempOrgId = [dic objectForKey:@"orgId"];
+    NSString *tempOrgName = [dic objectForKey:@"orgName"];
+    NSNumber *tempOrgState = [dic objectForKey:@"orgState"];
+    NSString *tempOrgStartTime = [dic objectForKey:@"orgStartTime"];
+    NSString *tempOrgEndTime = [dic objectForKey:@"orgEndTime"];
+    NSString *tempOrgAdminJidStr = [dic objectForKey:@"orgAdminJidStr"];
+    NSString *tempOrgDescription = [dic objectForKey:@"orgDescription"];
+    NSString *tempPtTag = [dic objectForKey:@"ptTag"];
+    NSString *tempUserTag = [dic objectForKey:@"userTag"];
+    NSString *tempRelationShipTag = [dic objectForKey:@"orgRelationShip"];
+    NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
+    if (tempOrgId) self.orgId = tempOrgId;
+    if (tempOrgName) self.orgName = tempOrgName;
+    if (tempOrgState) self.orgState = tempOrgState;
+    if (tempOrgStartTime) self.orgStartTime = [tempOrgStartTime StringToDate];
+    if (tempOrgEndTime) self.orgEndTime = [tempOrgEndTime StringToDate];
+    if (tempOrgAdminJidStr) self.orgAdminJidStr = tempOrgAdminJidStr;
+    if (tempOrgDescription) self.orgDescription = tempOrgDescription;
+    if (tempPtTag) self.ptTag = tempPtTag;
+    if (tempUserTag) self.userTag = tempUserTag;
+    if (tempRelationShipTag) self.relationShipTag = tempRelationShipTag;
+    if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
 

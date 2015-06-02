@@ -211,6 +211,7 @@
 {
     
     if (moc == nil) return nil;
+    if (dic == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     
     
