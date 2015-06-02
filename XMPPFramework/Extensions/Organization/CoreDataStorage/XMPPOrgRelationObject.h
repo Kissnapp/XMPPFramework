@@ -16,4 +16,8 @@
 @property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
++ (id)fetchOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
+
 @end
