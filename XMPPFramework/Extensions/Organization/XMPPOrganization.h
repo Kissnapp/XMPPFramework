@@ -108,7 +108,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @required
 
 - (BOOL)configureWithParent:(XMPPOrganization *)aParent queue:(dispatch_queue_t)queue;
-
+- (NSArray*)allPorjectListWithbareJid:(NSString*)streamBareJidStr stream:(XMPPStream*)xmppStream;
 @optional
 
 @end

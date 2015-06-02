@@ -88,5 +88,38 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 {
     return [super configureWithParent:aParent queue:queue];
 }
+- (NSArray*)allPorjectListWithbareJid:(NSString*)bareJidStr stream:(XMPPStream*)xmppStream
+{
+    
+   __block NSArray *allProject = nil;
+  [self executeBlock:^{
+     
+      
+      NSManagedObjectContext *moc = [self managedObjectContext];
+      NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+      
+      NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+                                                inManagedObjectContext:moc];
+      
+      NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+      [fetchRequest setEntity:entity];
+      [fetchRequest setFetchBatchSize:saveThreshold];
+      
+      if (xmppStream){
+          NSPredicate *predicate;
+          //!!!!:Notice:This method should not read the voice message
+          predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",
+                       streamBareJidStr];
+          
+          [fetchRequest setPredicate:predicate];
+      }
+      
+      allProject = [moc executeFetchRequest:fetchRequest error:nil];
+      
+     
+  }];
+    
+    return allProject;
 
+}
 @end
