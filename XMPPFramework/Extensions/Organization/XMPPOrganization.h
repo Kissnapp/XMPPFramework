@@ -90,6 +90,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                          target:(NSString*)targetID
                 completionBlock:(CompletionBlock)completionBlock;
 
+-(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
+
 @end
 
 

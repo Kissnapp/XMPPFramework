@@ -190,6 +190,56 @@ static const NSInteger ORG_ERROR_CODE = 9999;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-(void)allPorjectListWithBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="list_project">
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:@"aft:project"
+                                                                         attribute:@{@"type":@"list_project"}
+                                                                       stringValue:nil];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+}
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -361,56 +411,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         dispatch_async(moduleQueue, block);
 
 }
--(void)allPorjectListWithBlock:(CompletionBlock)completionBlock
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            // If the templateId is nil，we should notice the user the info
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project" type="list_project">
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:@"aft:project"
-                                                                         attribute:@{@"type":@"list_project"}
-                                                                       stringValue:nil];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-    
-}
+
 -(void)createOrganizationWithName:(NSString *)name templateId:(NSString *)templateId jobId:(NSString *)jobId completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -426,17 +427,15 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             
             // 2. Listing the request iq XML
             /*
-             创建工程：
              <iq from="79509d447102413a89e9ada9fde3cf6b@192.168.1.162/Gajim" id="5244001" type="set">
              <project xmlns="aft:project"  type="create">
-             {"name": "星河丹堤", "template":"41", "template":"1"}
+             {"name": "星河丹堤", "template":"41", "job":"1"}
              </project>
              </iq>
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:templateId
-                                                                    forKey:@"template"];
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:name,@"name",templateId,@"template",jobId,@"job", nil];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -1202,6 +1201,57 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         dispatch_async(moduleQueue, block);
 
 }
+-(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_template_hash">
+             </project>
+             </iq>
+             */
+            // 3. Create the request iq
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_template_hash"}
+                                                                       stringValue:nil];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1376,7 +1426,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  正确的结果：
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project" type="list_project">
-                 [{"id":"xxx", "name":"xxx"}, {"id":"xxx", "name":"xxx"}]
+                 [{"id":"xxx", "name":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx"}, ...]   %% modify.
                  </project>
                  </iq>
                  */
@@ -1413,9 +1463,10 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 }
                 
                 /*
+                 正确的结果：("id"-->工程的ID, name-->工程的名称)
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project" type="list_template">
-                 {"template": [{"id":"xx", "name":"xxx"}, {"id":"xx", "name":"xxx"}]}
+                 {"template": [{"id":"xx", "name":"xxx", "job_tag":"xxx", "member_tag":"xxx"}, ...]} %% modify  如果模板变了，要手动更改job_tag和member_tag.
                  </project>
                  </iq>
                  */
@@ -1491,10 +1542,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="create">
-                 {"id":"project_id","name": "project1", "job":"xxx", "part":"xxx"}
+                 {"id":"project_id","name": "project1", "job":"xxx", "part":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx",  "start_time":"xxx"}  %% modify
                  </project>
                  </iq>
-                 
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1532,6 +1582,13 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"project": "40"}
                  </project>
                  </iq>
+                 
+                 push to all member:(don't push message to all link project member, because there are only chat).
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="finished">
+                 {"end_time":"xxx"} %% modify
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1567,7 +1624,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="list_children_jobs">
-                 {project_id_value:[{"job_id":"123", "job_name”:””, "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx"} ]}
+                 {project_id_value:[{"job_id":"123", "job_name":"", "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx"} ]}
                  </project>
                  </iq>
                  */
@@ -1602,10 +1659,19 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="list_children_jobs">
-                 {project_id_value:[{"job_id":"123", "job_name”:””, "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx"} ]}
+                 <project xmlns="aft:project"  type="add_job">
+                 { "project":"60", "parent_job_id":"277", "job_name":"安装主任2", "part":"领导班子"}
                  </project>
                  </iq>
+                 
+                 %% modify update project job_timestamp.
+                 
+                 push msg:（客户端接收到这个消息后，需要重新去服务器拉组织架构，并重新获取project的job_tag)
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="60" type="add_job">
+                 {"job_tag":"xxx"} %% add modify
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1639,10 +1705,19 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="list_children_jobs">
-                 {project_id_value:[{"job_id":"123", "job_name”:””, "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx"} ]}
+                 <project xmlns="aft:project"  type="add_member">
+                 {"62": [{"job_id":"279", "job_name":"生产经理", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162", "part":"领导班子"}, {"job_id":"281", "job_name":"技术部长", "jid":"530fc2b5165148ea8ba98abda1b6176b@192.168.1.162",   "part":"技术部"} ] }
                  </project>
                  </iq>
+                 
+                 %% modify update project member_timestamp.
+                 
+                 push msg(推送给项目里所有的人及关联的项目里所有的人)
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="add_member">
+                 [ {"member_tag":"xxx"}, {"job_id":"279", "job_name":"生产经理", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162", "part":"领导班子"}, {"job_id":"281", "job_name":"技术部长", "jid":"530fc2b5165148ea8ba98abda1b6176b@192.168.1.162",   "part":"技术部"} ] %% modify
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1680,6 +1755,15 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"project":"40", "jid":"hello6@123"}
                  </project>
                  </iq>
+                 
+                 %% modify update project member_timestamp.
+                 
+                 push msg:
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="delete_member">
+                 [{"member_tag":"xxx"}, {"jid":"xxx", "jid":"xxx", ...}] %% modify
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1866,6 +1950,13 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"id_self":"50",“id_target":"51"}
                  </project>
                  </iq>
+                 
+                 push to id_target admin.
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="subscribe">
+                 {"id":"xxx", "name":"xxx"}
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1901,6 +1992,13 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"id_self":"xxx",“id_target":"xxx"}
                  </project>
                  </iq>
+                 
+                 push to all member in each project.
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="subscribed">
+                 {"id":"xxx", "name":"xxx", "memeber_tag":"xxx"}  %% 分别发给两个组织，分别发对方组织的信息。   %% modify
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1936,6 +2034,13 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"id_self":"xxx", "id_target":"xxx"}
                  </project>
                  </iq>
+                 
+                 push message to id_target admin
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="unsubscribed">
+                 {"id":"xxx", "name":"xxx"}
+                 </sys>
+                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -1972,6 +2077,13 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                  {"id_self":"xx",“id_target":"xxx"}
                  </project>
                  </iq>
+                 
+                 push to every in all each project member;
+                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                 <sys xmlns="aft.sys.project" projectid="1" type="subscribe">
+                 {"id":"xxx", "name":"xxx", "link_tag":"xxx"}
+                 </sys>
+                 </message>
 
                  */
                 
