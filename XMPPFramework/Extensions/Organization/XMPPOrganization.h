@@ -55,7 +55,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)endOrganizationWithId:(NSString *)Id
               completionBlock:(CompletionBlock)completionBlock;
 
--(void)getPossibleStaff:(NSString*)ID
+-(void)getPossiblePosition:(NSString*)ID
         completionBlock:(CompletionBlock)completionBlock;
 
 -(void)addCustomJob:(NSString*)ID
