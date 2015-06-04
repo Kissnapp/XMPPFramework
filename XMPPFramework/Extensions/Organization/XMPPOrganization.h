@@ -28,10 +28,15 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestServerallPorjectList;
 - (void)requestServerAllTemplate;
 - (void)requestServerOrganizationViewWithTemplateId:(NSString *)templateId;
-
 - (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
 - (void)requestServerAllOrgList;
 
+
+- (void)requestDBallPorjectListWithcompletionBlock:(CompletionBlock)completionBlock;
+- (void)requestDBAllTemplate;
+- (void)requestDBOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock;
+- (void)requestDBOrgPositionListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
+- (void)requestDBAllOrgListWithcompletionBlock:(CompletionBlock)completionBlock;
 
 
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
