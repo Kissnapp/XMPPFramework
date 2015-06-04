@@ -251,6 +251,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
             }
             
+            // fetch data from database
+            
+            
             // 0. Create a key for storaging completion block
             NSString *requestKey = [[self xmppStream] generateUUID];
             

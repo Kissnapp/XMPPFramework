@@ -102,6 +102,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 
+- (id)OrganizationPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
 @end
 
 // XMPPOrganizationStorage
