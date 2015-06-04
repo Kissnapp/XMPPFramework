@@ -25,8 +25,13 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage;
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
+- (void)requestServerallPorjectList;
+- (void)requestServerAllTemplate;
+- (void)requestServerOrganizationViewWithTemplateId:(NSString *)templateId;
+
 - (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
 - (void)requestServerAllOrgList;
+
 
 
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
@@ -47,7 +52,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)endOrganizationWithId:(NSString *)Id
               completionBlock:(CompletionBlock)completionBlock;
 
--(void)getPossibleStaff:(NSString*)ID
+-(void)getPossiblePosition:(NSString*)ID
         completionBlock:(CompletionBlock)completionBlock;
 
 -(void)addCustomJob:(NSString*)ID
