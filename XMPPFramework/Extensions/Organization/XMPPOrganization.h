@@ -20,12 +20,18 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 }
 
 @property (strong, readonly) id <XMPPOrganizationStorage> xmppOrganizationStorage;
+@property (assign) BOOL autoFetchOrgList;
 
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage;
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
+- (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
+- (void)requestServerAllOrgList;
+
+
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
                               completionBlock:(CompletionBlock)completionBlock;
+
 - (void)allPorjectListWithBlock:(CompletionBlock)completionBlock;
 
 - (void)requestAllTemplateWithBlock:(CompletionBlock)block;

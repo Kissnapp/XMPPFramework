@@ -40,6 +40,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
 @synthesize xmppOrganizationStorage = _xmppOrganizationStorage;
 @synthesize requestBlockDcitionary;
 @synthesize canSendRequest;
+@synthesize autoFetchOrgList;
 
 - (id)init
 {
@@ -71,6 +72,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         //setting the dafault data
         //your code ...
         canSendRequest = NO;
+        autoFetchOrgList = YES;
         requestBlockDcitionary = [NSMutableDictionary dictionary];
     }
     return self;
@@ -163,6 +165,36 @@ static const NSInteger ORG_ERROR_CODE = 9999;
     else
         dispatch_async(moduleQueue, block);
 }
+
+- (BOOL)autoFetchOrgList
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = autoFetchOrgList;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setAutoFetchOrgList:(BOOL)flag
+{
+    dispatch_block_t block = ^{
+        
+        autoFetchOrgList = flag;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Internal
@@ -1317,6 +1349,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
     // This method is invoked on the moduleQueue.
     
     [self setCanSendRequest:YES];
+    
+    // fetch all the org list
+    if (autoFetchOrgList) [self requestServerAllOrgList];
 }
 
 
