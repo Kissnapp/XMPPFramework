@@ -37,13 +37,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
 
 
-- (void)requestDBallPorjectListWithcompletionBlock:(CompletionBlock)completionBlock;
-- (void)requestDBAllTemplate;
-- (void)requestDBOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock;
-- (void)requestDBOrgPositionListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
-- (void)requestDBAllOrgListWithcompletionBlock:(CompletionBlock)completionBlock;
-
-
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
                               completionBlock:(CompletionBlock)completionBlock;
 
@@ -62,7 +55,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)endOrganizationWithId:(NSString *)Id
               completionBlock:(CompletionBlock)completionBlock;
 
--(void)getPossiblePosition:(NSString*)ID
+-(void)getPossibleStaff:(NSString*)ID
         completionBlock:(CompletionBlock)completionBlock;
 
 -(void)addCustomJob:(NSString*)ID
