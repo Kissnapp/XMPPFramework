@@ -29,6 +29,9 @@ static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
 static const NSInteger ORG_ERROR_CODE = 9999;
 
+static const NSString *REQUEST_ALL_ORG_KEY = @"request_all_org_key";
+static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
+
 @interface XMPPOrganization ()
 
 @property (strong, nonatomic) NSMutableDictionary *requestBlockDcitionary;
@@ -222,7 +225,10 @@ static const NSInteger ORG_ERROR_CODE = 9999;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
--(void)allPorjectListWithBlock:(CompletionBlock)completionBlock
+
+#pragma mark - 获取所有项目
+// 数据库同服务器请求
+- (void)requestServerAllOrgList
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -230,12 +236,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             
             // If the templateId is nil，we should notice the user the info
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_ORG_KEY];
             
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
+            // 1. Listing the request iq XML
             /*
              <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
              <project xmlns="aft:project" type="list_project">
@@ -243,7 +246,7 @@ static const NSInteger ORG_ERROR_CODE = 9999;
              </iq>
              */
             
-            // 3. Create the request iq
+            // 2. Create the request iq
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:@"aft:project"
                                                                          attribute:@{@"type":@"list_project"}
@@ -257,12 +260,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
             // 4. Send the request iq element to the server
             [[self xmppStream] sendElement:iqElement];
             
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
         }else{
             // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+            NSLog(@"%@",@"you can not send this iq before logining");
         }
     }};
     
@@ -270,8 +270,185 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         block();
     else
         dispatch_async(moduleQueue, block);
-    
 }
+
+// 逻辑层向数据库请求
+- (void)requestDBAllOrgListWithBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *orgs = [_xmppOrganizationStorage allOrgsWithXMPPStream:xmppStream];
+        
+        ([orgs count] > 1) ? completionBlock(orgs, nil) : [self _requestServerAllOrgListWithBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerAllOrgListWithBlock:(CompletionBlock)completionBlock
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+        
+        // If the templateId is nil，we should notice the user the info
+        // 0. Create a key for storaging completion block
+        NSString *requestKey = [[self xmppStream] generateUUID];
+        
+        // 1. add the completionBlock to the dcitionary
+        [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+        
+        // 2. Listing the request iq XML
+        /*
+         <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+         <project xmlns="aft:project" type="list_project">
+         </project>
+         </iq>
+         */
+        
+        // 3. Create the request iq
+        ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                         xmlns:@"aft:project"
+                                                                     attribute:@{@"type":@"list_project"}
+                                                                   stringValue:nil];
+        
+        IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                         to:nil
+                                                       type:@"get"
+                                                         id:requestKey
+                                               childElement:organizationElement];
+        // 4. Send the request iq element to the server
+        [[self xmppStream] sendElement:iqElement];
+        
+        // 5. add a timer to call back to user after a long time without server's reponse
+        [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+        
+    }else{
+        // 0. tell the the user that can not send a request
+        [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+    }
+}
+#pragma mark - 获取所有模板
+- (void)requestServerAllTemplates
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 1. Create a key for storaging completion block
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY];
+            
+            // 2. Listing the request iq XML
+            /*
+             获取模块请求：
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="list_template">
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"list_template"}
+                                                                       stringValue:nil];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            NSLog(@"you can not send this iq before logining");
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerAllTemplatesWithBlock:(CompletionBlock)completionBlock
+{
+    
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    
+    if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+        
+        
+        // 0. Create a key for storaging completion block
+        NSString *requestKey = [[self xmppStream] generateUUID];
+        
+        // 1. add the completionBlock to the dcitionary
+        [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+        
+        // 2. Listing the request iq XML
+        /*
+         获取模块请求：
+         <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+         <project xmlns="aft:project" type="list_template">
+         </project>
+         </iq>
+         */
+        
+        // 3. Create the request iq
+        
+        ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                         xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                     attribute:@{@"type":@"list_template"}
+                                                                   stringValue:nil];
+        
+        IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                         to:nil
+                                                       type:@"get"
+                                                         id:requestKey
+                                               childElement:organizationElement];
+        
+        
+        // 4. Send the request iq element to the server
+        [[self xmppStream] sendElement:iqElement];
+        
+        // 5. add a timer to call back to user after a long time without server's reponse
+        [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+        
+    }else{
+        // 0. tell the the user that can not send a request
+        [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+    }
+}
+
+- (void)requestDBAllTemplatesWithBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+        
+        ([templates count] > 1) ? completionBlock(templates, nil) : [self _requestServerAllTemplatesWithBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
+
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -333,60 +510,6 @@ static const NSInteger ORG_ERROR_CODE = 9999;
         block();
     else
         dispatch_async(moduleQueue, block);
-}
--(void)requestAllTemplateWithBlock:(CompletionBlock)completionBlock
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /*
-             获取模块请求：
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project" type="list_template">
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"list_template"}
-                                                                       stringValue:nil];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-    
 }
 - (void)checkOrganizationName:(NSString *)name completionBlock:(CompletionBlock)completionBlock
 {

@@ -25,8 +25,16 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage;
 - (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-- (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
+#pragma mark - 获取所有项目
 - (void)requestServerAllOrgList;
+- (void)requestDBAllOrgListWithBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 获取所有模板
+- (void)requestServerAllTemplates;
+- (void)requestDBAllTemplatesWithBlock:(CompletionBlock)completionBlock;
+
+
+- (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
 
 
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
@@ -108,8 +116,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 
-- (id)OrganizationPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
-
 @end
 
 // XMPPOrganizationStorage
@@ -130,5 +136,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 @optional
+
+- (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
+- (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
 
 @end
