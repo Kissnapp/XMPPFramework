@@ -2135,7 +2135,38 @@ static const NSInteger ORG_ERROR_CODE = 9999;
                 
                 return YES;
                 
+            }else if([projectType isEqualToString:@"get_template_hash"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                
+                id  data = [[project stringValue] objectFromJSONString];
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                
+                if (completionBlock) {
+                    completionBlock(data, nil);
+                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                }
+                
+                return YES;
+                
             }
+            
+
 
 
 
