@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
+#import "XMPPManagedObject.h"
 
 @class XMPPOrgRelationObject;
 
@@ -29,7 +29,7 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
     XMPPOrgCoreDataStorageObjectStateActive
 };
 
-@interface XMPPOrgCoreDataStorageObject : NSManagedObject
+@interface XMPPOrgCoreDataStorageObject : XMPPManagedObject
 
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * orgName;

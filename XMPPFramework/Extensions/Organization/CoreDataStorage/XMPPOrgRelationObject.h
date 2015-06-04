@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
+#import "XMPPManagedObject.h"
 
 @class XMPPOrgCoreDataStorageObject;
 
-@interface XMPPOrgRelationObject : NSManagedObject
+@interface XMPPOrgRelationObject : XMPPManagedObject 
 
 @property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;

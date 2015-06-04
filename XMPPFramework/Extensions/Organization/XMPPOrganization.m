@@ -223,6 +223,23 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Private API
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)_insertOrUpdateOrgWithDic:(NSArray *)orgDics
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([orgDics count] < 1) return;
+    
+    [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:(NSDictionary *)obj xmppStream:xmppStream];
+        
+    }];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1504,6 +1521,28 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
     return NO;
 }
 
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+    // This method is invoked on the moduleQueue.
+    
+    [self setCanSendRequest:NO];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    [requestBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        
+        CompletionBlock completionBlock = (CompletionBlock)obj;
+        
+        if (completionBlock) {
+            
+            [weakSelf callBackWithMessage:@"You had disconnect with the server"  completionBlock:completionBlock];
+            [requestBlockDcitionary removeObjectForKey:key];
+        }
+        
+    }];
+}
+
+
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
     // This method is invoked on the moduleQueue.
@@ -1566,9 +1605,8 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
                 return YES;
                 
             }else if([projectType isEqualToString:@"list_project"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-         
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1592,23 +1630,33 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
                  </iq>
                  */
                 
-                id  data = [[project stringValue] objectFromJSONString];
+                // 0.跟新数据库
+                NSArray *orgDics = [[project stringValue] objectFromJSONString];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                [self _insertOrUpdateOrgWithDic:orgDics];
                 
-                if (completionBlock) {
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                    // 2.向数据库获取数据
+                    NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        completionBlock(templates, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
                 }
-                
+
                 return YES;
 
                 
             }else if([projectType isEqualToString:@"list_template"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-      
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -1632,13 +1680,27 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
                  </iq>
                  */
                 
-                id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                // 0.跟新数据库
+                id data = [[project stringValue] objectFromJSONString];
                 
-                if (completionBlock) {
+                NSArray *orgDics = [data objectForKey:@"template"];
+        
+                [self _insertOrUpdateOrgWithDic:orgDics];
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                    // 2.向数据库获取数据
+                    NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        completionBlock(templates, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
                 }
                 
                 return YES;
@@ -2313,26 +2375,4 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
     
     return NO;
 }
-
-- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
-{
-    // This method is invoked on the moduleQueue.
-    
-    [self setCanSendRequest:NO];
-    
-    __weak typeof(self) weakSelf = self;
-    
-    [requestBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        
-        CompletionBlock completionBlock = (CompletionBlock)obj;
-    
-        if (completionBlock) {
-            
-            [weakSelf callBackWithMessage:@"You had disconnect with the server"  completionBlock:completionBlock];
-            [requestBlockDcitionary removeObjectForKey:key];
-        }
-        
-    }];
-}
-
 @end

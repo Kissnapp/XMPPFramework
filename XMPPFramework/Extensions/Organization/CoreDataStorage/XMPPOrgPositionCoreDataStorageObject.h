@@ -7,10 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
+#import "XMPPManagedObject.h"
 
-
-@interface XMPPOrgPositionCoreDataStorageObject : NSManagedObject
+@interface XMPPOrgPositionCoreDataStorageObject : XMPPManagedObject
 
 @property (nonatomic, retain) NSString * ptId;
 @property (nonatomic, retain) NSString * ptName;

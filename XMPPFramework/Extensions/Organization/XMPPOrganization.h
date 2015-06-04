@@ -124,22 +124,13 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @required
 
 - (BOOL)configureWithParent:(XMPPOrganization *)aParent queue:(dispatch_queue_t)queue;
-- (NSArray*)allPorjectListWithbareJid:(NSString*)streamBareJidStr stream:(XMPPStream*)xmppStream;
-- (NSArray *)userListForOrgWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
-
-- (BOOL)isAdminForOrgnizationJidStr:(NSString *)bareOrgJidStr xmppStream:(XMPPStream *)stream;
-- (id)orgPositionForOrg:(NSString*)userJidStr withPtID:(NSString*)ptID orgID:(NSString*)orgID xmppStream:(XMPPStream *)stream;
-
-
-
-
-
 
 @optional
 
-- (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
-
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
+- (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
 @end
