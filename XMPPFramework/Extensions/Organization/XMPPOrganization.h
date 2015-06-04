@@ -6,8 +6,7 @@
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
-#import <XMPPFramework/XMPPFramework.h>
-
+#import "XMPP.h"
 
 typedef void(^CompletionBlock)(id data, NSError *error);
 

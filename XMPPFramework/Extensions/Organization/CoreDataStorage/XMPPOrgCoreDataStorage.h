@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
-#import <XMPPFramework/XMPPFramework.h>
+#import "XMPPFramework.h"
 
 @interface XMPPOrgCoreDataStorage : XMPPCoreDataStorage
 {

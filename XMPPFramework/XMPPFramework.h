@@ -108,3 +108,13 @@
 #import "XMPPStreamManagementMemoryStorage.h"
 
 #import "XMPPMmsRequest.h"
+
+#import "XMPPOrganization.h"
+#import "XMPPOrgCoreDataStorage.h"
+#import "XMPPOrgCoreDataStorageObject.h"
+#import "XMPPOrgUserCoreDataStorageObject.h"
+#import "XMPPOrgRelationObject.h"
+#import "XMPPOrgPositionCoreDataStorageObject.h"
+
+#import "XMPPManagedObject.h"
+#import "PropertyTransforming.h"
