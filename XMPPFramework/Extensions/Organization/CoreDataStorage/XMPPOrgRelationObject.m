@@ -8,7 +8,6 @@
 
 #import "XMPPOrgRelationObject.h"
 #import "XMPPOrgCoreDataStorageObject.h"
-#import "NSDictionary+KeysTransfrom.h"
 
 @implementation XMPPOrgRelationObject
 

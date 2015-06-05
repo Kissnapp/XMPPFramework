@@ -7,7 +7,6 @@
 //
 
 #import "XMPPOrgPositionCoreDataStorageObject.h"
-#import "NSDictionary+KeysTransfrom.h"
 
 @implementation XMPPOrgPositionCoreDataStorageObject
 

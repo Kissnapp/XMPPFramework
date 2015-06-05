@@ -9,8 +9,6 @@
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgRelationObject.h"
 #import "NSString+NSDate.h"
-#import "NSDictionary+KeysTransfrom.h"
-
 
 @implementation XMPPOrgCoreDataStorageObject
 
@@ -285,7 +283,7 @@
     
     newOrg.streamBareJidStr = streamBareJidStr;
     
-    [newOrg updateWithServerDic:dic];
+    [newOrg updateWithDic:dic];
     
     return newOrg;
 }
@@ -309,7 +307,7 @@
                                                                                      streamBareJidStr:streamBareJidStr];
     if (newOrg != nil) {
         
-        [newOrg updateWithServerDic:dic];
+        [newOrg updateWithDic:dic];
         result = YES;
         
     }else{
@@ -393,13 +391,5 @@
     if (tempRelationShipTag) self.relationShipTag = tempRelationShipTag;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
-
-- (void)updateWithServerDic:(NSDictionary *)dic
-{
-    NSDictionary *newDic = [dic destinationDictionaryWithNewKeysMapDic:[self propertyTransformDictionary]];
-    
-    [self updateWithDic:newDic];
-}
-
 
 @end

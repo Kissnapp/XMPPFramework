@@ -12,6 +12,7 @@
 #import "XMPPLogging.h"
 #import "XMPPFramework.h"
 #import "DDList.h"
+#import "NSDictionary+KeysTransfrom.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -234,7 +235,18 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:(NSDictionary *)obj
+        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                          @"orgId":@"id",
+                                                                                                                          @"orgName":@"name",
+                                                                                                                          @"orgState":@"status",
+                                                                                                                          @"orgStartTime":@"start_time",
+                                                                                                                          @"orgEndTime":@"end_time",
+                                                                                                                          @"orgAdminJidStr":@"admin",
+                                                                                                                          @"orgDescription":@"description",
+                                                                                                                          @"ptTag":@"job_tag",
+                                                                                                                          @"userTag":@"member_tag",
+                                                                                                                          @"orgRelationShipTag":@"link_tag",
+                                                                                                                          }]
                                                  xmppStream:xmppStream
                                                   userBlock:^(NSString *orgId) {
                                                       
