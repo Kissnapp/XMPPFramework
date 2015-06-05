@@ -118,3 +118,4 @@
 
 #import "XMPPManagedObject.h"
 #import "PropertyTransforming.h"
+#import "NSDictionary+KeysTransfrom.h"

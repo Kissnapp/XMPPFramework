@@ -333,6 +333,8 @@
 		E7E02CBF1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */; };
 		E7E3A4A11B205D7600F3F9B5 /* XMPPManagedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A49F1B205D7600F3F9B5 /* XMPPManagedObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4A21B205D7600F3F9B5 /* XMPPManagedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4A01B205D7600F3F9B5 /* XMPPManagedObject.m */; };
+		E7E3A4B81B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4B61B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m */; };
+		E7E3A4B91B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4B71B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3F12A1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3F12B1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */; };
 		E7E3F12E1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -711,6 +713,8 @@
 		E7E3A49E1B2052CB00F3F9B5 /* PropertyTransforming.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PropertyTransforming.h; sourceTree = "<group>"; };
 		E7E3A49F1B205D7600F3F9B5 /* XMPPManagedObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPManagedObject.h; sourceTree = "<group>"; };
 		E7E3A4A01B205D7600F3F9B5 /* XMPPManagedObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPManagedObject.m; sourceTree = "<group>"; };
+		E7E3A4B61B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+KeysTransfrom.m"; sourceTree = "<group>"; };
+		E7E3A4B71B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+KeysTransfrom.h"; sourceTree = "<group>"; };
 		E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPBaseMessageSubObject.h; sourceTree = "<group>"; };
 		E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPBaseMessageSubObject.m; sourceTree = "<group>"; };
 		E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPAudioMessageObject.h; sourceTree = "<group>"; };
@@ -908,6 +912,8 @@
 		63F3B17B1960F91500BD8134 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				E7E3A4B71B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h */,
+				E7E3A4B61B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m */,
 				E78EEFBE1ABABEA000C902C3 /* NSString+ChineseToPinYin.h */,
 				E78EEFBD1ABABEA000C902C3 /* NSString+ChineseToPinYin.m */,
 				63F3B17C1960F91500BD8134 /* NSData+XMPP.h */,
@@ -2006,6 +2012,7 @@
 				E78F0E061AD66245004DE419 /* XMPPMmsRequest.h in Headers */,
 				E7D92F211A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h in Headers */,
 				E7E3A4A11B205D7600F3F9B5 /* XMPPManagedObject.h in Headers */,
+				E7E3A4B91B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h in Headers */,
 				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2158,6 +2165,7 @@
 				63F3B4B41960F91700BD8134 /* XMPPRoster.m in Sources */,
 				63F3B5471960F91700BD8134 /* XMPPMessage+XEP_0308.m in Sources */,
 				E77916521A4D7D2500279156 /* XMPPStreamManagementMemoryStorage.m in Sources */,
+				E7E3A4B81B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m in Sources */,
 				63F3B4B81960F91700BD8134 /* XMPPSystemInputActivityMonitor.m in Sources */,
 				E703D07D19D908CF00D8E3A4 /* XMPPAllMessage.m in Sources */,
 				63F3B4C91960F91700BD8134 /* XMPPRoomMessageCoreDataStorageObject.m in Sources */,

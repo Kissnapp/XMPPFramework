@@ -127,9 +127,15 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @optional
 
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
+
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
+
 - (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
-- (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
+                       xmppStream:(XMPPStream *)stream
+                        userBlock:(void (^)(NSString *orgId))userBlock
+                    positionBlock:(void (^)(NSString *orgId))positionBlock
+                    relationBlock:(void (^)(NSString *orgId))relationBlock;
 
 @end

@@ -234,7 +234,21 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:(NSDictionary *)obj xmppStream:xmppStream];
+        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:(NSDictionary *)obj
+                                                 xmppStream:xmppStream
+                                                  userBlock:^(NSString *orgId) {
+                                                      
+                                                      // 0.request all user info from server
+                                                      
+                                                  } positionBlock:^(NSString *orgId) {
+                                                      
+                                                      // 1.request all position info from server
+                                                      
+                                                  } relationBlock:^(NSString *orgId) {
+                                                      
+                                                      // 2.request all relation org info from server
+                                                      
+                                                  }];
         
     }];
 }

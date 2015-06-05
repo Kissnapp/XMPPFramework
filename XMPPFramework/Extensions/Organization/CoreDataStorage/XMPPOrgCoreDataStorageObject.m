@@ -9,7 +9,7 @@
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgRelationObject.h"
 #import "NSString+NSDate.h"
-
+#import "NSDictionary+KeysTransfrom.h"
 
 
 @implementation XMPPOrgCoreDataStorageObject
@@ -38,7 +38,22 @@
 
 - (NSMutableDictionary *)propertyTransformDictionary
 {
-    return [super propertyTransformDictionary];
+    NSMutableDictionary *keysMapDic = [super propertyTransformDictionary];
+    
+    [keysMapDic setValuesForKeysWithDictionary:@{
+                                                 @"orgId":@"id",
+                                                 @"orgName":@"name",
+                                                 @"orgState":@"status",
+                                                 @"orgStartTime":@"start_time",
+                                                 @"orgEndTime":@"end_time",
+                                                 @"orgAdminJidStr":@"admin",
+                                                 @"orgDescription":@"description",
+                                                 @"ptTag":@"job_tag",
+                                                 @"userTag":@"member_tag",
+                                                 @"orgRelationShipTag":@"link_tag",
+                                                 }];
+    
+    return keysMapDic;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +285,7 @@
     
     newOrg.streamBareJidStr = streamBareJidStr;
     
-    [newOrg updateWithDic:dic];
+    [newOrg updateWithServerDic:dic];
     
     return newOrg;
 }
@@ -294,7 +309,7 @@
                                                                                      streamBareJidStr:streamBareJidStr];
     if (newOrg != nil) {
         
-        [newOrg updateWithDic:dic];
+        [newOrg updateWithServerDic:dic];
         result = YES;
         
     }else{
@@ -363,7 +378,7 @@
     NSString *tempOrgDescription = [dic objectForKey:@"orgDescription"];
     NSString *tempPtTag = [dic objectForKey:@"ptTag"];
     NSString *tempUserTag = [dic objectForKey:@"userTag"];
-    NSString *tempRelationShipTag = [dic objectForKey:@"orgRelationShip"];
+    NSString *tempRelationShipTag = [dic objectForKey:@"orgRelationShipTag"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
     if (tempOrgId) self.orgId = tempOrgId;
@@ -377,6 +392,13 @@
     if (tempUserTag) self.userTag = tempUserTag;
     if (tempRelationShipTag) self.relationShipTag = tempRelationShipTag;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
+}
+
+- (void)updateWithServerDic:(NSDictionary *)dic
+{
+    NSDictionary *newDic = [dic destinationDictionaryWithNewKeysMapDic:[self propertyTransformDictionary]];
+    
+    [self updateWithDic:newDic];
 }
 
 
