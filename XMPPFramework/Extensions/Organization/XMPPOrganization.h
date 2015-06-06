@@ -32,6 +32,19 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestServerAllTemplates;
 - (void)requestDBAllTemplatesWithBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 获取一个组织的所有职位信息
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId;
+- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId;
+
+#pragma mark - 获取一个组织的所有成员信息
+- (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId;
+
+#pragma mark - 获取一个组织的所有关键组织的id
+- (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
+- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId;
+
+
 
 - (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
 
