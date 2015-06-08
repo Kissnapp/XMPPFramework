@@ -710,7 +710,6 @@
 		E7D92F201A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPAllMessageQueryModule.m; sourceTree = "<group>"; };
 		E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomUserCoreDataStorageObject.h; sourceTree = "<group>"; };
 		E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomUserCoreDataStorageObject.m; sourceTree = "<group>"; };
-		E7E3A49E1B2052CB00F3F9B5 /* PropertyTransforming.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PropertyTransforming.h; sourceTree = "<group>"; };
 		E7E3A49F1B205D7600F3F9B5 /* XMPPManagedObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPManagedObject.h; sourceTree = "<group>"; };
 		E7E3A4A01B205D7600F3F9B5 /* XMPPManagedObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPManagedObject.m; sourceTree = "<group>"; };
 		E7E3A4B61B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+KeysTransfrom.m"; sourceTree = "<group>"; };
@@ -1758,7 +1757,6 @@
 		E7E3A49D1B2052A100F3F9B5 /* PropertyTransforming */ = {
 			isa = PBXGroup;
 			children = (
-				E7E3A49E1B2052CB00F3F9B5 /* PropertyTransforming.h */,
 				E7E3A49F1B205D7600F3F9B5 /* XMPPManagedObject.h */,
 				E7E3A4A01B205D7600F3F9B5 /* XMPPManagedObject.m */,
 			);

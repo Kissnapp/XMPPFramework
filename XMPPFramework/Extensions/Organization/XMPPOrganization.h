@@ -34,16 +34,17 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 #pragma mark - 获取一个组织的所有职位信息
 - (void)requestServerAllPositionListWithOrgId:(NSString *)orgId;
-- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId;
+
+- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有成员信息
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
-- (void)requestDBAllUserListWithOrgId:(NSString *)orgId;
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;;
 
 #pragma mark - 获取一个组织的所有关键组织的id
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
-- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId;
-
+- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;;
 
 
 - (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
@@ -140,10 +141,11 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @optional
 
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
-
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
-
 - (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)orgUserListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)orgRelationListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
                        xmppStream:(XMPPStream *)stream

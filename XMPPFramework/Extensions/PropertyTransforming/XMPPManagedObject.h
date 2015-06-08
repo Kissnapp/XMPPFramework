@@ -7,8 +7,9 @@
 //
 
 #import <CoreData/CoreData.h>
-#import "PropertyTransforming.h"
 
-@interface XMPPManagedObject : NSManagedObject <PropertyTransforming>
+@interface XMPPManagedObject : NSManagedObject
+
+- (NSMutableDictionary *)propertyTransformDictionary;
 
 @end

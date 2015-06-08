@@ -32,6 +32,9 @@ static const NSInteger ORG_ERROR_CODE = 9999;
 
 static const NSString *REQUEST_ALL_ORG_KEY = @"request_all_org_key";
 static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
+static const NSString *REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_list_key";
+static const NSString *REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
+static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
 
 @interface XMPPOrganization ()
 
@@ -490,6 +493,159 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
         dispatch_async(moduleQueue, block);
 }
 
+#pragma mark - 获取一个组织的所有职位信息
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 1. Create a key for storaging completion block
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_POSITION_LIST_KEY];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
+             <project xmlns="aft.project" type="get_structure">
+             {"project":"xxx"}
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                                    forKey:@"project"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_structure"}
+                                                                       stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            NSLog(@"you can not send this iq before logining");
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerAllPositionListWithOrgId:(NSString *)orgId
+                               completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            if (!orgId) {
+                [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
+            }
+            
+            // fetch data from database
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
+             <project xmlns="aft.project" type="get_structure">
+             {"project":"xxx"}
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                                    forKey:@"project"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_structure"}
+                                                                       stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *positions = [_xmppOrganizationStorage orgPositionListWithId:orgId xmppStream:xmppStream];
+        
+        ([positions count] > 1) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
+                                                                                                 completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+#pragma mark - 获取一个组织的所有成员信息
+- (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
+{
+    
+}
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+{
+
+}
+
+#pragma mark - 获取一个组织的所有关键组织的id
+- (void)requestServerAllRelationListWithOrgId:(NSString *)orgId
+{
+
+}
+- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
+{
+
+}
 
 
 - (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock
