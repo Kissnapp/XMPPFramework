@@ -366,7 +366,7 @@
 {
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempOrgName = [dic objectForKey:@"orgName"];
-    NSNumber *tempOrgState = [dic objectForKey:@"orgState"];
+    NSNumber *tempOrgState = [NSNumber numberWithInteger:[[dic objectForKey:@"orgState"] integerValue]];
     NSString *tempOrgStartTime = [dic objectForKey:@"orgStartTime"];
     NSString *tempOrgEndTime = [dic objectForKey:@"orgEndTime"];
     NSString *tempOrgAdminJidStr = [dic objectForKey:@"orgAdminJidStr"];
