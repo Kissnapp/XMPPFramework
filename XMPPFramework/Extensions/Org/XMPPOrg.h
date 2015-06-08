@@ -19,7 +19,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 }
 
 @property (strong, readonly) id <XMPPOrgStorage> xmppOrganizationStorage;
+
 @property (assign) BOOL autoFetchOrgList;
+@property (assign) BOOL autoFetchOrgTemplateList;
 
 - (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage;
 - (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage dispatchQueue:(dispatch_queue_t)queue;

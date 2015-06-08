@@ -48,6 +48,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 @synthesize requestBlockDcitionary;
 @synthesize canSendRequest;
 @synthesize autoFetchOrgList;
+@synthesize autoFetchOrgTemplateList;
 
 - (id)init
 {
@@ -79,7 +80,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         //setting the dafault data
         //your code ...
         canSendRequest = NO;
-        autoFetchOrgList = YES;
+        autoFetchOrgList = NO;
+        autoFetchOrgTemplateList = NO;
         requestBlockDcitionary = [NSMutableDictionary dictionary];
     }
     return self;
@@ -202,7 +204,34 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 }
 
+- (BOOL)autoFetchOrgTemplateList
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = autoFetchOrgTemplateList;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
 
+- (void)setAutoFetchOrgTemplateList:(BOOL)flag
+{
+    dispatch_block_t block = ^{
+        
+        autoFetchOrgTemplateList = flag;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Internal
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,6 +265,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     if ([orgDics count] < 1) return;
     
+    __weak typeof(self) weakSelf = self;
+    
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
@@ -255,14 +286,19 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                                                       
                                                       // 0.request all user info from server
                                                       
+                                                      [weakSelf requestServerAllUserListWithOrgId:orgId];
+                                                      
                                                   } positionBlock:^(NSString *orgId) {
                                                       
                                                       // 1.request all position info from server
+                                                      
+                                                      [weakSelf requestServerAllPositionListWithOrgId:orgId];
                                                       
                                                   } relationBlock:^(NSString *orgId) {
                                                       
                                                       // 2.request all relation org info from server
                                                       
+                                                      [weakSelf requestServerAllRelationListWithOrgId:orgId];
                                                   }];
         
     }];
@@ -1674,6 +1710,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     // fetch all the org list
     if (autoFetchOrgList) [self requestServerAllOrgList];
+    if (autoFetchOrgTemplateList) [self requestServerAllTemplates];
 }
 
 

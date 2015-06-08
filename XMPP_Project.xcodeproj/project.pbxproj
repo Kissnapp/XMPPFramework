@@ -334,20 +334,20 @@
 		E7E3A4B81B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4B61B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.m */; };
 		E7E3A4B91B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4B71B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4CC1B25A49D00F3F9B5 /* XMPPOrg.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4BE1B25A49D00F3F9B5 /* XMPPOrg.xcdatamodeld */; };
-		E7E3A4CD1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C01B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h */; };
+		E7E3A4CD1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C01B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4CE1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4C11B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.m */; };
-		E7E3A4CF1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C21B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h */; };
+		E7E3A4CF1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C21B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4D01B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4C31B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.m */; };
-		E7E3A4D11B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C41B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h */; };
+		E7E3A4D11B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C41B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4D21B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4C51B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.m */; };
-		E7E3A4D31B25A49D00F3F9B5 /* XMPPOrgRelationObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C61B25A49D00F3F9B5 /* XMPPOrgRelationObject.h */; };
+		E7E3A4D31B25A49D00F3F9B5 /* XMPPOrgRelationObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C61B25A49D00F3F9B5 /* XMPPOrgRelationObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4D41B25A49D00F3F9B5 /* XMPPOrgRelationObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4C71B25A49D00F3F9B5 /* XMPPOrgRelationObject.m */; };
-		E7E3A4D51B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C81B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h */; };
+		E7E3A4D51B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4C81B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4D61B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4C91B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.m */; };
-		E7E3A4D71B25A49D00F3F9B5 /* XMPPOrg.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4CA1B25A49D00F3F9B5 /* XMPPOrg.h */; };
 		E7E3A4D81B25A49D00F3F9B5 /* XMPPOrg.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4CB1B25A49D00F3F9B5 /* XMPPOrg.m */; };
-		E7E3A4DC1B25A4BE00F3F9B5 /* XMPPManagedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4DA1B25A4BE00F3F9B5 /* XMPPManagedObject.h */; };
+		E7E3A4DC1B25A4BE00F3F9B5 /* XMPPManagedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4DA1B25A4BE00F3F9B5 /* XMPPManagedObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3A4DD1B25A4BE00F3F9B5 /* XMPPManagedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3A4DB1B25A4BE00F3F9B5 /* XMPPManagedObject.m */; };
+		E7E3A4F11B25AB0C00F3F9B5 /* XMPPOrg.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3A4CA1B25A49D00F3F9B5 /* XMPPOrg.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3F12A1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F1281A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E3F12B1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E3F1291A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.m */; };
 		E7E3F12E1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E3F12C1A1AF2D9000B68E8 /* XMPPAudioMessageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1829,7 +1829,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				63F3B6C91960F9F300BD8134 /* XMPPFramework.h in Headers */,
-				E7E3A4CD1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h in Headers */,
 				63F3B4841960F91700BD8134 /* XMPP.h in Headers */,
 				63F3B4AB1960F91700BD8134 /* XMPPResourceMemoryStorageObject.h in Headers */,
 				E703D01F19D5771100D8E3A4 /* XMPPMessage+ChatRoomMessage.h in Headers */,
@@ -1900,14 +1899,12 @@
 				63F3B48A1960F91700BD8134 /* XMPPJID.h in Headers */,
 				63F3B4FA1960F91700BD8134 /* XMPPvCardTempTel.h in Headers */,
 				63F3B55A1960F91700BD8134 /* DDAbstractDatabaseLogger.h in Headers */,
-				E7E3A4CF1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h in Headers */,
 				63F3B4EE1960F91700BD8134 /* XMPPvCardTempAdr.h in Headers */,
 				63F3B54C1960F91700BD8134 /* DDList.h in Headers */,
 				63F3B5481960F91700BD8134 /* XMPPMessage+XEP_0333.h in Headers */,
 				63F3B4EC1960F91700BD8134 /* XMPPvCardTemp.h in Headers */,
 				63F3B52E1960F91700BD8134 /* XMPPMessage+XEP_0184.h in Headers */,
 				63F3B4BD1960F91700BD8134 /* XMPPJabberRPCModule.h in Headers */,
-				E7E3A4D31B25A49D00F3F9B5 /* XMPPOrgRelationObject.h in Headers */,
 				63F3B4DC1960F91700BD8134 /* XMPPMUC.h in Headers */,
 				63F3B4E81960F91700BD8134 /* XMPPvCardCoreDataStorageObject.h in Headers */,
 				63F3B5601960F91700BD8134 /* DDLog+LOGV.h in Headers */,
@@ -1982,18 +1979,14 @@
 				E7E3F12A1A1AE6D9000B68E8 /* XMPPBaseMessageSubObject.h in Headers */,
 				63F3B4951960F91700BD8134 /* XMPPStream.h in Headers */,
 				63F3B5711960F91700BD8134 /* DDXMLElement.h in Headers */,
-				E7E3A4DC1B25A4BE00F3F9B5 /* XMPPManagedObject.h in Headers */,
 				63F3B56F1960F91700BD8134 /* DDXMLDocument.h in Headers */,
 				E7C4DFA919D2AAB1000CB916 /* XMPPChatRoom.h in Headers */,
-				E7E3A4D51B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h in Headers */,
 				E712D8B51994D51400287CD6 /* GCDAsyncSocket.h in Headers */,
 				E7EF536A1A1C3E8500F0C268 /* XMPPVideoMessageObject.h in Headers */,
-				E7E3A4D11B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h in Headers */,
 				E71A78D71A23229A004DC258 /* NSString+NSDate.h in Headers */,
 				E796C4101A318C96004F7CB0 /* XMPPLoginUserCoreDataStorageObject.h in Headers */,
 				E796C4081A318431004F7CB0 /* XMPPLoginHelperCoreDataStorage.h in Headers */,
 				E796C4141A318D34004F7CB0 /* XMPPLoginQueryModule.h in Headers */,
-				E7E3A4D71B25A49D00F3F9B5 /* XMPPOrg.h in Headers */,
 				E796C40C1A318431004F7CB0 /* XMPPLoginHelper.h in Headers */,
 				E72103C91A357ADE007D1485 /* XMPPChatRoomQueryModule.h in Headers */,
 				E71A78DB1A2324A4004DC258 /* NSDate+NSString.h in Headers */,
@@ -2006,6 +1999,13 @@
 				E77916581A4D7DD500279156 /* XMPPCustomBinding.h in Headers */,
 				E78EEFC01ABABEA000C902C3 /* NSString+ChineseToPinYin.h in Headers */,
 				E712DAB21B0B4ED20048A8A4 /* XMPPResourceCoreDataStorageObject.h in Headers */,
+				E7E3A4CD1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorage.h in Headers */,
+				E7E3A4CF1B25A49D00F3F9B5 /* XMPPOrgCoreDataStorageObject.h in Headers */,
+				E7E3A4D31B25A49D00F3F9B5 /* XMPPOrgRelationObject.h in Headers */,
+				E7E3A4DC1B25A4BE00F3F9B5 /* XMPPManagedObject.h in Headers */,
+				E7E3A4D51B25A49D00F3F9B5 /* XMPPOrgUserCoreDataStorageObject.h in Headers */,
+				E7E3A4D11B25A49D00F3F9B5 /* XMPPOrgPositionCoreDataStorageObject.h in Headers */,
+				E7E3A4F11B25AB0C00F3F9B5 /* XMPPOrg.h in Headers */,
 				E712DAB01B0B4ED20048A8A4 /* XMPPGroupCoreDataStorageObject.h in Headers */,
 				E712DAB61B0B4EE40048A8A4 /* XMPPUserCoreDataStorageObject.h in Headers */,
 				E78F0E061AD66245004DE419 /* XMPPMmsRequest.h in Headers */,
