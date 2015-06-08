@@ -1,4 +1,4 @@
-//
+
 //  XMPPOrganization.m
 //  XMPP_Project
 //
@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPOrganization.h"
+#import "XMPPOrg.h"
 #import "XMPP.h"
 #import "XMPPIDTracker.h"
 #import "XMPPLogging.h"
@@ -36,14 +36,14 @@ static const NSString *REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_li
 static const NSString *REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
 static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
 
-@interface XMPPOrganization ()
+@interface XMPPOrg ()
 
 @property (strong, nonatomic) NSMutableDictionary *requestBlockDcitionary;
 @property (assign, nonatomic) BOOL canSendRequest;
 
 @end
 
-@implementation XMPPOrganization
+@implementation XMPPOrg
 @synthesize xmppOrganizationStorage = _xmppOrganizationStorage;
 @synthesize requestBlockDcitionary;
 @synthesize canSendRequest;
@@ -60,12 +60,12 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     return [self initWithOrganizationStorage:nil dispatchQueue:queue];
 }
 
-- (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage
+- (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage
 {
     return [self initWithOrganizationStorage:storage dispatchQueue:NULL];
 }
 
-- (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue
+- (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage dispatchQueue:(dispatch_queue_t)queue
 {
     NSParameterAssert(storage != nil);
     
@@ -219,7 +219,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 #pragma mark Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPOrganizationStorage>)xmppOrganizationStorage
+- (id <XMPPOrgStorage>)xmppOrganizationStorage
 {
     // Note: The xmppRosterStorage variable is read-only (set in the init method)
     
@@ -1821,7 +1821,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
                     // 2.向数据库获取数据
-                    NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+                    NSArray *templates = [_xmppOrganizationStorage allOrgsWithXMPPStream:xmppStream];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
@@ -1863,9 +1863,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  */
                 
                 // 0.跟新数据库
-                id data = [[project stringValue] objectFromJSONString];
-                
-                NSArray *orgDics = [data objectForKey:@"template"];
+                NSArray *orgDics = [[project stringValue] objectFromJSONString];
         
                 [self _insertOrUpdateOrgWithDic:orgDics];
                 

@@ -10,19 +10,19 @@
 
 typedef void(^CompletionBlock)(id data, NSError *error);
 
-@protocol XMPPOrganizationDelegate;
-@protocol XMPPOrganizationStorage;
+@protocol XMPPOrgDelegate;
+@protocol XMPPOrgStorage;
 
-@interface XMPPOrganization : XMPPModule
+@interface XMPPOrg : XMPPModule
 {
-    __strong id <XMPPOrganizationStorage> _xmppOrganizationStorage;
+    __strong id <XMPPOrgStorage> _xmppOrganizationStorage;
 }
 
-@property (strong, readonly) id <XMPPOrganizationStorage> xmppOrganizationStorage;
+@property (strong, readonly) id <XMPPOrgStorage> xmppOrganizationStorage;
 @property (assign) BOOL autoFetchOrgList;
 
-- (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage;
-- (id)initWithOrganizationStorage:(id <XMPPOrganizationStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
+- (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage;
+- (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 #pragma mark - 获取所有项目
 - (void)requestServerAllOrgList;
@@ -123,7 +123,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 // XMPPOrganizationDelegate
-@protocol XMPPOrganizationDelegate <NSObject>
+@protocol XMPPOrgDelegate <NSObject>
 
 @required
 
@@ -132,11 +132,11 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @end
 
 // XMPPOrganizationStorage
-@protocol XMPPOrganizationStorage <NSObject>
+@protocol XMPPOrgStorage <NSObject>
 
 @required
 
-- (BOOL)configureWithParent:(XMPPOrganization *)aParent queue:(dispatch_queue_t)queue;
+- (BOOL)configureWithParent:(XMPPOrg *)aParent queue:(dispatch_queue_t)queue;
 
 @optional
 

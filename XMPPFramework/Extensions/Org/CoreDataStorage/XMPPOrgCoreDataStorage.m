@@ -11,7 +11,7 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
-#import "XMPPOrganization.h"
+#import "XMPPOrg.h"
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgPositionCoreDataStorageObject.h"
 #import "XMPPOrgUserCoreDataStorageObject.h"
@@ -34,7 +34,7 @@ NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on s
 #pragma mark - extension
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface XMPPOrgCoreDataStorage ()<XMPPOrganizationStorage>
+@interface XMPPOrgCoreDataStorage ()<XMPPOrgStorage>
 
 @end
 
@@ -107,7 +107,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (streamBareJidStr){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"streamBareJidStr",
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
                          streamBareJidStr, @"orgState", @(XMPPOrgCoreDataStorageObjectStateTemplate)];
             
             [fetchRequest setPredicate:predicate];
@@ -137,7 +137,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (streamBareJidStr){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"streamBareJidStr",
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K != %@",@"streamBareJidStr",
                                       streamBareJidStr, @"orgState", @(XMPPOrgCoreDataStorageObjectStateTemplate)];
             
             [fetchRequest setPredicate:predicate];

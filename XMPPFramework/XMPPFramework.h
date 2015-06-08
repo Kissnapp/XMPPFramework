@@ -109,7 +109,7 @@
 
 #import "XMPPMmsRequest.h"
 
-#import "XMPPOrganization.h"
+#import "XMPPOrg.h"
 #import "XMPPOrgCoreDataStorage.h"
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgUserCoreDataStorageObject.h"

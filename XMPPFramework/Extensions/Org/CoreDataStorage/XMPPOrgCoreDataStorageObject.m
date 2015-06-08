@@ -253,7 +253,7 @@
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND && %K == %@", @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@", @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
