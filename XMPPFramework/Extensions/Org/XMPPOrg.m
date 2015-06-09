@@ -1089,7 +1089,6 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         block();
     else
         dispatch_async(moduleQueue, block);
-    
 
 }
 -(void)deleteMemberFromPro:(NSString *)projectID jid:(NSString *)jid completionBlock:(CompletionBlock)completionBlock
