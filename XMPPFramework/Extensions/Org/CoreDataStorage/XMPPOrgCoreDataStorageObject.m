@@ -88,7 +88,7 @@
 {
     [self willAccessValueForKey:@"orgState"];
     NSNumber *value = [self primitiveValueForKey:@"orgState"];
-    [self didAccessValueForKey:@"streamBareJidStr"];
+    [self didAccessValueForKey:@"orgState"];
     
     return value;
 }
@@ -125,9 +125,9 @@
 
 - (void)setOrgEndTime:(NSDate *)value
 {
-    [self willChangeValueForKey:@"streamBareJidStr"];
-    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
-    [self didChangeValueForKey:@"streamBareJidStr"];
+    [self willChangeValueForKey:@"orgEndTime"];
+    [self setPrimitiveValue:value forKey:@"orgEndTime"];
+    [self didChangeValueForKey:@"orgEndTime"];
 }
 - (NSString *)orgAdminJidStr
 {
@@ -250,7 +250,9 @@
     if (moc == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+    NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                               inManagedObjectContext:moc];
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@", @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
@@ -274,8 +276,9 @@
     if (dic == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     
+    NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
     
-    XMPPOrgCoreDataStorageObject *newOrg = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPOrgCoreDataStorageObject"
+    XMPPOrgCoreDataStorageObject *newOrg = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                                          inManagedObjectContext:moc];
     
     newOrg.streamBareJidStr = streamBareJidStr;

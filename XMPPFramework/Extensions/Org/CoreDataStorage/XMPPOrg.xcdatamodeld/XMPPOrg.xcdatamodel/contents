@@ -4,41 +4,41 @@
         <attribute name="orgAdminJidStr" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgDescription" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgEndTime" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="orgId" attributeType="String" syncable="YES"/>
         <attribute name="orgName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgStartTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="orgState" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="ptTag" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="relationShipTag" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" syncable="YES"/>
         <attribute name="userTag" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="orgRelationShip" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="XMPPOrgRelationObject" inverseName="relationOrgShip" inverseEntity="XMPPOrgRelationObject" syncable="YES"/>
     </entity>
     <entity name="XMPPOrgPositionCoreDataStorageObject" representedClassName="XMPPOrgPositionCoreDataStorageObject" syncable="YES">
         <attribute name="dpId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="dpName" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="ptId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="orgId" attributeType="String" syncable="YES"/>
+        <attribute name="ptId" attributeType="String" syncable="YES"/>
         <attribute name="ptLeft" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="ptName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ptRight" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="XMPPOrgRelationObject" representedClassName="XMPPOrgRelationObject" syncable="YES">
-        <attribute name="relationOrgId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="relationOrgId" attributeType="String" syncable="YES"/>
         <relationship name="relationOrgShip" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="XMPPOrgCoreDataStorageObject" inverseName="orgRelationShip" inverseEntity="XMPPOrgCoreDataStorageObject" syncable="YES"/>
     </entity>
     <entity name="XMPPOrgUserCoreDataStorageObject" representedClassName="XMPPOrgUserCoreDataStorageObject" syncable="YES">
         <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ptId" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="userId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="streamBareJidStr" attributeType="String" syncable="YES"/>
+        <attribute name="userId" attributeType="String" syncable="YES"/>
         <attribute name="userJidStr" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
         <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="225"/>
-        <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="163"/>
+        <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="165"/>
         <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="75"/>
-        <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="118"/>
+        <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="120"/>
     </elements>
 </model>

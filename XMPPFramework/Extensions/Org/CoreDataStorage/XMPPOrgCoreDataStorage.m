@@ -99,7 +99,9 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -129,7 +131,9 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -159,7 +163,9 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgPositionCoreDataStorageObject"
+        NSString *entityName = NSStringFromClass([XMPPOrgPositionCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -245,7 +251,9 @@ static XMPPOrgCoreDataStorage *sharedInstance;
       NSManagedObjectContext *moc = [self managedObjectContext];
       NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
       
-      NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
+      NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+      
+      NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                 inManagedObjectContext:moc];
       
       NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
