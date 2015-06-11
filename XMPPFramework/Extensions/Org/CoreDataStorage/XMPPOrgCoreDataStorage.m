@@ -225,6 +225,48 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allPositions;
 }
 
+- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (streamBareJidStr){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"NOT(%K in %@) AND %K == %@",@"orgId", orgIds, @"streamBareJidStr",
+                                      streamBareJidStr];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            NSArray *deleteOrgs = [moc executeFetchRequest:fetchRequest error:nil];
+            
+            NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+            
+            for (XMPPOrgCoreDataStorageObject *org in deleteOrgs){
+                
+                [moc deleteObject:org];
+                
+                if (++unsavedCount >= saveThreshold){
+                    [self save];
+                    unsavedCount = 0;
+                }
+            }
+            // 删职位信息
+            // 删成员信息
+        }
+        
+    }];
+}
+
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
                        xmppStream:(XMPPStream *)stream
                         userBlock:(void (^)(NSString *orgId))userBlock

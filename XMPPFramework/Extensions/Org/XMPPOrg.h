@@ -141,6 +141,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (BOOL)configureWithParent:(XMPPOrg *)aParent queue:(dispatch_queue_t)queue;
 
 @optional
+
+- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds xmppStream:(XMPPStream *)stream;
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;

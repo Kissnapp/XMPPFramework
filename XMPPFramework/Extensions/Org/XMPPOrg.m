@@ -259,13 +259,37 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 #pragma mark Private API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)_insertOrUpdateOrgWithDic:(NSArray *)orgDics
+- (NSArray *)_specifiedValuesWithKey:(NSString *)key fromDics:(NSArray *)dics
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return nil;
+    
+    if ([dics count] < 1) return nil;
+    
+    __block NSMutableArray *array = [NSMutableArray array];
+    
+    [dics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        NSDictionary *dic = (NSDictionary *)obj;
+        
+        [array addObject:[dic objectForKey:key]];
+        
+    }];
+    
+    return array;
+}
+
+- (void)_insertOrUpateOrgWithDic:(NSArray *)orgDics
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
     if ([orgDics count] < 1) return;
     
     __weak typeof(self) weakSelf = self;
+    
+    
+    NSArray *orgIds = [self _specifiedValuesWithKey:@"id" fromDics:orgDics];
+    
+    [_xmppOrganizationStorage clearUnusedOrgWithOrgIds:orgIds xmppStream:xmppStream];
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
