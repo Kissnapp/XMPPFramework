@@ -304,6 +304,71 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     }];
 }
 
+- (void)_insertOrUpdateUserWithDic:(NSArray *)userDics
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([userDics count] < 1) return;
+    
+    [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [_xmppOrganizationStorage insertOrUpdateUserInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                           @"userId":@"id",
+                                                                                                                           @"userJidStr":@"name",
+                                                                                                                           @"orgId":@"status",
+                                                                                                                           @"ptId":@"start_time",
+                                                                                                                           @"ptName":@"end_time"
+                                                                                                                           }]
+                                                  xmppStream:xmppStream];
+        
+    }];
+}
+
+- (void)_insertOrUpdatePositionWithDic:(NSArray *)positionDics
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([positionDics count] < 1) return;
+    
+    [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [_xmppOrganizationStorage insertOrUpdatePositionInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                               @"ptId":@"id",
+                                                                                                                               @"ptName":@"name",
+                                                                                                                               @"ptLeft":@"status",
+                                                                                                                               @"ptRight":@"start_time",
+                                                                                                                               @"dpId":@"end_time",
+                                                                                                                               @"dpName":@"start_time",
+                                                                                                                               @"orgId":@"start_time"
+                                                                                                                               }]
+                                                      xmppStream:xmppStream];
+        
+    }];
+}
+
+- (void)_insertOrUpdateRelationWithDic:(NSArray *)relationDics
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([relationDics count] < 1) return;
+    
+    [relationDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [_xmppOrganizationStorage insertOrUpdateRelationInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                               @"ptId":@"id",
+                                                                                                                               @"ptName":@"name",
+                                                                                                                               @"ptLeft":@"status",
+                                                                                                                               @"ptRight":@"start_time",
+                                                                                                                               @"dpId":@"end_time",
+                                                                                                                               @"dpName":@"start_time",
+                                                                                                                               @"orgId":@"start_time"
+                                                                                                                               }]
+                                                      xmppStream:xmppStream];
+        
+    }];
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -664,38 +729,60 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 }
 
 #pragma mark - 获取一个组织的所有成员信息
-- (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
-{
-    
-}
-- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
-{
-
-}
-
-#pragma mark - 获取一个组织的所有关键组织的id
-- (void)requestServerAllRelationListWithOrgId:(NSString *)orgId
-{
-
-}
-- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
-{
-
-}
-
-
-- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId completionBlock:(CompletionBlock)completionBlock
+- (void)requestServerAllUserListWithOrgId:(NSString *)orgId
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
-            // If the templateId is nil，we should notice the user the info
-            if (!templateId) {
-                [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
-            }
             
-            // fetch data from database
+            // 1. Create a key for storaging completion block
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_USER_LIST_KEY];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project"  type="list_member">
+             {"project":"60", "project_target":"61"}
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"list_member"}
+                                                                       stringValue:[tempDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            NSLog(@"you can not send this iq before logining");
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerAllUserListWithOrgId:(NSString *)orgId
+                           completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
             
             // 0. Create a key for storaging completion block
@@ -706,28 +793,26 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             
             // 2. Listing the request iq XML
             /*
-             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
-             <project xmlns="aft.project" type="get_structure">
-             {"template":"xxx"}
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project"  type="list_member">
+             {"project":"60", "project_target":"61"}
              </project>
              </iq>
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:templateId
-                                                                    forKey:@"template"];
+            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"get_structure"}
-                                                                       stringValue:[templateDic JSONString]];
+                                                                         attribute:@{@"type":@"list_member"}
+                                                                       stringValue:[tempDic JSONString]];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
                                                              to:nil
                                                            type:@"get"
                                                              id:requestKey
                                                    childElement:organizationElement];
-            
             
             // 4. Send the request iq element to the server
             [[self xmppStream] sendElement:iqElement];
@@ -745,7 +830,153 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         block();
     else
         dispatch_async(moduleQueue, block);
+
 }
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+                      completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *users = [_xmppOrganizationStorage orgUserListWithId:orgId xmppStream:xmppStream];
+        
+        ([users count] > 1) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
+                                                                                     completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+#pragma mark - 获取一个组织的所有关键组织的id
+- (void)requestServerAllRelationListWithOrgId:(NSString *)orgId
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 1. Create a key for storaging completion block
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project"  type="list_link_project">
+             {"project":"60"}
+             </project>
+             </iq>
+             
+             */
+            
+            // 3. Create the request iq
+            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"list_link_project"}
+                                                                       stringValue:[tempDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            NSLog(@"you can not send this iq before logining");
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerAllRelationListWithOrgId:(NSString *)orgId
+                               completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project"  type="list_link_project">
+             {"project":"60"}
+             </project>
+             </iq>
+             
+             */
+            
+            // 3. Create the request iq
+            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"list_link_project"}
+                                                                       stringValue:[tempDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+    
+}
+- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *relations = [_xmppOrganizationStorage orgRelationListWithId:orgId xmppStream:xmppStream];
+        
+        ([relations count] > 1) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
+                                                                                                 completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+#pragma <#arguments#>
+
 - (void)checkOrganizationName:(NSString *)name completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -1206,63 +1437,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 
     
 }
--(void)allMemberList:(NSString *)projectID completionBlock:(CompletionBlock)completionBlock
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project"  type="list_member">
-             {"project":"60", "project_target":"61"}
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:projectID,
-                                      @"project", nil];
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"list_member"}
-                                                                       stringValue:[tempDic JSONString]];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-    
 
-    
-}
 -(void)allLinkProjectList:(NSString *)projectID completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -2256,11 +2431,10 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"list_member"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-             
-                    
-                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
@@ -2293,9 +2467,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"list_link_project"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     

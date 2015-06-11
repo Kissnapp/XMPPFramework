@@ -14,10 +14,13 @@
 @interface XMPPOrgRelationObject : XMPPManagedObject 
 
 @property (nonatomic, retain) NSString * relationOrgId;
+@property (nonatomic, retain) NSString * relationOrgName;
 @property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
-+ (id)fetchOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic;
++ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic;
+
+- (void)updateWithDic:(NSDictionary *)dic;
 
 @end

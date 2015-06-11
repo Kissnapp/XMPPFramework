@@ -12,6 +12,7 @@
 @implementation XMPPOrgRelationObject
 
 @dynamic relationOrgId;
+@dynamic relationOrgName;
 @dynamic relationOrgShip;
 
 
@@ -38,6 +39,22 @@
     [self setPrimitiveValue:value forKey:@"relationOrgId"];
     [self didChangeValueForKey:@"relationOrgId"];
 }
+
+- (NSString *)relationOrgName
+{
+    [self willAccessValueForKey:@"relationOrgName"];
+    NSString *value = [self primitiveValueForKey:@"relationOrgName"];
+    [self didAccessValueForKey:@"relationOrgName"];
+    
+    return value;
+}
+
+- (void)setRelationOrgName:(NSString *)value
+{
+    [self willChangeValueForKey:@"relationOrgName"];
+    [self setPrimitiveValue:value forKey:@"relationOrgName"];
+    [self didChangeValueForKey:@"relationOrgName"];
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSManagedObject
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +78,9 @@
     if (orgId == nil) return nil;
     if (moc == nil) return nil;
     
-    NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([self class])
+    NSString *entityName = NSStringFromClass([XMPPOrgRelationObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                               inManagedObjectContext:moc];
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@", @"relationOrgId", orgId];
@@ -77,33 +96,51 @@
     return (XMPPOrgRelationObject *)[results lastObject];
 }
 
-+ (id)fetchOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId
++ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic
 {
-    if (orgId == nil) return nil;
+    if (dic == nil) return nil;
     if (moc == nil) return nil;
+    
+    NSString *orgId = [dic objectForKey:@"relationOrgId"];
+    
+    if (orgId == nil) return nil;
     
     XMPPOrgRelationObject *object = [XMPPOrgRelationObject objectInManagedObjectContext:moc
                                                                               withOrgId:orgId];
     
-    if (!object) {
+    if (object == nil) {
         
-        object = [XMPPOrgRelationObject insertInManagedObjectContext:moc
-                                                           withOrgId:orgId];
+        object = [XMPPOrgRelationObject insertOrUpdateInManagedObjectContext:moc
+                                                                     withDic:dic];
+    }else{
+        
+        [object updateWithDic:dic];
     }
     
     return object;
 }
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic
 {
-    if (orgId == nil) return nil;
+    if (dic == nil) return nil;
     if (moc == nil) return nil;
     
-    XMPPOrgRelationObject *object = [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass([self class])
+    NSString *entityName = NSStringFromClass([XMPPOrgRelationObject class]);
+    
+    XMPPOrgRelationObject *object = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                                   inManagedObjectContext:moc];
-    object.relationOrgId = orgId;
+    [object updateWithDic:dic];
     
     return object;
+}
+
+- (void)updateWithDic:(NSDictionary *)dic
+{
+    NSString *tempOrgId = [dic objectForKey:@"relationOrgId"];
+    NSString *tempOrgName = [dic objectForKey:@"relationOrgName"];
+    
+    if (tempOrgId) self.relationOrgId = tempOrgId;
+    if (tempOrgName) self.relationOrgName = tempOrgName;
 }
 
 @end

@@ -141,7 +141,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (BOOL)configureWithParent:(XMPPOrg *)aParent queue:(dispatch_queue_t)queue;
 
 @optional
-
+- (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
 - (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
@@ -154,5 +154,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                         userBlock:(void (^)(NSString *orgId))userBlock
                     positionBlock:(void (^)(NSString *orgId))positionBlock
                     relationBlock:(void (^)(NSString *orgId))relationBlock;
+
+- (void)insertOrUpdateUserInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdatePositionInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdateRelationInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
 @end
