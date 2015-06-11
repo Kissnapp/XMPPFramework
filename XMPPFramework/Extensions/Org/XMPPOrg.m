@@ -1985,7 +1985,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  </iq>
                  */
                 
-                id  data = [[project stringValue] objectFromJSONString];
+                id  data = [project stringValue] ;
                 
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
