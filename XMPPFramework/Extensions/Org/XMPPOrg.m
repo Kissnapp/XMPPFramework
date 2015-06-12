@@ -2063,7 +2063,6 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 [self _insertOrUpateOrgWithDics:orgDics];
 
-
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
@@ -2113,8 +2112,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 0.跟新数据库
                 NSArray *orgDics = [[project stringValue] objectFromJSONString];
 
-                [self _insertOrUpateOrgWithDics:orgDics];
 
+                [self _insertOrUpateOrgWithDics:orgDics];
 
                 
                 // 1.判断是否向逻辑层返回block
