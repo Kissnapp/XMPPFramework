@@ -175,7 +175,7 @@
     if (streamBareJidStr == nil)
         predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"userId", userId, @"orgId", orgId];
     else
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND && %K == %@ AND %K == %@",
+        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@ AND %K == %@",
                      @"userId", userId, @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];

@@ -48,6 +48,11 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 @property (nonatomic, retain) NSString * relationShipTag;
 @property (nonatomic, retain) NSSet *orgRelationShip;
 
++ (id)relationShipObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                                     withOrgId:(NSString *)orgId
+                                    relationId:(NSString *)relationId
+                              streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                          withOrgId:(NSString *)orgId
                   streamBareJidStr:(NSString *)streamBareJidStr;

@@ -149,8 +149,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
-- (id)orgUserListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
-- (id)orgRelationListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)orgRelationsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
                        xmppStream:(XMPPStream *)stream
@@ -158,8 +159,13 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                     positionBlock:(void (^)(NSString *orgId))positionBlock
                     relationBlock:(void (^)(NSString *orgId))relationBlock;
 
-- (void)insertOrUpdateUserInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
-- (void)insertOrUpdatePositionInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
-- (void)insertOrUpdateRelationInDBWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+- (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+
+- (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdatePositionInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+
+- (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
 @end

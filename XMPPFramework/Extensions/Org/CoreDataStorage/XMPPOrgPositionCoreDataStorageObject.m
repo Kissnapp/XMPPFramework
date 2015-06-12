@@ -194,7 +194,7 @@
     if (streamBareJidStr == nil)
         predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"ptId", ptId, @"orgId", orgId];
     else
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND && %K == %@ AND %K == %@",
+        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@ AND %K == %@",
                      @"ptId", ptId, @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -317,8 +317,8 @@
 {
     NSString *tempPtId = [dic objectForKey:@"ptId"];
     NSString *tempPtName = [dic objectForKey:@"ptName"];
-    NSNumber *tempPtLeft = [dic objectForKey:@"ptLeft"];
-    NSNumber *tempPtRight = [dic objectForKey:@"ptRight"];
+    NSNumber *tempPtLeft = [NSNumber numberWithInteger:[[dic objectForKey:@"ptLeft"] integerValue]];
+    NSNumber *tempPtRight = [NSNumber numberWithInteger:[[dic objectForKey:@"ptRight"] integerValue]];
     NSString *tempDpId = [dic objectForKey:@"dpId"];
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempDpName = [dic objectForKey:@"dpName"];

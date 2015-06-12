@@ -23,4 +23,7 @@
 
 - (void)updateWithDic:(NSDictionary *)dic;
 
+- (NSComparisonResult)compareByRelationId:(XMPPOrgRelationObject *)another;
+- (NSComparisonResult)compareByRelationId:(XMPPOrgRelationObject *)another options:(NSStringCompareOptions)mask;
+
 @end

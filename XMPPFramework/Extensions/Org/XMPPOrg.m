@@ -328,7 +328,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     }];
 }
 
-- (void)_insertOrUpdateUserWithDic:(NSArray *)userDics
+- (void)_insertOrUpdateUserWithDics:(NSArray *)userDics orgId:(NSString *)orgId
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -337,57 +337,64 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         [_xmppOrgStorage insertOrUpdateUserInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                           @"userId":@"id",
-                                                                                                                           @"userJidStr":@"name",
-                                                                                                                           @"orgId":@"status",
-                                                                                                                           @"ptId":@"start_time",
-                                                                                                                           @"ptName":@"end_time"
+                                                                                                                  @"userId":@"id",
+                                                                                                                  @"userJidStr":@"name",
+                                                                                                                  @"orgId":@"status",
+                                                                                                                  @"ptId":@"start_time",
+                                                                                                                  @"ptName":@"end_time"
+                                                                                                                  }]
+                                                  xmppStream:xmppStream];
+        
+    }];
+}
+
+- (void)_insertOrUpdatePositionWithDic:(NSArray *)positionDics orgId:(NSString *)orgId
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([positionDics count] < 1) return;
+    
+    // delete the old data
+    [_xmppOrgStorage clearPositionsWithOrgId:orgId xmppStream:xmppStream];
+    
+    [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        //{"id":"1", "name":"项目经理", "left":"1", "right":"20", "part":"领导班子"}
+        [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId
+                                                         dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                           @"ptId":@"id",
+                                                                                                                           @"ptName":@"name",
+                                                                                                                           @"ptLeft":@"left",
+                                                                                                                           @"ptRight":@"right",
+                                                                                                                           @"dpId":@"part_id",
+                                                                                                                           @"dpName":@"part",
+                                                                                                                           @"orgId":@"project_id"
                                                                                                                            }]
                                                   xmppStream:xmppStream];
         
     }];
 }
 
-- (void)_insertOrUpdatePositionWithDic:(NSArray *)positionDics
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    if ([positionDics count] < 1) return;
-    
-    [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
-        [_xmppOrgStorage insertOrUpdatePositionInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                               @"ptId":@"id",
-                                                                                                                               @"ptName":@"name",
-                                                                                                                               @"ptLeft":@"status",
-                                                                                                                               @"ptRight":@"start_time",
-                                                                                                                               @"dpId":@"end_time",
-                                                                                                                               @"dpName":@"start_time",
-                                                                                                                               @"orgId":@"start_time"
-                                                                                                                               }]
-                                                      xmppStream:xmppStream];
-        
-    }];
-}
-
-- (void)_insertOrUpdateRelationWithDic:(NSArray *)relationDics
+- (void)_insertOrUpdateRelationWithDic:(NSArray *)relationDics orgId:(NSString *)orgId
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
     if ([relationDics count] < 1) return;
     
+    [_xmppOrgStorage clearRelationsWithOrgId:orgId xmppStream:xmppStream];
+    
     [relationDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrgStorage insertOrUpdateRelationInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                               @"ptId":@"id",
-                                                                                                                               @"ptName":@"name",
-                                                                                                                               @"ptLeft":@"status",
-                                                                                                                               @"ptRight":@"start_time",
-                                                                                                                               @"dpId":@"end_time",
-                                                                                                                               @"dpName":@"start_time",
-                                                                                                                               @"orgId":@"start_time"
-                                                                                                                               }]
-                                                      xmppStream:xmppStream];
+        [_xmppOrgStorage insertOrUpdateRelationInDBWithOrgId:orgId
+                                                         dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                           @"ptId":@"id",
+                                                                                                                           @"ptName":@"name",
+                                                                                                                           @"ptLeft":@"status",
+                                                                                                                           @"ptRight":@"start_time",
+                                                                                                                           @"dpId":@"end_time",
+                                                                                                                           @"dpName":@"start_time",
+                                                                                                                           @"orgId":@"start_time"
+                                                                                                                           }]
+                                                  xmppStream:xmppStream];
         
     }];
 }
@@ -861,7 +868,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *users = [_xmppOrgStorage orgUserListWithId:orgId xmppStream:xmppStream];
+        NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
         
         ([users count] > 1) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
                                                                                      completionBlock:completionBlock];
@@ -986,7 +993,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *relations = [_xmppOrgStorage orgRelationListWithId:orgId xmppStream:xmppStream];
+        NSArray *relations = [_xmppOrgStorage orgRelationsWithOrgId:orgId xmppStream:xmppStream];
         
         ([relations count] > 1) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
                                                                                                  completionBlock:completionBlock];
@@ -1979,6 +1986,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             NSString *projectType = [project attributeStringValueForName:@"type"];
             
             if([projectType isEqualToString:@"get_structure"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     /*
@@ -2004,20 +2012,23 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 /*
                  <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/IOS" id="5244001" type="result">
                     <project xmlns="aft.project" type="get_structure">
-                        [{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}, {...}]
+                    {"project":"41","structure":[{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}, {...}]}
                     </project>
                  </iq>
                  */
                 
                 // 0.跟新数据库
-                NSArray  *positions = [[project stringValue] objectFromJSONString];
-        
+                id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                NSArray *positions = [data objectForKey:@"structure"];
+                
+                [self _insertOrUpdatePositionWithDic:positions orgId:orgId];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_POSITION_LIST_KEY]]) {
                     
                     // 2.向数据库获取数据
-                    NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:@"1234" xmppStream:xmppStream];
+                    NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:orgId xmppStream:xmppStream];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
@@ -2031,6 +2042,112 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 }
                 
                 return YES;
+                
+            }else if([projectType isEqualToString:@"list_member"]){
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project"  type="list_member">
+                 {"project_id_value":[{"jid":"xxx", "job_id":"xxx", "job_name":"xxx", "part":"1"}, {} ]}
+                 </projec
+                 </iq>
+                 */
+               
+                
+                // 0.跟新数据库
+                id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                NSArray *users = [data objectForKey:@"structure"];
+                
+                [self _insertOrUpdateUserWithDics:users orgId:orgId];
+                
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_USER_LIST_KEY]]) {
+                    
+                    // 2.向数据库获取数据
+                    NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    // 3.用block返回数据
+                    if (completionBlock) {
+                        
+                        completionBlock(users, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                }
+                
+                return YES;
+                
+                
+            }else if([projectType isEqualToString:@"list_link_project"]){
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project"  type="list_link_projeck">
+                 {"self_project_id":[ [{"id":"xxx", "name":"xxx"}, {}] }
+                 </project>
+                 </iq>
+                 */
+                
+                // 0.跟新数据库
+                id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"self_project"];
+                NSArray *relations = [data objectForKey:@"link_project"];
+                
+                [self _insertOrUpdateRelationWithDic:relations orgId:orgId];
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY]]) {
+                    
+                    // 2.向数据库获取数据
+                    NSArray *relations = [_xmppOrgStorage orgRelationsWithOrgId:orgId xmppStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    // 3.用block返回数据
+                    if (completionBlock) {
+                        
+                        completionBlock(relations, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                }
+                
+                return YES;
+                
                 
             }else if([projectType isEqualToString:@"list_project"]){
                 
@@ -2451,78 +2568,6 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="list_member_and_link">
                  {"project_id_value":[ [{"id":"xxx", "name":"xxx"}, {}], [{"jid":"xxx", "job_id":"xxx", "job_name":"xxx", "part":"1"}, {} ] ]}
-                 </project>
-                 </iq>
-                 */
-                
-                id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
-                
-                return YES;
-                
-                
-            }else if([projectType isEqualToString:@"list_member"]){
-                
-                if ([[iq type] isEqualToString:@"error"]) {
-                    
-                     NSXMLElement *errorElement = [iq elementForName:@"error"];
-                    
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
-                    
-                    return YES;
-                }
-                
-                /*
-                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="list_member">
-                 {"project_id_value":[{"jid":"xxx", "job_id":"xxx", "job_name":"xxx", "part":"1"}, {} ]}
-                 </projec
-                 </iq>
-                 */
-                
-                id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
-                
-                return YES;
-                
-                
-            }else if([projectType isEqualToString:@"list_link_project"]){
-                
-                if ([[iq type] isEqualToString:@"error"]) {
-                    
-                    NSXMLElement *errorElement = [iq elementForName:@"error"];
-                    
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
-                    
-                    return YES;
-                }
-                
-                /*
-                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="list_link_projeck">
-                 {"self_project_id":[ [{"id":"xxx", "name":"xxx"}, {}] }
                  </project>
                  </iq>
                  */

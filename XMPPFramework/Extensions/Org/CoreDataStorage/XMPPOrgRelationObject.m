@@ -143,4 +143,17 @@
     if (tempOrgName) self.relationOrgName = tempOrgName;
 }
 
+- (NSComparisonResult)compareByRelationId:(XMPPOrgRelationObject *)another
+{
+    return [self compareByRelationId:another options:0];
+}
+
+- (NSComparisonResult)compareByRelationId:(XMPPOrgRelationObject *)another options:(NSStringCompareOptions)mask
+{
+    NSString *selfRelationId = [self relationOrgId];
+    NSString *otherRelationId = [another relationOrgId];
+    
+    return [selfRelationId compare:otherRelationId options:mask];
+}
+
 @end

@@ -192,6 +192,50 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allOrgs;
 }
 
+- (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgPositionCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",streamBareJidStr,orgId];
+            [fetchRequest setPredicate:predicate];
+            
+        }
+        
+        NSArray *allUnusedPositions = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPOrgPositionCoreDataStorageObject *position in allUnusedPositions) {
+            
+            [moc deleteObject:position];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        
+    }];
+}
+
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block NSArray *allPositions = nil;
@@ -402,9 +446,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
             if (![orgObject.relationShipTag isEqualToString:orgRelationShipTag])
                 if (relationBlock) relationBlock(orgId);
             
-            [XMPPOrgCoreDataStorageObject updateInManagedObjectContext:moc
-                                                               withDic:dic
-                                                      streamBareJidStr:streamBareJidStr];
+            [orgObject updateWithDic:dic];
             
         }
     
@@ -412,162 +454,138 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 
 }
 
-
-
-- (NSArray*)allPorjectListWithbareJid:(NSString*)bareJidStr stream:(XMPPStream*)xmppStream
+- (void)insertOrUpdatePositionInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
 {
-    
-   __block NSArray *allProject = nil;
-  [self executeBlock:^{
-     
-      
-      NSManagedObjectContext *moc = [self managedObjectContext];
-      NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
-      
-      NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
-      
-      NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
-                                                inManagedObjectContext:moc];
-      
-      NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-      [fetchRequest setEntity:entity];
-      [fetchRequest setFetchBatchSize:saveThreshold];
-      
-      if (xmppStream){
-          NSPredicate *predicate;
-          //!!!!:Notice:This method should not read the voice message
-          predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",
-                       streamBareJidStr];
-          
-          [fetchRequest setPredicate:predicate];
-      }
-      
-      allProject = [moc executeFetchRequest:fetchRequest error:nil];
-      
-     
-  }];
-    
-    return allProject;
-
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        
+        NSString *ptId = [dic objectForKey:@"ptId"];
+        
+        // find the give object info is whether existed
+        XMPPOrgPositionCoreDataStorageObject *position = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                   withPtId:ptId
+                                                                                                                      orgId:orgId
+                                                                                                           streamBareJidStr:streamBareJidStr];
+        
+        if (position == nil) {
+            
+            position = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                                  withDic:dic
+                                                                         streamBareJidStr:streamBareJidStr];
+            
+        }else{
+            
+            [position updateWithDic:dic];
+        }
+        
+        position.orgId = orgId;
+        
+    }];
 }
-- (NSArray *)userListForOrgWithBareJidStr:(NSString *)orgId xmppStream:(XMPPStream *)stream
+
+- (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
 {
-    XMPPLogTrace();
-    
-    __block NSArray *results = nil;
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        // find the give object info is whether existed
+        
+        XMPPOrgCoreDataStorageObject *org = [ XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                              withOrgId:orgId
+                                                                                       streamBareJidStr:streamBareJidStr];
+        
+        if (org) {
+            
+            XMPPOrgRelationObject *relation = [XMPPOrgRelationObject insertInManagedObjectContext:moc withDic:dic];
+            
+            [org addOrgRelationShipObject:relation];
+        }
+        
+    }];
+}
+
+- (id)orgRelationsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allRelations = nil;
     
     [self executeBlock:^{
         
-        NSManagedObjectContext *moc = [self managedObjectContext];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgUserCoreDataStorageObject"
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
-        [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
+                                      streamBareJidStr, @"orgId", orgId];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            NSArray *tempOrgs = [moc executeFetchRequest:fetchRequest error:nil];
+            
+            allRelations = [[(XMPPOrgCoreDataStorageObject *)[tempOrgs lastObject] orgRelationShip] allObjects];
+        }
+    }];
+    
+    return allRelations;
+}
+
+- (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
         
         if (stream){
-            NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"orgId == %@ && streamBareJidStr == %@",orgId,
-                         [[self myJIDForXMPPStream:stream] bare]];
             
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",streamBareJidStr,orgId];
             [fetchRequest setPredicate:predicate];
         }
         
-        results = [moc executeFetchRequest:fetchRequest error:nil];
+        NSArray *tempOrgs = [moc executeFetchRequest:fetchRequest error:nil];
         
-    }];
-    
-    return results;
-    
-}
-- (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
-{
-    __block XMPPOrgPositionCoreDataStorageObject *result = nil;
-    
-    [self executeBlock:^{
+        NSArray *allRelations = [[(XMPPOrgCoreDataStorageObject *)[tempOrgs lastObject] orgRelationShip] allObjects];
         
-        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
         
-        result = [XMPPChatRoomUserCoreDataStorageObject fetchObjectInManagedObjectContext:moc
-                                                                           withBareJidStr:bareJidStr
-                                                                              chatRoomJid:bareChatRoomJidStr
-                                                                         streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
-        
-    }];
-    
-    return result;
-}
-
--(id)orgPositionForOrg:(NSString*)streamBareJidStr withPtID:(NSString*)ptID orgID:(NSString*)orgID xmppStream:(XMPPStream *)stream
-{
-    __block XMPPOrgPositionCoreDataStorageObject *result = nil;
-    
-    [self executeBlock:^{
-        
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        
-        result = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc withPtId:ptID orgId:orgID streamBareJidStr: streamBareJidStr];
-        
-        
-    }];
-    
-    return result;
-}
-
-- (BOOL)isAdminForOrgnizationJidStr:(NSString *)bareOrgJidStr xmppStream:(XMPPStream *)stream
-{
-    XMPPLogTrace();
-    
-    __block BOOL result = NO;
-    
-    [self executeBlock:^{
-        
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        XMPPOrgCoreDataStorageObject *org = [self orgForID:bareOrgJidStr
-                                                               xmppStream:stream
-                                                     managedObjectContext:moc];
-        //if the chat room obejct is exsited
-        //We compare self jid is whether equal to the master bare jid string
-        if (org) {
-            result = ([org.orgAdminJidStr isEqualToString:[[stream myJID] bare]]);
+        for (XMPPOrgRelationObject *relation in allRelations) {
+            
+            [moc deleteObject:relation];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
         }
+        
     }];
-    
-    return result;
 }
-
-- (XMPPOrgCoreDataStorageObject *)orgForID:(NSString *)id  xmppStream:(XMPPStream *)stream
-                                managedObjectContext:(NSManagedObjectContext *)moc
-{
-    // This is a public method, so it may be invoked on any thread/queue.
-    
-    XMPPLogTrace();
-    
-    if (id == nil) return nil;
-    if (moc == nil) return nil;
-    
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgCoreDataStorageObject"
-                                              inManagedObjectContext:moc];
-    
-    NSPredicate *predicate;
-    if (stream == nil)
-        predicate = [NSPredicate predicateWithFormat:@"orgAdminJidStr == %@", id];
-    else
-        predicate = [NSPredicate predicateWithFormat:@"orgAdminJidStr == %@ AND streamBareJidStr == %@",
-                     id, [[self myJIDForXMPPStream:stream] bare]];
-    
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    [fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:predicate];
-    [fetchRequest setIncludesPendingChanges:YES];
-    [fetchRequest setFetchLimit:1];
-    
-    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-    
-    return (XMPPOrgCoreDataStorageObject *)[results lastObject];
-}
-
 
 @end

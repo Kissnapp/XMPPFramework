@@ -268,6 +268,28 @@
     return (XMPPOrgCoreDataStorageObject *)[results lastObject];
 }
 
++ (id)relationShipObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                                     withOrgId:(NSString *)orgId
+                                    relationId:(NSString *)relationId
+                              streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (orgId == nil) return nil;
+    if (orgId == nil) return nil;
+    if (moc == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                         withOrgId:orgId
+                                                                                  streamBareJidStr:streamBareJidStr];
+    for (XMPPOrgRelationObject *relation in org.orgRelationShip) {
+        if ([relation.relationOrgId isEqualToString:relationId]) {
+            return relation;
+        }
+    }
+    
+    return nil;
+}
+
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withDic:(NSDictionary *)dic
                   streamBareJidStr:(NSString *)streamBareJidStr
