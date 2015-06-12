@@ -15,10 +15,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @interface XMPPOrg : XMPPModule
 {
-    __strong id <XMPPOrgStorage> _xmppOrganizationStorage;
+    __strong id <XMPPOrgStorage> _xmppOrgStorage;
 }
 
-@property (strong, readonly) id <XMPPOrgStorage> xmppOrganizationStorage;
+@property (strong, readonly) id <XMPPOrgStorage> xmppOrgStorage;
 
 @property (assign) BOOL autoFetchOrgList;
 @property (assign) BOOL autoFetchOrgTemplateList;
@@ -146,7 +146,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
-- (id)orgPositionListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgUserListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)orgRelationListWithId:(NSString *)orgId xmppStream:(XMPPStream *)stream;

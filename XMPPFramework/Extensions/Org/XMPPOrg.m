@@ -44,7 +44,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 @end
 
 @implementation XMPPOrg
-@synthesize xmppOrganizationStorage = _xmppOrganizationStorage;
+@synthesize xmppOrgStorage = _xmppOrgStorage;
 @synthesize requestBlockDcitionary;
 @synthesize canSendRequest;
 @synthesize autoFetchOrgList;
@@ -72,7 +72,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     if ((self = [super initWithDispatchQueue:queue])){
         if ([storage configureWithParent:self queue:moduleQueue]){
-            _xmppOrganizationStorage = storage;
+            _xmppOrgStorage = storage;
         }else{
             XMPPLogError(@"%@: %@ - Unable to configure storage!", THIS_FILE, THIS_METHOD);
         }
@@ -248,11 +248,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 #pragma mark Configuration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id <XMPPOrgStorage>)xmppOrganizationStorage
+- (id <XMPPOrgStorage>)xmppOrgStorage
 {
     // Note: The xmppRosterStorage variable is read-only (set in the init method)
     
-    return _xmppOrganizationStorage;
+    return _xmppOrgStorage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     return array;
 }
 
-- (void)_insertOrUpateOrgWithDic:(NSArray *)orgDics
+- (void)_insertOrUpateOrgWithDics:(NSArray *)orgDics
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -289,11 +289,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     NSArray *orgIds = [self _specifiedValuesWithKey:@"id" fromDics:orgDics];
     
-    [_xmppOrganizationStorage clearUnusedOrgWithOrgIds:orgIds xmppStream:xmppStream];
+    [_xmppOrgStorage clearUnusedOrgWithOrgIds:orgIds xmppStream:xmppStream];
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+        [_xmppOrgStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                           @"orgId":@"id",
                                                                                                                           @"orgName":@"name",
                                                                                                                           @"orgState":@"status",
@@ -336,7 +336,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdateUserInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+        [_xmppOrgStorage insertOrUpdateUserInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                            @"userId":@"id",
                                                                                                                            @"userJidStr":@"name",
                                                                                                                            @"orgId":@"status",
@@ -356,7 +356,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdatePositionInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+        [_xmppOrgStorage insertOrUpdatePositionInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                                @"ptId":@"id",
                                                                                                                                @"ptName":@"name",
                                                                                                                                @"ptLeft":@"status",
@@ -378,7 +378,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     [relationDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrganizationStorage insertOrUpdateRelationInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+        [_xmppOrgStorage insertOrUpdateRelationInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                                @"ptId":@"id",
                                                                                                                                @"ptName":@"name",
                                                                                                                                @"ptLeft":@"status",
@@ -448,7 +448,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *orgs = [_xmppOrganizationStorage allOrgsWithXMPPStream:xmppStream];
+        NSArray *orgs = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
         
         ([orgs count] > 1) ? completionBlock(orgs, nil) : [self _requestServerAllOrgListWithBlock:completionBlock];
         
@@ -606,7 +606,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+        NSArray *templates = [_xmppOrgStorage allOrgTemplatesWithXMPPStream:xmppStream];
         
         ([templates count] > 1) ? completionBlock(templates, nil) : [self _requestServerAllTemplatesWithBlock:completionBlock];
         
@@ -739,7 +739,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *positions = [_xmppOrganizationStorage orgPositionListWithId:orgId xmppStream:xmppStream];
+        NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:orgId xmppStream:xmppStream];
         
         ([positions count] > 1) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
                                                                                                  completionBlock:completionBlock];
@@ -861,7 +861,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *users = [_xmppOrganizationStorage orgUserListWithId:orgId xmppStream:xmppStream];
+        NSArray *users = [_xmppOrgStorage orgUserListWithId:orgId xmppStream:xmppStream];
         
         ([users count] > 1) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
                                                                                      completionBlock:completionBlock];
@@ -986,7 +986,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *relations = [_xmppOrganizationStorage orgRelationListWithId:orgId xmppStream:xmppStream];
+        NSArray *relations = [_xmppOrgStorage orgRelationListWithId:orgId xmppStream:xmppStream];
         
         ([relations count] > 1) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
                                                                                                  completionBlock:completionBlock];
@@ -2009,14 +2009,25 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  </iq>
                  */
                 
-                id  data = [project stringValue] ;
+                // 0.跟新数据库
+                NSArray  *positions = [[project stringValue] objectFromJSONString];
+        
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-    
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_POSITION_LIST_KEY]]) {
+                    
+                    // 2.向数据库获取数据
+                    NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:@"1234" xmppStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    // 3.用block返回数据
+                    if (completionBlock) {
+                        
+                        completionBlock(positions, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
                 }
                 
                 return YES;
@@ -2050,13 +2061,13 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 0.跟新数据库
                 NSArray *orgDics = [[project stringValue] objectFromJSONString];
                 
-                [self _insertOrUpdateOrgWithDic:orgDics];
+                [self _insertOrUpateOrgWithDics:orgDics];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
                     // 2.向数据库获取数据
-                    NSArray *templates = [_xmppOrganizationStorage allOrgsWithXMPPStream:xmppStream];
+                    NSArray *templates = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
@@ -2100,13 +2111,13 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 0.跟新数据库
                 NSArray *orgDics = [[project stringValue] objectFromJSONString];
         
-                [self _insertOrUpdateOrgWithDic:orgDics];
+                [self _insertOrUpateOrgWithDics:orgDics];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
                     // 2.向数据库获取数据
-                    NSArray *templates = [_xmppOrganizationStorage allOrgTemplatesWithXMPPStream:xmppStream];
+                    NSArray *templates = [_xmppOrgStorage allOrgTemplatesWithXMPPStream:xmppStream];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
