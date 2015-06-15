@@ -1094,12 +1094,12 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"get_structure"}
+                                                                         attribute:@{@"type":@"create"}
                                                                        stringValue:[templateDic JSONString]];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
                                                              to:nil
-                                                           type:@"get"
+                                                           type:@"set"
                                                              id:requestKey
                                                    childElement:organizationElement];
             
