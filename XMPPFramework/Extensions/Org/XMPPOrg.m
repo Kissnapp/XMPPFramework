@@ -1253,7 +1253,27 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 
 }
-- (void)getPossiblePosition:(NSString *)ID completionBlock:(CompletionBlock)completionBlock
+- (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
+                                   orgId:(NSString *)orgId
+                         completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSArray *positions = [_xmppOrgStorage subPositionsWithPtId:ptId
+                                                             orgId:orgId
+                                                        xmppStream:xmppStream];
+        
+        completionBlock(positions, nil);
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)requestServerAllSubPositionsWithOrgId:(NSString *)orgId
+                              completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1277,7 +1297,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:ID
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
                                                                     forKey:@"project"];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
@@ -1310,7 +1330,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 
 }
--(void)addCustomJob:(NSString *)ID parentId:(NSString *)parentId name:(NSString *)jobName part:(NSString *)part completionBlock:(CompletionBlock)completionBlock
+- (void)createPositionWithOrgId:(NSString *)orgId
+                     parentPtId:(NSString *)parentPtId
+                         ptName:(NSString *)ptName
+                         dpName:(NSString *)dpName
+                completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1335,8 +1359,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             
             // 3. Create the request iq
             
-            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:
-                                     ID, @"project",parentId,@"parent_job_id",jobName,@"job_name",part,@"part", nil];
+            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project",parentPtId,@"parent_job_id",ptName,@"job_name",dpName,@"part", nil];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -2416,8 +2439,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"finish"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2448,11 +2471,15 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                // TODO:修改结束时间
+                XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
+                
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
                     
-                    completionBlock(data, nil);
+                    completionBlock(org, nil);
                     [requestBlockDcitionary removeObjectForKey:requestkey];
                 }
                 
@@ -2460,9 +2487,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"list_children_jobs"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2497,9 +2523,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
             }else if([projectType isEqualToString:@"add_job"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-                    
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
@@ -2516,20 +2541,23 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="add_job">
-                 { "project":"60", "parent_job_id":"277", "job_name":"安装主任2", "part":"领导班子"}
+                 {
+                    "project":"12345",
+                    "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}
+                 }
                  </project>
                  </iq>
                  
-                 %% modify update project job_timestamp.
+        
                  
                  push msg:（客户端接收到这个消息后，需要重新去服务器拉组织架构，并重新获取project的job_tag)
                  <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
                  <sys xmlns="aft.sys.project" projectid="60" type="add_job">
-                 {"job_tag":"xxx"} %% add modify
+                 {"job_tag":"xxx"}
                  </sys>
                  </message>
                  */
-                
+                //TODO:网数据库增加数据，重新读取并返回给外界
                 id  data = [[project stringValue] objectFromJSONString];
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 

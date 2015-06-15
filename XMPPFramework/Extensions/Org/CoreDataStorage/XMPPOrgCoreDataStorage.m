@@ -720,4 +720,70 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     
     return allRelations;
 }
+
+- (id)endOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block id org = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        // find the give object info is whether existed
+        
+        XMPPOrgCoreDataStorageObject *_org = [ XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                              withOrgId:orgId
+                                                                                       streamBareJidStr:streamBareJidStr];
+        
+        if (_org) {
+            
+            _org.orgState = @(XMPPOrgCoreDataStorageObjectStateEnd);
+            org = _org;
+        }
+        
+    }];
+    
+    return org;
+}
+
+- (id)subPositionsWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *subPositions = nil;
+    
+    [self executeBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgPositionCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        XMPPOrgPositionCoreDataStorageObject *superPosition = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                        withPtId:ptId
+                                                                                                                           orgId:orgId
+                                                                                                                streamBareJidStr:streamBareJidStr];
+        NSNumber *superLeft = superPosition.ptLeft;
+        NSNumber *superRight = superPosition.ptRight;
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@ AND ptLeft > %@ AND ptRight < %@",streamBareJidStr,orgId,superLeft,superRight];
+            [fetchRequest setPredicate:predicate];
+            
+        }
+        
+        subPositions = [moc executeFetchRequest:fetchRequest error:nil];
+        
+    }];
+
+    return subPositions;
+}
+
 @end

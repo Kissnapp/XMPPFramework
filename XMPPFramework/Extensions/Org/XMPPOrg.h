@@ -64,9 +64,34 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)endOrgWithId:(NSString *)orgId
      completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 查询自己可以添加的职位（自己的子职位）列表
+- (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
+                                   orgId:(NSString *)orgId
+                         completionBlock:(CompletionBlock)completionBlock;
 
--(void)getPossiblePosition:(NSString*)ID
-        completionBlock:(CompletionBlock)completionBlock;
+- (void)requestServerAllSubPositionsWithOrgId:(NSString *)orgId
+                              completionBlock:(CompletionBlock)completionBlock;
+
+
+#pragma mark - 创建新的职位信息
+/**
+ *  创建新的职位信息
+ *
+ *  @param orgId           组织id
+ *  @param parentPtId      职位所属上级职位的id
+ *  @param ptName          职位名称
+ *  @param dpName          职位所属部门名称
+ *  @param completionBlock 返回结果block
+ */
+- (void)createPositionWithOrgId:(NSString *)orgId
+                     parentPtId:(NSString *)parentPtId
+                         ptName:(NSString *)ptName
+                         dpName:(NSString *)dpName
+                completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 为某个组织加人
+
+#pragma mark - 从某个组织删人
 
 -(void)addCustomJob:(NSString*)ID
            parentId:(NSString*)parentId
@@ -164,5 +189,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+
+- (id)endOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)subPositionsWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end
