@@ -334,16 +334,19 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     if ([userDics count] < 1) return;
     
+    [_xmppOrgStorage clearUsersWithOrgId:orgId xmppStream:xmppStream];
+    
     [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
-        [_xmppOrgStorage insertOrUpdateUserInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                  @"userId":@"id",
-                                                                                                                  @"userJidStr":@"name",
-                                                                                                                  @"orgId":@"status",
-                                                                                                                  @"ptId":@"start_time",
-                                                                                                                  @"ptName":@"end_time"
-                                                                                                                  }]
-                                                  xmppStream:xmppStream];
+        [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId
+                                                     dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                       @"userId":@"id",
+                                                                                                                       @"userJidStr":@"name",
+                                                                                                                       @"orgId":@"status",
+                                                                                                                       @"ptId":@"start_time",
+                                                                                                                       @"ptName":@"end_time"
+                                                                                                                       }]
+                                              xmppStream:xmppStream];
         
     }];
 }
@@ -2063,7 +2066,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="list_member">
-                 {"project_id_value":[{"jid":"xxx", "job_id":"xxx", "job_name":"xxx", "part":"1"}, {} ]}
+                 {"project":"xxx", "member":[{"jid":"xxx", "job_id":"xxx", "job_name":"xxx", "part":"1"}, {} ]}
                  </projec
                  </iq>
                  */
@@ -2072,7 +2075,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 0.跟新数据库
                 id  data = [[project stringValue] objectFromJSONString];
                 NSString *orgId = [data objectForKey:@"project"];
-                NSArray *users = [data objectForKey:@"structure"];
+                NSArray *users = [data objectForKey:@"member"];
                 
                 [self _insertOrUpdateUserWithDics:users orgId:orgId];
                 

@@ -236,6 +236,95 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgUserCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",streamBareJidStr,orgId];
+            [fetchRequest setPredicate:predicate];
+            
+        }
+        
+        NSArray *allUnusedUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPOrgUserCoreDataStorageObject *user in allUnusedUsers) {
+            
+            [moc deleteObject:user];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        
+    }];
+}
+
+- (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",streamBareJidStr,orgId];
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *tempOrgs = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        NSArray *allRelations = [[(XMPPOrgCoreDataStorageObject *)[tempOrgs lastObject] orgRelationShip] allObjects];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPOrgRelationObject *relation in allRelations) {
+            
+            [moc deleteObject:relation];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        
+    }];
+}
+
+
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block NSArray *allPositions = nil;
@@ -485,6 +574,24 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
     }];
 }
+- (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        // find the give object info is whether existed
+        XMPPOrgUserCoreDataStorageObject *user = [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                                                        withDic:dic
+                                                                                               streamBareJidStr:streamBareJidStr];
+        
+        [user updateWithDic:dic];
+        
+        user.orgId = orgId;
+        
+    }];
+}
 
 - (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream
 {
@@ -543,49 +650,4 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     
     return allRelations;
 }
-
-- (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
-{
-    XMPPLogTrace();
-    
-    [self scheduleBlock:^{
-        //Your code ...
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-        
-        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
-        
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
-                                                  inManagedObjectContext:moc];
-        
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        [fetchRequest setEntity:entity];
-        [fetchRequest setFetchBatchSize:1];
-        
-        if (stream){
-            
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",streamBareJidStr,orgId];
-            [fetchRequest setPredicate:predicate];
-        }
-        
-        NSArray *tempOrgs = [moc executeFetchRequest:fetchRequest error:nil];
-        
-        NSArray *allRelations = [[(XMPPOrgCoreDataStorageObject *)[tempOrgs lastObject] orgRelationShip] allObjects];
-        
-        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
-        
-        for (XMPPOrgRelationObject *relation in allRelations) {
-            
-            [moc deleteObject:relation];
-            
-            if (++unsavedCount >= saveThreshold){
-                
-                [self save];
-                unsavedCount = 0;
-            }
-        }
-        
-    }];
-}
-
 @end
