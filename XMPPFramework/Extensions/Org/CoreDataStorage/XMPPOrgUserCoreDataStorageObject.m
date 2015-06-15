@@ -13,8 +13,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 @implementation XMPPOrgUserCoreDataStorageObject
 
-@dynamic userId;
-@dynamic userJidStr;
 @dynamic orgId;
 @dynamic ptId;
 @dynamic streamBareJidStr;
@@ -32,21 +30,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public Parameters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (NSString *)userId
-{
-    [self willAccessValueForKey:@"userId"];
-    NSString *value = [self primitiveValueForKey:@"userId"];
-    [self didAccessValueForKey:@"userId"];
-    
-    return value;
-}
-
-- (void)setUserId:(NSString *)value
-{
-    [self willChangeValueForKey:@"userId"];
-    [self setPrimitiveValue:value forKey:@"userId"];
-    [self didChangeValueForKey:@"userId"];
-}
 
 - (NSString *)userJidStr
 {
@@ -295,13 +278,11 @@
 
 - (void)updateWithDic:(NSDictionary *)dic
 {
-    NSString *tempUserId = [dic objectForKey:@"userId"];
     NSString *tempUserJidStr = [dic objectForKey:@"userJidStr"];
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempPtId = [dic objectForKey:@"ptId"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
-    if (tempUserId) self.userId = tempUserId;
     if (tempUserJidStr) self.userJidStr = tempUserJidStr;
     if (tempOrgId) self.orgId = tempOrgId;
     if (tempPtId) self.ptId = tempPtId;

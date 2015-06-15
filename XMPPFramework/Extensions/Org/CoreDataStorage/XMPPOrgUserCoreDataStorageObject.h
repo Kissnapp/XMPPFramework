@@ -11,7 +11,6 @@
 
 @interface XMPPOrgUserCoreDataStorageObject : XMPPManagedObject
 
-@property (nonatomic, retain) NSString * userId;
 @property (nonatomic, retain) NSString * userJidStr;
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * ptId;

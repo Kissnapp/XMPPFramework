@@ -33,13 +33,12 @@
         <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ptId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="streamBareJidStr" attributeType="String" syncable="YES"/>
-        <attribute name="userId" attributeType="String" syncable="YES"/>
         <attribute name="userJidStr" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
         <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="225"/>
         <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="165"/>
         <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="90"/>
-        <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="120"/>
+        <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="105"/>
     </elements>
 </model>
