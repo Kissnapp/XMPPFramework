@@ -230,6 +230,38 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allOrgs;
 }
 
+- (id)orgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+{
+    __block id org = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (streamBareJidStr){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
+                                      streamBareJidStr, @"orgId", orgId];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            org = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        }
+    }];
+    
+    return org;
+}
+
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();

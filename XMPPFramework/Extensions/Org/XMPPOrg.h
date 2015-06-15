@@ -142,6 +142,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
+- (id)orgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
