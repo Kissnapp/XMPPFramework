@@ -27,6 +27,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
+static const NSString *ORG_PUSH_MSG_XMLNS = @"aft.sys.project";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
 static const NSInteger ORG_ERROR_CODE = 9999;
 
@@ -340,11 +341,10 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId
                                                      dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                       @"userId":@"id",
-                                                                                                                       @"userJidStr":@"name",
+                                                                                                                       @"userJidStr":@"jid",
                                                                                                                        @"orgId":@"status",
-                                                                                                                       @"ptId":@"start_time",
-                                                                                                                       @"ptName":@"end_time"
+                                                                                                                       @"ptId":@"job_id",
+                                                                                                                       @"ptName":@"job_name"
                                                                                                                        }]
                                               xmppStream:xmppStream];
         
@@ -389,13 +389,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         [_xmppOrgStorage insertOrUpdateRelationInDBWithOrgId:orgId
                                                          dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                           @"ptId":@"id",
-                                                                                                                           @"ptName":@"name",
-                                                                                                                           @"ptLeft":@"status",
-                                                                                                                           @"ptRight":@"start_time",
-                                                                                                                           @"dpId":@"end_time",
-                                                                                                                           @"dpName":@"start_time",
-                                                                                                                           @"orgId":@"start_time"
+                                                                                                                           @"relationOrgId":@"id",
+                                                                                                                           @"relationOrgName":@"name"
                                                                                                                            }]
                                                   xmppStream:xmppStream];
         
@@ -407,7 +402,32 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)clearAllOrgs
+{
+    dispatch_block_t block = ^{
+        [_xmppOrgStorage clearAllOrgWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)clearAllTemplates
+{
+    dispatch_block_t block = ^{
+        [_xmppOrgStorage clearAllTemplatesWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 #pragma mark - 获取所有项目
+
 // 数据库同服务器请求
 - (void)requestServerAllOrgList
 {
@@ -454,6 +474,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 }
 
 // 逻辑层向数据库请求
+
 - (void)requestDBAllOrgListWithBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -1009,9 +1030,9 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 }
 
-#pragma <#arguments#>
 
-- (void)checkOrganizationName:(NSString *)name completionBlock:(CompletionBlock)completionBlock
+- (void)checkOrgName:(NSString *)name
+     completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1070,7 +1091,10 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 
 }
 
--(void)createOrganizationWithName:(NSString *)name templateId:(NSString *)templateId jobId:(NSString *)jobId completionBlock:(CompletionBlock)completionBlock
+- (void)createOrgWithName:(NSString *)name
+               templateId:(NSString *)templateId
+                selfJobId:(NSString *)jobId
+          completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1125,7 +1149,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
     
 }
--(void)endOrganizationWithId:(NSString *)Id completionBlock:(CompletionBlock)completionBlock
+- (void)endOrgWithId:(NSString *)orgId
+     completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1148,7 +1173,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:Id
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
                                                                     forKey:@"project"];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
@@ -2256,6 +2281,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"project_name_exist"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
@@ -2293,9 +2319,9 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"create"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
                 
-                    
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
@@ -2823,29 +2849,59 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
             }
-            
-
-
-
-
-
-
-
-
-
-            
-
-
-            
-
-
-
-            
-
-
+            // add case
         }
     }
     
     return NO;
 }
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
+{
+    // This method is invoked on the moduleQueue.
+    /*
+     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
+     <body groupid="33" groupname="FirstGroup" master="13412345678@localhost" type = "groupmember">
+     [{"jid":"13412345678@localhost","nickname":"test1123","action":"add"},//or remove,alter
+     {"jid":"13412345678@localhost","nickname":"test1123","action":"add"},
+     {"jid":"13412345678@localhost","nickname":"test1123","action":"add"}]
+     </body>
+     </message>
+     
+     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
+     <body  type = "groupinfo">
+     [{"groupid":"1","groupname":"testgroup","action":"dismiss"},//dismiss a group
+     {"groupid":"1","groupname":"testgroup","action":"rename"}]//modyfy the group nickname
+     </body>
+     </message>
+     */
+    
+    XMPPLogTrace();
+    
+    // Is this a message we need to store (a chat message)?
+    //
+    // A message to all recipients MUST be of type groupchat.
+    // A message to an individual recipient would have a <body/>.
+    
+//    NSXMLElement *pushElement = [message psuhElementFromChatRoomPushMessageWithXmlns:GROUP_PUSH_XMLNS];
+//    
+//    //This is a chart room push message
+//    if (pushElement) {
+//        
+//        //Note:if this is a push message about the group info
+//        if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]){
+//            
+//            [self groupMemberPushElement:pushElement];
+//            
+//            //Note:if this is a push message about the group member
+//        }else if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
+//            
+//            [self groupInfoPushElement:pushElement];
+//        }
+//        
+//        [multicastDelegate xmppChatRoom:self didReceiveSeiverPush:message];
+//    }
+}
+
+
 @end

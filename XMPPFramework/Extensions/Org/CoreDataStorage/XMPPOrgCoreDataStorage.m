@@ -107,7 +107,45 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
         if (stream){
             
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K != %@",@"streamBareJidStr",streamBareJidStr, @"orgState",@(XMPPOrgCoreDataStorageObjectStateTemplate)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allOrgs = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPOrgCoreDataStorageObject *org in allOrgs){
+            
+            [moc deleteObject:org];
+            
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+    }];
+}
+- (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",streamBareJidStr, @"orgState",@(XMPPOrgCoreDataStorageObjectStateTemplate)];
             
             [fetchRequest setPredicate:predicate];
         }

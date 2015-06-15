@@ -29,10 +29,12 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 获取所有项目
 - (void)requestServerAllOrgList;
 - (void)requestDBAllOrgListWithBlock:(CompletionBlock)completionBlock;
+- (void)clearAllOrgs;
 
 #pragma mark - 获取所有模板
 - (void)requestServerAllTemplates;
 - (void)requestDBAllTemplatesWithBlock:(CompletionBlock)completionBlock;
+- (void)clearAllTemplates;
 
 #pragma mark - 获取一个组织的所有职位信息
 - (void)requestServerAllPositionListWithOrgId:(NSString *)orgId;
@@ -48,27 +50,20 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
 - (void)requestDBAllRelationListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;;
 
+#pragma mark - 验证组织name
+- (void)checkOrgName:(NSString *)name
+     completionBlock:(CompletionBlock)completionBlock;
 
-- (void)requestServerOrgPositionListWithOrgId:(NSString *)orgId;
+#pragma mark - 创建组织
+- (void)createOrgWithName:(NSString *)name
+               templateId:(NSString *)templateId
+                selfJobId:(NSString *)jobId
+          completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 结束组织
+- (void)endOrgWithId:(NSString *)orgId
+     completionBlock:(CompletionBlock)completionBlock;
 
-- (void)requestOrganizationViewWithTemplateId:(NSString *)templateId
-                              completionBlock:(CompletionBlock)completionBlock;
-
-- (void)allPorjectListWithBlock:(CompletionBlock)completionBlock;
-
-- (void)requestAllTemplateWithBlock:(CompletionBlock)block;
-
-- (void)checkOrganizationName:(NSString *)name
-              completionBlock:(CompletionBlock)completionBlock;
-
-- (void)createOrganizationWithName:(NSString *)name
-                        templateId:(NSString *)templateId
-                             jobId:(NSString *)jobId
-                   completionBlock:(CompletionBlock)completionBlock;
-
-- (void)endOrganizationWithId:(NSString *)Id
-              completionBlock:(CompletionBlock)completionBlock;
 
 -(void)getPossiblePosition:(NSString*)ID
         completionBlock:(CompletionBlock)completionBlock;
@@ -144,6 +139,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds xmppStream:(XMPPStream *)stream;
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
+- (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
 

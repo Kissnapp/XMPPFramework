@@ -17,7 +17,6 @@
 @property (nonatomic, retain) NSString * streamBareJidStr;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                        withUserId:(NSString *)userId
                              orgId:(NSString *)orgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
@@ -30,7 +29,6 @@
                     streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
-                          withUserId:(NSString *)userId
                                orgId:(NSString *)orgId
                     streamBareJidStr:(NSString *)streamBareJidStr;
 
@@ -39,7 +37,5 @@
                     streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithDic:(NSDictionary *)dic;
-
-
 
 @end
