@@ -777,10 +777,13 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
              </project>
              </iq>
              */
-            
+            NSDictionary *templateDic  =nil;
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
-                                                                    forKey:@"project"];
+            if (orgId.length>0) {
+               templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                                        forKey:@"project"];
+            }
+          
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
