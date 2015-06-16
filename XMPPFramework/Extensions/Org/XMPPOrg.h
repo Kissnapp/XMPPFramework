@@ -162,7 +162,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 
-- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds xmppStream:(XMPPStream *)stream;
+- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream;
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
@@ -183,7 +183,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
-
+ 
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdatePositionInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
@@ -193,5 +193,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)endOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)subPositionsWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end

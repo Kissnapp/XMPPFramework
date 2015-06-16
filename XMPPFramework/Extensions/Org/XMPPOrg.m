@@ -260,6 +260,13 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 #pragma mark Private API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)_insertOrUpatePositionWithOrgId:(NSString *)orgId positionDic:(NSDictionary *)positionDic
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId dic:positionDic xmppStream:xmppStream];
+}
+
 - (void)_insertOrUpateOrgWithOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
@@ -326,7 +333,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     return array;
 }
 
-- (void)_insertOrUpateOrgWithDics:(NSArray *)orgDics
+- (void)_insertOrUpateOrgWithDics:(NSArray *)orgDics isTemplate:(BOOL)isTemplate
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -337,7 +344,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     
     NSArray *orgIds = [self _specifiedValuesWithKey:@"id" fromDics:orgDics];
     
-    [_xmppOrgStorage clearUnusedOrgWithOrgIds:orgIds xmppStream:xmppStream];
+    [_xmppOrgStorage clearUnusedOrgWithOrgIds:orgIds isTemplate:isTemplate xmppStream:xmppStream];
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
@@ -2279,7 +2286,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 0.跟新数据库
                 NSArray *orgDics = [[project stringValue] objectFromJSONString];
                 
-                [self _insertOrUpateOrgWithDics:orgDics];
+                [self _insertOrUpateOrgWithDics:orgDics isTemplate:NO];
 
                 
                 // 1.判断是否向逻辑层返回block
@@ -2331,7 +2338,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 NSArray *orgDics = [[project stringValue] objectFromJSONString];
 
 
-                [self _insertOrUpateOrgWithDics:orgDics];
+                [self _insertOrUpateOrgWithDics:orgDics isTemplate:YES];
 
                 
                 // 1.判断是否向逻辑层返回block
@@ -2560,13 +2567,24 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  </sys>
                  </message>
                  */
-                //TODO:网数据库增加数据，重新读取并返回给外界
+                // 0.修改数据库
                 id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                NSDictionary *ptInfoDic = [data objectForKey:@"job"];
+                NSString *ptId = [ptInfoDic objectForKey:@"id"];
+                
+                [self _insertOrUpatePositionWithOrgId:orgId positionDic:ptInfoDic];
+                
+                // 1.返回block
+                XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithPtId:ptId
+                                                                                             orgId:orgId
+                                                                                        xmppStream:xmppStream];
+                
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
                     
-                    completionBlock(data, nil);
+                    completionBlock(position, nil);
                     [requestBlockDcitionary removeObjectForKey:requestkey];
                 }
                 
@@ -2574,8 +2592,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"add_member"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     

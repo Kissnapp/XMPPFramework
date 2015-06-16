@@ -428,7 +428,40 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allPositions;
 }
 
-- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds xmppStream:(XMPPStream *)stream
+- (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allUsers = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgUserCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
+                                      streamBareJidStr, @"orgId", orgId];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        }
+    }];
+    
+    return allUsers;
+}
+
+- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();
     [self scheduleBlock:^{
@@ -446,8 +479,8 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (streamBareJidStr){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"NOT(orgId in %@) AND streamBareJidStr == %@", orgIds,
-                                      streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:(isTemplate ? @"NOT(orgId in %@) AND streamBareJidStr == %@ AND orgState == %@":@"NOT(orgId in %@) AND streamBareJidStr == %@ AND orgState == %@"), orgIds,
+                                      streamBareJidStr, @(XMPPOrgCoreDataStorageObjectStateTemplate)];
             
             [fetchRequest setPredicate:predicate];
             
@@ -563,7 +596,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 }
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
-                       xmppStream:(XMPPStream *)stream
+                       xmppStream:(XMPPStream *)stream 
                         userBlock:(void (^)(NSString *orgId))userBlock
                     positionBlock:(void (^)(NSString *orgId))positionBlock
                     relationBlock:(void (^)(NSString *orgId))relationBlock
@@ -784,6 +817,25 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     }];
 
     return subPositions;
+}
+
+- (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block XMPPOrgPositionCoreDataStorageObject *position = nil;
+    
+    [self executeBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        position = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                             withPtId:ptId
+                                                                                orgId:orgId
+                                                                     streamBareJidStr:streamBareJidStr];
+        
+    }];
+    
+    return position;
 }
 
 @end
