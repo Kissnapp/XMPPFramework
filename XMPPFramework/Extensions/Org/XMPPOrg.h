@@ -90,6 +90,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
+//- (void)
 
 #pragma mark - 从某个组织删人
 

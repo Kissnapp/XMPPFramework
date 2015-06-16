@@ -264,7 +264,16 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId dic:positionDic xmppStream:xmppStream];
+    [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId dic:[positionDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                         @"ptId":@"id",
+                                                                                                                         @"ptName":@"name",
+                                                                                                                         @"ptLeft":@"left",
+                                                                                                                         @"ptRight":@"right",
+                                                                                                                         @"dpId":@"part_id",
+                                                                                                                         @"dpName":@"part",
+                                                                                                                         @"orgId":@"project_id"
+                                                                                                                         }]
+                                              xmppStream:xmppStream];
 }
 
 - (void)_insertOrUpateOrgWithOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
@@ -349,17 +358,17 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         [_xmppOrgStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                          @"orgId":@"id",
-                                                                                                                          @"orgName":@"name",
-                                                                                                                          @"orgState":@"status",
-                                                                                                                          @"orgStartTime":@"start_time",
-                                                                                                                          @"orgEndTime":@"end_time",
-                                                                                                                          @"orgAdminJidStr":@"admin",
-                                                                                                                          @"orgDescription":@"description",
-                                                                                                                          @"ptTag":@"job_tag",
-                                                                                                                          @"userTag":@"member_tag",
-                                                                                                                          @"orgRelationShipTag":@"link_tag",
-                                                                                                                          }]
+                                                                                                                 @"orgId":@"id",
+                                                                                                                 @"orgName":@"name",
+                                                                                                                 @"orgState":@"status",
+                                                                                                                 @"orgStartTime":@"start_time",
+                                                                                                                 @"orgEndTime":@"end_time",
+                                                                                                                 @"orgAdminJidStr":@"admin",
+                                                                                                                 @"orgDescription":@"description",
+                                                                                                                 @"ptTag":@"job_tag",
+                                                                                                                 @"userTag":@"member_tag",
+                                                                                                                 @"orgRelationShipTag":@"link_tag"
+                                                                                                                 }]
                                                  xmppStream:xmppStream
                                                   userBlock:^(NSString *orgId) {
                                                       
