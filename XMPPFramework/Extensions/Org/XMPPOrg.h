@@ -13,6 +13,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @protocol XMPPOrgDelegate;
 @protocol XMPPOrgStorage;
 
+@class XMPPOrgUserCoreDataStorageObject;
+
 @interface XMPPOrg : XMPPModule
 {
     __strong id <XMPPOrgStorage> _xmppOrgStorage;
@@ -90,7 +92,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
-//- (void)
+- (void)addUsers:(NSArray *)users joinOrg:(NSString *)orgId;
+- (void)fillOrg:(NSString *)orgId withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... ;
 
 #pragma mark - 从某个组织删人
 
