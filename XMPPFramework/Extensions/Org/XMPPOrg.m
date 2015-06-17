@@ -392,7 +392,28 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     }];
 }
 
-- (void)_insertOrUpdateUserWithDics:(NSArray *)userDics orgId:(NSString *)orgId
+- (void)_insertNewUserWithDics:(NSArray *)userDics orgId:(NSString *)orgId
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([userDics count] < 1) return;
+    
+    [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        
+        [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId
+                                                     dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                       @"userJidStr":@"jid",
+                                                                                                                       @"orgId":@"orgId",
+                                                                                                                       @"ptId":@"job_id",
+                                                                                                                       @"ptName":@"job_name"
+                                                                                                                       }]
+                                              xmppStream:xmppStream];
+        
+    }];
+
+}
+
+- (void)_resetAllUserWithDics:(NSArray *)userDics orgId:(NSString *)orgId
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -1410,52 +1431,64 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 }
 
-- (void)addUsers:(NSArray *)users joinOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
+- (void)addUsers:(NSArray *)users
+         joinOrg:(NSString *)orgId
+  withPositionId:(NSString *)ptId
+ completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
             
-//            // 0. Create a key for storaging completion block
-//            NSString *requestKey = [[self xmppStream] generateUUID];
-//            
-//            // 1. add the completionBlock to the dcitionary
-//            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-//            
-//            // 2. Listing the request iq XML
-//            /*
-//             <iq from="79509d447102413a89e9ada9fde3cf6b@192.168.1.162/Gajim" id="5244001" type="set">
-//             <project xmlns="aft:project"  type="add_member">
-//             {"62": [{"job_id":"279", "job_name":"生产经理", "jid":"125d9af626064ba2bbdd1fe215b8926c", "part":"领导班子"}, {"job_id":"281", "job_name":"技术部长", "jid":"530fc2b5165148ea8ba98abda1b6176b",   "part":"技术部"} ] }
-//             </project>
-//             </iq>
-//             */
-//            NSString *jobName;
-//            // 3. Create the request iq
-//            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,
-//                                      @"job_id",jobName,@"job_name",jid,@"jid",part,@"part", nil];
-//            NSArray * arr = [NSArray arrayWithObject:tempDic];
-//            NSDictionary* temp = [NSDictionary dictionaryWithObject:arr forKey:orgId];
-//            
-//            
-//            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-//                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-//                                                                         attribute:@{@"type":@"add_member"}
-//                                                                       stringValue:[temp JSONString]];
-//            
-//            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-//                                                             to:nil
-//                                                           type:@"set"
-//                                                             id:requestKey
-//                                                   childElement:organizationElement];
-//            
-//            
-//            // 4. Send the request iq element to the server
-//            [[self xmppStream] sendElement:iqElement];
-//            
-//            // 5. add a timer to call back to user after a long time without server's reponse
-//            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="353303d3e01e45d0a7d2ac436031a5d7@192.168.1.167/Gajim" id="5244001" type="set">
+             <project xmlns="aft:project"  type="add_member">
+             {"project":"48", "member":[{"job_id":"84", "jid":"855a8e0a42df4c0bb25cbf7e8ad94568@192.168.1.167"}] }
+             </project>
+             </iq>
+             */
+        
+            // 3. Create the request iq
+            NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+            __block NSMutableArray *userArrays = [NSMutableArray array];
+            
+            [users enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                XMPPOrgUserCoreDataStorageObject *user = obj;
+                NSDictionary *tempUserDic = @{
+                                              @"job_id":ptId,
+                                              @"jid":user.userJidStr
+                                              };
+                [userArrays addObject:tempUserDic];
+            }];
+            
+            [dic setObject:orgId forKey:@"project"];
+            [dic setObject:userArrays forKey:@"member"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"add_member"}
+                                                                       stringValue:[dic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"set"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
             
         }else{
             // 0. tell the the user that can not send a request
@@ -1469,12 +1502,15 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 }
 
-- (void)fillOrg:(NSString *)orgId callBackBlock:(CompletionBlock)completionBlock withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ...
+- (void)fillOrg:(NSString *)orgId
+ withPositionId:(NSString *)ptId
+  callBackBlock:(CompletionBlock)completionBlock
+      withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ...
 {
+    __block NSMutableArray *userArrays = [NSMutableArray array];
+    
     va_list args;
     va_start(args, user1);
-    
-    NSMutableArray *users = [NSMutableArray  array];
     
     if (user1) {
         
@@ -1482,11 +1518,74 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         while ((user = va_arg(args, XMPPOrgUserCoreDataStorageObject *))) {
             
-            [users addObject:user];
+            NSDictionary *tempUserDic = @{
+                                          @"job_id":ptId,
+                                          @"jid":user.userJidStr
+                                          };
+            [userArrays addObject:tempUserDic];
         }
     }
     
     va_end(args);
+    
+    
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="353303d3e01e45d0a7d2ac436031a5d7@192.168.1.167/Gajim" id="5244001" type="set">
+             <project xmlns="aft:project"  type="add_member">
+             {"project":"48", "member":[{"job_id":"84", "jid":"855a8e0a42df4c0bb25cbf7e8ad94568@192.168.1.167"}] }
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+            
+            [dic setObject:orgId forKey:@"project"];
+            [dic setObject:userArrays forKey:@"member"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"add_member"}
+                                                                       stringValue:[dic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"set"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+    
+   
     
     // request
 }
@@ -1550,7 +1649,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 
 }
--(void)deleteMemberFromPro:(NSString *)projectID jid:(NSString *)jid completionBlock:(CompletionBlock)completionBlock
+- (void)removeUser:(XMPPOrgUserCoreDataStorageObject *)user formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1574,8 +1673,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
              */
             
             // 3. Create the request iq
-            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:projectID,
-                                      @"project",jid,@"jid", nil];
+            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,
+                                      @"project",user.userJidStr,@"jid", nil];
          
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -2271,7 +2370,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 NSString *orgId = [data objectForKey:@"project"];
                 NSArray *users = [data objectForKey:@"member"];
                 
-                [self _insertOrUpdateUserWithDics:users orgId:orgId];
+                [self _resetAllUserWithDics:users orgId:orgId];
                 
                 
                 // 1.判断是否向逻辑层返回block
@@ -2700,26 +2799,35 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="add_member">
-                 {"62": [{"job_id":"279", "job_name":"生产经理", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162", "part":"领导班子"}, {"job_id":"281", "job_name":"技术部长", "jid":"530fc2b5165148ea8ba98abda1b6176b@192.168.1.162",   "part":"技术部"} ] }
+                 {"project":"xxx", "member":[{"job_id":"104", "jid":"f73cc8848dd94c938c83eed0704351f7@192.168.1.167"}, ... ] }
                  </project>
                  </iq>
                  
-                 %% modify update project member_timestamp.
-                 
-                 push msg(推送给项目里所有的人及关联的项目里所有的人)
+                 push msg(推送给项目里所有的人及关联的项目里所有的人
                  <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
                  <sys xmlns="aft.sys.project" projectid="1" type="add_member">
-                 [ {"member_tag":"xxx"}, {"job_id":"279", "job_name":"生产经理", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162", "part":"领导班子"}, {"job_id":"281", "job_name":"技术部长", "jid":"530fc2b5165148ea8ba98abda1b6176b@192.168.1.162",   "part":"技术部"} ] %% modify
+                 {"project":"xxx", "member":[ {"member_tag":"xxx"}, {"job_id":"279", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162"} ]}
                  </sys>
                  </message>
                  */
                 
+                // 0.解析获得数据
                 id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                NSArray *userDics = [data objectForKey:@"member"];
+                
+                // 1.存入数据库
+                [self _insertNewUserWithDics:userDics orgId:orgId];
+                
+                // 2.获取新加入的人员信息
+                NSArray *newUserIds = [self _specifiedValuesWithKey:@"jid" fromDics:userDics];
+                NSArray *newUsers = [_xmppOrgStorage newUsersWithOrgId:orgId userIds:newUserIds xmppStream:xmppStream];
+                
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
                     
-                    completionBlock(data, nil);
+                    completionBlock(newUsers, nil);
                     [requestBlockDcitionary removeObjectForKey:requestkey];
                 }
                 
@@ -2727,8 +2835,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 
                 
             }else if([projectType isEqualToString:@"delete_member"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2761,11 +2869,16 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [data objectForKey:@"project"];
+                NSString *userJidStr = [data objectForKey:@"jid"];
+                
+                [_xmppOrgStorage deleteUserWithUserJidStr:userJidStr orgId:orgId xmppStream:xmppStream];
+                
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
                     
-                    completionBlock(data, nil);
+                    completionBlock(userJidStr, nil);
                     [requestBlockDcitionary removeObjectForKey:requestkey];
                 }
                 

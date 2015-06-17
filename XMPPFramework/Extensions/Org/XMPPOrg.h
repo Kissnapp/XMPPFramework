@@ -92,32 +92,22 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
-- (void)addUsers:(NSArray *)users joinOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
-- (void)fillOrg:(NSString *)orgId callBackBlock:(CompletionBlock)completionBlock withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... ;
+- (void)addUsers:(NSArray *)users
+         joinOrg:(NSString *)orgId
+  withPositionId:(NSString *)ptId
+ completionBlock:(CompletionBlock)completionBlock;
+
+- (void)fillOrg:(NSString *)orgId
+ withPositionId:(NSString *)ptId
+  callBackBlock:(CompletionBlock)completionBlock
+      withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... NS_REQUIRES_NIL_TERMINATION;
 
 #pragma mark - 从某个组织删人
+- (void)removeUser:(XMPPOrgUserCoreDataStorageObject *)user formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 订阅某个组织
 
-#pragma mark - 取消订阅m
-
--(void)addCustomJob:(NSString*)ID
-           parentId:(NSString*)parentId
-               name:(NSString*)jobName
-               part:(NSString*)part
-    completionBlock:(CompletionBlock)completionBlock ;
-
--(void)addMemberToProject:(NSString*)ID
-                    jodId:(NSString*)jobID
-                     name:(NSString*)jobName
-                      jid:(NSString*)jid
-                     part:(NSString*)part
-          completionBlock:(CompletionBlock)completionBlock;
-
--(void)deleteMemberFromPro:(NSString*)projectID
-                       jid:(NSString*)jid
-           completionBlock:(CompletionBlock)completionBlock;
-
+#pragma mark - 取消订阅某个组织
 
 -(void)memberListAndLinkPro:(NSString*)projectID
             completionBlock:(CompletionBlock)completionBlock;
@@ -181,6 +171,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
+- (id)newUsersWithOrgId:(NSString *)orgId userIds:(NSArray *)userIds xmppStream:(XMPPStream *)stream;
+
 - (id)orgRelationsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
@@ -190,6 +182,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                     relationBlock:(void (^)(NSString *orgId))relationBlock;
 
 - (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)deleteUserWithUserJidStr:(NSString *)userJidStr orgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
  
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
