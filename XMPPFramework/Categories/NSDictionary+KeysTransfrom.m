@@ -21,8 +21,10 @@
         if (object) {
             
             [destinationDictionary removeObjectForKey:obj];
-            [destinationDictionary setValue:object forKey:key];
             
+            if (![object isKindOfClass:[NSNull class]]){
+                [destinationDictionary setValue:object forKey:key];
+            }
         }
     }];
     
@@ -43,7 +45,10 @@
         if (object) {
             
             [destinationDictionary removeObjectForKey:obj];
-            [destinationDictionary setValue:object forKey:key];
+            
+            if (![object isKindOfClass:[NSNull class]]){
+                [destinationDictionary setValue:object forKey:key];
+            }
             
         }
     }];
@@ -62,7 +67,10 @@
         if (object) {
             
             [destinationDictionary removeObjectForKey:obj];
-            [destinationDictionary setValue:object forKey:key];
+            
+            if (![object isKindOfClass:[NSNull class]]){
+                [destinationDictionary setValue:object forKey:key];
+            }
             
         }
     }];
@@ -85,7 +93,10 @@
         if (object) {
             
             [destinationDictionary removeObjectForKey:obj];
-            [destinationDictionary setValue:object forKey:key];
+            
+            if (![object isKindOfClass:[NSNull class]]){
+                [destinationDictionary setValue:object forKey:key];
+            }
             
         }
     }];

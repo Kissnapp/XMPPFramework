@@ -92,10 +92,14 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
-- (void)addUsers:(NSArray *)users joinOrg:(NSString *)orgId;
-- (void)fillOrg:(NSString *)orgId withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... ;
+- (void)addUsers:(NSArray *)users joinOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
+- (void)fillOrg:(NSString *)orgId callBackBlock:(CompletionBlock)completionBlock withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... ;
 
 #pragma mark - 从某个组织删人
+
+#pragma mark - 订阅某个组织
+
+#pragma mark - 取消订阅m
 
 -(void)addCustomJob:(NSString*)ID
            parentId:(NSString*)parentId
