@@ -1431,7 +1431,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         dispatch_async(moduleQueue, block);
 }
 
-- (void)addUsers:(NSArray *)users
+- (void)addUsers:(NSArray *)userBareJids
          joinOrg:(NSString *)orgId
   withPositionId:(NSString *)ptId
  completionBlock:(CompletionBlock)completionBlock
@@ -1460,11 +1460,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             NSMutableDictionary *dic = [NSMutableDictionary dictionary];
             __block NSMutableArray *userArrays = [NSMutableArray array];
             
-            [users enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                XMPPOrgUserCoreDataStorageObject *user = obj;
+            [userBareJids enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                NSString *userBareJid = obj;
                 NSDictionary *tempUserDic = @{
                                               @"job_id":ptId,
-                                              @"jid":user.userJidStr
+                                              @"jid":userBareJid
                                               };
                 [userArrays addObject:tempUserDic];
             }];
@@ -1505,22 +1505,22 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 - (void)fillOrg:(NSString *)orgId
  withPositionId:(NSString *)ptId
   callBackBlock:(CompletionBlock)completionBlock
-      withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ...
+      withUsers:(NSString *)userBareJid1, ...
 {
     __block NSMutableArray *userArrays = [NSMutableArray array];
     
     va_list args;
-    va_start(args, user1);
+    va_start(args, userBareJid1);
     
-    if (user1) {
+    if (userBareJid1) {
         
-        XMPPOrgUserCoreDataStorageObject *user;
+        NSString *userBareJid;
         
-        while ((user = va_arg(args, XMPPOrgUserCoreDataStorageObject *))) {
+        while ((userBareJid = va_arg(args, NSString *))) {
             
             NSDictionary *tempUserDic = @{
                                           @"job_id":ptId,
-                                          @"jid":user.userJidStr
+                                          @"jid":userBareJid
                                           };
             [userArrays addObject:tempUserDic];
         }

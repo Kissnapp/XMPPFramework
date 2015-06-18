@@ -92,7 +92,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
-- (void)addUsers:(NSArray *)users
+- (void)addUsers:(NSArray *)userBareJids
          joinOrg:(NSString *)orgId
   withPositionId:(NSString *)ptId
  completionBlock:(CompletionBlock)completionBlock;
@@ -100,7 +100,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)fillOrg:(NSString *)orgId
  withPositionId:(NSString *)ptId
   callBackBlock:(CompletionBlock)completionBlock
-      withUsers:(XMPPOrgUserCoreDataStorageObject *)user1, ... NS_REQUIRES_NIL_TERMINATION;
+      withUsers:(NSString *)userBareJid1, ... NS_REQUIRES_NIL_TERMINATION;
 
 #pragma mark - 从某个组织删人
 - (void)removeUser:(XMPPOrgUserCoreDataStorageObject *)user formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
