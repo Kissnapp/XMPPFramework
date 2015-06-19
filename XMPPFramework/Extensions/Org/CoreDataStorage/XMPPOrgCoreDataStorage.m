@@ -181,9 +181,14 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"orgStartTime" ascending:YES];
+        
+        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, nil];
+        
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setSortDescriptors:sortDescriptors];
         
         if (streamBareJidStr){
             NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
@@ -213,9 +218,14 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"orgStartTime" ascending:YES];
+        
+        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, nil];
+        
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setSortDescriptors:sortDescriptors];
         
         if (streamBareJidStr){
             NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K != %@",@"streamBareJidStr",
