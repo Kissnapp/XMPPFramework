@@ -103,39 +103,37 @@ typedef void(^CompletionBlock)(id data, NSError *error);
       withUsers:(NSString *)userBareJid1, ... NS_REQUIRES_NIL_TERMINATION;
 
 #pragma mark - 从某个组织删人
-- (void)removeUser:(XMPPOrgUserCoreDataStorageObject *)user formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
+- (void)removeUserBareJidStr:(NSString *)userBareJidStr formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 订阅某个组织
+- (void)subcribeOrgRequestWithSelfOrgId:(NSString *)selfOrgId
+                             otherOrgId:(NSString *)otherOrgId
+                            description:(NSString *)description
+                        completionBlock:(CompletionBlock)completionBlock;
+
+- (void)acceptSubcribeRequestWithSelfOrgId:(NSString *)selfOrgId
+                            otherOrgId:(NSString *)otherOrgId
+                           description:(NSString *)description
+                       completionBlock:(CompletionBlock)completionBlock;
+
+- (void)refuseSubcribeRequestWithSelfOrgId:(NSString *)selfOrgId
+                                otherOrgId:(NSString *)otherOrgId
+                               description:(NSString *)description
+                           completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 取消订阅某个组织
-
--(void)memberListAndLinkPro:(NSString*)projectID
-            completionBlock:(CompletionBlock)completionBlock;
-
--(void)allMemberList:(NSString*)projectID
-     completionBlock:(CompletionBlock)completionBlock;
-
--(void)allLinkProjectList:(NSString*)projectID
+- (void)removeSubcribeOrg:(NSString *)orgId
+                  formOrg:(NSString *)formOrg
+              description:(NSString *)description
           completionBlock:(CompletionBlock)completionBlock;
 
--(void)searchProject:(NSString*)name
-     completionBlock:(CompletionBlock)completionBlock;
 
--(void)subcribeProject:(NSString*)myID
-                target:(NSString*)targetID
-       completionBlock:(CompletionBlock)completionBlock;
 
--(void)agreeSubcribeProject:(NSString*)myID
-                     target:(NSString*)targetID
-            completionBlock:(CompletionBlock)completionBlock;
 
--(void)dissagreeSubcribeProject:(NSString*)myID
-                         target:(NSString*)targetID
-                completionBlock:(CompletionBlock)completionBlock;
 
--(void)cancelSubcribeProject:(NSString*)myID
-                         target:(NSString*)targetID
-                completionBlock:(CompletionBlock)completionBlock;
+#pragma mark - 搜索某个组织
+-(void)searchOrgWithName:(NSString *)orgName
+         completionBlock:(CompletionBlock)completionBlock;
 
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
 
@@ -148,6 +146,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @required
 
 @optional
+
+- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveSubcribeRequestWith:(NSString *)request;
 
 @end
 
@@ -195,5 +195,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (id)subPositionsWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (BOOL)isAdminWithUser:(NSString *)userBareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end

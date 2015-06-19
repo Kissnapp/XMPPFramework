@@ -915,4 +915,25 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return position;
 }
 
+- (BOOL)isAdminWithUser:(NSString *)userBareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block BOOL isAndmin = NO;
+    
+    [self executeBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:orgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        if (org && [org.orgAdminJidStr isEqualToString:userBareJidStr]) {
+            isAndmin = YES;
+        }
+    }];
+    
+    return isAndmin;
+}
+
 @end

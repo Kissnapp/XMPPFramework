@@ -29,6 +29,15 @@
         <attribute name="relationOrgName" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="relationOrgShip" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="XMPPOrgCoreDataStorageObject" inverseName="orgRelationShip" inverseEntity="XMPPOrgCoreDataStorageObject" syncable="YES"/>
     </entity>
+    <entity name="XMPPOrgSubcribeCoreDataStorageObject" representedClassName="XMPPOrgSubcribeCoreDataStorageObject" syncable="YES">
+        <attribute name="formOrgId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fromOrgName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="state" optional="YES" attributeType="Integer 32" syncable="YES"/>
+        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="toOrgId" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
     <entity name="XMPPOrgUserCoreDataStorageObject" representedClassName="XMPPOrgUserCoreDataStorageObject" syncable="YES">
         <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ptId" optional="YES" attributeType="String" syncable="YES"/>
@@ -40,5 +49,6 @@
         <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="165"/>
         <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="90"/>
         <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="105"/>
+        <element name="XMPPOrgSubcribeCoreDataStorageObject" positionX="-1152" positionY="-180" width="128" height="150"/>
     </elements>
 </model>
