@@ -565,7 +565,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         NSArray *orgs = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
         
-        ([orgs count] > 1) ? completionBlock(orgs, nil) : [self _requestServerAllOrgListWithBlock:completionBlock];
+        ([orgs count] > 0) ? completionBlock(orgs, nil) : [self _requestServerAllOrgListWithBlock:completionBlock];
         
     }};
     
@@ -723,7 +723,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         NSArray *templates = [_xmppOrgStorage allOrgTemplatesWithXMPPStream:xmppStream];
         
-        ([templates count] > 1) ? completionBlock(templates, nil) : [self _requestServerAllTemplatesWithBlock:completionBlock];
+        ([templates count] > 0) ? completionBlock(templates, nil) : [self _requestServerAllTemplatesWithBlock:completionBlock];
         
     }};
     
@@ -859,7 +859,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:orgId xmppStream:xmppStream];
         
-        ([positions count] > 1) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
+        ([positions count] > 0) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
                                                                                                  completionBlock:completionBlock];
         
     }};
@@ -981,7 +981,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
         
-        ([users count] > 1) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
+        ([users count] > 0) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
                                                                                      completionBlock:completionBlock];
         
     }};
@@ -1106,7 +1106,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         
         NSArray *relations = [_xmppOrgStorage orgRelationsWithOrgId:orgId xmppStream:xmppStream];
         
-        ([relations count] > 1) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
+        ([relations count] > 0) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
                                                                                                  completionBlock:completionBlock];
         
     }};
@@ -1463,8 +1463,9 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             [userBareJids enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                 NSString *userBareJid = obj;
                 NSDictionary *tempUserDic = @{
-                                              @"job_id":ptId,
-                                              @"jid":userBareJid
+                                              @"jid":userBareJid,
+                                              @"job_id":ptId
+            
                                               };
                 [userArrays addObject:tempUserDic];
             }];
