@@ -133,6 +133,20 @@
     
     return object;
 }
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId orgName:(NSString *)orgName
+{
+    if (orgId == nil) return nil;
+    if (moc == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPOrgRelationObject class]);
+    
+    XMPPOrgRelationObject *object = [NSEntityDescription insertNewObjectForEntityForName:entityName
+                                                                  inManagedObjectContext:moc];
+    object.relationOrgId = orgId;
+    object.relationOrgName = orgName;
+    
+    return object;
+}
 
 - (void)updateWithDic:(NSDictionary *)dic
 {

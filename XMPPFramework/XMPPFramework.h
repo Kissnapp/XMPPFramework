@@ -115,6 +115,7 @@
 #import "XMPPOrgUserCoreDataStorageObject.h"
 #import "XMPPOrgRelationObject.h"
 #import "XMPPOrgPositionCoreDataStorageObject.h"
+#import "XMPPOrgSubcribeCoreDataStorageObject.h"
 
 #import "XMPPManagedObject.h"
 #import "NSDictionary+KeysTransfrom.h"

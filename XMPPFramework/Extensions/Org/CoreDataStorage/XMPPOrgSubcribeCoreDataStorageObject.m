@@ -147,6 +147,7 @@
     // your code here ...
     [super awakeFromInsert];
     [self setPrimitiveValue:[NSDate date] forKey:@"time"];
+    [self setPrimitiveValue:@(XMPPOrgSubcribeStateNotHandle) forKey:@"state"];
 }
 
 - (void)awakeFromFetch
@@ -176,5 +177,119 @@
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                     withFormOrgId:(NSString *)formOrgId
+                           toOrgId:(NSString *)toOrgId
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (formOrgId == nil) return nil;
+    if (toOrgId == nil) return nil;
+    if (moc == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPOrgSubcribeCoreDataStorageObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                              inManagedObjectContext:moc];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"formOrgId == %@ AND toOrgId == %@ AND streamBareJidStr == %@", formOrgId, toOrgId, streamBareJidStr];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    return (XMPPOrgSubcribeCoreDataStorageObject *)[results lastObject];
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (dic == nil) return nil;
+    if (moc == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPOrgSubcribeCoreDataStorageObject class]);
+    
+    XMPPOrgSubcribeCoreDataStorageObject *newSubcribe = [NSEntityDescription insertNewObjectForEntityForName:entityName
+                                                                                      inManagedObjectContext:moc];
+    
+    newSubcribe.streamBareJidStr = streamBareJidStr;
+    
+    [newSubcribe updateWithDic:dic];
+    
+    return newSubcribe;
+}
+
++ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    BOOL result = NO;
+    
+    if (dic == nil) return result;
+    if (moc == nil) return result;
+    if (streamBareJidStr == nil) return result;
+    
+    NSString *tempFormOrgId = [dic objectForKey:@"formOrgId"];
+    NSString *tempToOrgId = [dic objectForKey:@"toOrgId"];
+    
+    XMPPOrgSubcribeCoreDataStorageObject *subcribe = [XMPPOrgSubcribeCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                          withFormOrgId:tempFormOrgId
+                                                                                                                toOrgId:tempToOrgId
+                                                                                                       streamBareJidStr:streamBareJidStr];
+    if (subcribe) {
+        
+        [subcribe updateWithDic:dic];
+        result = YES;
+    }
+    
+    return result;
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                       withFormOrgId:(NSString *)formOrgId
+                             toOrgId:(NSString *)toOrgId
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    
+    BOOL result = NO;
+    
+    if (formOrgId == nil) return result;
+    if (toOrgId == nil) return result;
+    if (moc == nil) return result;
+    if (streamBareJidStr == nil) return result;
+    
+    XMPPOrgSubcribeCoreDataStorageObject *subcribe = [XMPPOrgSubcribeCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                          withFormOrgId:formOrgId
+                                                                                                                toOrgId:toOrgId
+                                                                                                       streamBareJidStr:streamBareJidStr];
+    
+    if (subcribe) {
+        
+        [moc deleteObject:subcribe];
+        
+        result = YES;
+    }
+    
+    return result;
+}
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                             withDic:(NSDictionary *)dic
+                    streamBareJidStr:(NSString *)streamBareJidStr
+{
+    NSString *tempFormOrgId = [dic objectForKey:@"formOrgId"];
+    NSString *tempToOrgId = [dic objectForKey:@"toOrgId"];
+    
+    return [XMPPOrgSubcribeCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                withFormOrgId:tempFormOrgId
+                                                                      toOrgId:tempToOrgId
+                                                             streamBareJidStr:streamBareJidStr];
+}
 
 @end

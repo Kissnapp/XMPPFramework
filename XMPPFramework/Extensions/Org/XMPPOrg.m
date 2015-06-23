@@ -12,6 +12,7 @@
 #import "XMPPLogging.h"
 #import "XMPPFramework.h"
 #import "DDList.h"
+#import "NSString+NSDate.h"
 #import "NSDictionary+KeysTransfrom.h"
 
 #if ! __has_feature(objc_arc)
@@ -404,8 +405,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                                                      dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                        @"userJidStr":@"jid",
                                                                                                                        @"orgId":@"orgId",
-                                                                                                                       @"ptId":@"job_id",
-                                                                                                                       @"ptName":@"job_name"
+                                                                                                                       @"ptId":@"job_id"
                                                                                                                        }]
                                               xmppStream:xmppStream];
         
@@ -427,8 +427,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                                                      dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                        @"userJidStr":@"jid",
                                                                                                                        @"orgId":@"orgId",
-                                                                                                                       @"ptId":@"job_id",
-                                                                                                                       @"ptName":@"job_name"
+                                                                                                                       @"ptId":@"job_id"
                                                                                                                        }]
                                               xmppStream:xmppStream];
         
@@ -1712,6 +1711,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
+        if (![_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:selfOrgId xmppStream:xmppStream]) {
+            [self _callBackWithMessage:@"you can not send this request because that you are not the admin of this org" completionBlock:completionBlock];
+            return ;
+        }
+        
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
             
@@ -1769,6 +1773,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                            completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (![_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:selfOrgId xmppStream:xmppStream]) {
+            [self _callBackWithMessage:@"you can not send this request because that you are not the admin of this org" completionBlock:completionBlock];
+            return ;
+        }
         
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
@@ -1829,6 +1838,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
+        if (![_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:selfOrgId xmppStream:xmppStream]) {
+            [self _callBackWithMessage:@"you can not send this request because that you are not the admin of this org" completionBlock:completionBlock];
+            return ;
+        }
+        
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
             
@@ -1886,6 +1900,11 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
           completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (![_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:formOrg xmppStream:xmppStream]) {
+            [self _callBackWithMessage:@"you can not send this request because that you are not the admin of this org" completionBlock:completionBlock];
+            return ;
+        }
         
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
             
@@ -2502,13 +2521,6 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  {"project": "40"}
                  </project>
                  </iq>
-                 
-                 push to all member:(don't push message to all link project member, because there are only chat).
-                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
-                 <sys xmlns="aft.sys.project" projectid="1" type="finished">
-                 {"end_time":"xxx"} %% modify
-                 </sys>
-                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -2646,13 +2658,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  </project>
                  </iq>
                  
-                 push msg(推送给项目里所有的人及关联的项目里所有的人
-                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
-                 <sys xmlns="aft.sys.project" projectid="1" type="add_member">
-                 {"project":"xxx", "member":[ {"member_tag":"xxx"}, {"job_id":"279", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162"} ]}
-                 </sys>
-                 </message>
-                 */
+                */
                 
                 // 0.解析获得数据
                 id  data = [[project stringValue] objectFromJSONString];
@@ -2807,8 +2813,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
             }else if([projectType isEqualToString:@"subscribed"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2849,8 +2855,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
             }else if([projectType isEqualToString:@"unsubscribed"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
               
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2891,9 +2897,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
             }else if([projectType isEqualToString:@"unsubscribe"]){
+                
                 if ([[iq type] isEqualToString:@"error"]) {
-                    
-                  
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     
@@ -2974,48 +2979,211 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
     // This method is invoked on the moduleQueue.
-    /*
-     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
-     <body groupid="33" groupname="FirstGroup" master="13412345678@localhost" type = "groupmember">
-     [{"jid":"13412345678@localhost","nickname":"test1123","action":"add"},//or remove,alter
-     {"jid":"13412345678@localhost","nickname":"test1123","action":"add"},
-     {"jid":"13412345678@localhost","nickname":"test1123","action":"add"}]
-     </body>
-     </message>
-     
-     <message from="aftgroup_33@localhost" type="groupchat" push="true" xml:lang="en" to="13412345678@localhost">
-     <body  type = "groupinfo">
-     [{"groupid":"1","groupname":"testgroup","action":"dismiss"},//dismiss a group
-     {"groupid":"1","groupname":"testgroup","action":"rename"}]//modyfy the group nickname
-     </body>
-     </message>
-     */
-    
     XMPPLogTrace();
     
-    // Is this a message we need to store (a chat message)?
-    //
-    // A message to all recipients MUST be of type groupchat.
-    // A message to an individual recipient would have a <body/>.
+    NSXMLElement *sysElement = [message elementForName:@"sys" xmlns:@"aft.sys.project"];
     
-//    NSXMLElement *pushElement = [message psuhElementFromChatRoomPushMessageWithXmlns:GROUP_PUSH_XMLNS];
-//    
-//    //This is a chart room push message
-//    if (pushElement) {
-//        
-//        //Note:if this is a push message about the group info
-//        if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_MEMBER_PUSH]){
-//            
-//            [self groupMemberPushElement:pushElement];
-//            
-//            //Note:if this is a push message about the group member
-//        }else if ([[pushElement attributeStringValueForName:@"type"] isEqualToString:GROUP_INFO_PUSH]){
-//            
-//            [self groupInfoPushElement:pushElement];
-//        }
-//        
-//        [multicastDelegate xmppChatRoom:self didReceiveSeiverPush:message];
-//    }
+    //This is a org push message
+    if (sysElement) {
+        
+        __weak typeof(self) weakSelf = self;
+        NSString *orgId = [sysElement attributeStringValueForName:@"projectid"];
+        
+        if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"finished"]){// 结束一个项目工程
+            /*
+            <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+            <sys xmlns="aft.sys.project" projectid="1" type="finished">
+            {"end_time":"xxx"}
+            </sys>
+            </message>
+             */
+           
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSDate *endTime = [[data objectForKey:@"end_time"] StringToDate];
+            
+            [_xmppOrgStorage endOrgWithOrgId:orgId orgEndTime:endTime xmppStream:xmppStream];
+            
+            // TODO:执行block回掉，由于在请求回复事执行力block  此处暂时不使用
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"add_job"]){// 添加自定义职位
+            /*
+             <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="1" type="add_job">
+             {"job_tag":"xxx"}
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *positionTag = [data objectForKey:@"job_tag"];
+            
+            [_xmppOrgStorage comparePositionInfoWithOrgId:orgId
+                                              positionTag:positionTag
+                                               xmppStream:xmppStream
+                                             refreshBlock:^(NSString *orgId) {
+                                                 
+                                                 // 0.request all position info from server
+                                                 
+                                                 [weakSelf requestServerAllPositionListWithOrgId:orgId];
+                                                 
+                                             }];
+        
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"add_member"]){// 添加成员
+            /*
+             <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="1" type="add_member">
+             {
+             "project":"xxx",
+             "member_tag":"xxx",
+             "member":[ {"job_id":"279", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162"}]
+             }
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *userTag = [data objectForKey:@"member_tag"];
+            NSArray *userInfoDics = [data objectForKey:@"member"];
+            
+            // 0.往数据库添加成员信息
+            [self _insertNewUserWithDics:userInfoDics orgId:orgId];
+            
+            // 1.修改组织表中的成员tag
+            [_xmppOrgStorage updateUserTagWithOrgId:orgId
+                                            userTag:userTag
+                                         xmppStream:xmppStream];
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"delete_member"]){// 删除成员
+            /*
+             <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="1" type="delete_member">
+             {
+             "project":"xxx",
+             "member_tag":"xxx",
+             "member":["jid1","jid2","jid3",...,"jidn"]
+             }
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *userTag = [data objectForKey:@"member_tag"];
+            NSArray *userBareJidStrs = [data objectForKey:@"member"];
+            
+            // 0.删除数据库中指定成员信息
+            [_xmppOrgStorage deleteUserWithUserBareJidStrs:userBareJidStrs
+                                          fromOrgWithOrgId:orgId
+                                                xmppStream:xmppStream];
+            
+            // 1.修改组织表中的成员tag
+            [_xmppOrgStorage updateUserTagWithOrgId:orgId
+                                            userTag:userTag
+                                         xmppStream:xmppStream];
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"subscribe"]){// 收到工程关联的请求
+            /*
+             <message from="48@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="48" type="subscribe">
+             {"id_self":"xxx", "name_self":"xxx", "id_target":"xxx", "name_target":"xxx",  }
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *fromOrgId = [data objectForKey:@"id_target"];
+            NSString *formOrgName = [data objectForKey:@"name_target"];
+            NSString *toOrgId = [data objectForKey:@"id_self"];
+            
+
+            [_xmppOrgStorage insertSubcribeObjectWithDic:[data destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                        @"formOrgId":@"id_target",
+                                                                                                        @"fromOrgName":@"name_target",
+                                                                                                        @"toOrgId":@"id_self",
+                                                                                                        @"message":@"message"
+                                                                                                          }]
+                                              xmppStream:xmppStream];
+            [multicastDelegate xmppOrg:self
+    didReceiveSubcribeRequestFromOrgId:fromOrgId
+                           fromOrgName:formOrgName
+                               toOrgId:toOrgId];
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"subscribed"]){// 同意别的组织关联请求
+            /*
+             <message from="49@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="49" type="subscribed">
+             {"id_self":"xxx", "name_self":"xxx", "link_tag_self":"xxx", "id_target":"xxx", "name_target":"xxx" }
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *formOrgId = [data objectForKey:@"id_target"];
+            NSString *formOrgName = [data objectForKey:@"name_target"];
+            NSString *toOrgId = [data objectForKey:@"id_self"];
+            NSString *relationTag = [data objectForKey:@"link_tag_self"];
+    
+            
+            // 0.把新的关联组织信息加入数据库
+            [_xmppOrgStorage addOrgId:formOrgId orgName:formOrgName toOrgId:toOrgId xmppStream:xmppStream];
+            
+            // 1.修改本组织的关联tag
+            [_xmppOrgStorage updateRelationShipTagWithOrgId:toOrgId relationShipTag:relationTag xmppStream:xmppStream];
+            
+            // 2.如果自己是本组织的admin，那么就修改该请求信息为已接受的
+            if ([_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:toOrgId xmppStream:xmppStream]) {
+                
+                [_xmppOrgStorage updateSubcribeObjectWithDic:[data destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                            @"formOrgId":@"id_target",
+                                                                                                            @"fromOrgName":@"name_target",
+                                                                                                            @"toOrgId":@"id_self",
+                                                                                                            @"message":@"message"
+                                                                                                            }]
+                                                      accept:YES
+                                                  xmppStream:xmppStream];
+                // 3.回掉通知收到 接受通知
+                [multicastDelegate xmppOrg:self didReceiveAcceptSubcribeFromOrgId:formOrgId fromOrgName:formOrgName toOrgId:toOrgId];
+            }
+            
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"unsubscribed"]){// 拒绝别的组织的关联请求
+            /*
+             <sys xmlns="aft.sys.project" projectid="1" type="unsubscribed">
+             {"id_self":"xxx", "name_self":"xxx", "id_target":"xxx", "name_target":"xxx"}
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *formOrgId = [data objectForKey:@"id_self"];
+            NSString *formOrgName = [data objectForKey:@"name_self"];
+            NSString *toOrgId = [data objectForKey:@"id_target"];
+            
+            // 0.回掉通知被拒绝
+            [multicastDelegate xmppOrg:self didReceiveRefuseSubcribeFromOrgId:formOrgId fromOrgName:formOrgName toOrgId:toOrgId];
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"unsubscribe"]){// 删除已经关联的组织
+            /*
+             <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+             <sys xmlns="aft.sys.project" projectid="1" type="unsubscribe">
+             {"id_self":"xxx", "name_self":"xxx", "link_tag_self":"xxx", "id_target":"xxx", "name_target":"xxx"}
+             </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *formOrgId = [data objectForKey:@"id_self"];
+            NSString *formOrgName = [data objectForKey:@"name_self"];
+            NSString *toOrgId = [data objectForKey:@"id_target"];
+            
+            // 0.删除数据库关联组织信息
+            [multicastDelegate xmppOrg:self didReceiveRefuseSubcribeFromOrgId:formOrgId fromOrgName:formOrgName toOrgId:toOrgId];
+            
+            // 1.改变数据库组织表关联tag
+            
+            // 2.回掉通知
+            
+        }
+    }
 }
 
 

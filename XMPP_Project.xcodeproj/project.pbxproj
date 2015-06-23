@@ -320,7 +320,7 @@
 		E796C4111A318C96004F7CB0 /* XMPPLoginUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E796C40F1A318C96004F7CB0 /* XMPPLoginUserCoreDataStorageObject.m */; };
 		E796C4141A318D34004F7CB0 /* XMPPLoginQueryModule.h in Headers */ = {isa = PBXBuildFile; fileRef = E796C4121A318D34004F7CB0 /* XMPPLoginQueryModule.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E796C4151A318D34004F7CB0 /* XMPPLoginQueryModule.m in Sources */ = {isa = PBXBuildFile; fileRef = E796C4131A318D34004F7CB0 /* XMPPLoginQueryModule.m */; };
-		E7A570EE1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7A570EC1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h */; };
+		E7A570EE1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7A570EC1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7A570EF1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A570ED1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.m */; };
 		E7AE674419FE4E97008546EA /* XMPPMessage+AdditionMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7AE674219FE4E97008546EA /* XMPPMessage+AdditionMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7AE674519FE4E97008546EA /* XMPPMessage+AdditionMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = E7AE674319FE4E97008546EA /* XMPPMessage+AdditionMessage.m */; };
@@ -1911,7 +1911,6 @@
 				63F3B4EC1960F91700BD8134 /* XMPPvCardTemp.h in Headers */,
 				63F3B52E1960F91700BD8134 /* XMPPMessage+XEP_0184.h in Headers */,
 				63F3B4BD1960F91700BD8134 /* XMPPJabberRPCModule.h in Headers */,
-				E7A570EE1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h in Headers */,
 				63F3B4DC1960F91700BD8134 /* XMPPMUC.h in Headers */,
 				63F3B4E81960F91700BD8134 /* XMPPvCardCoreDataStorageObject.h in Headers */,
 				63F3B5601960F91700BD8134 /* DDLog+LOGV.h in Headers */,
@@ -2017,6 +2016,7 @@
 				E712DAB61B0B4EE40048A8A4 /* XMPPUserCoreDataStorageObject.h in Headers */,
 				E78F0E061AD66245004DE419 /* XMPPMmsRequest.h in Headers */,
 				E7D92F211A7F6F2E00CE2608 /* XMPPAllMessageQueryModule.h in Headers */,
+				E7A570EE1B32C3D600F56E41 /* XMPPOrgSubcribeCoreDataStorageObject.h in Headers */,
 				E7E3A4B91B213A0200F3F9B5 /* NSDictionary+KeysTransfrom.h in Headers */,
 				E7EF536B1A1C68D700F0C268 /* XMPPLocationMessageObject.h in Headers */,
 			);

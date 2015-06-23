@@ -112,35 +112,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                            withUserId:(NSString *)userId
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (userId == nil) return nil;
-    if (moc == nil) return nil;
-    
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgUserCoreDataStorageObject"
-                                              inManagedObjectContext:moc];
-    
-    NSPredicate *predicate;
-    if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"userId", userId];
-    else
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",
-                     @"userId", userId, @"streamBareJidStr", streamBareJidStr];
-    
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    [fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:predicate];
-    [fetchRequest setIncludesPendingChanges:YES];
-    [fetchRequest setFetchLimit:1];
-    
-    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-    
-    return (XMPPOrgUserCoreDataStorageObject *)[results lastObject];
-}
-*/
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                              orgId:(NSString *)orgId
@@ -250,18 +221,11 @@
     
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     
-    if (tempOrgId == nil) return NO;
     
-    XMPPOrgUserCoreDataStorageObject *deleteObject = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                              orgId:tempOrgId
-                                                                                                   streamBareJidStr:streamBareJidStr];
-    if (deleteObject){
-        
-        [moc deleteObject:deleteObject];
-        return YES;
-    }
     
-    return NO;
+    return [XMPPOrgUserCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                    orgId:tempOrgId
+                                                         streamBareJidStr:streamBareJidStr];
 }
 
 - (void)updateWithDic:(NSDictionary *)dic

@@ -253,6 +253,7 @@
         result = YES;
         
     }else{
+        
         [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
                                                                    withDic:dic
                                                           streamBareJidStr:streamBareJidStr];
@@ -297,20 +298,10 @@
     NSString *tempPtId = [dic objectForKey:@"ptId"];
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     
-    if (tempPtId == nil) return NO;
-    if (tempOrgId == nil) return NO;
-    
-    XMPPOrgPositionCoreDataStorageObject *deleteObject = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                                   withPtId:tempPtId
-                                                                                                                      orgId:tempOrgId
-                                                                                                           streamBareJidStr:streamBareJidStr];
-    if (deleteObject){
-        
-        [moc deleteObject:deleteObject];
-        return YES;
-    }
-    
-    return NO;
+    return [XMPPOrgPositionCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                     withPtId:tempPtId
+                                                                        orgId:tempOrgId
+                                                             streamBareJidStr:streamBareJidStr];
 }
 
 - (void)updateWithDic:(NSDictionary *)dic

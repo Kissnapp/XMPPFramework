@@ -373,18 +373,9 @@
     
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     
-    if (tempOrgId == nil) return NO;
-    
-    XMPPOrgCoreDataStorageObject *deleteObject = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                  withOrgId:tempOrgId
-                                                                                           streamBareJidStr:streamBareJidStr];
-    if (deleteObject){
-        
-        [moc deleteObject:deleteObject];
-        return YES;
-    }
-    
-    return NO;
+    return [XMPPOrgCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                            withOrgId:tempOrgId
+                                                     streamBareJidStr:streamBareJidStr];
 }
 
 - (void)updateWithDic:(NSDictionary *)dic

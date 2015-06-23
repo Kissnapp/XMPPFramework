@@ -128,9 +128,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
           completionBlock:(CompletionBlock)completionBlock;
 
 
-
-
-
 #pragma mark - 搜索某个组织
 -(void)searchOrgWithName:(NSString *)orgName
          completionBlock:(CompletionBlock)completionBlock;
@@ -147,7 +144,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 
-- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveSubcribeRequestWith:(NSString *)request;
+- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveSubcribeRequestFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
+- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveAcceptSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
+- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveRefuseSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
 
 @end
 
@@ -183,6 +182,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)deleteUserWithUserJidStr:(NSString *)userJidStr orgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)deleteUserWithUserBareJidStrs:(NSArray *)userBareJidStrs fromOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
  
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
@@ -198,4 +198,19 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (BOOL)isAdminWithUser:(NSString *)userBareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
+- (id)endOrgWithOrgId:(NSString *)orgId orgEndTime:(NSDate *)orgEndTime xmppStream:(XMPPStream *)stream;
+- (void)comparePositionInfoWithOrgId:(NSString *)orgId
+                         positionTag:(NSString *)positionTag
+                          xmppStream:(XMPPStream *)stream
+                        refreshBlock:(void (^)(NSString *orgId))refreshBlock;
+- (void)updateUserTagWithOrgId:(NSString *)orgId
+                       userTag:(NSString *)userTag
+                    xmppStream:(XMPPStream *)stream;
+- (void)updateRelationShipTagWithOrgId:(NSString *)orgId
+                       relationShipTag:(NSString *)relationShipTag
+                            xmppStream:(XMPPStream *)stream;
+
+- (void)insertSubcribeObjectWithDic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+- (void)updateSubcribeObjectWithDic:(NSDictionary *)dic accept:(BOOL)accept xmppStream:(XMPPStream *)stream;
+- (void)addOrgId:(NSString *)orgId orgName:(NSString *)orgName toOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 @end

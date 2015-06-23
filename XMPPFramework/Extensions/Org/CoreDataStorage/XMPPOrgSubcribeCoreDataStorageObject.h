@@ -25,7 +25,6 @@ typedef NS_ENUM(NSUInteger, XMPPOrgSubcribeState) {
 @property (nonatomic, retain) NSNumber * state;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 
-
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                      withFormOrgId:(NSString *)formOrgId
                            toOrgId:(NSString *)toOrgId
