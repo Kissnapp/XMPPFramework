@@ -147,6 +147,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveSubcribeRequestFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
 - (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveAcceptSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
 - (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveRefuseSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
+- (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveRemoveSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
 
 @end
 
@@ -212,5 +213,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (void)insertSubcribeObjectWithDic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 - (void)updateSubcribeObjectWithDic:(NSDictionary *)dic accept:(BOOL)accept xmppStream:(XMPPStream *)stream;
-- (void)addOrgId:(NSString *)orgId orgName:(NSString *)orgName toOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (void)addOrgId:(NSString *)fromOrgId orgName:(NSString *)formOrgName toOrgId:(NSString *)toTogId xmppStream:(XMPPStream *)stream;
+- (void)removeOrgId:(NSString *)removeOrgId orgName:(NSString *)removeOrgName fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
+
 @end

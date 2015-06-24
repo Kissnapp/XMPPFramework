@@ -899,7 +899,9 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
         if (org) {
             
-            XMPPOrgRelationObject *relation = [XMPPOrgRelationObject insertInManagedObjectContext:moc withDic:dic];
+            XMPPOrgRelationObject *relation = [XMPPOrgRelationObject insertInManagedObjectContext:moc
+                                                                                          withDic:dic
+                                                                                 streamBareJidStr:streamBareJidStr];
             
             [org addOrgRelationShipObject:relation];
         }
@@ -1096,8 +1098,31 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         if (org) {
             XMPPOrgRelationObject *relation = [XMPPOrgRelationObject insertInManagedObjectContext:moc
                                                                                         withOrgId:fromOrgId
-                                                                                          orgName:formOrgName];
+                                                                                          orgName:formOrgName
+                                                                                 streamBareJidStr:streamBareJidStr];
             [org addOrgRelationShipObject:relation];
+        }
+    }];
+}
+
+- (void)removeOrgId:(NSString *)removeOrgId orgName:(NSString *)removeOrgName fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:fromOrgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        if (org) {
+            
+            XMPPOrgRelationObject *relation = [org xmppOrgRelationObjectWithRelationId:removeOrgId];
+            
+            if (relation) {
+                [org removeOrgRelationShipObject:relation];
+            }
         }
     }];
 }

@@ -3172,16 +3172,18 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             
             id data = [[sysElement stringValue] objectFromJSONString];
             NSString *formOrgId = [data objectForKey:@"id_self"];
-            NSString *formOrgName = [data objectForKey:@"name_self"];
             NSString *toOrgId = [data objectForKey:@"id_target"];
+            NSString *toOrgName = [data objectForKey:@"name_target"];
+            NSString *relationTag = [data objectForKey:@"link_tag_self"];
             
             // 0.删除数据库关联组织信息
-            [multicastDelegate xmppOrg:self didReceiveRefuseSubcribeFromOrgId:formOrgId fromOrgName:formOrgName toOrgId:toOrgId];
+            [_xmppOrgStorage removeOrgId:toOrgId orgName:toOrgId fromOrgId:formOrgId xmppStream:xmppStream];
             
             // 1.改变数据库组织表关联tag
+            [_xmppOrgStorage updateRelationShipTagWithOrgId:formOrgId relationShipTag:relationTag xmppStream:xmppStream];
             
             // 2.回掉通知
-            
+            [multicastDelegate xmppOrg:self didReceiveRemoveSubcribeFromOrgId:toOrgId fromOrgName:toOrgName toOrgId:formOrgId];
         }
     }
 }

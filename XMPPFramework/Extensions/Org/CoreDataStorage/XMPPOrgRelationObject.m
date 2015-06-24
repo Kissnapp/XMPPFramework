@@ -13,6 +13,7 @@
 
 @dynamic relationOrgId;
 @dynamic relationOrgName;
+@dynamic streamBareJidStr;
 @dynamic relationOrgShip;
 
 
@@ -55,6 +56,21 @@
     [self setPrimitiveValue:value forKey:@"relationOrgName"];
     [self didChangeValueForKey:@"relationOrgName"];
 }
+- (NSString *)streamBareJidStr
+{
+    [self willAccessValueForKey:@"streamBareJidStr"];
+    NSString *value = [self primitiveValueForKey:@"streamBareJidStr"];
+    [self didAccessValueForKey:@"streamBareJidStr"];
+    
+    return value;
+}
+
+- (void)setStreamBareJidStr:(NSString *)value
+{
+    [self willChangeValueForKey:@"streamBareJidStr"];
+    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
+    [self didChangeValueForKey:@"streamBareJidStr"];
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSManagedObject
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +89,9 @@
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                         withOrgId:(NSString *)orgId
+                  streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (orgId == nil) return nil;
     if (moc == nil) return nil;
@@ -83,7 +101,7 @@
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@", @"relationOrgId", orgId];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"relationOrgId == %@ AND streamBareJidStr == %@", orgId, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -96,7 +114,9 @@
     return (XMPPOrgRelationObject *)[results lastObject];
 }
 
-+ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic
++ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc
+                                   withDic:(NSDictionary *)dic
+                          streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (dic == nil) return nil;
     if (moc == nil) return nil;
@@ -106,12 +126,14 @@
     if (orgId == nil) return nil;
     
     XMPPOrgRelationObject *object = [XMPPOrgRelationObject objectInManagedObjectContext:moc
-                                                                              withOrgId:orgId];
+                                                                              withOrgId:orgId
+                                                                       streamBareJidStr:streamBareJidStr];
     
     if (object == nil) {
         
         object = [XMPPOrgRelationObject insertOrUpdateInManagedObjectContext:moc
-                                                                     withDic:dic];
+                                                                     withDic:dic
+                                                            streamBareJidStr:streamBareJidStr];
     }else{
         
         [object updateWithDic:dic];
@@ -120,7 +142,9 @@
     return object;
 }
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (dic == nil) return nil;
     if (moc == nil) return nil;
@@ -129,11 +153,15 @@
     
     XMPPOrgRelationObject *object = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                                   inManagedObjectContext:moc];
+    object.streamBareJidStr = streamBareJidStr;
     [object updateWithDic:dic];
     
     return object;
 }
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId orgName:(NSString *)orgName
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                         withOrgId:(NSString *)orgId
+                           orgName:(NSString *)orgName
+                  streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (orgId == nil) return nil;
     if (moc == nil) return nil;
@@ -144,6 +172,7 @@
                                                                   inManagedObjectContext:moc];
     object.relationOrgId = orgId;
     object.relationOrgName = orgName;
+    object.streamBareJidStr = streamBareJidStr;
     
     return object;
 }
@@ -152,9 +181,11 @@
 {
     NSString *tempOrgId = [dic objectForKey:@"relationOrgId"];
     NSString *tempOrgName = [dic objectForKey:@"relationOrgName"];
+    NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
     if (tempOrgId) self.relationOrgId = tempOrgId;
     if (tempOrgName) self.relationOrgName = tempOrgName;
+    if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
 - (NSComparisonResult)compareByRelationId:(XMPPOrgRelationObject *)another

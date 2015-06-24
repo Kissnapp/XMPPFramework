@@ -15,12 +15,22 @@
 
 @property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) NSString * relationOrgName;
+@property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;
 
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withOrgId:(NSString *)orgId orgName:(NSString *)orgName;
-+ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic;
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                         withOrgId:(NSString *)orgId
+                  streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                         withOrgId:(NSString *)orgId
+                           orgName:(NSString *)orgName
+                  streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc
+                                   withDic:(NSDictionary *)dic
+                          streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithDic:(NSDictionary *)dic;
 

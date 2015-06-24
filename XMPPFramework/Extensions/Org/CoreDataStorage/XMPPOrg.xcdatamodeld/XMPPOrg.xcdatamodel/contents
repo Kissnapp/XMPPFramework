@@ -27,6 +27,7 @@
     <entity name="XMPPOrgRelationObject" representedClassName="XMPPOrgRelationObject" syncable="YES">
         <attribute name="relationOrgId" attributeType="String" syncable="YES"/>
         <attribute name="relationOrgName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="relationOrgShip" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="XMPPOrgCoreDataStorageObject" inverseName="orgRelationShip" inverseEntity="XMPPOrgCoreDataStorageObject" syncable="YES"/>
     </entity>
     <entity name="XMPPOrgSubcribeCoreDataStorageObject" representedClassName="XMPPOrgSubcribeCoreDataStorageObject" syncable="YES">
@@ -47,7 +48,7 @@
     <elements>
         <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="225"/>
         <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="165"/>
-        <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="90"/>
+        <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="105"/>
         <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="105"/>
         <element name="XMPPOrgSubcribeCoreDataStorageObject" positionX="-1152" positionY="-180" width="128" height="150"/>
     </elements>

@@ -38,4 +38,5 @@
 
 - (void)updateWithDic:(NSDictionary *)dic;
 
+
 @end

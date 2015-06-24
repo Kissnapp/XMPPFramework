@@ -405,4 +405,16 @@
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
+- (id)xmppOrgRelationObjectWithRelationId:(NSString *)relationOrgId
+{
+    for (XMPPOrgRelationObject *relation in self.orgRelationShip) {
+        
+        if ([relation.relationOrgId isEqualToString:relationOrgId]) {
+            return relation;
+        }
+    }
+    
+    return nil;
+}
+
 @end

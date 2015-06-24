@@ -75,6 +75,8 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 
 - (void)updateWithDic:(NSDictionary *)dic;
 
+- (id)xmppOrgRelationObjectWithRelationId:(NSString *)relationOrgId;
+
 @end
 
 @interface XMPPOrgCoreDataStorageObject (CoreDataGeneratedAccessors)
