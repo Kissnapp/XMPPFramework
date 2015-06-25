@@ -136,6 +136,11 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 -(void)searchOrgWithName:(NSString *)orgName
          completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 根据某个组织的id获取这个组织的信息
+- (void)requestServerOrgWithOrgId:(NSString *)orgId;
+- (void)requestDBOrgWithOrgId:(NSString *)orgId
+              completionBlock:(CompletionBlock)completionBlock;
+
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
 
 @end

@@ -261,8 +261,8 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:1];
         
         if (streamBareJidStr){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"streamBareJidStr",
-                                      streamBareJidStr, @"orgId", orgId];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",
+                                      streamBareJidStr, orgId];
             
             [fetchRequest setPredicate:predicate];
             

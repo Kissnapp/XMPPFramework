@@ -37,6 +37,7 @@ static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
 static const NSString *REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_list_key";
 static const NSString *REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
 static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
+static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 
 @interface XMPPOrg ()
 
@@ -507,6 +508,120 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
         block();
     else
         dispatch_async(moduleQueue, block);
+}
+
+#pragma mark - 根据某个组织的id获取这个组织的信息
+
+- (void)requestServerOrgWithOrgId:(NSString *)orgId
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_INFO_KEY];
+            
+            // 1. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_project">
+              {"project":"xxx"}
+             </project>
+             </iq>
+             */
+            
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                                    forKey:@"project"];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_project"}
+                                                                       stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            NSLog(@"%@",@"you can not send this iq before logining");
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)requestDBOrgWithOrgId:(NSString *)orgId
+              completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        id org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
+        
+        org ? completionBlock(org, nil) : [self _requestServerOrgWithOrgId:orgId completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)_requestServerOrgWithOrgId:(NSString *)orgId
+                   completionBlock:(CompletionBlock)completionBlock
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+        
+        // If the templateId is nil，we should notice the user the info
+        // 0. Create a key for storaging completion block
+        NSString *requestKey = [[self xmppStream] generateUUID];
+        
+        // 1. add the completionBlock to the dcitionary
+        [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+        
+        // 2. Listing the request iq XML
+        /*
+         <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+         <project xmlns="aft:project" type="get_project">
+         {"project":"xxx"}
+         </project>
+         </iq>
+         */
+        
+        // 3. Create the request iq
+        NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                                forKey:@"project"];
+        
+        ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                         xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                     attribute:@{@"type":@"get_project"}
+                                                                   stringValue:[templateDic JSONString]];
+        
+        IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                         to:nil
+                                                       type:@"get"
+                                                         id:requestKey
+                                               childElement:organizationElement];
+        // 4. Send the request iq element to the server
+        [[self xmppStream] sendElement:iqElement];
+        
+        // 5. add a timer to call back to user after a long time without server's reponse
+        [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+        
+    }else{
+        // 0. tell the the user that can not send a request
+        [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+    }
 }
 
 #pragma mark - 获取所有项目
@@ -2410,6 +2525,89 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 return YES;
                 
                 
+            }else if([projectType isEqualToString:@"get_project"]){
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 正确的结果：
+                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project" type="get_project">
+                 {"id":"xxx", "name":"xxx", "description":"xxx", "status":"xxx", "admin":"xxx", "start_time":"xxx", "end_time":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx"}
+                 </project>
+                 </iq>
+                 */
+                
+                // 0.跟新数据库
+                NSDictionary *orgDic = [[project stringValue] objectFromJSONString];
+                NSString *orgId = [orgDic objectForKey:@"id"];
+                
+                __weak typeof(self) weakSelf = self;
+                [_xmppOrgStorage insertOrUpdateOrgInDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                            @"orgId":@"id",
+                                                                                                            @"orgName":@"name",
+                                                                                                            @"orgState":@"status",
+                                                                                                            @"orgStartTime":@"start_time",
+                                                                                                            @"orgEndTime":@"end_time",
+                                                                                                            @"orgAdminJidStr":@"admin",
+                                                                                                            @"orgDescription":@"description",
+                                                                                                            @"ptTag":@"job_tag",
+                                                                                                            @"userTag":@"member_tag",
+                                                                                                            @"orgRelationShipTag":@"link_tag"
+                                                                                                            }]
+                                                xmppStream:xmppStream
+                                                 userBlock:^(NSString *orgId) {
+                                                     
+                                                     // 0.request all user info from server
+                                                     
+                                                     [weakSelf requestServerAllUserListWithOrgId:orgId];
+                                                     
+                                                 } positionBlock:^(NSString *orgId) {
+                                                     
+                                                     // 1.request all position info from server
+                                                     
+                                                     [weakSelf requestServerAllPositionListWithOrgId:orgId];
+                                                     
+                                                 } relationBlock:^(NSString *orgId) {
+                                                     
+                                                     // 2.request all relation org info from server
+                                                     
+                                                     [weakSelf requestServerAllRelationListWithOrgId:orgId];
+                                                 }];
+                
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_INFO_KEY]]) {
+                    
+                    // 2.向数据库获取数据
+                    id data = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        completionBlock(data, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                }
+                
+                return YES;
+                
+                
             }else if([projectType isEqualToString:@"project_name_exist"]){
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -3029,7 +3227,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
              {
              "project":"xxx",
              "member_tag":"xxx",
-             "member":[ {"job_id":"279", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162"}]
+             "member":[{"job_id":"279", "jid":"125d9af626064ba2bbdd1fe215b8926c@192.168.1.162"},...]
              }
              </sys>
              </message>
@@ -3048,6 +3246,8 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                                             userTag:userTag
                                          xmppStream:xmppStream pullOrgBlock:^(NSString *orgId) {
                                              
+                                             // 2.下载这个组织的信息
+                                             [weakSelf requestServerOrgWithOrgId:orgId];
                                          }];
             
         }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"delete_member"]){// 删除成员
