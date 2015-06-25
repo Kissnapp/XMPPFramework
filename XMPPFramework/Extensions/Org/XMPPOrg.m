@@ -328,7 +328,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     if (!dispatch_get_specific(moduleQueueTag)) return nil;
     
-    if ([dics count] < 1) return nil;
+    //if ([dics count] < 1) return nil;
     
     __block NSMutableArray *array = [NSMutableArray array];
     
@@ -347,7 +347,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    if ([orgDics count] < 1) return;
+    //if ([orgDics count] < 1) return;
     
     __weak typeof(self) weakSelf = self;
     
@@ -2328,7 +2328,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  正确的结果：
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project" type="list_project">
-                 [{"id":"xxx", "name":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx"}, ...]   %% modify.
+                 [{"id":"xxx", "name":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx"}, ...]
                  </project>
                  </iq>
                  */
