@@ -166,6 +166,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @optional
 
 - (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream;
+- (void)clearOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
@@ -211,7 +212,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                         refreshBlock:(void (^)(NSString *orgId))refreshBlock;
 - (void)updateUserTagWithOrgId:(NSString *)orgId
                        userTag:(NSString *)userTag
-                    xmppStream:(XMPPStream *)stream;
+                    xmppStream:(XMPPStream *)stream
+                  pullOrgBlock:(void (^)(NSString *orgId))pullOrgBlock;
 - (void)updateRelationShipTagWithOrgId:(NSString *)orgId
                        relationShipTag:(NSString *)relationShipTag
                             xmppStream:(XMPPStream *)stream;

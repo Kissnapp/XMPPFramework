@@ -2668,6 +2668,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                 // 1.存入数据库
                 [self _insertNewUserWithDics:userDics orgId:orgId];
                 
+                
                 // 2.获取新加入的人员信息
                 NSArray *newUserIds = [self _specifiedValuesWithKey:@"jid" fromDics:userDics];
                 NSArray *newUsers = [_xmppOrgStorage newUsersWithOrgId:orgId userIds:newUserIds xmppStream:xmppStream];
@@ -2707,14 +2708,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
                  </project>
                  </iq>
                  
-                 %% modify update project member_timestamp.
-                 
-                 push msg:
-                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
-                 <sys xmlns="aft.sys.project" projectid="1" type="delete_member">
-                 [{"member_tag":"xxx"}, {"jid":"xxx", "jid":"xxx", ...}] %% modify
-                 </sys>
-                 </message>
+                
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
@@ -3048,10 +3042,13 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             // 0.往数据库添加成员信息
             [self _insertNewUserWithDics:userInfoDics orgId:orgId];
             
-            // 1.修改组织表中的成员tag
+            
+            // 1.修改组织表中的成员tag,如果数据库中没有这个项目，就要下载(防止被添加人数据库没有这个组织)
             [_xmppOrgStorage updateUserTagWithOrgId:orgId
                                             userTag:userTag
-                                         xmppStream:xmppStream];
+                                         xmppStream:xmppStream pullOrgBlock:^(NSString *orgId) {
+                                             
+                                         }];
             
         }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"delete_member"]){// 删除成员
             /*
@@ -3070,15 +3067,28 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
             NSString *userTag = [data objectForKey:@"member_tag"];
             NSArray *userBareJidStrs = [data objectForKey:@"member"];
             
-            // 0.删除数据库中指定成员信息
-            [_xmppOrgStorage deleteUserWithUserBareJidStrs:userBareJidStrs
-                                          fromOrgWithOrgId:orgId
-                                                xmppStream:xmppStream];
+            // 0.判断被删除的人中是否有自己，有自己要删除数据库中的该项目信息，项目职位和人员信息
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF == %@", [[xmppStream myJID] bare]];
+            NSArray *results = [userBareJidStrs filteredArrayUsingPredicate:predicate];
             
-            // 1.修改组织表中的成员tag
-            [_xmppOrgStorage updateUserTagWithOrgId:orgId
-                                            userTag:userTag
-                                         xmppStream:xmppStream];
+            if ([results count] >= 1) {// 有自己
+                
+                // 1.有自己删除数据库中该项目信息，项目职位和人员信息
+                [_xmppOrgStorage clearOrgWithOrgId:orgId xmppStream:xmppStream];
+                
+            }else{// 没有自己
+                
+                // 2.没有自己，删除数据库中指定成员信息
+                [_xmppOrgStorage deleteUserWithUserBareJidStrs:userBareJidStrs
+                                              fromOrgWithOrgId:orgId
+                                                    xmppStream:xmppStream];
+                
+                // 3.没有自己，修改组织表中的成员tag
+                [_xmppOrgStorage updateUserTagWithOrgId:orgId
+                                                userTag:userTag
+                                             xmppStream:xmppStream
+                                           pullOrgBlock:NULL];
+            }
             
         }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"subscribe"]){// 收到工程关联的请求
             /*

@@ -593,6 +593,24 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return newUsers;
 }
 
+- (void)clearOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        [XMPPOrgCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                         withOrgId:orgId
+                                                  streamBareJidStr:streamBareJidStr];
+        
+    }];
+    
+    [self clearUsersWithOrgId:orgId xmppStream:stream];
+    [self clearPositionsWithOrgId:orgId xmppStream:stream];
+}
+
 - (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();
@@ -753,7 +771,10 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     }];
 }
 
-- (void)updateUserTagWithOrgId:(NSString *)orgId userTag:(NSString *)userTag xmppStream:(XMPPStream *)stream
+- (void)updateUserTagWithOrgId:(NSString *)orgId
+                       userTag:(NSString *)userTag
+                    xmppStream:(XMPPStream *)stream
+                  pullOrgBlock:(void (^)(NSString *orgId))pullOrgBlock
 {
     [self scheduleBlock:^{
         
@@ -763,7 +784,15 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                              withOrgId:orgId
                                                                                       streamBareJidStr:streamBareJidStr];
-        if (org) org.userTag = userTag;
+        if (org) {
+            
+            org.userTag = userTag;
+            
+        }else{
+            if (pullOrgBlock) {
+                pullOrgBlock(orgId);
+            }
+        }
     }];
 }
 
@@ -873,13 +902,10 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
         // find the give object info is whether existed
-        XMPPOrgUserCoreDataStorageObject *user = [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                                                        withDic:dic
-                                                                                               streamBareJidStr:streamBareJidStr];
-        
-        [user updateWithDic:dic];
-        
-        user.orgId = orgId;
+        [XMPPOrgUserCoreDataStorageObject updateInManagedObjectContext:moc
+                                                               withDic:dic
+                                                                 orgId:orgId
+                                                      streamBareJidStr:streamBareJidStr];
         
     }];
 }

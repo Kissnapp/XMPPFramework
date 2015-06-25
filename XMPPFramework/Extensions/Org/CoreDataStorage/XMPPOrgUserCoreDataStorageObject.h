@@ -18,22 +18,27 @@
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                              orgId:(NSString *)orgId
+                        userJidStr:(NSString *)userJidStr
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withDic:(NSDictionary *)dic
+                             orgId:(NSString *)orgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
                              withDic:(NSDictionary *)dic
-                    streamBareJidStr:(NSString *)streamBareJidStr;
-
-+ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                                orgId:(NSString *)orgId
                     streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
+                               orgId:(NSString *)orgId
+                          userJidStr:(NSString *)userJidStr
+                    streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                              withDic:(NSDictionary *)dic
+                               orgId:(NSString *)orgId
                     streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithDic:(NSDictionary *)dic;

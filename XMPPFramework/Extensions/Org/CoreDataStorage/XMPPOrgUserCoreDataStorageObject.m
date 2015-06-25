@@ -115,9 +115,11 @@
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                              orgId:(NSString *)orgId
+                        userJidStr:(NSString *)userJidStr
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (orgId == nil) return nil;
+    if (userJidStr == nil) return nil;
     if (moc == nil) return nil;
     
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgUserCoreDataStorageObject"
@@ -125,9 +127,9 @@
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"orgId", orgId];
+        predicate = [NSPredicate predicateWithFormat:@"orgId == %@",orgId];
     else
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
+        predicate = [NSPredicate predicateWithFormat:@"orgId == %@ AND streamBareJidStr == %@ AND userJidStr == %@",orgId, streamBareJidStr, userJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -143,6 +145,7 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withDic:(NSDictionary *)dic
+                             orgId:(NSString *)orgId
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     
@@ -155,6 +158,7 @@
                                                                               inManagedObjectContext:moc];
     
     newUser.streamBareJidStr = streamBareJidStr;
+    newUser.orgId = orgId;
     
     [newUser updateWithDic:dic];
     
@@ -163,17 +167,21 @@
 
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc
                              withDic:(NSDictionary *)dic
+                               orgId:(NSString *)orgId
                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     BOOL result = NO;
     
-    NSString *tempOrgId = [dic objectForKey:@"orgId"];
+    NSString *tempOrgId = orgId ? :[dic objectForKey:@"orgId"];
+    NSString *temuserJidStr = [dic objectForKey:@"userJidStr"];
     
     if (tempOrgId == nil)  return result;
+    if (temuserJidStr == nil)  return result;
     if (moc == nil)  return result;
     
     XMPPOrgUserCoreDataStorageObject *newUser = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                          orgId:tempOrgId
+                                                                                                    userJidStr:temuserJidStr
                                                                                               streamBareJidStr:streamBareJidStr];
     if (newUser != nil) {
         
@@ -183,6 +191,7 @@
     }else{
         [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
                                                                withDic:dic
+                                                                 orgId:tempOrgId
                                                       streamBareJidStr:streamBareJidStr];
         result = YES;
     }
@@ -193,6 +202,7 @@
 
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                                orgId:(NSString *)orgId
+                          userJidStr:(NSString *)userJidStr
                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (orgId == nil) return NO;
@@ -201,6 +211,7 @@
     
     XMPPOrgUserCoreDataStorageObject *deleteObject = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                               orgId:orgId
+                                                                                                         userJidStr:userJidStr
                                                                                                    streamBareJidStr:streamBareJidStr];
     if (deleteObject){
         
@@ -213,18 +224,20 @@
 
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
                              withDic:(NSDictionary *)dic
+                               orgId:(NSString *)orgId
                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (dic == nil) return NO;
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
-    NSString *tempOrgId = [dic objectForKey:@"orgId"];
-    
+    NSString *tempOrgId = orgId ? :[dic objectForKey:@"orgId"];
+    NSString *temuserJidStr = [dic objectForKey:@"userJidStr"];
     
     
     return [XMPPOrgUserCoreDataStorageObject deleteInManagedObjectContext:moc
                                                                     orgId:tempOrgId
+                                                               userJidStr:temuserJidStr
                                                          streamBareJidStr:streamBareJidStr];
 }
 
