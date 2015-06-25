@@ -28,7 +28,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
-static const NSString *ORG_PUSH_MSG_XMLNS = @"aft.sys.project";
+static const NSString *ORG_PUSH_MSG_XMLNS = @"aft:project";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
 static const NSInteger ORG_ERROR_CODE = 9999;
 
@@ -2981,7 +2981,7 @@ static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_li
     // This method is invoked on the moduleQueue.
     XMPPLogTrace();
     
-    NSXMLElement *sysElement = [message elementForName:@"sys" xmlns:@"aft.sys.project"];
+    NSXMLElement *sysElement = [message elementForName:@"sys" xmlns:[NSString stringWithFormat:@"%@",ORG_PUSH_MSG_XMLNS]];
     
     //This is a org push message
     if (sysElement) {

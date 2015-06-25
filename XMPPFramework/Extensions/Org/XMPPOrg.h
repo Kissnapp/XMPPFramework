@@ -46,11 +46,13 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 #pragma mark - 获取一个组织的所有成员信息
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
-- (void)requestDBAllUserListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;;
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+                      completionBlock:(CompletionBlock)completionBlock;;
 
 #pragma mark - 获取一个组织的所有关键组织的id
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
-- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;;
+- (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock;;
 
 #pragma mark - 验证组织name
 - (void)checkOrgName:(NSString *)name
@@ -103,7 +105,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
       withUsers:(NSString *)userBareJid1, ... NS_REQUIRES_NIL_TERMINATION;
 
 #pragma mark - 从某个组织删人
-- (void)removeUserBareJidStr:(NSString *)userBareJidStr formOrg:(NSString *)orgId completionBlock:(CompletionBlock)completionBlock;
+- (void)removeUserBareJidStr:(NSString *)userBareJidStr
+                     formOrg:(NSString *)orgId
+             completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 订阅某个组织
 - (void)subcribeOrgRequestWithSelfOrgId:(NSString *)selfOrgId
@@ -150,6 +154,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)xmppOrg:(XMPPOrg *)xmppOrg didReceiveRemoveSubcribeFromOrgId:(NSString *)fromOrgId fromOrgName:(NSString *)fromOrgName toOrgId:(NSString *)toOrgId;
 
 @end
+
 
 // XMPPOrganizationStorage
 @protocol XMPPOrgStorage <NSObject>
