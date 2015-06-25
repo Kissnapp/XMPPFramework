@@ -611,7 +611,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (streamBareJidStr){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:(isTemplate ? @"NOT(orgId in %@) AND streamBareJidStr == %@ AND orgState == %@":@"NOT(orgId in %@) AND streamBareJidStr == %@ AND orgState == %@"), orgIds,
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:(isTemplate ? @"NOT(orgId IN %@) AND streamBareJidStr == %@ AND orgState == %@":@"NOT(orgId IN %@) AND streamBareJidStr == %@ AND orgState != %@"), orgIds,
                                       streamBareJidStr, @(XMPPOrgCoreDataStorageObjectStateTemplate)];
             
             [fetchRequest setPredicate:predicate];
