@@ -2976,6 +2976,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
+                NSArray * arr = [data JSONString];
                 CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
                 if (completionBlock) {
