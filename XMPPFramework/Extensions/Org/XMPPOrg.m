@@ -26,7 +26,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #else
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
-
+static const double REQUEST_TIMEOUT_DELAY = 30.0f;
 static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
 static const NSString *ORG_PUSH_MSG_XMLNS = @"aft:project";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
@@ -2176,7 +2176,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 {
     // We should find our request block after 60 seconds,if there is no reponse from the server,
     //  we should call back with a error to notice the user that the server has no response for this request
-    NSTimeInterval delayInSeconds = 60.0;
+    NSTimeInterval delayInSeconds = REQUEST_TIMEOUT_DELAY;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
     dispatch_after(popTime, moduleQueue, ^(void){@autoreleasepool{
         
@@ -3051,13 +3051,6 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                  {"id_self":"xxx",“id_target":"xxx"}
                  </project>
                  </iq>
-                 
-                 push to all member in each project.
-                 <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
-                 <sys xmlns="aft.sys.project" projectid="1" type="subscribed">
-                 {"id":"xxx", "name":"xxx", "memeber_tag":"xxx"}  %% 分别发给两个组织，分别发对方组织的信息。   %% modify
-                 </sys>
-                 </message>
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
