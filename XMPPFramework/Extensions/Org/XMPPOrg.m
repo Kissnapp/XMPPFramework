@@ -624,6 +624,25 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     }
 }
 
+#pragma mark - 根据某个组织的id查询他在数据库中的名称
+
+- (void)requestDBOrgNameWithOrgId:(NSString *)orgId
+                  completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
+        
+        org ? completionBlock(org.orgName, nil) : [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 #pragma mark - 获取所有项目
 
 // 数据库同服务器请求

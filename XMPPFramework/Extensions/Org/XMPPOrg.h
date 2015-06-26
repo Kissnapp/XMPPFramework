@@ -141,6 +141,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestDBOrgWithOrgId:(NSString *)orgId
               completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 根据某个组织的id查询他在数据库中的名称
+- (void)requestDBOrgNameWithOrgId:(NSString *)orgId
+                  completionBlock:(CompletionBlock)completionBlock;
+
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
 
 @end
