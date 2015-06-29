@@ -192,10 +192,9 @@
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@",@"ptId", ptId, @"orgId", orgId];
+        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND orgId == %@", ptId, orgId];
     else
-        predicate = [NSPredicate predicateWithFormat:@"%K == %@ AND %K == %@ AND %K == %@",
-                     @"ptId", ptId, @"orgId", orgId, @"streamBareJidStr", streamBareJidStr];
+        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND orgId == %@ AND streamBareJidStr == %@", ptId, orgId, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];

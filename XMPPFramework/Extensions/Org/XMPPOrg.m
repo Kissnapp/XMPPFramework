@@ -277,6 +277,32 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                                                                                                                          }]
                                               xmppStream:xmppStream];
 }
+- (void)_insertOrUpdatePositionWithDic:(NSArray *)positionDics orgId:(NSString *)orgId
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if ([positionDics count] < 1) return;
+    
+    // delete the old data
+    [_xmppOrgStorage clearPositionsWithOrgId:orgId xmppStream:xmppStream];
+    
+    [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        //{"id":"1", "name":"项目经理", "left":"1", "right":"20", "part":"领导班子"}
+        [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId
+                                                         dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                           @"ptId":@"id",
+                                                                                                                           @"ptName":@"name",
+                                                                                                                           @"ptLeft":@"left",
+                                                                                                                           @"ptRight":@"right",
+                                                                                                                           @"dpId":@"part_id",
+                                                                                                                           @"dpName":@"part",
+                                                                                                                           @"orgId":@"project_id"
+                                                                                                                           }]
+                                                  xmppStream:xmppStream];
+        
+    }];
+}
+
 
 - (void)_insertOrUpateOrgWithOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
 {
@@ -435,31 +461,6 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     }];
 }
 
-- (void)_insertOrUpdatePositionWithDic:(NSArray *)positionDics orgId:(NSString *)orgId
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    if ([positionDics count] < 1) return;
-    
-    // delete the old data
-    [_xmppOrgStorage clearPositionsWithOrgId:orgId xmppStream:xmppStream];
-    
-    [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        //{"id":"1", "name":"项目经理", "left":"1", "right":"20", "part":"领导班子"}
-        [_xmppOrgStorage insertOrUpdatePositionInDBWithOrgId:orgId
-                                                         dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                           @"ptId":@"id",
-                                                                                                                           @"ptName":@"name",
-                                                                                                                           @"ptLeft":@"left",
-                                                                                                                           @"ptRight":@"right",
-                                                                                                                           @"dpId":@"part_id",
-                                                                                                                           @"dpName":@"part",
-                                                                                                                           @"orgId":@"project_id"
-                                                                                                                           }]
-                                                  xmppStream:xmppStream];
-        
-    }];
-}
 
 - (void)_insertOrUpdateRelationWithDic:(NSArray *)relationDics orgId:(NSString *)orgId
 {
