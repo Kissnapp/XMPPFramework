@@ -196,6 +196,12 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                     positionBlock:(void (^)(NSString *orgId))positionBlock
                     relationBlock:(void (^)(NSString *orgId))relationBlock;
 
+- (void)insertNewCreateOrgnDBWith:(NSDictionary *)dic
+                       xmppStream:(XMPPStream *)stream
+                        userBlock:(void (^)(NSString *orgId))userBlock
+                    positionBlock:(void (^)(NSString *orgId))positionBlock
+                    relationBlock:(void (^)(NSString *orgId))relationBlock;
+
 - (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)deleteUserWithUserJidStr:(NSString *)userJidStr orgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)deleteUserWithUserBareJidStrs:(NSArray *)userBareJidStrs fromOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;

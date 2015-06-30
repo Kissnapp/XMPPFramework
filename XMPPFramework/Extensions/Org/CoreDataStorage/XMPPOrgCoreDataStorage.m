@@ -85,7 +85,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPOrganizationStorage
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue
+- (BOOL)configureWithParent:(XMPPOrg *)aParent queue:(dispatch_queue_t)queue
 {
     return [super configureWithParent:aParent queue:queue];
 }
@@ -808,6 +808,60 @@ static XMPPOrgCoreDataStorage *sharedInstance;
                                                                                              withOrgId:orgId
                                                                                       streamBareJidStr:streamBareJidStr];
         if (org) org.relationShipTag = relationShipTag;
+    }];
+}
+
+- (void)insertNewCreateOrgnDBWith:(NSDictionary *)dic
+                       xmppStream:(XMPPStream *)stream
+                        userBlock:(void (^)(NSString *orgId))userBlock
+                    positionBlock:(void (^)(NSString *orgId))positionBlock
+                    relationBlock:(void (^)(NSString *orgId))relationBlock
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *orgId = [dic objectForKey:@"orgId"];
+        
+        // find the give object info is whether existed
+        XMPPOrgCoreDataStorageObject *orgObject = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                   withOrgId:orgId
+                                                                                            streamBareJidStr:streamBareJidStr];
+        
+        if (orgObject == nil) {
+            
+            orgObject = [XMPPOrgCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                           withDic:dic
+                                                                  streamBareJidStr:streamBareJidStr];
+            orgObject.orgAdminJidStr = streamBareJidStr;
+            orgObject.orgState = @(XMPPOrgCoreDataStorageObjectStateActive);
+            
+            if (userBlock) userBlock(orgId);
+            if (positionBlock) positionBlock(orgId);
+            if (relationBlock) relationBlock(orgId);
+            
+        }else{
+            
+            NSString *userTag = [dic objectForKey:@"userTag"];
+            NSString *ptTag = [dic objectForKey:@"ptTag"];
+            NSString *orgRelationShipTag = [dic objectForKey:@"orgRelationShipTag"];
+            
+            if (![orgObject.userTag isEqualToString:userTag])
+                if (userBlock) userBlock(orgId);
+            
+            if (![orgObject.ptTag isEqualToString:ptTag])
+                if (positionBlock) positionBlock(orgId);
+            
+            if (![orgObject.relationShipTag isEqualToString:orgRelationShipTag])
+                if (relationBlock) relationBlock(orgId);
+            
+            [orgObject updateWithDic:dic];
+            
+            orgObject.orgAdminJidStr = streamBareJidStr;
+            orgObject.orgState = @(XMPPOrgCoreDataStorageObjectStateActive);
+        }
+        
     }];
 }
 

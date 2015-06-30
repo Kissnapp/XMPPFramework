@@ -303,6 +303,51 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     }];
 }
 
+- (void)_insertNewOrgAfterCreateOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    __weak typeof(self) weakSelf = self;
+    [_xmppOrgStorage insertNewCreateOrgnDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                @"orgId":@"id",
+                                                                                                @"orgName":@"name",
+                                                                                                @"orgState":@"status",
+                                                                                                @"orgStartTime":@"start_time",
+                                                                                                @"orgEndTime":@"end_time",
+                                                                                                @"orgAdminJidStr":@"admin",
+                                                                                                @"orgDescription":@"description",
+                                                                                                @"ptTag":@"job_tag",
+                                                                                                @"userTag":@"member_tag",
+                                                                                                @"orgRelationShipTag":@"link_tag",
+                                                                                                }]
+                                    xmppStream:xmppStream
+                                     userBlock:^(NSString *orgId) {
+                                         
+                                         // 0.request all user info from server
+                                         
+                                         [weakSelf requestServerAllUserListWithOrgId:orgId];
+                                         
+                                     } positionBlock:^(NSString *orgId) {
+                                         
+                                         // 1.request all position info from server
+                                         
+                                         [weakSelf requestServerAllPositionListWithOrgId:orgId];
+                                         
+                                     } relationBlock:^(NSString *orgId) {
+                                         
+                                         // 2.request all relation org info from server
+                                         
+                                         [weakSelf requestServerAllRelationListWithOrgId:orgId];
+                                     }];
+    
+    [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId dic:[userDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                 @"userJidStr":@"jid",
+                                                                                                                 @"orgId":@"orgId",
+                                                                                                                 @"ptId":@"job_id",
+                                                                                                                 @"ptName":@"job_name"
+                                                                                                                 }]
+                                          xmppStream:xmppStream];
+}
 
 - (void)_insertOrUpateOrgWithOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
 {
@@ -2704,7 +2749,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 NSDictionary *userInfoDic = [data objectForKey:@"member"];
                 NSString *orgId = [orgInfoDic objectForKey:@"id"];
                 
-                [self _insertOrUpateOrgWithOrgId:orgId orgDic:orgInfoDic userDic:userInfoDic];
+                [self _insertNewOrgAfterCreateOrgId:orgId orgDic:orgInfoDic userDic:userInfoDic];
                 
                 // 1.返回block
                 XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
