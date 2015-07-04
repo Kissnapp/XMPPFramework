@@ -77,6 +77,12 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                               completionBlock:(CompletionBlock)completionBlock;
 
 
+#pragma mark - 按部门名称查询部门成员列表
+
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId
+                          dpName:(NSString *)dpName
+                       ascending:(BOOL)ascending;
+
 #pragma mark - 创建新的职位信息
 /**
  *  创建新的职位信息
@@ -185,6 +191,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)usersInDepartmentWithDpName:(NSString *)dpName
+                            orgId:(NSString *)orgId
+                        ascending:(BOOL)ascending
+                       xmppStream:(XMPPStream *)stream;
 
 - (id)newUsersWithOrgId:(NSString *)orgId userIds:(NSArray *)userIds xmppStream:(XMPPStream *)stream;
 

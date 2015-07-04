@@ -763,11 +763,6 @@ static NSMutableSet *databaseFileNames;
 		mainThreadManagedObjectContext.persistentStoreCoordinator = coordinator;
 		mainThreadManagedObjectContext.undoManager = nil;
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(managedObjectContextWillSave:)
-                                                     name:NSManagedObjectContextWillSaveNotification
-                                                   object:nil];
-		
 		[[NSNotificationCenter defaultCenter] addObserver:self
 		                                         selector:@selector(managedObjectContextDidSave:)
 		                                             name:NSManagedObjectContextDidSaveNotification
@@ -778,11 +773,6 @@ static NSMutableSet *databaseFileNames;
 	}
 	
 	return mainThreadManagedObjectContext;
-}
-
-- (void)managedObjectContextWillSave:(NSNotification *)notification
-{
-    [self mainThreadManagedObjectContextWillMergeChanges];;
 }
 
 - (void)managedObjectContextDidSave:(NSNotification *)notification
@@ -800,7 +790,8 @@ static NSMutableSet *databaseFileNames;
             for (NSManagedObject *object in [[notification userInfo] objectForKey:NSUpdatedObjectsKey]) {
                 [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
             }
-			
+            
+            [self mainThreadManagedObjectContextWillMergeChanges];
 			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
 			[self mainThreadManagedObjectContextDidMergeChanges];
 		});

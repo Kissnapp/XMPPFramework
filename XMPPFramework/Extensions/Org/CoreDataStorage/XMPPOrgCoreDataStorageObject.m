@@ -8,6 +8,7 @@
 
 #import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgRelationObject.h"
+#import "XMPPOrgPositionCoreDataStorageObject.h"
 #import "NSString+NSDate.h"
 
 @implementation XMPPOrgCoreDataStorageObject
@@ -23,6 +24,7 @@
 @dynamic ptTag;
 @dynamic userTag;
 @dynamic relationShipTag;
+@dynamic orgPtShip;
 @dynamic orgRelationShip;
 
 

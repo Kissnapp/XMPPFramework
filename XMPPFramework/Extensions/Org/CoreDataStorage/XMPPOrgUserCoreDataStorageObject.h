@@ -9,12 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "XMPPManagedObject.h"
 
+@class XMPPOrgPositionCoreDataStorageObject;
+
 @interface XMPPOrgUserCoreDataStorageObject : XMPPManagedObject
 
-@property (nonatomic, retain) NSString * userJidStr;
-@property (nonatomic, retain) NSString * orgId;
-@property (nonatomic, retain) NSString * ptId;
 @property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, retain) NSString * userJidStr;
+@property (nonatomic, retain) XMPPOrgPositionCoreDataStorageObject *userPtShip;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                              orgId:(NSString *)orgId
@@ -23,7 +24,6 @@
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withDic:(NSDictionary *)dic
-                             orgId:(NSString *)orgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc

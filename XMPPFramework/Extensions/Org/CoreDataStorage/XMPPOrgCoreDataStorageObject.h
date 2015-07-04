@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPPManagedObject.h"
 
-@class XMPPOrgRelationObject;
+@class XMPPOrgPositionCoreDataStorageObject, XMPPOrgRelationObject;
 
 /**
  *  The org state tag
@@ -46,6 +46,7 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 @property (nonatomic, retain) NSString * userTag;
 // when the relationship org list of a org had been update,this value will been updated
 @property (nonatomic, retain) NSString * relationShipTag;
+@property (nonatomic, retain) NSSet *orgPtShip;
 @property (nonatomic, retain) NSSet *orgRelationShip;
 
 + (id)relationShipObjectInManagedObjectContext:(NSManagedObjectContext *)moc
@@ -80,6 +81,11 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 @end
 
 @interface XMPPOrgCoreDataStorageObject (CoreDataGeneratedAccessors)
+
+- (void)addOrgPtShipObject:(XMPPOrgPositionCoreDataStorageObject *)value;
+- (void)removeOrgPtShipObject:(XMPPOrgPositionCoreDataStorageObject *)value;
+- (void)addOrgPtShip:(NSSet *)values;
+- (void)removeOrgPtShip:(NSSet *)values;
 
 - (void)addOrgRelationShipObject:(XMPPOrgRelationObject *)value;
 - (void)removeOrgRelationShipObject:(XMPPOrgRelationObject *)value;

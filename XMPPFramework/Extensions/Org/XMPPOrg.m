@@ -1472,6 +1472,30 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 
 }
+
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId
+                          dpName:(NSString *)dpName
+                       ascending:(BOOL)ascending
+{
+    __block NSArray *users = nil;
+    
+    dispatch_block_t block = ^{
+        
+        users = [_xmppOrgStorage usersInDepartmentWithDpName:dpName
+                                                       orgId:orgId
+                                                   ascending:ascending
+                                                  xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return users;
+}
+
+
 - (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
                                    orgId:(NSString *)orgId
                          completionBlock:(CompletionBlock)completionBlock

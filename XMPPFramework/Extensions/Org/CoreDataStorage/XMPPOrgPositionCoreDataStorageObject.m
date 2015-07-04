@@ -7,6 +7,9 @@
 //
 
 #import "XMPPOrgPositionCoreDataStorageObject.h"
+#import "XMPPOrgCoreDataStorageObject.h"
+#import "XMPPOrgUserCoreDataStorageObject.h"
+
 
 @implementation XMPPOrgPositionCoreDataStorageObject
 
@@ -15,10 +18,10 @@
 @dynamic ptLeft;
 @dynamic ptRight;
 @dynamic dpId;
-@dynamic orgId;
 @dynamic dpName;
 @dynamic streamBareJidStr;
-
+@dynamic ptOrgShip;
+@dynamic ptUserShip;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -129,22 +132,6 @@
     [self didChangeValueForKey:@"dpName"];
 }
 
-- (NSString *)orgId
-{
-    [self willAccessValueForKey:@"orgId"];
-    NSString *value = [self primitiveValueForKey:@"orgId"];
-    [self didAccessValueForKey:@"orgId"];
-    
-    return value;
-}
-
-- (void)setOrgId:(NSString *)value
-{
-    [self willChangeValueForKey:@"orgId"];
-    [self setPrimitiveValue:value forKey:@"orgId"];
-    [self didChangeValueForKey:@"orgId"];
-}
-
 - (NSString *)streamBareJidStr
 {
     [self willAccessValueForKey:@"streamBareJidStr"];
@@ -192,9 +179,9 @@
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND orgId == %@", ptId, orgId];
+        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND ptOrgShip.orgId == %@", ptId, orgId];
     else
-        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND orgId == %@ AND streamBareJidStr == %@", ptId, orgId, streamBareJidStr];
+        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND ptOrgShip.orgId == %@ AND streamBareJidStr == %@", ptId, orgId, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -242,20 +229,26 @@
     if (tempOrgId == nil)  return result;
     if (moc == nil)  return result;
     
-    XMPPOrgPositionCoreDataStorageObject *newPosition = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
+    XMPPOrgPositionCoreDataStorageObject *position = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                               withPtId:tempPtId
                                                                                                                  orgId:tempOrgId
                                                                                                       streamBareJidStr:streamBareJidStr];
-    if (newPosition != nil) {
+    if (position != nil) {
         
-        [newPosition updateWithDic:dic];
+        [position updateWithDic:dic];
         result = YES;
         
     }else{
         
-        [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                   withDic:dic
-                                                          streamBareJidStr:streamBareJidStr];
+        XMPPOrgPositionCoreDataStorageObject *newPosition = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                                                                       withDic:dic
+                                                                                                              streamBareJidStr:streamBareJidStr];
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:tempOrgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        [org addOrgPtShipObject:newPosition];
+        
         result = YES;
     }
     
@@ -310,7 +303,6 @@
     NSNumber *tempPtLeft = [NSNumber numberWithInteger:[[dic objectForKey:@"ptLeft"] integerValue]];
     NSNumber *tempPtRight = [NSNumber numberWithInteger:[[dic objectForKey:@"ptRight"] integerValue]];
     NSString *tempDpId = [dic objectForKey:@"dpId"];
-    NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempDpName = [dic objectForKey:@"dpName"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
@@ -320,7 +312,6 @@
     if ([tempPtRight integerValue] > 0) self.ptRight = tempPtRight;
     if (tempDpId) self.dpId = tempDpId;
     if (tempDpName) self.dpName = tempDpName;
-    if (tempOrgId) self.orgId = tempOrgId;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
