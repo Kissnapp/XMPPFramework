@@ -408,6 +408,50 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)clearUsersNotInUserJidStrs:(NSArray *)userJidStrs orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgUserCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND userPtShip.orgId == %@ AND NOT(userJidStr IN %@)",streamBareJidStr,orgId,userJidStrs];
+            [fetchRequest setPredicate:predicate];
+            
+        }
+        
+        NSArray *allUnusedUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPOrgUserCoreDataStorageObject *user in allUnusedUsers) {
+            
+            [moc deleteObject:user];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        
+    }];
+}
+
 - (void)deleteUserWithUserJidStr:(NSString *)userJidStr orgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();

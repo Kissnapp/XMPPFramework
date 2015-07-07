@@ -220,6 +220,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                     relationBlock:(void (^)(NSString *orgId))relationBlock;
 
 - (void)clearUsersWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)clearUsersNotInUserJidStrs:(NSArray *)userJidStrs orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)deleteUserWithUserJidStr:(NSString *)userJidStr orgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
 - (void)deleteUserWithUserBareJidStrs:(NSArray *)userBareJidStrs fromOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;

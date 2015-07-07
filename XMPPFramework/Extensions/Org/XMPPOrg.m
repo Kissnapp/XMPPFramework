@@ -493,7 +493,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     
     if ([userDics count] < 1) return;
     
-    [_xmppOrgStorage clearUsersWithOrgId:orgId xmppStream:xmppStream];
+    NSArray *userJidStrs = [self _specifiedValuesWithKey:@"jid" fromDics:userDics];
+    
+    [_xmppOrgStorage clearUsersNotInUserJidStrs:userJidStrs orgId:orgId xmppStream:xmppStream];
     
     [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
