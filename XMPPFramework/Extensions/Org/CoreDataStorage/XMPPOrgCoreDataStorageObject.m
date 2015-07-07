@@ -7,8 +7,6 @@
 //
 
 #import "XMPPOrgCoreDataStorageObject.h"
-#import "XMPPOrgRelationObject.h"
-#import "XMPPOrgPositionCoreDataStorageObject.h"
 #import "NSString+NSDate.h"
 
 @implementation XMPPOrgCoreDataStorageObject
@@ -24,8 +22,6 @@
 @dynamic ptTag;
 @dynamic userTag;
 @dynamic relationShipTag;
-@dynamic orgPtShip;
-@dynamic orgRelationShip;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,28 +266,6 @@
     return (XMPPOrgCoreDataStorageObject *)[results lastObject];
 }
 
-+ (id)relationShipObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                     withOrgId:(NSString *)orgId
-                                    relationId:(NSString *)relationId
-                              streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (orgId == nil) return nil;
-    if (orgId == nil) return nil;
-    if (moc == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    
-    XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                         withOrgId:orgId
-                                                                                  streamBareJidStr:streamBareJidStr];
-    for (XMPPOrgRelationObject *relation in org.orgRelationShip) {
-        if ([relation.relationOrgId isEqualToString:relationId]) {
-            return relation;
-        }
-    }
-    
-    return nil;
-}
-
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withDic:(NSDictionary *)dic
                   streamBareJidStr:(NSString *)streamBareJidStr
@@ -405,18 +379,6 @@
     if (tempUserTag) self.userTag = tempUserTag;
     if (tempRelationShipTag) self.relationShipTag = tempRelationShipTag;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
-}
-
-- (id)xmppOrgRelationObjectWithRelationId:(NSString *)relationOrgId
-{
-    for (XMPPOrgRelationObject *relation in self.orgRelationShip) {
-        
-        if ([relation.relationOrgId isEqualToString:relationOrgId]) {
-            return relation;
-        }
-    }
-    
-    return nil;
 }
 
 @end

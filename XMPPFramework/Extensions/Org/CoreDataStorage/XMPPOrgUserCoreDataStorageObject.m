@@ -94,11 +94,8 @@
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgUserCoreDataStorageObject"
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate;
-    if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"userPtShip.ptOrgShip.orgId == %@",orgId];
-    else
-        predicate = [NSPredicate predicateWithFormat:@"userPtShip.ptOrgShip.orgId == %@ AND streamBareJidStr == %@ AND userJidStr == %@",orgId, streamBareJidStr, userJidStr];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"userPtShip.orgId == %@ AND streamBareJidStr == %@ AND userJidStr == %@",orgId, streamBareJidStr, userJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -157,28 +154,25 @@
         result = YES;
         
     }else{
+        
         XMPPOrgUserCoreDataStorageObject *newUser = [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
                                                                                                         withDic:dic
                                                                                                streamBareJidStr:streamBareJidStr];
-
         
         XMPPOrgPositionCoreDataStorageObject *position = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                                    withPtId:tempPtId
                                                                                                                       orgId:tempOrgId
                                                                                                            streamBareJidStr:streamBareJidStr];
         
-        if (position) {
-            
-            XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                 withOrgId:tempOrgId
-                                                                                          streamBareJidStr:streamBareJidStr];
-            
-            if (org) {
-                [position addPtUserShipObject:newUser];
-                [org addOrgPtShipObject:position];
-            }
-        }
-
+        if (!position) position = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                                             withDic:@{
+                                                                                                       @"ptId":tempPtId,
+                                                                                                       @"orgId":tempOrgId
+                                                                                                       }
+                                                                                    streamBareJidStr:streamBareJidStr];
+        
+        [position addPtUserShipObject:newUser];
+     
         result = YES;
     }
     

@@ -283,8 +283,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     
     if ([positionDics count] < 1) return;
     
+    NSArray *ptIds = [self _specifiedValuesWithKey:@"id" fromDics:positionDics];
+    
     // delete the old data
-    [_xmppOrgStorage clearPositionsWithOrgId:orgId xmppStream:xmppStream];
+    [_xmppOrgStorage clearPositionsNotInPtIds:ptIds orgId:orgId xmppStream:xmppStream];
     
     [positionDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         //{"id":"1", "name":"项目经理", "left":"1", "right":"20", "part":"领导班子"}
@@ -426,7 +428,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     
     NSArray *orgIds = [self _specifiedValuesWithKey:@"id" fromDics:orgDics];
     
-    [_xmppOrgStorage clearUnusedOrgWithOrgIds:orgIds isTemplate:isTemplate xmppStream:xmppStream];
+    [_xmppOrgStorage clearOrgsNotInOrgIds:orgIds isTemplate:isTemplate xmppStream:xmppStream];
     
     [orgDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
@@ -668,6 +670,22 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         // 0. tell the the user that can not send a request
         [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
     }
+}
+
+- (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
+                        completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        id departMentArray = [_xmppOrgStorage orgDepartmentWithOrgId:orgId xmppStream:xmppStream];
+        
+        completionBlock(departMentArray, nil);
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 #pragma mark - 根据某个组织的id查询他在数据库中的名称

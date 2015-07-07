@@ -7,7 +7,6 @@
 //
 
 #import "XMPPOrgPositionCoreDataStorageObject.h"
-#import "XMPPOrgCoreDataStorageObject.h"
 #import "XMPPOrgUserCoreDataStorageObject.h"
 
 
@@ -19,8 +18,8 @@
 @dynamic ptRight;
 @dynamic dpId;
 @dynamic dpName;
+@dynamic orgId;
 @dynamic streamBareJidStr;
-@dynamic ptOrgShip;
 @dynamic ptUserShip;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +130,21 @@
     [self setPrimitiveValue:value forKey:@"dpName"];
     [self didChangeValueForKey:@"dpName"];
 }
+- (NSString *)orgId
+{
+    [self willAccessValueForKey:@"orgId"];
+    NSString *value = [self primitiveValueForKey:@"orgId"];
+    [self didAccessValueForKey:@"orgId"];
+    
+    return value;
+}
+
+- (void)setOrgId:(NSString *)value
+{
+    [self willChangeValueForKey:@"orgId"];
+    [self setPrimitiveValue:value forKey:@"orgId"];
+    [self didChangeValueForKey:@"orgId"];
+}
 
 - (NSString *)streamBareJidStr
 {
@@ -177,11 +191,7 @@
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPOrgPositionCoreDataStorageObject"
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate;
-    if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND ptOrgShip.orgId == %@", ptId, orgId];
-    else
-        predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND ptOrgShip.orgId == %@ AND streamBareJidStr == %@", ptId, orgId, streamBareJidStr];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"ptId == %@ AND streamBareJidStr == %@ AND orgId == %@", ptId, streamBareJidStr, orgId];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -189,7 +199,8 @@
     [fetchRequest setIncludesPendingChanges:YES];
     [fetchRequest setFetchLimit:1];
     
-    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    NSError *error = nil;
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:&error];
     
     return (XMPPOrgPositionCoreDataStorageObject *)[results lastObject];
 }
@@ -236,22 +247,19 @@
     if (position != nil) {
         
         [position updateWithDic:dic];
+        
         result = YES;
         
     }else{
         
-        XMPPOrgPositionCoreDataStorageObject *newPosition = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                                                                       withDic:dic
-                                                                                                              streamBareJidStr:streamBareJidStr];
-        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                             withOrgId:tempOrgId
-                                                                                      streamBareJidStr:streamBareJidStr];
-        
-        [org addOrgPtShipObject:newPosition];
+        position = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                              withDic:dic
+                                                                     streamBareJidStr:streamBareJidStr];
         
         result = YES;
     }
     
+    position.orgId = tempOrgId;
     
     return result;
 }
@@ -300,6 +308,7 @@
 {
     NSString *tempPtId = [dic objectForKey:@"ptId"];
     NSString *tempPtName = [dic objectForKey:@"ptName"];
+    NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSNumber *tempPtLeft = [NSNumber numberWithInteger:[[dic objectForKey:@"ptLeft"] integerValue]];
     NSNumber *tempPtRight = [NSNumber numberWithInteger:[[dic objectForKey:@"ptRight"] integerValue]];
     NSString *tempDpId = [dic objectForKey:@"dpId"];
@@ -308,6 +317,7 @@
     
     if (tempPtId) self.ptId = tempPtId;
     if (tempPtName) self.ptName = tempPtName;
+    if (tempOrgId) self.orgId = tempOrgId;
     if ([tempPtLeft integerValue] > 0) self.ptLeft = tempPtLeft;
     if ([tempPtRight integerValue] > 0) self.ptRight = tempPtRight;
     if (tempDpId) self.dpId = tempDpId;

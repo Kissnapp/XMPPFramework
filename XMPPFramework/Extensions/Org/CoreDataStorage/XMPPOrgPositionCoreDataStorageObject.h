@@ -19,8 +19,8 @@
 @property (nonatomic, retain) NSNumber * ptRight;
 @property (nonatomic, retain) NSString * dpId;
 @property (nonatomic, retain) NSString * dpName;
+@property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * streamBareJidStr;
-@property (nonatomic, retain) XMPPOrgCoreDataStorageObject *ptOrgShip;
 @property (nonatomic, retain) NSSet *ptUserShip;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc

@@ -9,28 +9,33 @@
 #import <Foundation/Foundation.h>
 #import "XMPPManagedObject.h"
 
-@class XMPPOrgCoreDataStorageObject;
-
 @interface XMPPOrgRelationObject : XMPPManagedObject 
 
+@property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) NSString * relationOrgName;
 @property (nonatomic, retain) NSString * streamBareJidStr;
-@property (nonatomic, retain) XMPPOrgCoreDataStorageObject *relationOrgShip;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                         withOrgId:(NSString *)orgId
+                     withSelfOrgId:(NSString *)selfOrgId
+                     relationOrgId:(NSString *)relationOrgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                           withDic:(NSDictionary *)dic
-                  streamBareJidStr:(NSString *)streamBareJidStr;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                         withOrgId:(NSString *)orgId
-                           orgName:(NSString *)orgName
-                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)insertOrUpdateInManagedObjectContext:(NSManagedObjectContext *)moc
+                                 selfOrgId:(NSString *)selfOrgId
                                    withDic:(NSDictionary *)dic
                           streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                         selfOrgId:(NSString *)selfOrgId
+                           withDic:(NSDictionary *)dic
+                  streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                     withSelfOrgId:(NSString *)selfOrgId
+                     relationOrgId:(NSString *)relationOrgId
+                   relationOrgName:(NSString *)relationOrgName
+                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithDic:(NSDictionary *)dic;
 

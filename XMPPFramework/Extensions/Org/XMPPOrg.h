@@ -77,12 +77,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                               completionBlock:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 按部门名称查询部门成员列表
-
-- (id)requestDBAllUsersWithOrgId:(NSString *)orgId
-                          dpName:(NSString *)dpName
-                       ascending:(BOOL)ascending;
-
 #pragma mark - 创建新的职位信息
 /**
  *  创建新的职位信息
@@ -147,9 +141,20 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestDBOrgWithOrgId:(NSString *)orgId
               completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 根据某个组织的id查询他的部门信息
+- (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
+                        completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 按部门名称查询部门成员列表
+
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId 
+                          dpName:(NSString *)dpName
+                       ascending:(BOOL)ascending;
+
 #pragma mark - 根据某个组织的id查询他在数据库中的名称
 - (void)requestDBOrgNameWithOrgId:(NSString *)orgId
                   completionBlock:(CompletionBlock)completionBlock;
+
 
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
 
@@ -180,7 +185,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 
-- (void)clearUnusedOrgWithOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream;
+- (void)clearOrgsNotInOrgIds:(NSArray *)orgIds isTemplate:(BOOL)isTemplate xmppStream:(XMPPStream *)stream;
 - (void)clearOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)clearAllOrgWithXMPPStream:(XMPPStream *)stream;
 - (void)clearAllTemplatesWithXMPPStream:(XMPPStream *)stream;
@@ -189,6 +194,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)orgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)orgDepartmentWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)usersInDepartmentWithDpName:(NSString *)dpName
@@ -218,6 +225,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)insertOrUpdateUserInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
  
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
+- (void)clearPositionsNotInPtIds:(NSArray *)ptIds  orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (void)insertOrUpdatePositionInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
 - (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
