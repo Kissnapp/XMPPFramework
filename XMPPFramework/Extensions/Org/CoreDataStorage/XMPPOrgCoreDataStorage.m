@@ -340,7 +340,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
         if (stream){
             
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@ AND NOT(orgId IN %@)",streamBareJidStr,orgId,ptIds];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@ AND NOT(ptId IN %@)",streamBareJidStr,orgId,ptIds];
             [fetchRequest setPredicate:predicate];
             
         }
@@ -1118,6 +1118,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         }else{
             
             [position updateWithDic:dic];
+
         }
         
         position.orgId = orgId;

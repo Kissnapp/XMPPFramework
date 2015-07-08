@@ -155,9 +155,9 @@
         
     }else{
         
-        XMPPOrgUserCoreDataStorageObject *newUser = [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                                                        withDic:dic
-                                                                                               streamBareJidStr:streamBareJidStr];
+        user = [XMPPOrgUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      withDic:dic
+                                                             streamBareJidStr:streamBareJidStr];
         
         XMPPOrgPositionCoreDataStorageObject *position = [XMPPOrgPositionCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                                    withPtId:tempPtId
@@ -171,7 +171,7 @@
                                                                                                        }
                                                                                     streamBareJidStr:streamBareJidStr];
         
-        [position addPtUserShipObject:newUser];
+        [position addPtUserShipObject:user];
      
         result = YES;
     }

@@ -247,7 +247,6 @@
     if (position != nil) {
         
         [position updateWithDic:dic];
-        
         result = YES;
         
     }else{
@@ -255,7 +254,6 @@
         position = [XMPPOrgPositionCoreDataStorageObject insertInManagedObjectContext:moc
                                                                               withDic:dic
                                                                      streamBareJidStr:streamBareJidStr];
-        
         result = YES;
     }
     

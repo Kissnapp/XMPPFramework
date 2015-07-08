@@ -479,7 +479,8 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                                                      dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                        @"userJidStr":@"jid",
                                                                                                                        @"orgId":@"orgId",
-                                                                                                                       @"ptId":@"job_id"
+                                                                                                                       @"ptId":@"job_id",
+                                                                                                                       @"dpName":@"part"
                                                                                                                        }]
                                               xmppStream:xmppStream];
         
@@ -498,12 +499,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     [_xmppOrgStorage clearUsersNotInUserJidStrs:userJidStrs orgId:orgId xmppStream:xmppStream];
     
     [userDics enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        
+
         [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId
                                                      dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                        @"userJidStr":@"jid",
                                                                                                                        @"orgId":@"orgId",
-                                                                                                                       @"ptId":@"job_id"
+                                                                                                                       @"ptId":@"job_id",
+                                                                                                                       @"dpName":@"part"
                                                                                                                        }]
                                               xmppStream:xmppStream];
         
@@ -1688,8 +1690,8 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 NSDictionary *tempUserDic = @{
                                               @"jid":userBareJid,
                                               @"job_id":ptId
-            
                                               };
+                
                 [userArrays addObject:tempUserDic];
             }];
             
