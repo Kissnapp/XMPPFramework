@@ -598,8 +598,12 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"ptLeft" ascending:YES];
+        NSArray *sortDescriptors = @[sd1];
+        
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
+        [fetchRequest setSortDescriptors:sortDescriptors];
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (streamBareJidStr){
