@@ -2808,11 +2808,15 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 // 0.跟新数据库
                 id  data = [[project stringValue] objectFromJSONString];
                 
-                NSDictionary *orgInfoDic = [data objectForKey:@"project"];
-                NSDictionary *userInfoDic = [data objectForKey:@"member"];
-                NSDictionary *positionInfoDic = [data objectForKey:@"job"];
+                NSDictionary *orgInfoDic = data[@"project"];
+                NSDictionary *positionInfoDic = data[@"job"];
                 
-                NSString *orgId = [orgInfoDic objectForKey:@"id"];
+                NSString *orgId = orgInfoDic[@"id"];
+                NSString *ptId = positionInfoDic[@"job_id"];
+                
+                NSMutableDictionary *userInfoDic = [NSMutableDictionary dictionaryWithDictionary:data[@"member"]];
+                
+                userInfoDic[@"job_id"] = ptId;
                 
                 [self _insertNewOrgAfterCreateOrgId:orgId
                                              orgDic:orgInfoDic
