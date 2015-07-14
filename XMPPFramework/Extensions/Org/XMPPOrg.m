@@ -2807,9 +2807,11 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 
                 // 0.跟新数据库
                 id  data = [[project stringValue] objectFromJSONString];
+                
                 NSDictionary *orgInfoDic = [data objectForKey:@"project"];
                 NSDictionary *userInfoDic = [data objectForKey:@"member"];
                 NSDictionary *positionInfoDic = [data objectForKey:@"job"];
+                
                 NSString *orgId = [orgInfoDic objectForKey:@"id"];
                 
                 [self _insertNewOrgAfterCreateOrgId:orgId
