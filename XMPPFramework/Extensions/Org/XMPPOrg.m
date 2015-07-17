@@ -3346,7 +3346,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             
             [_xmppOrgStorage endOrgWithOrgId:orgId orgEndTime:endTime xmppStream:xmppStream];
             
-            // TODO:执行block回掉，由于在请求回复事执行力block  此处暂时不使用
+            // TODO:执行block回掉，由于在请求回复事执行block  此处暂时不使用
             
         }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"add_job"]){// 添加自定义职位
             /*
