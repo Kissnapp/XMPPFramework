@@ -1510,6 +1510,23 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 
 }
 
+- (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId
+{
+    __block BOOL isAdmin = NO;
+    
+    dispatch_block_t block = ^{
+        
+        isAdmin = [_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:orgId xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return isAdmin;
+}
+
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId
                           dpName:(NSString *)dpName
                        ascending:(BOOL)ascending

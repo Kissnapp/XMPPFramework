@@ -155,6 +155,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestDBOrgNameWithOrgId:(NSString *)orgId
                   completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 自己是否是该工程的admin
+
+- (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
 
