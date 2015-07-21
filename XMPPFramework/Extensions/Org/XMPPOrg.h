@@ -146,17 +146,20 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                         completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 按部门名称查询部门成员列表
-
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId 
                           dpName:(NSString *)dpName
                        ascending:(BOOL)ascending;
+
+#pragma mark - 按部门名称查询部门职位列表
+- (id)requestDBAllPositionsWithOrgId:(NSString *)orgId
+                              dpName:(NSString *)dpName
+                           ascending:(BOOL)ascending;
 
 #pragma mark - 根据某个组织的id查询他在数据库中的名称
 - (void)requestDBOrgNameWithOrgId:(NSString *)orgId
                   completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 自己是否是该工程的admin
-
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
@@ -201,10 +204,16 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)orgDepartmentWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
 - (id)usersInDepartmentWithDpName:(NSString *)dpName
                             orgId:(NSString *)orgId
                         ascending:(BOOL)ascending
                        xmppStream:(XMPPStream *)stream;
+
+- (id)positionsInDepartmentWithDpName:(NSString *)dpName
+                                orgId:(NSString *)orgId
+                            ascending:(BOOL)ascending
+                           xmppStream:(XMPPStream *)stream;
 
 - (id)newUsersWithOrgId:(NSString *)orgId userIds:(NSArray *)userIds xmppStream:(XMPPStream *)stream;
 

@@ -652,7 +652,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         // Get the count of users...
         NSExpression *keyPathExpression = [NSExpression expressionForKeyPath: @"ptUserShip"]; // Does not really matter
         NSExpression *ptNameExpression = [NSExpression expressionForFunction: @"count:" arguments: [NSArray arrayWithObject:keyPathExpression]];
-        NSExpressionDescription *expressionDescription = [[NSExpressionDescription alloc] init];
+        NSExpressionDescription *expressionDescription = [NSExpressionDescription new];
         [expressionDescription setName: @"ptUserCount"];
         [expressionDescription setExpression: ptNameExpression];
         [expressionDescription setExpressionResultType: NSInteger32AttributeType];
@@ -661,8 +661,6 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
         // setting the groupby value
         [fetchRequest setPropertiesToGroupBy:@[dpNameDescription]];
-    
-        
         
         if (streamBareJidStr){
 
@@ -744,6 +742,43 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     }];
     
     return allUsers;
+}
+
+- (id)positionsInDepartmentWithDpName:(NSString *)dpName
+                                orgId:(NSString *)orgId
+                            ascending:(BOOL)ascending
+                           xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allPositions = nil;
+    
+    [self executeBlock:^{
+    
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgPositionCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"ptLeft" ascending:ascending];
+        NSArray *sortDescriptors = @[sd1];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@ AND dpName == %@",streamBareJidStr, orgId, dpName];
+            [fetchRequest setPredicate:predicate];
+            
+            
+            allPositions = [moc executeFetchRequest:fetchRequest error:nil];
+        }
+    }];
+    
+    return allPositions;
 }
 
 - (id)newUsersWithOrgId:(NSString *)orgId userIds:(NSArray *)userIds xmppStream:(XMPPStream *)stream
