@@ -13,6 +13,7 @@
 
 @dynamic orgId;
 @dynamic orgName;
+@dynamic orgPhoto;
 @dynamic orgState;
 @dynamic orgStartTime;
 @dynamic orgEndTime;
@@ -81,6 +82,22 @@
     [self willChangeValueForKey:@"orgName"];
     [self setPrimitiveValue:value forKey:@"orgName"];
     [self didChangeValueForKey:@"orgName"];
+}
+
+- (NSString *)orgPhoto
+{
+    [self willAccessValueForKey:@"orgPhoto"];
+    NSString *value = [self primitiveValueForKey:@"orgPhoto"];
+    [self didAccessValueForKey:@"orgPhoto"];
+    
+    return value;
+}
+
+- (void)setOrgPhoto:(NSString *)value
+{
+    [self willChangeValueForKey:@"orgPhoto"];
+    [self setPrimitiveValue:value forKey:@"orgPhoto"];
+    [self didChangeValueForKey:@"orgPhoto"];
 }
 - (NSNumber *)orgState
 {
@@ -358,6 +375,7 @@
 {
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempOrgName = [dic objectForKey:@"orgName"];
+    NSString *temoOrgPhoto = dic[@"orgPhoto"];
     NSNumber *tempOrgState = [NSNumber numberWithInteger:[[dic objectForKey:@"orgState"] integerValue]];
     NSString *tempOrgStartTime = [dic objectForKey:@"orgStartTime"];
     NSString *tempOrgEndTime = [dic objectForKey:@"orgEndTime"];
@@ -370,6 +388,7 @@
     
     if (tempOrgId) self.orgId = tempOrgId;
     if (tempOrgName) self.orgName = tempOrgName;
+    if (temoOrgPhoto) self.orgPhoto = temoOrgPhoto;
     if (tempOrgState) self.orgState = tempOrgState;
     if (tempOrgStartTime) self.orgStartTime = [tempOrgStartTime StringToDate];
     if (tempOrgEndTime) self.orgEndTime = [tempOrgEndTime StringToDate];

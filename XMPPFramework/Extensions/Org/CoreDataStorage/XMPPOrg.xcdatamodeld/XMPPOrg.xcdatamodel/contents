@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7549" systemVersion="14B25" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14B25" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="XMPPOrgCoreDataStorageObject" representedClassName="XMPPOrgCoreDataStorageObject" syncable="YES">
         <attribute name="orgAdminJidStr" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgDescription" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgEndTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="orgPhoto" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgStartTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="orgState" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="ptTag" optional="YES" attributeType="String" syncable="YES"/>
@@ -46,7 +47,7 @@
         <relationship name="userPtShip" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="XMPPOrgPositionCoreDataStorageObject" inverseName="ptUserShip" inverseEntity="XMPPOrgPositionCoreDataStorageObject" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="210"/>
+        <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="225"/>
         <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="180"/>
         <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="120"/>
         <element name="XMPPOrgSubcribeCoreDataStorageObject" positionX="-1152" positionY="-180" width="128" height="150"/>

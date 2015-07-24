@@ -275,6 +275,38 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return org;
 }
 
+- (id)orgPhotoWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block XMPPOrgCoreDataStorageObject *org = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (streamBareJidStr){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgId == %@",
+                                      streamBareJidStr, orgId];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            org = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        }
+    }];
+    
+    return org.orgPhoto;
+}
+
 
 - (void)clearPositionsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream
 {

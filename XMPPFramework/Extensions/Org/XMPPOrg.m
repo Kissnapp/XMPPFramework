@@ -316,6 +316,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     [_xmppOrgStorage insertNewCreateOrgnDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
                                                                                                 @"orgId":@"id",
                                                                                                 @"orgName":@"name",
+                                                                                                @"orgPhoto":@"photo",
                                                                                                 @"orgState":@"status",
                                                                                                 @"orgStartTime":@"start_time",
                                                                                                 @"orgEndTime":@"end_time",
@@ -375,6 +376,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     [_xmppOrgStorage insertOrUpdateOrgInDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
                                                                                                 @"orgId":@"id",
                                                                                                 @"orgName":@"name",
+                                                                                                @"orgPhoto":@"photo",
                                                                                                 @"orgState":@"status",
                                                                                                 @"orgStartTime":@"start_time",
                                                                                                 @"orgEndTime":@"end_time",
@@ -450,6 +452,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         [_xmppOrgStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                  @"orgId":@"id",
                                                                                                                  @"orgName":@"name",
+                                                                                                                 @"orgPhoto":@"photo",
                                                                                                                  @"orgState":@"status",
                                                                                                                  @"orgStartTime":@"start_time",
                                                                                                                  @"orgEndTime":@"end_time",
@@ -1508,6 +1511,91 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     else
         dispatch_async(moduleQueue, block);
 
+}
+
+- (void)requestDBOrgPhotoWithOrgId:(NSString *)orgId
+                   completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        NSString *photo = [_xmppOrgStorage orgPhotoWithOrgId:orgId xmppStream:xmppStream];
+        
+        (photo) ? completionBlock(photo, nil) : [self _requestDBOrgPhotoWithOrgId:orgId
+                                                                  completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestDBOrgPhotoWithOrgId:(NSString *)orgId
+                    completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            if (!orgId) {
+                [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
+            }
+            
+            // fetch data from database
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="c834580a878d43088fa382bac1530603@192.168.1.130/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_photo">
+             {"project":"41"}
+             </project>
+             </iq>
+             */
+            NSDictionary *templateDic  =nil;
+            // 3. Create the request iq
+            if (orgId.length>0) {
+                templateDic = [NSDictionary dictionaryWithObject:orgId
+                                                          forKey:@"project"];
+            }
+            
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_photo"}
+                                                                       stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId
@@ -3333,6 +3421,83 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 
                 return YES;
                 
+            }else if ([projectType isEqualToString:@"get_photo"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 正确的结果：
+                 <iq from="c834580a878d43088fa382bac1530603@192.168.1.130/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project" type="get_photo">
+                 {"project":"xxx", "photo":"xxx"}
+                 </project>
+                 </iq>
+                 */
+                
+                // 0.跟新数据库
+                NSDictionary *orgDic = [[project stringValue] objectFromJSONString];
+                NSString *orgId = orgDic[@"project"];
+                
+                __weak typeof(self) weakSelf = self;
+                
+                [_xmppOrgStorage insertOrUpdateOrgInDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                            @"orgId":@"id",
+                                                                                                            @"orgName":@"name",
+                                                                                                            @"orgState":@"status",
+                                                                                                            @"orgStartTime":@"start_time",
+                                                                                                            @"orgEndTime":@"end_time",
+                                                                                                            @"orgAdminJidStr":@"admin",
+                                                                                                            @"orgDescription":@"description",
+                                                                                                            @"ptTag":@"job_tag",
+                                                                                                            @"userTag":@"member_tag",
+                                                                                                            @"orgRelationShipTag":@"link_tag"
+                                                                                                            }]
+                                                xmppStream:xmppStream
+                                                 userBlock:^(NSString *orgId) {
+                                                     
+                                                     // 0.request all user info from server
+                                                     
+                                                     [weakSelf requestServerAllUserListWithOrgId:orgId];
+                                                     
+                                                 } positionBlock:^(NSString *orgId) {
+                                                     
+                                                     // 1.request all position info from server
+                                                     
+                                                     [weakSelf requestServerAllPositionListWithOrgId:orgId];
+                                                     
+                                                 } relationBlock:^(NSString *orgId) {
+                                                     
+                                                     // 2.request all relation org info from server
+                                                     
+                                                     [weakSelf requestServerAllRelationListWithOrgId:orgId];
+                                                 }];
+                
+                
+                // 2.向数据库获取数据
+                id data = [_xmppOrgStorage orgPhotoWithOrgId:orgId xmppStream:xmppStream];
+                
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                
+                if (completionBlock) {
+                    
+                    completionBlock(data, nil);
+                    [requestBlockDcitionary removeObjectForKey:requestkey];
+                }
+
+                
+                return YES;
             }
             // add case
         }

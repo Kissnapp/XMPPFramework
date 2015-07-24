@@ -31,6 +31,7 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * orgName;
+@property (nonatomic, retain) NSString * orgPhoto;
 // org state: -1==>template, 0==>org has been ended , 1==>org is been running
 @property (nonatomic, retain) NSNumber * orgState;
 @property (nonatomic, retain) NSDate * orgStartTime;
