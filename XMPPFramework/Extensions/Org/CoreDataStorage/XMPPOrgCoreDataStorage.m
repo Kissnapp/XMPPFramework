@@ -1344,6 +1344,26 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return position;
 }
 
+- (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block BOOL existed = NO;
+    
+    [self executeBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgUserCoreDataStorageObject *user = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                          orgId:orgId
+                                                                                                     userJidStr:bareJidStr
+                                                                                               streamBareJidStr:streamBareJidStr];
+        
+        if (user) existed = YES;
+    }];
+    
+    return existed;
+}
+
 - (BOOL)isAdminWithUser:(NSString *)userBareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block BOOL isAndmin = NO;

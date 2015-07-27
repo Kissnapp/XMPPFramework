@@ -1598,6 +1598,23 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 }
 
+- (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr inOrgWithId:(NSString *)orgId
+{
+    __block BOOL isAdmin = NO;
+    
+    dispatch_block_t block = ^{
+        
+        isAdmin = [_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:orgId xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return isAdmin;
+}
+
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId
 {
     __block BOOL isAdmin = NO;

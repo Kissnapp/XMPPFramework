@@ -162,6 +162,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 自己是否是该工程的admin
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
+#pragma mark - 查询某个用户是否在某个组织中
+- (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr inOrgWithId:(NSString *)orgId;
+
 #pragma mark - 根据组织id 查询该组织的头像url
 - (void)requestDBOrgPhotoWithOrgId:(NSString *)orgId
                    completionBlock:(CompletionBlock)completionBlock;
@@ -256,6 +259,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (BOOL)isAdminWithUser:(NSString *)userBareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)endOrgWithOrgId:(NSString *)orgId orgEndTime:(NSDate *)orgEndTime xmppStream:(XMPPStream *)stream;
 - (void)comparePositionInfoWithOrgId:(NSString *)orgId
