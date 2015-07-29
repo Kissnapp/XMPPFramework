@@ -3694,7 +3694,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             // 1.修改本组织的关联tag
             [_xmppOrgStorage updateRelationShipTagWithOrgId:toOrgId relationShipTag:relationTag xmppStream:xmppStream];
             
-            // 2.如果自己是本组织的admin，那么就修改该请求信息为已接受的
+            // 2.下载关联组织的信息
+            [self requestServerOrgWithOrgId:formOrgId];
+            
+            // 3.如果自己是本组织的admin，那么就修改该请求信息为已接受的
             if ([_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:toOrgId xmppStream:xmppStream]) {
                 
                 [_xmppOrgStorage updateSubcribeObjectWithDic:[data destinationDictionaryWithNewKeysMapDic:@{
