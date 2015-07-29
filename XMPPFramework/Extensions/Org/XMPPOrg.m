@@ -1604,7 +1604,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     
     dispatch_block_t block = ^{
         
-        isAdmin = [_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:orgId xmppStream:xmppStream];
+        isAdmin = [_xmppOrgStorage existedUserWithBareJidStr:bareJidStr orgId:orgId xmppStream:xmppStream];
     };
     
     if (dispatch_get_specific(moduleQueueTag))

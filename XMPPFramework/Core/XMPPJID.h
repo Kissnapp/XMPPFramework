@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#define AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR @"IOS"
+#define AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR @"mobile"
 
 enum XMPPJIDCompareOptions
 {

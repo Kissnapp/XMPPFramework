@@ -2367,9 +2367,9 @@
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos7.1;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s";
+				VALID_ARCHS = "armv7 armv7s i386 x86_64";
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Debug;
@@ -2404,9 +2404,9 @@
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos7.1;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s";
+				VALID_ARCHS = "armv7 armv7s i386 x86_64";
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Release;
