@@ -47,12 +47,28 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 获取一个组织的所有成员信息
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
 - (void)requestDBAllUserListWithOrgId:(NSString *)orgId
-                      completionBlock:(CompletionBlock)completionBlock;;
+                      completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有关键组织的id
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
 - (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
-                          completionBlock:(CompletionBlock)completionBlock;;
+                          completionBlock:(CompletionBlock)completionBlock;
+
+
+#pragma mark - 获取一个组织关联组织的所有职位信息
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+                                relationOrgId:(NSString *)relationOrgId;
+
+- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                            relationOrgId:(NSString *)relationOrgId
+                          completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 获取一个组织的所有成员信息
+- (void)requestServerAllUserListWithOrgId:(NSString *)orgId
+                            relationOrgId:(NSString *)relationOrgId;
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+                        relationOrgId:(NSString *)relationOrgId
+                      completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 验证组织name
 - (void)checkOrgName:(NSString *)name
@@ -145,6 +161,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
                         completionBlock:(CompletionBlock)completionBlock;
 
+- (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
+                          relationOrgId:(NSString *)relationOrgId
+                        completionBlock:(CompletionBlock)completionBlock;
+
 #pragma mark - 按部门名称查询部门成员列表
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId 
                           dpName:(NSString *)dpName
@@ -158,6 +178,11 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 根据某个组织的id查询他在数据库中的名称
 - (void)requestDBOrgNameWithOrgId:(NSString *)orgId
                   completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 根据某个关联组织的id查询他在数据库中的名称
+- (void)requestDBRelationOrgNameWithRelationOrgId:(NSString *)relationOrgId
+                                            orgId:(NSString *)orgId
+                                  completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 自己是否是该工程的admin
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
@@ -205,7 +230,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
 - (id)orgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
-
+- (id)relationOrgWithRelationId:(NSString *)relationId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgDepartmentWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;

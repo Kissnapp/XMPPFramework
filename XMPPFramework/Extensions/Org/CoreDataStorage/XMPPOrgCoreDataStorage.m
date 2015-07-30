@@ -651,6 +651,37 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allPositions;
 }
 
+- (id)relationOrgWithRelationId:(NSString *)relationId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block XMPPOrgRelationObject *relation = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgRelationObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"relationOrgId == %@ AND orgId == %@ AND streamBareJidStr == %@", relationId,orgId,streamBareJidStr];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            relation = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        }
+    }];
+    return relation;
+}
+
 - (id)orgDepartmentWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block NSArray *allDepartments = nil;
@@ -1445,14 +1476,17 @@ static XMPPOrgCoreDataStorage *sharedInstance;
                                                                                 withSelfOrgId:fromOrgId
                                                                                 relationOrgId:removeOrgId
                                                                              streamBareJidStr:streamBareJidStr];
-        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
-        
-        [moc deleteObject:relation];
-        
-        if (++unsavedCount >= saveThreshold){
+        if (relation) {
+            NSUInteger unsavedCount = [self numberOfUnsavedChanges];
             
-            [self save];
-            unsavedCount = 0;
+            [moc deleteObject:relation];
+            
+            if (++unsavedCount >= saveThreshold){
+                
+                [self save];
+                unsavedCount = 0;
+            }
+
         }
         
     }];

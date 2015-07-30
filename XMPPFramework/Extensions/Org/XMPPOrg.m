@@ -695,19 +695,32 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 }
 
 - (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
+                          relationOrgId:(NSString *)relationOrgId
                         completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{
         
-        id departMentArray = [_xmppOrgStorage orgDepartmentWithOrgId:orgId xmppStream:xmppStream];
+        id departMentArray = [_xmppOrgStorage orgDepartmentWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
-        completionBlock(departMentArray, nil);
+        if ([departMentArray count] > 0) {
+            completionBlock(departMentArray, nil);
+        }else{
+            completionBlock(nil,nil);
+            [self requestServerAllPositionListWithOrgId:orgId relationOrgId:relationOrgId];
+            [self requestServerAllUserListWithOrgId:orgId relationOrgId:relationOrgId];
+        }
     };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_async(moduleQueue, block);
+}
+
+- (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
+                        completionBlock:(CompletionBlock)completionBlock
+{
+    [self requestDBOrgDepartmentWithOrgId:orgId relationOrgId:nil completionBlock:completionBlock];
 }
 
 #pragma mark - 根据某个组织的id查询他在数据库中的名称
@@ -720,6 +733,25 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
         
         org ? completionBlock(org.orgName, nil) : [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+#pragma mark - 根据某个关联组织的id查询他在数据库中的名称
+- (void)requestDBRelationOrgNameWithRelationOrgId:(NSString *)relationOrgId
+                                            orgId:(NSString *)orgId
+                                  completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
+        
+        relation ? completionBlock(relation.relationOrgName, nil) : [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
         
     }};
     
@@ -952,8 +984,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 }
 
-#pragma mark - 获取一个组织的所有职位信息
+#pragma mark - 获取一个组织关联组织的所有职位信息
 - (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+                                relationOrgId:(NSString *)relationOrgId
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -967,15 +1000,16 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             /*
              <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
              <project xmlns="aft.project" type="get_structure">
-             {"project":"xxx"}
+             {"project":"xxx","project_target":"1234"}
              </project>
              </iq>
              */
             
             // 3. Create the request iq
             
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObject:orgId
-                                                                    forKey:@"project"];
+            NSMutableDictionary *templateDic = [NSMutableDictionary dictionary];
+            if (orgId) templateDic[@"project"] = orgId;
+            if (relationOrgId) templateDic[@"project_target"] = relationOrgId;
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -1005,6 +1039,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 }
 
 - (void)_requestServerAllPositionListWithOrgId:(NSString *)orgId
+                                 relationOrgId:(NSString *)relationOrgId
                                completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -1033,13 +1068,11 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
              </project>
              </iq>
              */
-            NSDictionary *templateDic  =nil;
+            NSMutableDictionary *templateDic  = [NSMutableDictionary dictionary];
             // 3. Create the request iq
-            if (orgId.length>0) {
-               templateDic = [NSDictionary dictionaryWithObject:orgId
-                                                                        forKey:@"project"];
-            }
-          
+            if (orgId.length > 0) templateDic[@"project"] = orgId;
+            if (relationOrgId.length > 0) templateDic[@"project_target"] = relationOrgId;
+            
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -1071,14 +1104,17 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 }
 
+
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                            relationOrgId:(NSString *)relationOrgId
                           completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:orgId xmppStream:xmppStream];
+        NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
         ([positions count] > 0) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
+                                                                                                   relationOrgId:relationOrgId
                                                                                                  completionBlock:completionBlock];
         
     }};
@@ -1091,6 +1127,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 
 #pragma mark - 获取一个组织的所有成员信息
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId
+                            relationOrgId:(NSString *)relationOrgId
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -1110,7 +1147,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
              */
             
             // 3. Create the request iq
-            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
+            NSMutableDictionary * tempDic = [NSMutableDictionary dictionary];
+            if (orgId) tempDic[@"project"] = orgId;
+            if (relationOrgId) tempDic[@"project_target"] = relationOrgId;
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -1139,6 +1178,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 }
 
 - (void)_requestServerAllUserListWithOrgId:(NSString *)orgId
+                             relationOrgId:(NSString *)relationOrgId
                            completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -1162,7 +1202,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
              */
             
             // 3. Create the request iq
-            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
+            NSMutableDictionary * tempDic = [NSMutableDictionary dictionary];
+            if (orgId) tempDic[@"project"] = orgId;
+            if (relationOrgId) tempDic[@"project_target"] = relationOrgId;
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -1191,16 +1233,19 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         block();
     else
         dispatch_async(moduleQueue, block);
-
+    
 }
+
 - (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+                        relationOrgId:(NSString *)relationOrgId
                       completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
+        NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
         ([users count] > 0) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
+                                                                                       relationOrgId:relationOrgId
                                                                                      completionBlock:completionBlock];
         
     }};
@@ -1209,6 +1254,30 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         block();
     else
         dispatch_async(moduleQueue, block);
+}
+
+#pragma mark - 获取一个组织的所有职位信息
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+{
+    [self requestServerAllPositionListWithOrgId:orgId relationOrgId:nil];
+}
+
+- (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock
+{
+    [self requestDBAllPositionListWithOrgId:orgId relationOrgId:nil completionBlock:completionBlock];
+}
+
+#pragma mark - 获取一个组织的所有成员信息
+- (void)requestServerAllUserListWithOrgId:(NSString *)orgId
+{
+    [self requestServerAllUserListWithOrgId:orgId relationOrgId:nil];
+}
+
+- (void)requestDBAllUserListWithOrgId:(NSString *)orgId
+                      completionBlock:(CompletionBlock)completionBlock
+{
+    [self requestDBAllUserListWithOrgId:orgId relationOrgId:nil completionBlock:completionBlock];
 }
 
 #pragma mark - 获取一个组织的所有关键组织的id
@@ -3694,8 +3763,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             // 1.修改本组织的关联tag
             [_xmppOrgStorage updateRelationShipTagWithOrgId:toOrgId relationShipTag:relationTag xmppStream:xmppStream];
             
-            // 2.下载关联组织的信息
-            [self requestServerOrgWithOrgId:formOrgId];
+            // 2.下载关联组织的职位信息和成员信息
+            [self requestServerAllPositionListWithOrgId:toOrgId relationOrgId:formOrgId];
+            [self requestServerAllUserListWithOrgId:toOrgId relationOrgId:formOrgId];
             
             // 3.如果自己是本组织的admin，那么就修改该请求信息为已接受的
             if ([_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:toOrgId xmppStream:xmppStream]) {
