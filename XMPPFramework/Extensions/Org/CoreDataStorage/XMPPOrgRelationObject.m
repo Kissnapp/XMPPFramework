@@ -13,6 +13,9 @@
 @dynamic orgId;
 @dynamic relationOrgId;
 @dynamic relationOrgName;
+@synthesize relationPhoto;
+@synthesize relationPtTag;
+@synthesize relationUserTag;
 @dynamic streamBareJidStr;
 
 - (NSMutableDictionary *)propertyTransformDictionary
@@ -70,6 +73,7 @@
     [self setPrimitiveValue:value forKey:@"relationOrgName"];
     [self didChangeValueForKey:@"relationOrgName"];
 }
+
 - (NSString *)streamBareJidStr
 {
     [self willAccessValueForKey:@"streamBareJidStr"];
@@ -80,6 +84,56 @@
 }
 
 - (void)setStreamBareJidStr:(NSString *)value
+{
+    [self willChangeValueForKey:@"streamBareJidStr"];
+    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
+    [self didChangeValueForKey:@"streamBareJidStr"];
+}
+
+
+- (NSString *)relationPhoto
+{
+    [self willAccessValueForKey:@"relationPhoto"];
+    NSString *value = [self primitiveValueForKey:@"relationPhoto"];
+    [self didAccessValueForKey:@"relationPhoto"];
+    
+    return value;
+}
+
+- (void)setRelationPhoto:(NSString *)value
+{
+    [self willChangeValueForKey:@"relationPhoto"];
+    [self setPrimitiveValue:value forKey:@"relationPhoto"];
+    [self didChangeValueForKey:@"relationPhoto"];
+}
+
+
+- (NSString *)relationPtTag
+{
+    [self willAccessValueForKey:@"relationPtTag"];
+    NSString *value = [self primitiveValueForKey:@"relationPtTag"];
+    [self didAccessValueForKey:@"relationPtTag"];
+    
+    return value;
+}
+
+- (void)setRelationPtTag:(NSString *)value
+{
+    [self willChangeValueForKey:@"relationPtTag"];
+    [self setPrimitiveValue:value forKey:@"relationPtTag"];
+    [self didChangeValueForKey:@"relationPtTag"];
+}
+
+- (NSString *)relationUserTag
+{
+    [self willAccessValueForKey:@"relationUserTag"];
+    NSString *value = [self primitiveValueForKey:@"relationUserTag"];
+    [self didAccessValueForKey:@"relationUserTag"];
+    
+    return value;
+}
+
+- (void)setRelationUserTag:(NSString *)value
 {
     [self willChangeValueForKey:@"streamBareJidStr"];
     [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
@@ -185,38 +239,22 @@
     
     return object;
 }
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withSelfOrgId:(NSString *)selfOrgId
-                     relationOrgId:(NSString *)relationOrgId
-                   relationOrgName:(NSString *)relationOrgName
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (selfOrgId == nil) return nil;
-    if (relationOrgId == nil) return nil;
-    if (moc == nil) return nil;
-    
-    NSString *entityName = NSStringFromClass([XMPPOrgRelationObject class]);
-    
-    XMPPOrgRelationObject *object = [NSEntityDescription insertNewObjectForEntityForName:entityName
-                                                                  inManagedObjectContext:moc];
-    
-    object.orgId = selfOrgId;
-    object.relationOrgId = relationOrgId;
-    object.relationOrgName = relationOrgName;
-    object.streamBareJidStr = streamBareJidStr;
-    
-    return object;
-}
 
 - (void)updateWithDic:(NSDictionary *)dic
 {
     NSString *tempOrgId = [dic objectForKey:@"orgId"];
     NSString *tempRelationOrgId = [dic objectForKey:@"relationOrgId"];
     NSString *tempRelationOrgName = [dic objectForKey:@"relationOrgName"];
+    NSString *tempRelationOrgPhoto = [dic objectForKey:@"relationPhoto"];
+    NSString *tempRelationOrgPtTag = [dic objectForKey:@"relationPtTag"];
+    NSString *tempRelationOrgUserTag = [dic objectForKey:@"relationUserTag"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
     if (tempOrgId) self.orgId = tempOrgId;
     if (tempRelationOrgId) self.relationOrgId = tempRelationOrgId;
+    if (tempRelationOrgPhoto) self.relationPhoto = tempRelationOrgPhoto;
+    if (tempRelationOrgPtTag) self.relationPtTag = tempRelationOrgPtTag;
+    if (tempRelationOrgUserTag) self.relationUserTag = tempRelationOrgUserTag;
     if (tempRelationOrgName) self.relationOrgName = tempRelationOrgName;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }

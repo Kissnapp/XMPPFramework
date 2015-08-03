@@ -14,6 +14,9 @@
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * relationOrgId;
 @property (nonatomic, retain) NSString * relationOrgName;
+@property (nonatomic, retain) NSString * relationPhoto;
+@property (nonatomic, retain) NSString * relationPtTag;
+@property (nonatomic, retain) NSString * relationUserTag;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
@@ -29,12 +32,6 @@
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                          selfOrgId:(NSString *)selfOrgId
                            withDic:(NSDictionary *)dic
-                  streamBareJidStr:(NSString *)streamBareJidStr;
-
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withSelfOrgId:(NSString *)selfOrgId
-                     relationOrgId:(NSString *)relationOrgId
-                   relationOrgName:(NSString *)relationOrgName
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 - (void)updateWithDic:(NSDictionary *)dic;

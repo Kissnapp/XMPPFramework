@@ -184,6 +184,18 @@ typedef void(^CompletionBlock)(id data, NSError *error);
                                             orgId:(NSString *)orgId
                                   completionBlock:(CompletionBlock)completionBlock;
 
+- (void)relationOrgPhotoWithrelationOrgId:(NSString *)relationOrgId
+                                    orgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 获取一个关联组组的详细信息
+- (void)requestServerRelationOrgWithRelationId:(NSString *)relationId
+                                         orgId:(NSString *)orgId;
+
+- (void)requestDBRelationOrgWithRelationId:(NSString *)relationId
+                                     orgId:(NSString *)orgId
+                           completionBlock:(CompletionBlock)completionBlock;
+
 #pragma mark - 自己是否是该工程的admin
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
@@ -276,7 +288,12 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)insertOrUpdatePositionInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 
 - (void)clearRelationsWithOrgId:(NSString *)orgId  xmppStream:(XMPPStream *)stream;
-- (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+/*- (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId dic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;*/
+- (void)insertOrUpdateRelationInDBWithOrgId:(NSString *)orgId
+                                        dic:(NSDictionary *)dic
+                                 xmppStream:(XMPPStream *)stream
+                                  userBlock:(void (^)(NSString *orgId, NSString *relationOrgId))userBlock
+                              positionBlock:(void (^)(NSString *orgId,  NSString *relationOrgId))positionBlock;
 
 - (id)endOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
@@ -302,6 +319,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)insertSubcribeObjectWithDic:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
 - (void)updateSubcribeObjectWithDic:(NSDictionary *)dic accept:(BOOL)accept xmppStream:(XMPPStream *)stream;
 - (void)addOrgId:(NSString *)fromOrgId orgName:(NSString *)formOrgName toOrgId:(NSString *)toTogId xmppStream:(XMPPStream *)stream;
-- (void)removeOrgId:(NSString *)removeOrgId orgName:(NSString *)removeOrgName fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
+- (void)removeOrgId:(NSString *)removeOrgId fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
 
 @end

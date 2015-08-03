@@ -29,6 +29,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 static const double REQUEST_TIMEOUT_DELAY = 30.0f;
 static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
 static const NSString *ORG_PUSH_MSG_XMLNS = @"aft:project";
+static const NSString *ORG_REQUEST_ERROR_XMLNS = @"aft:errors";
 static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
 static const NSInteger ORG_ERROR_CODE = 9999;
 
@@ -38,6 +39,7 @@ static const NSString *REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_li
 static const NSString *REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
 static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
 static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
+static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_info_key";
 
 @interface XMPPOrg ()
 
@@ -531,7 +533,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 }
 
 
-- (void)_insertOrUpdateRelationWithDic:(NSArray *)relationDics orgId:(NSString *)orgId
+- (void)_insertOrUpdateRelationWithDics:(NSArray *)relationDics orgId:(NSString *)orgId
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -544,9 +546,17 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         [_xmppOrgStorage insertOrUpdateRelationInDBWithOrgId:orgId
                                                          dic:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                            @"relationOrgId":@"id",
-                                                                                                                           @"relationOrgName":@"name"
-                                                                                                                           }]
-                                                  xmppStream:xmppStream];
+                                                                                                                           @"relationOrgName":@"name",
+                                                                                                                           @"relationPhoto":@"photo",
+                                                                                                                           @"relationPtTag":@"job_tag",
+                                                                                                                           @"relationUserTag":@"member_tag"
+                                                                                                                           }] xmppStream:xmppStream
+                                                   userBlock:^(NSString *orgId, NSString *relationOrgId) {
+                                                       [self requestServerAllUserListWithOrgId:orgId relationOrgId:relationOrgId];
+                                                   }
+                                               positionBlock:^(NSString *orgId, NSString *relationOrgId) {
+                                                   [self requestServerAllPositionListWithOrgId:orgId relationOrgId:relationOrgId];
+                                               }];
         
     }];
 }
@@ -751,8 +761,14 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         
         XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
         
-        relation ? completionBlock(relation.relationOrgName, nil) : [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
-        
+        if (relation != nil) {
+            
+            completionBlock(relation.relationOrgName, nil);
+            
+        }else{
+            [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+            [self _requestServerRelationOrgWithRelationId:relationOrgId orgId:orgId completionBlock:NULL];
+        }
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -761,51 +777,36 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 }
 
-#pragma mark - 获取所有项目
-
-// 数据库同服务器请求
-- (void)requestServerAllOrgList
+- (void)relationOrgPhotoWithrelationOrgId:(NSString *)relationOrgId
+                                    orgId:(NSString *)orgId
+                          completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+        XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
+        
+        if (relation != nil) {
             
-            // If the templateId is nil，we should notice the user the info
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_ORG_KEY];
-            
-            // 1. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project" type="list_project">
-             </project>
-             </iq>
-             */
-            
-            // 2. Create the request iq
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:@"aft:project"
-                                                                         attribute:@{@"type":@"list_project"}
-                                                                       stringValue:nil];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
+            completionBlock(relation.relationPhoto, nil);
             
         }else{
-            // 0. tell the the user that can not send a request
-            NSLog(@"%@",@"you can not send this iq before logining");
+            [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+            [self _requestServerRelationOrgWithRelationId:relationOrgId orgId:orgId completionBlock:NULL];
         }
+        
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_async(moduleQueue, block);
+}
+#pragma mark - 获取所有项目
+
+// 数据库同服务器请求
+- (void)requestServerAllOrgList
+{
+    [self _requestServerAllOrgListWithBlock:NULL];
 }
 
 // 逻辑层向数据库请求
@@ -833,11 +834,20 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
         
         // If the templateId is nil，we should notice the user the info
-        // 0. Create a key for storaging completion block
-        NSString *requestKey = [[self xmppStream] generateUUID];
         
-        // 1. add the completionBlock to the dcitionary
-        [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+        // 0. Create a key for storaging completion block
+        NSString *requestKey = nil;
+        if (completionBlock == NULL ) {
+            
+            requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_ORG_KEY];
+            
+        }else{
+            
+            requestKey = [[self xmppStream] generateUUID];
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+
+        }
         
         // 2. Listing the request iq XML
         /*
@@ -865,57 +875,16 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
         
     }else{
-        // 0. tell the the user that can not send a request
-        [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        if (completionBlock != NULL) {
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
     }
 }
 #pragma mark - 获取所有模板
 - (void)requestServerAllTemplates
 {
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 1. Create a key for storaging completion block
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY];
-            
-            // 2. Listing the request iq XML
-            /*
-             获取模块请求：
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project" type="list_template">
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"list_template"}
-                                                                       stringValue:nil];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            NSLog(@"you can not send this iq before logining");
-        }
-    }};
     
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
 }
 
 - (void)_requestServerAllTemplatesWithBlock:(CompletionBlock)completionBlock
@@ -928,10 +897,18 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         
         
         // 0. Create a key for storaging completion block
-        NSString *requestKey = [[self xmppStream] generateUUID];
-        
-        // 1. add the completionBlock to the dcitionary
-        [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+        NSString *requestKey = nil;
+        if (completionBlock == NULL ) {
+            
+            requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY];
+            
+        }else{
+            
+            requestKey = [[self xmppStream] generateUUID];
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+        }
         
         // 2. Listing the request iq XML
         /*
@@ -963,8 +940,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
         
     }else{
-        // 0. tell the the user that can not send a request
-        [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        if (completionBlock != NULL) {
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
     }
 }
 
@@ -988,54 +967,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 - (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
                                 relationOrgId:(NSString *)relationOrgId
 {
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 1. Create a key for storaging completion block
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_POSITION_LIST_KEY];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="2eef0b948af444ffb50223c485cae10b@192.168.1.162/Gajim" id="5244001" type="get">
-             <project xmlns="aft.project" type="get_structure">
-             {"project":"xxx","project_target":"1234"}
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            
-            NSMutableDictionary *templateDic = [NSMutableDictionary dictionary];
-            if (orgId) templateDic[@"project"] = orgId;
-            if (relationOrgId) templateDic[@"project_target"] = relationOrgId;
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"get_structure"}
-                                                                       stringValue:[templateDic JSONString]];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            NSLog(@"you can not send this iq before logining");
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self _requestServerAllPositionListWithOrgId:orgId relationOrgId:relationOrgId completionBlock:NULL];
 }
 
 - (void)_requestServerAllPositionListWithOrgId:(NSString *)orgId
@@ -1051,14 +983,20 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 [self _callBackWithMessage:@"The template id you inputed is nil" completionBlock:completionBlock];
             }
             
-            // fetch data from database
-            
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            NSString *requestKey = nil;
+            if (completionBlock == NULL ) {
+                
+                requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_POSITION_LIST_KEY];
+                
+            }else{
+                
+                requestKey = [[self xmppStream] generateUUID];
+                // 1. add the completionBlock to the dcitionary
+                [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+                
+            }
             
             // 2. Listing the request iq XML
             /*
@@ -1093,8 +1031,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
             
         }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+            if (completionBlock != NULL) {
+                // 0. tell the the user that can not send a request
+                [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+            }
         }
     }};
     
@@ -1129,52 +1069,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId
                             relationOrgId:(NSString *)relationOrgId
 {
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 1. Create a key for storaging completion block
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_USER_LIST_KEY];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project"  type="list_member">
-             {"project":"60", "project_target":"61"}
-             </project>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            NSMutableDictionary * tempDic = [NSMutableDictionary dictionary];
-            if (orgId) tempDic[@"project"] = orgId;
-            if (relationOrgId) tempDic[@"project_target"] = relationOrgId;
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"list_member"}
-                                                                       stringValue:[tempDic JSONString]];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            NSLog(@"you can not send this iq before logining");
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self _requestServerAllUserListWithOrgId:orgId relationOrgId:relationOrgId completionBlock:NULL];
 }
 
 - (void)_requestServerAllUserListWithOrgId:(NSString *)orgId
@@ -1187,10 +1082,18 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            NSString *requestKey = nil;
+            if (completionBlock == NULL ) {
+                
+                requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_USER_LIST_KEY];
+                
+            }else{
+                
+                requestKey = [[self xmppStream] generateUUID];
+                // 1. add the completionBlock to the dcitionary
+                [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+                
+            }
             
             // 2. Listing the request iq XML
             /*
@@ -1224,9 +1127,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
             
         }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
+            if (completionBlock != NULL) {
+                // 0. tell the the user that can not send a request
+                [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+            }        }
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -1256,6 +1160,99 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
         dispatch_async(moduleQueue, block);
 }
 
+#pragma mark - 获取一个关联组组的详细信息
+- (void)requestServerRelationOrgWithRelationId:(NSString *)relationId
+                                         orgId:(NSString *)orgId
+{
+    [self _requestServerRelationOrgWithRelationId:relationId orgId:orgId completionBlock:NULL];
+}
+
+- (void)requestDBRelationOrgWithRelationId:(NSString *)relationId
+                                     orgId:(NSString *)orgId
+                           completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationId orgId:orgId xmppStream:xmppStream];
+        
+        (relation) ? completionBlock(relation, nil) : [self _requestServerRelationOrgWithRelationId:relationId
+                                                                                              orgId:orgId
+                                                                                    completionBlock:completionBlock];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)_requestServerRelationOrgWithRelationId:(NSString *)relationOrgId
+                                          orgId:(NSString *)orgId
+                                completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = nil;
+            
+            if (completionBlock == NULL) {
+                requestKey = [NSString stringWithFormat:@"%@",REQUEST_RELATION_ORG_INFO_KEY];
+            }else{
+                requestKey = [[self xmppStream] generateUUID];
+                
+                // 1. add the completionBlock to the dcitionary
+                [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            }
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="81464048fffd4648915e839d9acebcda@192.168.1.130/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_link_project">
+             {"project":"41", "project_target":"50"}
+             </project>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSMutableDictionary * tempDic = [NSMutableDictionary dictionary];
+            if (orgId) tempDic[@"project"] = orgId;
+            if (relationOrgId) tempDic[@"project_target"] = relationOrgId;
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{@"type":@"get_link_project"}
+                                                                       stringValue:[tempDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            if (completionBlock != NULL)
+                // 5. add a timer to call back to user after a long time without server's reponse
+                [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            if (completionBlock != NULL) {
+                // 0. tell the the user that can not send a request
+                [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+            }
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 #pragma mark - 获取一个组织的所有职位信息
 - (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
 {
@@ -1283,51 +1280,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
 #pragma mark - 获取一个组织的所有关键组织的id
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId
 {
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 1. Create a key for storaging completion block
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project"  type="list_link_project">
-             {"project":"60"}
-             </project>
-             </iq>
-             
-             */
-            
-            // 3. Create the request iq
-            NSDictionary * tempDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId,@"project", nil];
-            
-            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
-                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
-                                                                         attribute:@{@"type":@"list_link_project"}
-                                                                       stringValue:[tempDic JSONString]];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:organizationElement];
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            NSLog(@"you can not send this iq before logining");
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self _requestServerAllRelationListWithOrgId:orgId completionBlock:NULL];
 }
 
 - (void)_requestServerAllRelationListWithOrgId:(NSString *)orgId
@@ -1339,10 +1292,17 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = nil;
             
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            if (completionBlock == NULL) {
+                requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY];
+            }else{
+                requestKey = [[self xmppStream] generateUUID];
+                
+                // 1. add the completionBlock to the dcitionary
+                [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            }
+
             
             // 2. Listing the request iq XML
             /*
@@ -1744,7 +1704,6 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
     
     return positions;
 }
-
 
 - (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
                                    orgId:(NSString *)orgId
@@ -2609,12 +2568,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                      */
 
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2660,12 +2620,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2714,12 +2675,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
-                    if (completionBlock) {
+                    if (completionBlock != NULL) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2728,10 +2690,10 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="list_link_projeck">
-                 {"self_project_id":[ [{"id":"xxx", "name":"xxx"}, {}] }
+                 <project xmlns="aft:project"  type="list_link_project">
+                 {"self_project":"xxx", "link_project":[ [{"id":"xxx", "name":"xxx"}, {}] } %% modify3
                  </project>
-                 </iq>
+                 </iq
                  */
                 
                 // 0.跟新数据库
@@ -2739,7 +2701,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 NSString *orgId = [data objectForKey:@"self_project"];
                 NSArray *relations = [data objectForKey:@"link_project"];
                 
-                [self _insertOrUpdateRelationWithDic:relations orgId:orgId];
+                [self _insertOrUpdateRelationWithDics:relations orgId:orgId];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY]]) {
@@ -2766,12 +2728,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2817,12 +2780,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2869,12 +2833,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2901,6 +2866,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                     [_xmppOrgStorage insertOrUpdateOrgInDBWith:[(NSDictionary *)obj destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                              @"orgId":@"id",
                                                                                                                              @"orgName":@"name",
+                                                                                                                             @"orgPhoto":@"photo",
                                                                                                                              @"orgState":@"status",
                                                                                                                              @"orgStartTime":@"start_time",
                                                                                                                              @"orgEndTime":@"end_time",
@@ -2951,17 +2917,86 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 return YES;
                 
                 
-            }else if([projectType isEqualToString:@"project_name_exist"]){
+            }else if([projectType isEqualToString:@"get_link_project"]){
                 
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock != NULL) {
+                        
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                    return YES;
+                }
+                
+                /*
+                 正确的结果：("id"-->工程的ID, name-->工程的名称)
+                 <iq from="81464048fffd4648915e839d9acebcda@192.168.1.130/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project" type="get_link_project">
+                 {"self_project":"xxx", "link_project":{"id":"xxx", "name":"xxx", "admin":"xxx", "job_tag":"xxx", "member_tag":"xxx"}}
+                 </project>
+                 </iq>
+                 */
+                
+                // 0.跟新数据库
+                id data = [[project stringValue] objectFromJSONString];
+                
+                NSString *orgId = data[@"self_project"];
+                NSDictionary *relationDic = data[@"link_project"];
+                NSString *relationOrgId = data[@"id"];
+                
+                [_xmppOrgStorage insertOrUpdateRelationInDBWithOrgId:orgId
+                                                                 dic:[(NSDictionary *)relationDic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                                                   @"relationOrgId":@"id",
+                                                                                                                                   @"relationOrgName":@"name",
+                                                                                                                                   @"relationPhoto":@"photo",
+                                                                                                                                   @"relationPtTag":@"job_tag",
+                                                                                                                                   @"relationUserTag":@"member_tag"
+                                                                                                                                   }] xmppStream:xmppStream
+                                                           userBlock:^(NSString *orgId, NSString *relationOrgId) {
+                                                               [self requestServerAllUserListWithOrgId:orgId relationOrgId:relationOrgId];
+                                                           }
+                                                       positionBlock:^(NSString *orgId, NSString *relationOrgId) {
+                                                           [self requestServerAllPositionListWithOrgId:orgId relationOrgId:relationOrgId];
+                                                       }];
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_RELATION_ORG_INFO_KEY]]) {
+                    
+                    // 2.向数据库获取数据
+                    XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        completionBlock(relation, nil);
+                        [requestBlockDcitionary removeObjectForKey:requestkey];
+                    }
+                    
+                }
+                
+                return YES;
+                
+                
+            }else if([projectType isEqualToString:@"project_name_exist"]){
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
+                    
+                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
+                    
+                    if (completionBlock) {
+                        
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -2994,12 +3029,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                 
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3055,12 +3091,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3096,12 +3133,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3131,12 +3169,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 
                 if ([[iq type] isEqualToString:@"error"]) {
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3191,12 +3230,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3241,12 +3281,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3285,12 +3326,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3321,12 +3363,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                 
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3363,12 +3406,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3398,12 +3442,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
               
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3440,12 +3485,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3484,12 +3530,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                     
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3511,12 +3558,13 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
                 if ([[iq type] isEqualToString:@"error"]) {
                     
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
                     CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                     
                     if (completionBlock) {
                         
-                        [self callBackWithMessage:[errorElement attributeStringValueForName:@"code"] completionBlock:completionBlock];
+                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
                         [requestBlockDcitionary removeObjectForKey:requestkey];
                     }
                     
@@ -3764,9 +3812,9 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             [_xmppOrgStorage updateRelationShipTagWithOrgId:toOrgId relationShipTag:relationTag xmppStream:xmppStream];
             
             // 2.下载关联组织的职位信息和成员信息
-            [self requestServerAllPositionListWithOrgId:toOrgId relationOrgId:formOrgId];
-            [self requestServerAllUserListWithOrgId:toOrgId relationOrgId:formOrgId];
+            [self requestServerRelationOrgWithRelationId:formOrgId orgId:toOrgId];
             
+            // FIXME:请求方会重复添加关联组织信息
             // 3.如果自己是本组织的admin，那么就修改该请求信息为已接受的
             if ([_xmppOrgStorage isAdminWithUser:[[xmppStream myJID] bare] orgId:toOrgId xmppStream:xmppStream]) {
                 
@@ -3815,7 +3863,7 @@ static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
             NSString *relationTag = [data objectForKey:@"link_tag_self"];
             
             // 0.删除数据库关联组织信息
-            [_xmppOrgStorage removeOrgId:toOrgId orgName:toOrgId fromOrgId:formOrgId xmppStream:xmppStream];
+            [_xmppOrgStorage removeOrgId:toOrgId fromOrgId:formOrgId xmppStream:xmppStream];
             
             // 1.改变数据库组织表关联tag
             [_xmppOrgStorage updateRelationShipTagWithOrgId:formOrgId relationShipTag:relationTag xmppStream:xmppStream];
