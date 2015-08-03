@@ -4,6 +4,7 @@
 #import "XMPPResourceCoreDataStorageObject.h"
 #import "XMPPRosterPrivate.h"
 #import "XMPPCoreDataStorageProtected.h"
+#import "XMPPRosterVersionCoreDataStorageObject.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
@@ -571,6 +572,53 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     }];
 }
 
+- (NSString *)versionWithXMPPStream:(XMPPStream *)stream
+{
+    __block NSString *version = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPRosterVersionCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPRosterVersionCoreDataStorageObject *rosterVersion = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        version = rosterVersion.version;
+    }];
+    
+    return version;
+}
+
+- (void)insertOrUpdateRosterVersion:(NSString *)rosterVersion xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPRosterVersionCoreDataStorageObject updateOrInsertInManagedObjectContext:moc
+                                                                             version:rosterVersion
+                                                                    streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        }];
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPRosterQueryModuleStorage

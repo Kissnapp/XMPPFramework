@@ -828,5 +828,9 @@
 {
 
 }
+- (NSString *)versionWithXMPPStream:(XMPPStream *)stream
+{
+    return nil;
+}
 
 @end

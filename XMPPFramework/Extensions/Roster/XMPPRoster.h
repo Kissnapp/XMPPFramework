@@ -359,6 +359,10 @@
                  groups:(NSArray **)groups
                  forJID:(XMPPJID *)jid
              xmppStream:(XMPPStream *)stream;
+
+- (NSString *)versionWithXMPPStream:(XMPPStream *)stream;
+- (void)insertOrUpdateRosterVersion:(NSString *)rosterVersion xmppStream:(XMPPStream *)stream;
+
 @optional
 
 /**
