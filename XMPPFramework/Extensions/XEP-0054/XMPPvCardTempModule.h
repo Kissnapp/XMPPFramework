@@ -52,6 +52,27 @@
 **/
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp;
 
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr;
+
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage;
+
+- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage;
+
+/**
+ *  fetch a vCard from database ,if it not existed,we will request from server
+ *
+ *  @param bareJidStr      The user's bare jid string
+ *  @param completionBlock a block to return vCard
+ */
+- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock;
+/**
+ *  Request from server with a vCard photo hash string,The server will return us the different vCard
+ *
+ *  @param bareJidStr      The user's bare jid string
+ *  @param completionBlock a block to return vCard
+ */
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,5 +134,7 @@
  * This is used so that we don't request the vCardTemp multiple times.
 **/
 - (BOOL)shouldFetchvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+
+- (NSString *)photoHashForvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
 @end

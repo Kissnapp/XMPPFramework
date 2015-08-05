@@ -215,6 +215,53 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	return nickName;
 }
 
+- (NSString *)photoURLForBareJidStr:(NSString *)bareJidStr
+{
+    __block NSString *photoURL;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
+        photoURL = [_moduleStorage photoURLForJID:jid xmppStream:xmppStream];
+        
+        if (photoURL == nil){
+            [_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
+        }
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return photoURL;
+}
+
+- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule requestvCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

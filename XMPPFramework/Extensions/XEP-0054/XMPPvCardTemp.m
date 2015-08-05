@@ -27,6 +27,7 @@
 
 NSString *const kXMPPNSvCardTemp = @"vcard-temp";
 NSString *const kXMPPvCardTempElement = @"vCard";
+NSString *const kXMPPvCardTempTagElement = @"vCardTag";
 
 
 @implementation XMPPvCardTemp
@@ -93,6 +94,18 @@ NSString *const kXMPPvCardTempElement = @"vCard";
   [iq addChild:vCardElem];
   return iq;
 }
+
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash
+{
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:[XMPPStream generateUUID]];
+    NSXMLElement *vCardTagElem = [NSXMLElement elementWithName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp];
+    
+    [vCardTagElem addAttributeWithName:@"tag" stringValue:photoHash ? :@""];
+    
+    [iq addChild:vCardTagElem];
+    return iq;
+}
+
 
 
 #pragma mark -
@@ -169,6 +182,15 @@ NSString *const kXMPPvCardTempElement = @"vCard";
     NSXMLElement *number = [NSXMLElement elementWithName:@"NUMBER"];
     [tel addChild:number];
     [number setStringValue:phoneNumber];
+}
+
+- (NSString *)photoURL {
+    return [[self elementForName:@"HEADPHOTO"] stringValue];
+}
+
+
+- (void)setPhotoURL:(NSString *)photoURL {
+    XMPP_VCARD_SET_STRING_CHILD(photoURL, @"HEADPHOTO");
 }
 
 - (NSDate *)bday {

@@ -34,7 +34,6 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 @implementation XMPPMmsRequest
 @synthesize uploadCompletionBlockDcitionary;
 @synthesize downloadCompletionBlockDcitionary;
-@synthesize canSendRequest;
 
 - (id)init
 {

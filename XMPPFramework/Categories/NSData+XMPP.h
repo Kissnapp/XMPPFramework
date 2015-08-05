@@ -4,6 +4,8 @@
 
 - (NSData *)xmpp_md5Digest;
 
+- (NSString *)xmpp_md5Digest_32;
+
 - (NSData *)xmpp_sha1Digest;
 
 - (NSString *)xmpp_hexStringValue;
@@ -23,6 +25,7 @@
 
 @interface NSData (XMPPDeprecated)
 - (NSData *)md5Digest XMPP_DEPRECATED("Use -xmpp_md5Digest");
+- (NSString *)md5Digest_32 XMPP_DEPRECATED("Use -xmpp_md5Digest_32");
 - (NSData *)sha1Digest XMPP_DEPRECATED("Use -xmpp_sha1Digest");
 - (NSString *)hexStringValue XMPP_DEPRECATED("Use -xmpp_hexStringValue");
 - (NSString *)base64Encoded XMPP_DEPRECATED("Use -xmpp_base64Encoded");

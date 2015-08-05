@@ -26,32 +26,21 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 #else
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
-static const double REQUEST_TIMEOUT_DELAY = 30.0f;
-static const NSString *ORG_REQUEST_XMLNS = @"aft:project";
-static const NSString *ORG_PUSH_MSG_XMLNS = @"aft:project";
-static const NSString *ORG_REQUEST_ERROR_XMLNS = @"aft:errors";
-static const NSString *ORG_ERROR_DOMAIN = @"com.afusion.org.error";
-static const NSInteger ORG_ERROR_CODE = 9999;
 
-static const NSString *REQUEST_ALL_ORG_KEY = @"request_all_org_key";
-static const NSString *REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
-static const NSString *REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_list_key";
-static const NSString *REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
-static const NSString *REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
-static const NSString *REQUEST_ORG_INFO_KEY = @"request_org_info_key";
-static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_info_key";
+static NSString *const ORG_REQUEST_XMLNS = @"aft:project";
+static NSString *const ORG_PUSH_MSG_XMLNS = @"aft:project";
+static NSString *const ORG_REQUEST_ERROR_XMLNS = @"aft:errors";
 
-@interface XMPPOrg ()
-
-@property (strong, nonatomic) NSMutableDictionary *requestBlockDcitionary;
-@property (assign, nonatomic) BOOL canSendRequest;
-
-@end
+static NSString *const REQUEST_ALL_ORG_KEY = @"request_all_org_key";
+static NSString *const REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
+static NSString *const REQUEST_ORG_POSITION_LIST_KEY = @"request_org_position_list_key";
+static NSString *const REQUEST_ORG_USER_LIST_KEY = @"request_org_user_list_key";
+static NSString *const REQUEST_ORG_RELATION_LIST_KEY = @"request_org_relation_list_key";
+static NSString *const REQUEST_ORG_INFO_KEY = @"request_org_info_key";
+static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_info_key";
 
 @implementation XMPPOrg
 @synthesize xmppOrgStorage = _xmppOrgStorage;
-@synthesize requestBlockDcitionary;
-@synthesize canSendRequest;
 @synthesize autoFetchOrgList;
 @synthesize autoFetchOrgTemplateList;
 
@@ -84,10 +73,9 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         //setting the dafault data
         //your code ...
-        canSendRequest = NO;
+
         autoFetchOrgList = NO;
         autoFetchOrgTemplateList = NO;
-        requestBlockDcitionary = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -108,77 +96,10 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
     return NO;
 }
 
-- (void)deactivate
-{
-    XMPPLogTrace();
-    
-    // Reserved for future potential use
-    // Reserved for possible future use.
-    dispatch_block_t block = ^{
-        
-        canSendRequest = NO;
-        
-        [requestBlockDcitionary removeAllObjects];
-        requestBlockDcitionary = nil;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-    
-    [super deactivate];
-}
-
-
-- (void)dealloc
-{
-    dispatch_block_t block = ^{
-        
-        [requestBlockDcitionary removeAllObjects];
-        requestBlockDcitionary = nil;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Configuration and Flags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)canSendRequest
-{
-    __block BOOL result = NO;
-    
-    dispatch_block_t block = ^{
-        result = canSendRequest;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-    return result;
-}
-
-- (void)setCanSendRequest:(BOOL)CanSendRequest
-{
-    dispatch_block_t block = ^{
-        
-        canSendRequest = CanSendRequest;
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
 
 - (BOOL)autoFetchOrgList
 {
@@ -664,7 +585,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         // If the templateId is nil，we should notice the user the info
         // 0. Create a key for storaging completion block
-        NSString *requestKey = [[self xmppStream] generateUUID];
+        NSString *requestKey = [self requestKey];;
         
         // 1. add the completionBlock to the dcitionary
         [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -843,7 +764,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
         }else{
             
-            requestKey = [[self xmppStream] generateUUID];
+            requestKey = [self requestKey];;
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
 
@@ -904,7 +825,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
         }else{
             
-            requestKey = [[self xmppStream] generateUUID];
+            requestKey = [self requestKey];;
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
             
@@ -992,7 +913,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
             }else{
                 
-                requestKey = [[self xmppStream] generateUUID];
+                requestKey = [self requestKey];;
                 // 1. add the completionBlock to the dcitionary
                 [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
                 
@@ -1089,7 +1010,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
             }else{
                 
-                requestKey = [[self xmppStream] generateUUID];
+                requestKey = [self requestKey];;
                 // 1. add the completionBlock to the dcitionary
                 [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
                 
@@ -1202,7 +1123,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             if (completionBlock == NULL) {
                 requestKey = [NSString stringWithFormat:@"%@",REQUEST_RELATION_ORG_INFO_KEY];
             }else{
-                requestKey = [[self xmppStream] generateUUID];
+                requestKey = [self requestKey];;
                 
                 // 1. add the completionBlock to the dcitionary
                 [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1297,7 +1218,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             if (completionBlock == NULL) {
                 requestKey = [NSString stringWithFormat:@"%@",REQUEST_ORG_RELATION_LIST_KEY];
             }else{
-                requestKey = [[self xmppStream] generateUUID];
+                requestKey = [self requestKey];;
                 
                 // 1. add the completionBlock to the dcitionary
                 [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1376,7 +1297,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             // If the templateId is nil，we should notice the user the info
         
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1437,7 +1358,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1493,7 +1414,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1576,7 +1497,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1733,7 +1654,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1794,7 +1715,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1854,7 +1775,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -1948,7 +1869,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2012,7 +1933,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2071,7 +1992,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2133,7 +2054,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2196,7 +2117,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2260,7 +2181,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2323,7 +2244,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2378,7 +2299,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             
             // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
+            NSString *requestKey = [self requestKey];;
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -2421,59 +2342,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         dispatch_async(moduleQueue, block);
 
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark Private methods
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
-        NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",ORG_ERROR_DOMAIN] code:ORG_ERROR_CODE userInfo:userInfo];
-        completionBlock(nil, error);
-        
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
 
-- (void)_callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock
-{
-    // if not this queue we should return
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
-    NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",ORG_ERROR_DOMAIN] code:ORG_ERROR_CODE userInfo:userInfo];
-    completionBlock(nil, error);
-}
-
-// call back with error info to who had used it
-- (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey
-{
-    // We should find our request block after 60 seconds,if there is no reponse from the server,
-    //  we should call back with a error to notice the user that the server has no response for this request
-    NSTimeInterval delayInSeconds = REQUEST_TIMEOUT_DELAY;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-    dispatch_after(popTime, moduleQueue, ^(void){@autoreleasepool{
-        
-        if ([dic objectForKey:requestKey]) {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"request from server with no response for a long time!" forKey:NSLocalizedDescriptionKey];
-            NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",ORG_ERROR_DOMAIN] code:ORG_ERROR_CODE userInfo:userInfo];
-            
-            CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestKey];
-            if (completionBlock) {
-                
-                completionBlock(nil, _error);
-                [dic removeObjectForKey:requestKey];
-                
-            }
-        }
-        
-    }});
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
@@ -2492,28 +2361,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 
 - (BOOL)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error
 {
-    if ([[iq type] isEqualToString:@"get"]) {
-        
-        NSXMLElement *project = [iq elementForName:@"project" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]];
-        
-        if (project)
-        {
-            NSString *requestkey = [iq elementID];
-            
-            CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-            
-            if (completionBlock) {
-                
-                [self callBackWithMessage:@"send iq error" completionBlock:completionBlock];
-                [requestBlockDcitionary removeObjectForKey:requestkey];
-                
-                return YES;
-            }
-
-        }
-    }
-    
-    return NO;
+    return [self _executeRequestBlockWithElementName:@"project" xmlns:ORG_REQUEST_XMLNS sendIQ:iq];
 }
 
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
@@ -2570,13 +2418,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2602,14 +2444,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:orgId xmppStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
                     // 3.用block返回数据
-                    if (completionBlock) {
-                        
-                        completionBlock(positions, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:positions];
                     
                 }
                 
@@ -2622,13 +2458,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2656,14 +2486,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
                     // 3.用block返回数据
-                    if (completionBlock) {
-                        
-                        completionBlock(users, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:users];
                     
                 }
                 
@@ -2677,13 +2501,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock != NULL) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2709,15 +2527,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     NSArray *relations = [_xmppOrgStorage orgRelationsWithOrgId:orgId xmppStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
                     // 3.用block返回数据
-                    if (completionBlock) {
-                        
-                        completionBlock(relations, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
-                    
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:relations];
                 }
                 
                 return YES;
@@ -2730,13 +2541,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2760,15 +2565,9 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_TEMPLATE_KEY]]) {
                     
                     // 2.向数据库获取数据
-                    NSArray *templates = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
+                    NSArray *allOrgs = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        completionBlock(templates, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:allOrgs];
                     
                 }
 
@@ -2782,13 +2581,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2815,13 +2608,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     NSArray *templates = [_xmppOrgStorage allOrgTemplatesWithXMPPStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        completionBlock(templates, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:templates];
                     
                 }
                 
@@ -2835,13 +2622,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2904,13 +2685,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     id data = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        completionBlock(data, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                     
                 }
                 
@@ -2924,13 +2699,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock != NULL) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -2972,13 +2741,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     // 2.向数据库获取数据
                     XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        completionBlock(relation, nil);
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:relation];
                     
                 }
                 
@@ -2992,13 +2755,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3013,13 +2770,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3031,13 +2783,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3075,13 +2821,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 // 1.返回block
                 XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(org, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:org];
                 
                 return YES;
                 
@@ -3093,13 +2833,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3117,13 +2851,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 // TODO:修改结束时间
                 XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(org, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:org];
                 
                 return YES;
                 
@@ -3135,13 +2863,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3155,13 +2877,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3171,13 +2888,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3214,13 +2925,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                                                              orgId:orgId
                                                                                         xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(position, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:position];
                 
                 return YES;
                 
@@ -3232,13 +2937,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3265,14 +2964,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 NSArray *newUserIds = [self _specifiedValuesWithKey:@"jid" fromDics:userDics];
                 NSArray *newUsers = [_xmppOrgStorage newUsersWithOrgId:orgId userIds:newUserIds xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(newUsers, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
-                
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:newUsers];
                 return YES;
                 
                 
@@ -3283,13 +2975,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3310,13 +2996,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
                 [_xmppOrgStorage deleteUserWithUserJidStr:userJidStr orgId:orgId xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(userJidStr, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:userJidStr];
                 
                 return YES;
                 
@@ -3328,13 +3008,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3349,12 +3023,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3365,13 +3035,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3392,12 +3056,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3408,13 +3068,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3428,12 +3082,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3444,13 +3094,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3471,12 +3115,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3487,13 +3127,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3515,12 +3149,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  */
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3532,25 +3162,15 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
                 
                 
                 id  data = [[project stringValue] objectFromJSONString];
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
                 
-                if (completionBlock) {
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
@@ -3560,13 +3180,7 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
-                    CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                    
-                    if (completionBlock) {
-                        
-                        [self callBackWithMessage:[codeElement stringValue] completionBlock:completionBlock];
-                        [requestBlockDcitionary removeObjectForKey:requestkey];
-                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
                     
                     return YES;
                 }
@@ -3622,15 +3236,8 @@ static const NSString *REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 // 2.向数据库获取数据
                 id data = [_xmppOrgStorage orgPhotoWithOrgId:orgId xmppStream:xmppStream];
                 
-                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestkey];
-                
-                if (completionBlock) {
-                    
-                    completionBlock(data, nil);
-                    [requestBlockDcitionary removeObjectForKey:requestkey];
-                }
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
 
-                
                 return YES;
             }
             // add case
