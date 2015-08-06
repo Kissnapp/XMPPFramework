@@ -96,11 +96,8 @@
 	
 	NSString *prepUser = [XMPPStringPrep prepNode:rawUser];
 	NSString *prepDomain = [XMPPStringPrep prepDomain:rawDomain];
-	//NSString *prepResource = [XMPPStringPrep prepResource:rawResource];
-    
-    //update - 20150114
-    NSString *prepResource = [NSString stringWithFormat:@"%@",AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR];
-    
+	NSString *prepResource = [XMPPStringPrep prepResource:rawResource];
+
     //Debug model
     //NSLog(@"All JID Info IS：user = %@\tdomain = %@\tresource = %@",prepUser,prepDomain,prepResource);
 

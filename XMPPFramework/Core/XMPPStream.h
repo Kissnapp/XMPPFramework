@@ -59,7 +59,8 @@ typedef NS_ENUM(NSUInteger, XMPPRegisterType) {
     XMPPRegisterTypeEmail              //regist with a email address string
 };
 
-extern const NSTimeInterval XMPPStreamTimeoutNone;
+FOUNDATION_EXTERN NSTimeInterval const XMPPStreamTimeoutNone;
+FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
 

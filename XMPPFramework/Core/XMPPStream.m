@@ -55,8 +55,8 @@
 NSString *const XMPPStreamErrorDomain = @"XMPPStreamErrorDomain";
 NSString *const XMPPStreamDidChangeMyJIDNotification = @"XMPPStreamDidChangeMyJID";
 
-const NSTimeInterval XMPPStreamTimeoutNone = -1;
-
+NSTimeInterval const XMPPStreamTimeoutNone = -1;
+NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR = @"mobile";
 enum XMPPStreamFlags
 {
 	kP2PInitiator                 = 1 << 0,  // If set, we are the P2P initializer
@@ -2729,8 +2729,15 @@ enum XMPPStreamConfig
             loginType = type;
         }
         
-        //authenticate form server
-        [self setMyJID:[XMPPJID jidWithString:myJidStr]];
+        // authenticate form server
+        // we setting a @"mobile" for resource for local request jid
+        XMPPJID *localJID = [XMPPJID jidWithString:myJidStr];
+        if (![[localJID resource] isEqualToString:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR]) {
+            localJID = [XMPPJID jidWithString:myJidStr resource:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR];
+        }
+        
+        [self setMyJID:localJID];
+        
         result = [self _authenticateWithPassword:Password type:loginType error:&err];
     }};
     
