@@ -146,7 +146,7 @@
 	if (vCardTemp == nil && self.vCardTempRel != nil)
 	{
 		[[self managedObjectContext] deleteObject:self.vCardTempRel];
-		
+		[self setPrimitiveValue:nil forKey:@"photoHash"];
 		return;
 	}
 	
@@ -161,6 +161,8 @@
 	[self willChangeValueForKey:@"vCardTemp"];
 	self.vCardTempRel.vCardTemp = vCardTemp;
 	[self didChangeValueForKey:@"vCardTemp"];
+    
+    [self setPrimitiveValue:[[[vCardTemp XMLString] dataUsingEncoding:NSUTF8StringEncoding] xmpp_md5Digest_32]  forKey:@"photoHash"];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

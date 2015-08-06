@@ -8,8 +8,6 @@
 
 #import "XMPP.h"
 
-typedef void(^CompletionBlock)(id data, NSError *error);
-
 @protocol XMPPOrgDelegate;
 @protocol XMPPOrgStorage;
 
