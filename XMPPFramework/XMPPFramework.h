@@ -108,3 +108,14 @@
 #import "XMPPStreamManagementMemoryStorage.h"
 
 #import "XMPPMmsRequest.h"
+
+#import "XMPPOrg.h"
+#import "XMPPOrgCoreDataStorage.h"
+#import "XMPPOrgCoreDataStorageObject.h"
+#import "XMPPOrgUserCoreDataStorageObject.h"
+#import "XMPPOrgRelationObject.h"
+#import "XMPPOrgPositionCoreDataStorageObject.h"
+#import "XMPPOrgSubcribeCoreDataStorageObject.h"
+
+#import "XMPPManagedObject.h"
+#import "NSDictionary+KeysTransfrom.h"

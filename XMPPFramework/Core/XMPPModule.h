@@ -1,5 +1,10 @@
 #import <Foundation/Foundation.h>
 #import "GCDMulticastDelegate.h"
+#import "XMPP.h"
+
+#define XMPP_NOT_IN_MODULE_QUEUE NSAssert(dispatch_get_specific(moduleQueueTag),@"Invoked method (\"%@\") outside [\"%@\"] moduleQueue(Line:%d)",[NSString stringWithUTF8String:__func__],[self moduleName],__LINE__)
+
+typedef void(^CompletionBlock)(id data, NSError *error);
 
 @class XMPPStream;
 
@@ -15,18 +20,27 @@
 **/
 @interface XMPPModule : NSObject
 {
-	XMPPStream *xmppStream;
-
-	dispatch_queue_t moduleQueue;
-	void *moduleQueueTag;
-	
-	id multicastDelegate;
+    XMPPStream *xmppStream;
+    
+    dispatch_queue_t moduleQueue;
+    void *moduleQueueTag;
+    
+    id multicastDelegate;
+    
+    BOOL canSendRequest;
+    NSMutableDictionary *requestBlockDcitionary;
 }
+
 
 @property (readonly) dispatch_queue_t moduleQueue;
 @property (readonly) void *moduleQueueTag;
 
 @property (strong, readonly) XMPPStream *xmppStream;
+
+@property (assign, nonatomic) BOOL canSendRequest;
+@property (strong, nonatomic) NSMutableDictionary *requestBlockDcitionary;
+
+- (NSString *)moduleName;
 
 - (id)init;
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;
@@ -38,6 +52,21 @@
 - (void)removeDelegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeDelegate:(id)delegate;
 
-- (NSString *)moduleName;
+- (void)callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock;
+
+// those methods must uesd in the modeule CGD queue
+
+- (NSTimeInterval)xmpp_request_timeout_delay;
+- (NSInteger)xmpp_module_error_code;
+- (NSString *)xmpp_module_error_domain;
+
+- (NSString *)requestKey;
+
+- (void)_callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock;
+- (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey;
+
+- (void)_executeRequestBlockWithRequestKey:(NSString *)requestkey valueObject:(id)valueObject;
+- (void)_executeRequestBlockWithRequestKey:(NSString *)requestkey errorMessage:(id)message;
+- (BOOL)_executeRequestBlockWithElementName:(NSString *)elementName xmlns:(NSString *)xmlns sendIQ:(XMPPIQ *)iq;
 
 @end

@@ -1913,6 +1913,63 @@ enum XMPPStreamConfig
 #pragma mark - This methods is added by Peter Lee for kissnapp project:2014-12-11
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (BOOL)kissnapp_sendElement:(DDXMLElement *)element error:(NSError **)errPtr
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = YES;
+    __block NSError *err = nil;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        if (state != STATE_XMPP_CONNECTED)
+        {
+            NSString *errMsg = @"Please wait until the stream is connected.";
+            NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+            
+            err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamInvalidState userInfo:info];
+            
+            result = NO;
+            return_from_block;
+        }
+        
+        if (![self supportsInBandRegistration])
+        {
+            NSString *errMsg = @"The server does not support in band registration.";
+            NSDictionary *info = [NSDictionary dictionaryWithObject:errMsg forKey:NSLocalizedDescriptionKey];
+            
+            err = [NSError errorWithDomain:XMPPStreamErrorDomain code:XMPPStreamUnsupportedAction userInfo:info];
+            
+            result = NO;
+            return_from_block;
+        }
+        
+        NSString *outgoingStr = [element compactXMLString];
+        NSData *outgoingData = [outgoingStr dataUsingEncoding:NSUTF8StringEncoding];
+        
+        XMPPLogSend(@"SEND: %@", outgoingStr);
+        numberOfBytesSent += [outgoingData length];
+        
+        [asyncSocket writeData:outgoingData
+                   withTimeout:TIMEOUT_XMPP_WRITE
+                           tag:TAG_XMPP_WRITE_STREAM];
+        
+        // Update state
+        state = STATE_XMPP_CONNECTED;
+        
+    }};
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
+    
+    return result;
+}
+
 //This is a methods write by Peter Lee - 2014-12-11
 - (BOOL)kissnapp_registerWithElements:(NSArray *)elements error:(NSError **)errPtr
 {

@@ -156,6 +156,27 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	return result;
 }
 
+- (NSString *)photoURLForJID:(XMPPJID *)jid  xmppStream:(XMPPStream *)stream
+{
+    // This is a public method.
+    // It may be invoked on any thread/queue.
+    
+    XMPPLogTrace();
+    
+    __block NSString *result;
+    
+    [self executeBlock:^{
+        
+        XMPPvCardCoreDataStorageObject *vCard;
+        vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+                                                  inManagedObjectContext:[self managedObjectContext]];
+        
+        result = vCard.vCardTemp.photoURL;
+    }];
+    
+    return result;
+}
+
 - (NSString *)photoHashForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream 
 {
 	// This is a public method.
@@ -198,6 +219,24 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPvCardTempModuleStorage protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (NSString *)photoHashForvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block NSString *result;
+    
+    [self executeBlock:^{
+        
+        XMPPvCardCoreDataStorageObject *vCard;
+        vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+                                                  inManagedObjectContext:[self managedObjectContext]];
+        
+        result = vCard.photoHash;
+    }];
+    
+    return result;
+}
 
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {

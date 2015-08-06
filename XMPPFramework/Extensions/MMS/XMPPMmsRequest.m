@@ -9,6 +9,7 @@
 #import "XMPPMmsRequest.h"
 #import "XMPPStream.h"
 
+static const double REQUEST_TIMEOUT_DELAY = 30.0f;
 static const NSString *MMS_REQUEST_XMLNS = @"aft:mms";
 static const NSString *MMS_ERROR_DOMAIN = @"com.afusion.mms.error";
 static const NSInteger MMS_ERROR_CODE = 9999;
@@ -33,7 +34,6 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 @implementation XMPPMmsRequest
 @synthesize uploadCompletionBlockDcitionary;
 @synthesize downloadCompletionBlockDcitionary;
-@synthesize canSendRequest;
 
 - (id)init
 {
@@ -323,7 +323,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey
 {
-    NSTimeInterval delayInSeconds = 60.0;
+    NSTimeInterval delayInSeconds = REQUEST_TIMEOUT_DELAY;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
     dispatch_after(popTime, moduleQueue, ^(void){@autoreleasepool{
     
@@ -380,10 +380,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
         
         if (uploadBlock) {
+            
             uploadBlock(nil,nil,nil, _error);
+            [uploadCompletionBlockDcitionary removeObjectForKey:key];
         }
         
-        [uploadCompletionBlockDcitionary removeObjectForKey:key];
     }else{
         NSDictionary *blockDic = [downloadCompletionBlockDcitionary objectForKey:key];
         NSString *file = [[blockDic allKeys] firstObject];
@@ -392,9 +393,8 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
         if (downloadBlock) {
             downloadBlock(nil, _error);
+            [downloadCompletionBlockDcitionary removeObjectForKey:key];
         }
-        
-        [downloadCompletionBlockDcitionary removeObjectForKey:key];
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,10 +466,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
                 
                 if (uploadBlock) {
+                    
                     uploadBlock(token, file, expiration, nil);
+                    [uploadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
-                [uploadCompletionBlockDcitionary removeObjectForKey:key];
             }
             else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
@@ -484,10 +485,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
                 if (downloadBlock) {
+                    
                     downloadBlock([query stringValue], nil);
+                    [downloadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
-                [downloadCompletionBlockDcitionary removeObjectForKey:key];
             }
 
             

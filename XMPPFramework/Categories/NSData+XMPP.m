@@ -31,6 +31,20 @@ static char encodingTable[64] = {
     return [NSData dataWithBytes:result length:CC_SHA1_DIGEST_LENGTH];
 }
 
+- (NSString *)xmpp_md5Digest_32
+{
+    unsigned char result[CC_MD5_DIGEST_LENGTH];
+ 
+    CC_MD5([self bytes], (CC_LONG)[self length], result);
+    
+    
+    NSMutableString *md5String = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    for(int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+        [md5String appendFormat:@"%02x", result[i]];
+    
+    return md5String;
+}
+
 - (NSString *)xmpp_hexStringValue
 {
 	NSMutableString *stringBuffer = [NSMutableString stringWithCapacity:([self length] * 2)];
@@ -217,6 +231,10 @@ static char encodingTable[64] = {
 
 - (NSData *)md5Digest {
     return [self xmpp_md5Digest];
+}
+
+- (NSString *)md5Digest_32{
+    return [self xmpp_md5Digest_32];
 }
 
 - (NSData *)sha1Digest {

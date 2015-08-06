@@ -397,11 +397,13 @@ enum XMPPRosterFlags
 		flags &= ~kPopulatingRoster;
 }
 
-- (void)_addRosterItems:(NSArray *)rosterItems
+- (void)_addRosterItems:(NSArray *)rosterItems version:(NSString *)version
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
     
     BOOL hasRoster = [self hasRoster];
+    
+    [xmppRosterStorage insertOrUpdateRosterVersion:version xmppStream:xmppStream];
     
     for (NSXMLElement *item in rosterItems)
     {
@@ -818,8 +820,15 @@ enum XMPPRosterFlags
 		// <iq type="get">
 		//   <query xmlns="jabber:iq:roster"/>
 		// </iq>
-		
+        
 		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:roster"];
+        
+        // get the version of this roster
+        NSString *rosterVersion = [xmppRosterStorage versionWithXMPPStream:xmppStream];
+        if (rosterVersion == nil) {
+            rosterVersion = @"";
+        }
+        [query addAttributeWithName:@"ver" stringValue:rosterVersion];
 		
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:[xmppStream generateUUID]];
 		[iq addChild:query];
@@ -861,7 +870,9 @@ enum XMPPRosterFlags
 		}
 		
 		NSArray *items = [query elementsForName:@"item"];
-        [self _addRosterItems:items];
+        NSString *version = [query attributeStringValueForName:@"ver"];
+        
+        [self _addRosterItems:items version:version];
 		
 		if (!hasRoster)
 		{
@@ -925,8 +936,11 @@ enum XMPPRosterFlags
         {
             [multicastDelegate xmppRoster:self didReceiveRosterPush:iq];
             
+            
             NSArray *items = [query elementsForName:@"item"];
-            [self _addRosterItems:items];
+            NSString *version = [query attributeStringValueForName:@"ver"];
+            
+            [self _addRosterItems:items version:version];
         }
         else if([iq isResultIQ])
         {

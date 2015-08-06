@@ -150,6 +150,80 @@
 		dispatch_async(moduleQueue, block);
 }
 
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr
+{
+    [self requestvCardTempWithTagForJID:bareJidStr ignoreStorage:NO];
+}
+
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
+{
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        NSString *photoHash = [_xmppvCardTempModuleStorage photoHashForvCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
+        
+        XMPPvCardTemp *vCardTemp = nil;
+        
+        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
+        
+        if (!ignoreStorage)
+        {
+            // Try loading from storage
+            vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
+        }
+        
+        if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+        {
+            [self _requestvCardTempWithTag:photoHash bareJidStr:bareJidStr];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
+{
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPvCardTemp *vCardTemp = nil;
+        
+        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
+        
+        if (!ignoreStorage)
+        {
+            // Try loading from storage
+            vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
+        }
+        
+        if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
+        {
+            [self _requestvCardTempWithTag:tag bareJidStr:bareJidStr];
+        }
+
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
+}
+
+- (void)_requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr
+{
+
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if(!bareJidStr) return;
+    
+    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag]];
+}
+
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch{
     
     __block XMPPvCardTemp *result;
@@ -205,10 +279,104 @@
 
 }
 
+- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        // if there is vCard in the database,we should return the existed vCard
+        XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
+        
+        if (vCardTemp != nil) {
+            completionBlock(vCardTemp, nil);
+            return;
+        }
+        
+        
+        // if there is no vCard in the database, we should request from server
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [self requestKey];;
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_template_hash">
+             </project>
+             </iq>
+             */
+            // 3. Create the request iq
+            
+            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr]];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [self requestKey];;
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
+             <project xmlns="aft:project" type="get_template_hash">
+             </project>
+             </iq>
+             */
+            // 3. Create the request iq
+            
+            NSString *photoHash = [_xmppvCardTempModuleStorage photoHashForvCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
+            
+            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:photoHash];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 - (void)_updatevCardTemp:(XMPPvCardTemp *)vCardTemp forJID:(XMPPJID *)jid
 {
     if(!jid) return;
@@ -266,19 +434,67 @@
 	// 
 	// Therefore we use vCardTempCopyFromIQ instead of vCardTempSubElementFromIQ.
     
+    NSXMLElement *vCardTempTagElement = [iq elementForName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp];
+    
+    if (vCardTempTagElement != nil) {// 是比较tag的请求
+        
+        NSXMLElement *vCardElement = [vCardTempTagElement elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+        
+        if (vCardElement != nil) {// 返回有新的vCard，存数据库并返回block
+            // 0.新的vCard
+            XMPPvCardTemp *vCardObject = [XMPPvCardTemp vCardTempFromElement:vCardElement];
+            // 1.存储
+            [self _updatevCardTemp:vCardObject forJID:[[iq from] bareJID]];
+            // 2.返回给逻辑层
+            [self _executeRequestBlockWithRequestKey:[iq elementID] valueObject:vCardObject];
+            
+        }else{// 相同，没有新的vCard,从数据取给逻辑层
+            
+            XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:[[iq from] bareJID] xmppStream:xmppStream];
+            [self _executeRequestBlockWithRequestKey:[iq elementID] valueObject:vCardTemp];
+        }
+        
+        return YES;
+    }
+    
+    // 一般请求
 	XMPPvCardTemp *vCardTemp = [XMPPvCardTemp vCardTempCopyFromIQ:iq];
-	if (vCardTemp != nil)
-	{
+	if (vCardTemp != nil){
+        // 1.存储
 		[self _updatevCardTemp:vCardTemp forJID:[iq from]];
+        
+        // 2.返回给逻辑层
+        [self _executeRequestBlockWithRequestKey:[iq elementID] valueObject:vCardTemp];
+        
 		return YES;
-	}
+    }
 	
 	return NO;
 }
 
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
+{
+    // This method is invoked on the moduleQueue.
+    
+    [self setCanSendRequest:YES];
+}
+
 - (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
 {
-	[_myvCardTracker removeAllIDs];
+    // This method is invoked on the moduleQueue.
+    
+    [self setCanSendRequest:NO];
+    
+    for (NSString *requestKey in [requestBlockDcitionary allKeys]) {
+        [self _executeRequestBlockWithRequestKey:requestKey errorMessage:@"You had disconnect with the server"];
+    }
+    
+    [_myvCardTracker removeAllIDs];
+}
+
+- (BOOL)xmppStream:(XMPPStream *)sender didFailToSendIQ:(XMPPIQ *)iq error:(NSError *)error
+{
+    return [self _executeRequestBlockWithElementName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp sendIQ:iq];
 }
 
 @end

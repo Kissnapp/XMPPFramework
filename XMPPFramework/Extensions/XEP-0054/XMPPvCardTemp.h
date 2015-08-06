@@ -30,6 +30,7 @@ typedef enum _XMPPvCardTempClass {
 
 extern NSString *const kXMPPNSvCardTemp;
 extern NSString *const kXMPPvCardTempElement;
+extern NSString *const kXMPPvCardTempTagElement;
 
 
 /*
@@ -44,6 +45,7 @@ extern NSString *const kXMPPvCardTempElement;
 //增加邮箱和电话号码，抛弃愿来的邮箱数组和电话数组
 @property (strong, nonatomic) NSString *emailAddress;
 @property (strong, nonatomic) NSString *phoneNumber;
+@property (strong, nonatomic) NSString *photoURL;
 
 @property (nonatomic, strong) NSDate *bday;
 @property (nonatomic, strong) NSData *photo;
@@ -98,6 +100,7 @@ extern NSString *const kXMPPvCardTempElement;
 + (XMPPvCardTemp *)vCardTempSubElementFromIQ:(XMPPIQ *)iq;
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq;
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid;
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash;
 
 
 - (void)addAddress:(XMPPvCardTempAdr *)adr;
@@ -118,6 +121,5 @@ extern NSString *const kXMPPvCardTempElement;
 - (void)addEmailAddress:(XMPPvCardTempEmail *)email;
 - (void)removeEmailAddress:(XMPPvCardTempEmail *)email;
 - (void)clearEmailAddresses;
-
 
 @end

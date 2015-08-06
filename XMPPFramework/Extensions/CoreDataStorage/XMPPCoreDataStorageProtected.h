@@ -32,6 +32,26 @@
 **/
 - (NSString *)managedObjectModelName;
 
+// Override me, if needed, to provide customized behavior.
+//
+// This method is queried to get the name of the ManagedObjectModel within the app bundle.
+// It should return the name of the appropriate file (*ainThreadManagedObjectContextWillMergeChangesNotificationName) sans string extension.
+//
+// E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtensionCoreDataStorageMainThreadManagedObjectContextWillMergeChangesNotificationName".
+//
+// Note that a file extension should NOT be included.
+- (NSString *)mainThreadManagedObjectContextWillMergeChangesNotificationName;
+
+// Override me, if needed, to provide customized behavior.
+//
+// This method is queried to get the name of the ManagedObjectModel within the app bundle.
+// It should return the name of the appropriate file (*MainThreadManagedObjectContextDidMergeChanges) sans string extension.
+//
+// E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtensionCoreDataStorageMainThreadManagedObjectContextDidMergeChanges".
+//
+// Note that a file extension should NOT be included.
+- (NSString *)mainThreadManagedObjectContextDidMergeChangesNotificationName;
+
 
 /**
  * Override me, if needed, to provide customized behavior.
@@ -141,6 +161,22 @@
  * The default implementation does nothing.
 **/
 - (void)mainThreadManagedObjectContextDidMergeChanges;
+
+/**
+ * This method will be invoked on the main thread,
+ * after the mainThreadManagedObjectContext will merge changes from another context.
+ *
+ * This method may be useful if you have code dependent upon when changes the datastore hit the user interface.
+ * For example, you want to play a sound when a message is received.
+ * You could play the sound right away, from the background queue, but the timing may be slightly off because
+ * the user interface won't update til the changes have been saved to disk,
+ * and then propogated to the managedObjectContext of the main thread.
+ * Alternatively you could set a flag, and then hook into this method
+ * to play the sound at the exact moment the propogation hits the main thread.
+ *
+ * The default implementation does nothing.
+ **/
+- (void)mainThreadManagedObjectContextWillMergeChanges;
 
 #pragma mark Setup
 

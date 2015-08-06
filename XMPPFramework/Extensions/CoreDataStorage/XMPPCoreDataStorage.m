@@ -61,6 +61,34 @@ static NSMutableSet *databaseFileNames;
 #pragma mark Override Me
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (NSString *)mainThreadManagedObjectContextWillMergeChangesNotificationName
+{
+    // Override me, if needed, to provide customized behavior.
+    //
+    // This method is queried to get the name of the ManagedObjectModel within the app bundle.
+    // It should return the name of the appropriate file (*ainThreadManagedObjectContextWillMergeChangesNotificationName) sans string extension.
+    //
+    // E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtensionCoreDataStorageMainThreadManagedObjectContextWillMergeChangesNotificationName".
+    //
+    // Note that a file extension should NOT be included.
+    
+    return [NSString stringWithFormat:@"%@%@",NSStringFromClass([self class]),@"MainThreadManagedObjectContextWillMergeChanges"];
+}
+
+- (NSString *)mainThreadManagedObjectContextDidMergeChangesNotificationName
+{
+    // Override me, if needed, to provide customized behavior.
+    //
+    // This method is queried to get the name of the ManagedObjectModel within the app bundle.
+    // It should return the name of the appropriate file (*MainThreadManagedObjectContextDidMergeChanges) sans string extension.
+    //
+    // E.g., if your subclass was named "XMPPExtensionCoreDataStorage", then this method would return "XMPPExtensionCoreDataStorageMainThreadManagedObjectContextDidMergeChanges".
+    //
+    // Note that a file extension should NOT be included.
+    
+    return [NSString stringWithFormat:@"%@%@",NSStringFromClass([self class]),@"MainThreadManagedObjectContextDidMergeChanges"];
+}
+
 - (NSString *)managedObjectModelName
 {
 	// Override me, if needed, to provide customized behavior.
@@ -225,11 +253,23 @@ static NSMutableSet *databaseFileNames;
 	// This method is invoked on the storageQueue.
 }
 
+- (void)mainThreadManagedObjectContextWillMergeChanges
+{
+    // Override me if you want to do anything special when changes get propogated to the main thread.
+    //
+    // This method is invoked on the main thread.
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:[self mainThreadManagedObjectContextWillMergeChangesNotificationName] object:[self mainThreadManagedObjectContextWillMergeChangesNotificationName]];
+}
+
+
 - (void)mainThreadManagedObjectContextDidMergeChanges
 {
 	// Override me if you want to do anything special when changes get propogated to the main thread.
 	// 
 	// This method is invoked on the main thread.
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:[self mainThreadManagedObjectContextDidMergeChangesNotificationName] object:[self mainThreadManagedObjectContextDidMergeChangesNotificationName]];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -722,7 +762,7 @@ static NSMutableSet *databaseFileNames;
 		
 		mainThreadManagedObjectContext.persistentStoreCoordinator = coordinator;
 		mainThreadManagedObjectContext.undoManager = nil;
-		
+        
 		[[NSNotificationCenter defaultCenter] addObserver:self
 		                                         selector:@selector(managedObjectContextDidSave:)
 		                                             name:NSManagedObjectContextDidSaveNotification
@@ -750,7 +790,8 @@ static NSMutableSet *databaseFileNames;
             for (NSManagedObject *object in [[notification userInfo] objectForKey:NSUpdatedObjectsKey]) {
                 [[mainThreadManagedObjectContext objectWithID:[object objectID]] willAccessValueForKey:nil];
             }
-			
+            
+            [self mainThreadManagedObjectContextWillMergeChanges];
 			[mainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
 			[self mainThreadManagedObjectContextDidMergeChanges];
 		});
