@@ -2624,8 +2624,15 @@ enum XMPPStreamConfig
     
     if ([self supportsSCRAMSHA1Authentication])
     {
-        someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:inPassword];
-        result = [self authenticate:someAuth type:type error:&err];
+        if (inPassword == nil) {
+            NSData *clientKeyData = nil;
+            NSData *serverKeyData = nil;
+            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self clientKeyData:clientKeyData serverKeyData:serverKeyData];
+            result = [self authenticate:someAuth type:type error:&err];
+        }else{
+            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:inPassword];
+            result = [self authenticate:someAuth type:type error:&err];
+        }
     }
     else if ([self supportsDigestMD5Authentication])
     {
@@ -2751,6 +2758,63 @@ enum XMPPStreamConfig
         *errPtr = err;
     
     return result;
+}
+
+- (BOOL)loginWithCurrentUserWithError:(NSError **)errPtr
+{
+    __block BOOL    result = NO;
+    __block NSError   *err = nil;
+    __block XMPPLoginType loginType = XMPPLoginTypeDefault;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        /*
+        __block NSString *myJidStr = nil;
+        authenticateInputType = type;
+        authenticateInputStr = [loginName copy];
+        
+        myJidStr = [self myJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
+        
+        //If the myJidStr is nil
+        if (!myJidStr) {
+            myJidStr = [loginName copy];
+            loginType = type;
+        }
+        
+        // authenticate form server
+        // we setting a @"mobile" for resource for local request jid
+        XMPPJID *localJID = [XMPPJID jidWithString:myJidStr];
+        if (![[localJID resource] isEqualToString:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR]) {
+            localJID = [XMPPJID jidWithString:myJidStr resource:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR];
+        }
+        
+        [self setMyJID:localJID];
+        */
+        result = [self _authenticateWithPassword:nil type:loginType error:&err];
+    }};
+    
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    if (errPtr)
+        *errPtr = err;
+    
+    return result;
+}
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        [multicastDelegate saveClientData:clientData serverData:serverData xmppStream:self];
+    }};
+    
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_async(xmppQueue, block);
 }
 
 - (BOOL)isAuthenticating

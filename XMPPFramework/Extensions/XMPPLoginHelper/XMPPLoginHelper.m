@@ -668,5 +668,29 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)sender
+{
+    switch (sender.authenticateType) {
+        case XMPPLoginTypePhone:
+            [self saveClientData:clientData serverData:serverData forPhoneNumber:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+            break;
+        case XMPPLoginTypeEmail:
+            [self  saveClientData:clientData serverData:serverData forEmailAddress:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+            break;
+        default:
+            [self saveCurrentUserClientData:clientData serverData:serverData];
+            break;
+    }
+}
+
+- (NSData *)clientKeyDataWithXMPPStream:(XMPPStream *)sender
+{
+    return nil;
+}
+
+- (NSData *)serverKeyDataWithXMPPStream:(XMPPStream *)sender
+{
+    return nil;
+}
 
 @end

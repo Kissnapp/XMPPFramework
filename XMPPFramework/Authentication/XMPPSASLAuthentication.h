@@ -59,6 +59,9 @@ typedef NS_ENUM(NSInteger, XMPPHandleAuthResponse) {
 **/
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)password;
 
+// TODO:To use the local data for login
+- (id)initWithStream:(XMPPStream *)stream clientKeyData:(NSData *)clientKeyData serverKeyData:(NSData *)serverKeyData;
+
 /**
  * Attempts to start the authentication process.
  * The auth mechanism should send whatever stanzas are needed to begin the authentication process.

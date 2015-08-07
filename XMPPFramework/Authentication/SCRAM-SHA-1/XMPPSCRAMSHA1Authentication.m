@@ -50,6 +50,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 @property (nonatomic, strong) NSData *clientProofData;
 @property (nonatomic) CCHmacAlgorithm hashAlgorithm;
 
+@property (nonatomic, strong) NSData *clientKeyData;
+@property (nonatomic, strong) NSData *serverKeyData;
+
 @end
 
 ///////////RFC5802 http://tools.ietf.org/html/rfc5802 //////////////
@@ -74,11 +77,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return self;
 }
 
+- (id)initWithStream:(XMPPStream *)stream clientKeyData:(NSData *)clientKeyData serverKeyData:(NSData *)serverKeyData
+{
+    if ((self = [super init])) {
+        xmppStream = stream;
+        _username = [XMPPStringPrep prepNode:[xmppStream.myJID user]];
+        _clientKeyData = clientKeyData;
+        _serverKeyData = serverKeyData;
+        _hashAlgorithm = kCCHmacAlgSHA1;
+    }
+    return self;
+}
+
 - (BOOL)start:(NSError **)errPtr
 {
 	XMPPLogTrace();
 
-    if(self.username.length || self.password.length) {
+    if(self.username.length /*|| self.password.length*/) {
         
         NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
         [auth addAttributeWithName:@"mechanism" stringValue:@"SCRAM-SHA-1"];
@@ -102,7 +117,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     XMPPLogTrace();
     
-    if(self.username.length || self.password.length) {
+    if(self.username.length /*|| self.password.length*/) {
         
         NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
         [auth addAttributeWithName:@"mechanism" stringValue:@"SCRAM-SHA-1"];
@@ -227,31 +242,35 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (BOOL)calculateProofs
 {
     //Check to see that we have a password, salt and iteration count above 4096 (from RFC5802)
-    if (!self.password.length || !self.salt.length || self.count.unsignedIntegerValue < 4096) {
+    if ( !self.salt.length || self.count.unsignedIntegerValue < 4096) {
         return NO;
     }
     
-    
-    // TODO:判断clientKeyData和serverKeyData是否存在，不存在则重新计算
-    
-    NSData *passwordData = [self.password dataUsingEncoding:NSUTF8StringEncoding];
     NSData *saltData = [[self.salt dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Decoded];
     
-    NSData *saltedPasswordData = [self HashWithAlgorithm:self.hashAlgorithm password:passwordData salt:saltData iterations:[self.count unsignedIntValue]];
+    // TODO:判断clientKeyData和serverKeyData是否存在，不存在则重新计算
+    if (self.password.length > 0) {
+        
+        NSData *passwordData = [self.password dataUsingEncoding:NSUTF8StringEncoding];
+        
+        NSData *saltedPasswordData = [self HashWithAlgorithm:self.hashAlgorithm password:passwordData salt:saltData iterations:[self.count unsignedIntValue]];
+        
+        _clientKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Client Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
+        _serverKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Server Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
+        
+        // TODO:保存clientKeyData和serverKeyData
+        [xmppStream saveClientData:_clientKeyData serverData:_serverKeyData];
+        
+    }
     
-    NSData *clientKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Client Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
-    NSData *serverKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Server Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
-    
-    // TODO:保存clientKeyData和serverKeyData
-
-    NSData *storedKeyData = [clientKeyData xmpp_sha1Digest];
+    NSData *storedKeyData = [_clientKeyData xmpp_sha1Digest];
     
     NSData *authMessageData = [[NSString stringWithFormat:@"%@,%@,c=biws,r=%@",self.clientFirstMessageBare,self.serverMessage1,self.combinedNonce] dataUsingEncoding:NSUTF8StringEncoding];
     
     NSData *clientSignatureData = [self HashWithAlgorithm:self.hashAlgorithm data:authMessageData key:storedKeyData];
     
-    self.serverSignatureData = [self HashWithAlgorithm:self.hashAlgorithm data:authMessageData key:serverKeyData];
-    self.clientProofData = [self xorData:clientKeyData withData:clientSignatureData];
+    self.serverSignatureData = [self HashWithAlgorithm:self.hashAlgorithm data:authMessageData key:_serverKeyData];
+    self.clientProofData = [self xorData:_clientKeyData withData:clientSignatureData];
     
     //check to see that we caclulated some client proof and server signature
     if (self.clientProofData && self.serverSignatureData) {

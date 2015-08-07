@@ -501,6 +501,26 @@ FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 
 - (void)clearAllStreamInputInfo;
 
+/**
+ *  login the server with
+ *
+ *  @param loginName The name used for logining
+ *  @param password  The password used for logining
+ *  @param type      The login type which has been switch into three type
+ *      ##  XMPPLoginTypeDefault - login with a jid string
+ *      ##  XMPPLoginTypePhone - login with a phone number string
+ *      ##  XMPPLoginTypeEmail - login with a email address string
+ *  @param errPtr    Error information
+ *
+ *  @return YES,if logined succeed
+ *          NO,other case
+ */
+- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr;
+
+- (BOOL)loginWithCurrentUserWithError:(NSError **)errPtr;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Authentication
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,21 +591,7 @@ FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
-/**
- *  login the server with
- *
- *  @param loginName The name used for logining
- *  @param password  The password used for logining
- *  @param type      The login type which has been switch into three type
- *      ##  XMPPLoginTypeDefault - login with a jid string
- *      ##  XMPPLoginTypePhone - login with a phone number string
- *      ##  XMPPLoginTypeEmail - login with a email address string
- *  @param errPtr    Error information
- *
- *  @return YES,if logined succeed
- *          NO,other case
- */
-- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr;
+
 
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
@@ -988,10 +994,17 @@ FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 
 - (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
 
+// TODO:Here is some delegate methods for us
 /**
  * we can get the strean bare jid str with this method
  **/
 - (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)sender;
+
+- (NSData *)clientKeyDataWithXMPPStream:(XMPPStream *)sender;
+
+- (NSData *)serverKeyDataWithXMPPStream:(XMPPStream *)sender;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice
