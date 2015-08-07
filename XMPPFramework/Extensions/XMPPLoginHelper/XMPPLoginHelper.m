@@ -140,7 +140,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)savePhoneNumber:(NSString *)phoneNumber
 {
     dispatch_block_t block = ^{
-        [_xmppLoginHelperStorage savePhoneNumber:phoneNumber xmppStream:xmppStream];
+        [_xmppLoginHelperStorage savePhoneNumber:phoneNumber];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -151,7 +151,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 - (void)saveEmailAddress:(NSString *)emailAddress
 {
     dispatch_block_t block = ^{
-        [_xmppLoginHelperStorage saveEmailAddress:emailAddress xmppStream:xmppStream];
+        [_xmppLoginHelperStorage saveEmailAddress:emailAddress];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -160,7 +160,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)updatePhoneNumber:(NSString *)phoneNumber
+- (void)updatePhoneNumberCurrentLoginUser:(NSString *)phoneNumber
 {
     dispatch_block_t block = ^{
         [_xmppLoginHelperStorage updatePhoneNumber:phoneNumber xmppStream:xmppStream];
@@ -171,7 +171,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)updateEmailAddress:(NSString *)emailAddress
+
+- (void)updateEmailAddressCurrentLoginUser:(NSString *)emailAddress
 {
     dispatch_block_t block = ^{
         [_xmppLoginHelperStorage updateEmailAddress:emailAddress xmppStream:xmppStream];
@@ -206,12 +207,47 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber
-{}
-- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress
-{}
-- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr
-{}
+
+- (void)deleteUserWithPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage deleteLoginUserWithPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)deleteUserWithEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage deleteLoginUserWithEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)deleteUserWithStreamBareJidStr:(NSString *)streamBareJidStr
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage deleteLoginUserWithStreamBareJidStr:streamBareJidStr];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)deleteUserCurrentLoginUser
+{
+    [self deleteUserWithStreamBareJidStr:[[xmppStream myJID] bare]];
+}
+
+
 
 - (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
 {
@@ -259,6 +295,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
+
 - (NSString *)currentEmaiAddress
 {
     __block NSString *result = nil;
@@ -304,6 +341,278 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
+
+- (NSData *)clientDataCurrentLoginUser
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage clientDataCurrentXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSData *)clientDataForPhoneNumber:(NSString *)phoneNumber
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage clientDataForPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSData *)clientDataForEmailAddress:(NSString *)emailAddress
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage clientDataForEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (NSData *)serverDataCurrentLoginUser
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage serverDataCurrentXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSData *)serverDataForPhoneNumber:(NSString *)phoneNumber
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage serverDataForPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (NSData *)serverDataForEmailAddress:(NSString *)emailAddress
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage serverDataForEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (BOOL)autoLoginWithPhoneNumber:(NSString *)phoneNumber
+{
+    __block BOOL result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage autoLoginWithPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (BOOL)autoLoginWithEmailAddress:(NSString *)emailAddress
+{
+    __block BOOL result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage autoLoginWithEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+- (BOOL)autoLoginCurrentUser
+{
+    __block BOOL result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage autoLoginCurrentXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (id)allLoginUserInDatabase
+{
+    __block id allLoginUsers = nil;
+    
+    dispatch_block_t block = ^{
+        allLoginUsers = [_xmppLoginHelperStorage allLoginUserInDatabase];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return allLoginUsers;
+}
+- (id)currentLoginUser
+{
+    __block id currentLoginUser = nil;
+    
+    dispatch_block_t block = ^{
+        currentLoginUser = [_xmppLoginHelperStorage currentLoginUserWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return currentLoginUser;
+}
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveClientData:clientData serverData:serverData forPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveClientData:clientData serverData:serverData forEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)saveCurrentUserClientData:(NSData *)clientData serverData:(NSData *)serverData
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveCurrentUserClientData:clientData serverData:serverData xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)updateLoginTimeWithPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateLoginTimeWithPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)updateLoginTimeWithEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateLoginTimeWithEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)updateLoginTimeCurrentLoginUser
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateLoginTimeCurrentXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)updateAutoLogin:(BOOL)autoLogin forPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateAutoLogin:autoLogin forPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)updateAutoLogin:(BOOL)autoLogin forEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateAutoLogin:autoLogin forEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)updateAutoLoginCurrentLoginUser:(BOOL)autoLogin
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateAutoLoginCurrentLoginUser:autoLogin xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

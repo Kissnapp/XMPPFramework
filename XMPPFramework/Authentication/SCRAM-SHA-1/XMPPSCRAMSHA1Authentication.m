@@ -125,7 +125,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     self.clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@",self.username,self.clientNonce];
     
-    NSString *tempClientFirstMessageBare = [NSString stringWithFormat:@"%@,t=%d",self.clientFirstMessageBare,type];
+    NSString *tempClientFirstMessageBare = [NSString stringWithFormat:@"%@,t=%ld",self.clientFirstMessageBare,(long)type];
     
     NSData *message1Data = [[NSString stringWithFormat:@"n,,%@",tempClientFirstMessageBare] dataUsingEncoding:NSUTF8StringEncoding];
     return [message1Data xmpp_base64Encoded];
@@ -231,6 +231,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         return NO;
     }
     
+    
+    // TODO:判断clientKeyData和serverKeyData是否存在，不存在则重新计算
+    
     NSData *passwordData = [self.password dataUsingEncoding:NSUTF8StringEncoding];
     NSData *saltData = [[self.salt dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Decoded];
     
@@ -238,6 +241,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     NSData *clientKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Client Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
     NSData *serverKeyData = [self HashWithAlgorithm:self.hashAlgorithm data:[@"Server Key" dataUsingEncoding:NSUTF8StringEncoding] key:saltedPasswordData];
+    
+    // TODO:保存clientKeyData和serverKeyData
 
     NSData *storedKeyData = [clientKeyData xmpp_sha1Digest];
     

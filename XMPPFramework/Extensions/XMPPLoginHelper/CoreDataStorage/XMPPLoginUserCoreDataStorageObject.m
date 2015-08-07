@@ -11,15 +11,75 @@
 
 @implementation XMPPLoginUserCoreDataStorageObject
 
-@dynamic loginTime;
-@dynamic phoneNumber;
-@dynamic emailAddress;
-@dynamic nickName;
+@dynamic loginIdType;
+@dynamic loginId;
 @dynamic streamBareJidStr;
-@dynamic longitude;
-@dynamic latitude;
-@dynamic password;
+@dynamic currentLoginUser;
+@dynamic clientKeyData;
+@dynamic serverKeyData;
+@synthesize loginTime;
+@synthesize autoLogin;
 
+
+- (NSString *)loginId
+{
+    [self willAccessValueForKey:@"loginId"];
+    NSString *value = [self primitiveValueForKey:@"loginId"];
+    [self didAccessValueForKey:@"loginId"];
+    return value;
+}
+
+- (void)setLoginId:(NSString *)value
+{
+    [self willChangeValueForKey:@"loginId"];
+    [self setPrimitiveValue:value forKey:@"loginId"];
+    [self didChangeValueForKey:@"loginId"];
+}
+
+- (NSNumber *)loginIdType
+{
+    [self willAccessValueForKey:@"loginIdType"];
+    NSNumber *value = [self primitiveValueForKey:@"loginIdType"];
+    [self didAccessValueForKey:@"loginIdType"];
+    return value;
+}
+
+- (void)setLoginIdType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"loginIdType"];
+    [self setPrimitiveValue:value forKey:@"loginIdType"];
+    [self didChangeValueForKey:@"loginIdType"];
+}
+
+- (NSNumber *)autoLogin
+{
+    [self willAccessValueForKey:@"autoLogin"];
+    NSNumber *value = [self primitiveValueForKey:@"autoLogin"];
+    [self didAccessValueForKey:@"autoLogin"];
+    return value;
+}
+
+- (void)setAutoLogin:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"autoLogin"];
+    [self setPrimitiveValue:value forKey:@"autoLogin"];
+    [self didChangeValueForKey:@"autoLogin"];
+}
+
+- (NSNumber *)currentLoginUser
+{
+    [self willAccessValueForKey:@"currentLoginUser"];
+    NSNumber *value = [self primitiveValueForKey:@"currentLoginUser"];
+    [self didAccessValueForKey:@"currentLoginUser"];
+    return value;
+}
+
+- (void)setCurrentLoginUser:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"currentLoginUser"];
+    [self setPrimitiveValue:value forKey:@"currentLoginUser"];
+    [self didChangeValueForKey:@"currentLoginUser"];
+}
 
 - (NSDate *)loginTime
 {
@@ -51,96 +111,36 @@
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
-
-- (NSString *)phoneNumber
+- (NSData *)clientKeyData
 {
-    [self willAccessValueForKey:@"phoneNumber"];
-    NSString *value = [self primitiveValueForKey:@"phoneNumber"];
-    [self didAccessValueForKey:@"phoneNumber"];
+    [self willAccessValueForKey:@"clientKeyData"];
+    NSData *value = [self primitiveValueForKey:@"clientKeyData"];
+    [self didAccessValueForKey:@"clientKeyData"];
     return value;
 }
 
-- (void)setPhoneNumber:(NSString *)value
+- (void)setClientKeyData:(NSData *)value
 {
-    [self willChangeValueForKey:@"phoneNumber"];
-    [self setPrimitiveValue:value forKey:@"phoneNumber"];
-    [self didChangeValueForKey:@"phoneNumber"];
+    [self willChangeValueForKey:@"clientKeyData"];
+    [self setPrimitiveValue:value forKey:@"clientKeyData"];
+    [self didChangeValueForKey:@"clientKeyData"];
 }
 
-- (NSString *)emailAddress
+- (NSData *)serverKeyData
 {
-    [self willAccessValueForKey:@"emailAddress"];
-    NSString *value = [self primitiveValueForKey:@"emailAddress"];
-    [self didAccessValueForKey:@"emailAddress"];
+    [self willAccessValueForKey:@"serverKeyData"];
+    NSData *value = [self primitiveValueForKey:@"serverKeyData"];
+    [self didAccessValueForKey:@"serverKeyData"];
     return value;
 }
 
-- (void)seEmailAddress:(NSString *)value
+- (void)setServerKeyData:(NSData *)value
 {
-    [self willChangeValueForKey:@"emailAddress"];
-    [self setPrimitiveValue:value forKey:@"emailAddress"];
-    [self didChangeValueForKey:@"emailAddress"];
+    [self willChangeValueForKey:@"serverKeyData"];
+    [self setPrimitiveValue:value forKey:@"serverKeyData"];
+    [self didChangeValueForKey:@"serverKeyData"];
 }
 
-- (NSString *)nickName
-{
-    [self willAccessValueForKey:@"nickName"];
-    NSString *value = [self primitiveValueForKey:@"nickName"];
-    [self didAccessValueForKey:@"nickName"];
-    return value;
-}
-
-- (void)setNickName:(NSString *)value
-{
-    [self willChangeValueForKey:@"nickName"];
-    [self setPrimitiveValue:value forKey:@"nickName"];
-    [self didChangeValueForKey:@"nickName"];
-}
-
-- (NSString *)password
-{
-    [self willAccessValueForKey:@"password"];
-    NSString *value = [self primitiveValueForKey:@"password"];
-    [self didAccessValueForKey:@"password"];
-    return value;
-}
-
-- (void)setPassword:(NSString *)value
-{
-    [self willChangeValueForKey:@"password"];
-    [self setPrimitiveValue:value forKey:@"password"];
-    [self didChangeValueForKey:@"password"];
-}
-
-- (NSString *)latitude
-{
-    [self willAccessValueForKey:@"latitude"];
-    NSString *value = [self primitiveValueForKey:@"latitude"];
-    [self didAccessValueForKey:@"latitude"];
-    return value;
-}
-
-- (void)setLatitude:(NSString *)value
-{
-    [self willChangeValueForKey:@"latitude"];
-    [self setPrimitiveValue:value forKey:@"latitude"];
-    [self didChangeValueForKey:@"latitude"];
-}
-
-- (NSString *)longitude
-{
-    [self willAccessValueForKey:@"longitude"];
-    NSString *value = [self primitiveValueForKey:@"longitude"];
-    [self didAccessValueForKey:@"longitude"];
-    return value;
-}
-
-- (void)setLongitude:(NSString *)value
-{
-    [self willChangeValueForKey:@"longitude"];
-    [self setPrimitiveValue:value forKey:@"longitude"];
-    [self didChangeValueForKey:@"longitude"];
-}
 #pragma mark - awake action
 
 - (void)awakeFromInsert
@@ -150,200 +150,30 @@
 }
 
 #pragma mark - public methods
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                   withPhoneNumber:(NSString *)phonenumber
-                  withEmailAddress:(NSString *)emailaddress
-                          nickName:(NSString *)nickname
-                          password:(NSString *)password
-                         longitude:(NSString *)longitude
-                          latitude:(NSString *)latitude
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (!moc || !streamBareJidStr) return nil;
-    
-    XMPPLoginUserCoreDataStorageObject *newUser = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPLoginUserCoreDataStorageObject"
-                                                                                inManagedObjectContext:moc];
-    if (newUser) {
-        [newUser updateWithPhoneNumber:phonenumber
-                      withEmailAddress:emailaddress
-                              nickName:nickname
-                              password:password
-                             longitude:longitude
-                              latitude:latitude
-                      streamBareJidStr:streamBareJidStr];
-        
-        return newUser;
-    }
-    
-    return nil;
-}
-
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                   withPhoneNumber:(NSString *)phonenumber
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                            withPhoneNumber:phonenumber
-                                                           withEmailAddress:nil
-                                                                   nickName:nil
-                                                                   password:nil
-                                                                  longitude:nil
-                                                                   latitude:nil
-                                                           streamBareJidStr:streamBareJidStr];
-}
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                  withEmailAddress:(NSString *)emailaddress
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                            withPhoneNumber:nil
-                                                           withEmailAddress:emailaddress
-                                                                   nickName:nil
-                                                                   password:nil
-                                                                  longitude:nil
-                                                                   latitude:nil
-                                                           streamBareJidStr:streamBareJidStr];
-}
-
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                   withPhoneNumber:(NSString *)phonenumber
-                          password:(NSString *)password
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                            withPhoneNumber:phonenumber
-                                                           withEmailAddress:nil
-                                                                   nickName:nil
-                                                                   password:password
-                                                                  longitude:nil
-                                                                   latitude:nil
-                                                           streamBareJidStr:streamBareJidStr];
-}
-
-
-
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                  withEmailAddress:(NSString *)emailaddress
-                          password:(NSString *)password
-                  streamBareJidStr:(NSString *)streamBareJidStr
-{
-    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                            withPhoneNumber:nil
-                                                           withEmailAddress:emailaddress
-                                                                   nickName:nil
-                                                                   password:password
-                                                                  longitude:nil
-                                                                   latitude:nil
-                                                           streamBareJidStr:streamBareJidStr];
-}
-//update or insert methods
-+ (id)updateStreamBareJidStrOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
-                                           withPhoneNumber:(NSString *)phonenumber
-                                          streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (moc == nil) return nil;
-    if (phonenumber == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    
-    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                      withPhoneNumber:phonenumber];
-    if (updateUser) {//if exist alter it
-        [updateUser setStreamBareJidStr:streamBareJidStr];
-        [updateUser setLoginTime:[NSDate date]];
-    }else{// if not existed,create a new one
-        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                      withPhoneNumber:phonenumber
-                                                                     streamBareJidStr:streamBareJidStr];
-    }
-    return updateUser;
-}
-
-+ (id)updateStreamBareJidStrOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
-                                          withEmailAddress:(NSString *)emailaddress
-                                          streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (moc == nil) return nil;
-    if (emailaddress == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    
-    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                     withEmailAddress:emailaddress];
-    if (updateUser) {//if exist alter it
-        [updateUser setStreamBareJidStr:streamBareJidStr];
-        [updateUser setLoginTime:[NSDate date]];
-    }else{// if not existed,create a new one
-        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                     withEmailAddress:emailaddress
-                                                                     streamBareJidStr:streamBareJidStr];
-    }
-    return updateUser;
-}
-
-+ (id)updatePhoneNumberOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
-                                      withPhoneNumber:(NSString *)phonenumber
-                                     streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (moc == nil) return nil;
-    if (phonenumber == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    
-    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                     streamBareJidStr:streamBareJidStr];
-    if (updateUser) {//if exist alter it
-        [updateUser setPhoneNumber:phonenumber];
-        [updateUser setLoginTime:[NSDate date]];
-    }else{// if not existed,create a new one
-        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                      withPhoneNumber:phonenumber
-                                                                     streamBareJidStr:streamBareJidStr];
-    }
-    return updateUser;
-}
-
-+ (id)updateEmailAddressOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
-                                      withEmailAddress:(NSString *)emailaddress
-                                      streamBareJidStr:(NSString *)streamBareJidStr
-{
-    if (moc == nil) return nil;
-    if (emailaddress == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    
-    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                     streamBareJidStr:streamBareJidStr];
-    if (updateUser) {//if exist alter it
-        [updateUser setEmailAddress:emailaddress];
-        [updateUser setLoginTime:[NSDate date]];
-    }else{// if not existed,create a new one
-        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                     withEmailAddress:emailaddress
-                                                                     streamBareJidStr:streamBareJidStr];
-    }
-    return updateUser;
-}
 
 //fetch methods
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                   withPhoneNumber:(NSString *)phonenumber
+                       phoneNumber:(NSString *)phonenumber
 {
     if (moc == nil) return nil;
     if (phonenumber == nil) return nil;
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"phoneNumber",phonenumber];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"loginId == %@ AND loginIdType == %@",phonenumber,@(LoginHelperIdTypePhone)];
     
     return  [XMPPLoginUserCoreDataStorageObject fetchInInManagedObjectContext:moc
-                                                                WithPredicate:predicate];
+                                                                    predicate:predicate];
 }
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                  withEmailAddress:(NSString *)emailaddress
+                      emailAddress:(NSString *)emailaddress
 {
     if (moc == nil) return nil;
     if (emailaddress == nil) return nil;
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"emailAddress",emailaddress];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"loginId == %@ && loginIdType == %@",emailaddress,@(LoginHelperIdTypeEmail)];
     
     return  [XMPPLoginUserCoreDataStorageObject fetchInInManagedObjectContext:moc
-                                                                WithPredicate:predicate];
+                                                                    predicate:predicate];
 }
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
@@ -355,11 +185,11 @@
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",streamBareJidStr];
     
     return  [XMPPLoginUserCoreDataStorageObject fetchInInManagedObjectContext:moc
-                                                                WithPredicate:predicate];
+                                                                    predicate:predicate];
 }
 
 + (id)fetchInInManagedObjectContext:(NSManagedObjectContext *)moc
-                      WithPredicate:(NSPredicate *)predicate
+                          predicate:(NSPredicate *)predicate
 {
     if (moc == nil) return nil;
     if (predicate == nil) return nil;
@@ -378,17 +208,208 @@
     return (XMPPLoginUserCoreDataStorageObject *)[results lastObject];
 }
 
+// insert methods
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                           loginId:(NSString *)loginId
+                       loginIdType:(LoginHelperIdType)loginIdType
+                  currentLoginUser:(BOOL)currentLoginUser
+                         autoLogin:(BOOL)autoLogin
+                     clientKeyData:(NSData *)clientKeyData
+                     serverKeyData:(NSData *)serverKeyData
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (!moc) return nil;
+    
+    XMPPLoginUserCoreDataStorageObject *newUser = [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass([self class])
+                                                                                inManagedObjectContext:moc];
+    if (newUser) {
+        [newUser updateWithLoginId:loginId
+                       loginIdType:loginIdType
+                  currentLoginUser:currentLoginUser
+                         autoLogin:autoLogin
+                     clientKeyData:clientKeyData
+                     serverkeyData:serverKeyData
+                  streamBareJidStr:streamBareJidStr];
+        
+        return newUser;
+    }
+    
+    return nil;
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                       phoneNumber:(NSString *)phonenumber
+                         autoLogin:(BOOL)autoLogin
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                    loginId:phonenumber
+                                                                loginIdType:LoginHelperIdTypePhone
+                                                           currentLoginUser:YES
+                                                                  autoLogin:autoLogin
+                                                              clientKeyData:nil
+                                                              serverKeyData:nil
+                                                           streamBareJidStr:streamBareJidStr];
+}
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                  emailAddress:(NSString *)emailaddress
+                         autoLogin:(BOOL)autoLogin
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                    loginId:emailaddress
+                                                                loginIdType:LoginHelperIdTypeEmail
+                                                           currentLoginUser:YES
+                                                                  autoLogin:autoLogin
+                                                              clientKeyData:nil
+                                                              serverKeyData:nil
+                                                           streamBareJidStr:streamBareJidStr];
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                   phoneNumber:(NSString *)phonenumber
+                         autoLogin:(BOOL)autoLogin
+                     clientKeyData:(NSData *)clientKeyData
+                     serverKeyData:(NSData *)serverKeyData
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                    loginId:phonenumber
+                                                                loginIdType:LoginHelperIdTypePhone
+                                                           currentLoginUser:YES
+                                                                  autoLogin:autoLogin
+                                                              clientKeyData:clientKeyData
+                                                              serverKeyData:serverKeyData
+                                                           streamBareJidStr:streamBareJidStr];
+}
+
+
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                      emailAddress:(NSString *)emailaddress
+                         autoLogin:(BOOL)autoLogin
+                     clientKeyData:(NSData *)clientKeyData
+                     serverKeyData:(NSData *)serverKeyData
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    return [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                    loginId:emailaddress
+                                                                loginIdType:LoginHelperIdTypeEmail
+                                                           currentLoginUser:YES
+                                                                  autoLogin:autoLogin
+                                                              clientKeyData:clientKeyData
+                                                              serverKeyData:serverKeyData
+                                                           streamBareJidStr:streamBareJidStr];
+}
+//update or insert methods
++ (id)updateStreamBareJidStrOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
+                                           phoneNumber:(NSString *)phonenumber
+                                                 autoLogin:(BOOL)autoLogin
+                                          streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (phonenumber == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                      phoneNumber:phonenumber];
+    if (updateUser) {//if exist alter it
+        [updateUser setStreamBareJidStr:streamBareJidStr];
+        [updateUser setAutoLogin:@(autoLogin)];
+        [updateUser setLoginTime:[NSDate date]];
+    }else{// if not existed,create a new one
+        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      phoneNumber:phonenumber
+                                                                            autoLogin:autoLogin
+                                                                     streamBareJidStr:streamBareJidStr];
+    }
+    return updateUser;
+}
+
++ (id)updateStreamBareJidStrOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
+                                          emailAddress:(NSString *)emailaddress
+                                                 autoLogin:(BOOL)autoLogin
+                                          streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (emailaddress == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                     emailAddress:emailaddress];
+    if (updateUser) {//if exist alter it
+        [updateUser setStreamBareJidStr:streamBareJidStr];
+        [updateUser setAutoLogin:@(autoLogin)];
+        [updateUser setLoginTime:[NSDate date]];
+    }else{// if not existed,create a new one
+        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                    emailAddress:emailaddress
+                                                                            autoLogin:autoLogin
+                                                                     streamBareJidStr:streamBareJidStr];
+    }
+    return updateUser;
+}
+
++ (id)updatePhoneNumberOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
+                                      phoneNumber:(NSString *)phonenumber
+                                            autoLogin:(BOOL)autoLogin
+                                     streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (phonenumber == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                     streamBareJidStr:streamBareJidStr];
+    if (updateUser) {//if exist alter it
+        [updateUser setLoginId:phonenumber];
+        [updateUser setLoginIdType:@(LoginHelperIdTypePhone)];
+        [updateUser setAutoLogin:@(autoLogin)];
+        [updateUser setLoginTime:[NSDate date]];
+    }else{// if not existed,create a new one
+        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      phoneNumber:phonenumber
+                                                                            autoLogin:autoLogin
+                                                                     streamBareJidStr:streamBareJidStr];
+    }
+    return updateUser;
+}
+
++ (id)updateEmailAddressOrInsertInManagedObjectContext:(NSManagedObjectContext *)moc
+                                          emailAddress:(NSString *)emailaddress
+                                             autoLogin:(BOOL)autoLogin
+                                      streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (emailaddress == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    XMPPLoginUserCoreDataStorageObject *updateUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                     streamBareJidStr:streamBareJidStr];
+    if (updateUser) {//if exist alter it
+        [updateUser setLoginId:emailaddress];
+        [updateUser setLoginIdType:@(LoginHelperIdTypeEmail)];
+        [updateUser setAutoLogin:@(autoLogin)];
+        [updateUser setLoginTime:[NSDate date]];
+    }else{// if not existed,create a new one
+        updateUser = [XMPPLoginUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                     emailAddress:emailaddress
+                                                                            autoLogin:autoLogin
+                                                                     streamBareJidStr:streamBareJidStr];
+    }
+    return updateUser;
+}
 
 
 //update mthods
 + (BOOL)updateAllInManagedObjectContext:(NSManagedObjectContext *)moc
-                      withPhoneNumber:(NSString *)phonenumber
-                     withEmailAddress:(NSString *)emailaddress
-                             nickName:(NSString *)nickname
-                             password:(NSString *)password
-                            longitude:(NSString *)longitude
-                             latitude:(NSString *)latitude
-                     streamBareJidStr:(NSString *)streamBareJidStr
+                                loginId:(NSString *)loginId
+                            loginIdType:(LoginHelperIdType)loginIdType
+                       currentLoginUser:(BOOL)currentLoginUser
+                              autoLogin:(BOOL)autoLogin
+                          clientKeyData:(NSData *)clientKeyData
+                          serverKeyData:(NSData *)serverKeyData
+                       streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (moc == nil) return NO;
     if (streamBareJidStr == nil) return NO;
@@ -397,20 +418,19 @@
                                                                                                        streamBareJidStr:streamBareJidStr];
     if (!updateObject) return NO;
     
-    [updateObject updateWithPhoneNumber:phonenumber
-                       withEmailAddress:emailaddress
-                               nickName:nickname
-                               password:password
-                              longitude:longitude
-                               latitude:latitude
-                       streamBareJidStr:streamBareJidStr];
-    [updateObject setLoginTime:[NSDate date]];
+    [updateObject updateWithLoginId:loginId
+                        loginIdType:loginIdType
+                   currentLoginUser:currentLoginUser
+                          autoLogin:autoLogin
+                      clientKeyData:clientKeyData
+                      serverkeyData:serverKeyData
+                   streamBareJidStr:streamBareJidStr];
     
     return YES;
 }
 
 + (BOOL)updateStreamBareJidStrInManagedObjectContext:(NSManagedObjectContext *)moc
-                                     withPhoneNumber:(NSString *)phonenumber
+                                         phoneNumber:(NSString *)phonenumber
                                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (moc == nil) return NO;
@@ -418,7 +438,7 @@
     if (phonenumber == nil) return NO;
     
     XMPPLoginUserCoreDataStorageObject *updateObject = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                        withPhoneNumber:phonenumber];
+                                                                                                            phoneNumber:phonenumber];
     if (!updateObject) return NO;
     
     [updateObject setStreamBareJidStr:streamBareJidStr];
@@ -428,7 +448,7 @@
 
 }
 + (BOOL)updateStreamBareJidStrInManagedObjectContext:(NSManagedObjectContext *)moc
-                                    withEmailAddress:(NSString *)emailaddress
+                                        emailAddress:(NSString *)emailaddress
                                     streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (moc == nil) return NO;
@@ -436,7 +456,7 @@
     if (emailaddress == nil) return NO;
     
     XMPPLoginUserCoreDataStorageObject *updateObject = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                       withEmailAddress:emailaddress];
+                                                                                                           emailAddress:emailaddress];
     if (!updateObject) return NO;
     
     [updateObject setStreamBareJidStr:streamBareJidStr];
@@ -446,42 +466,41 @@
 
 }
 + (BOOL)updatePhoneNumberInManagedObjectContext:(NSManagedObjectContext *)moc
-                                withPhoneNumber:(NSString *)phonenumber
+                                    phoneNumber:(NSString *)phonenumber
                                streamBareJidStr:(NSString *)streamBareJidStr
 {
-    return [XMPPLoginUserCoreDataStorageObject updateAllInManagedObjectContext:moc
-                                                               withPhoneNumber:phonenumber
-                                                              withEmailAddress:nil
-                                                                      nickName:nil
-                                                                      password:nil
-                                                                     longitude:nil
-                                                                      latitude:nil
-                                                              streamBareJidStr:streamBareJidStr];
+    XMPPLoginUserCoreDataStorageObject *loginUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                    streamBareJidStr:streamBareJidStr];
+    if (loginUser == nil) return NO;
+    
+    loginUser.loginId = phonenumber;
+    loginUser.loginIdType = @(LoginHelperIdTypePhone);
+    return YES;
 }
+
 + (BOOL)updateEmailAddressInManagedObjectContext:(NSManagedObjectContext *)moc
-                                withEmailAddress:(NSString *)emailaddress
+                                    emailAddress:(NSString *)emailaddress
                                 streamBareJidStr:(NSString *)streamBareJidStr
 {
-    return [XMPPLoginUserCoreDataStorageObject updateAllInManagedObjectContext:moc
-                                                               withPhoneNumber:nil
-                                                              withEmailAddress:emailaddress
-                                                                      nickName:nil
-                                                                      password:nil
-                                                                     longitude:nil
-                                                                      latitude:nil
-                                                              streamBareJidStr:streamBareJidStr];
+    XMPPLoginUserCoreDataStorageObject *loginUser = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                    streamBareJidStr:streamBareJidStr];
+    if (loginUser == nil) return NO;
+    
+    loginUser.loginId = emailaddress;
+    loginUser.loginIdType = @(LoginHelperIdTypeEmail);
+    return YES;
 }
 
 
 //delete methods
 + (BOOL)deleteFromManagedObjectContext:(NSManagedObjectContext *)moc
-                       withPhoneNumber:(NSString *)phonenumber
+                           phoneNumber:(NSString *)phonenumber
 {
     if (moc == nil) return NO;
     if (phonenumber == nil) return NO;
     
     XMPPLoginUserCoreDataStorageObject *deleteObject = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                        withPhoneNumber:phonenumber];
+                                                                                                        phoneNumber:phonenumber];
     if (deleteObject != nil){
         
         [moc deleteObject:deleteObject];
@@ -493,13 +512,13 @@
 
 
 + (BOOL)deleteFromManagedObjectContext:(NSManagedObjectContext *)moc
-                      withEmailAddress:(NSString *)emailaddress
+                          emailAddress:(NSString *)emailaddress
 {
     if (moc == nil) return NO;
     if (emailaddress == nil) return NO;
     
     XMPPLoginUserCoreDataStorageObject *deleteObject = [XMPPLoginUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                       withEmailAddress:emailaddress];
+                                                                                                           emailAddress:emailaddress];
     if (deleteObject != nil){
         
         [moc deleteObject:deleteObject];
@@ -529,21 +548,40 @@
 
 
 #pragma mark - object update method
-- (void)updateWithPhoneNumber:(NSString *)phonenumber
-             withEmailAddress:(NSString *)emailaddress
-                     nickName:(NSString *)nickname
-                     password:(NSString *)password
-                    longitude:(NSString *)longitude
-                     latitude:(NSString *)latitude
+- (void)updateWithLoginId:(NSString *)loginId
+              loginIdType:(LoginHelperIdType)loginIdType
+         currentLoginUser:(BOOL)currentLoginUser
+                autoLogin:(BOOL)autoLogin
+            clientKeyData:(NSData *)clientKeyData
+            serverkeyData:(NSData *)serverkeyData
              streamBareJidStr:(NSString *)streamBareJidStr
 {
-    if (phonenumber) [self setPhoneNumber:phonenumber];
-    if (emailaddress) [self setEmailAddress:emailaddress];
-    if (nickname) [self setNickName:nickname];
-    if (password) [self setPassword:password];
-    if (longitude) [self setLongitude:longitude];
-    if (latitude) [self setLatitude:latitude];
-    if (streamBareJidStr) [self setStreamBareJidStr:streamBareJidStr];
+    BOOL hasChanges = NO;
+    if (loginId) {
+        [self setLoginId:self.loginId];
+        hasChanges = YES;
+    }
+    if (loginIdType) {
+        [self setLoginIdType:@(loginIdType)];
+        hasChanges = YES;
+    }
+    if (clientKeyData) {
+        [self setClientKeyData:clientKeyData];
+        hasChanges = YES;
+    }
+    if (serverkeyData) {
+        [self setServerKeyData:serverkeyData];
+        hasChanges = YES;
+    }
+    if (streamBareJidStr) {
+        [self setStreamBareJidStr:streamBareJidStr];
+        hasChanges = YES;
+    }
+    
+    [self setCurrentLoginUser:@(currentLoginUser)];
+    [self setAutoLogin:@(autoLogin)];
+    
+    if (hasChanges) [self setLoginTime:[NSDate date]];
 }
 
 @end
