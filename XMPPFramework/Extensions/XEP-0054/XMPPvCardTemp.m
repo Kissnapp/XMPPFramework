@@ -95,9 +95,20 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
   return iq;
 }
 
-+ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid iqId:(NSString *)iqId
 {
-    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:[XMPPStream generateUUID]];
+    NSString *iqElementId = iqId ? :[XMPPStream generateUUID];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:iqElementId];
+    NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+    
+    [iq addChild:vCardElem];
+    return iq;
+}
+
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash iqId:(NSString *)iqId
+{
+    NSString *iqElementId = iqId ? :[XMPPStream generateUUID];
+    XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:iqElementId];
     NSXMLElement *vCardTagElem = [NSXMLElement elementWithName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp];
     
     [vCardTagElem addAttributeWithName:@"tag" stringValue:photoHash ? :@""];
