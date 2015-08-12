@@ -205,6 +205,8 @@ FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 
 @property (assign, readonly) BOOL hasMyJIDFromServer;
 
+@property (assign, nonatomic) BOOL loginWithCurrentUser;
+
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
  * For this reason, the xmpp stream supports sending keep-alive data.
@@ -998,13 +1000,19 @@ FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 /**
  * we can get the strean bare jid str with this method
  **/
-- (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType;
+- (NSString *)streamBareJidStrWithXMPPStream:(XMPPStream *)sender;
 
 - (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)sender;
 
-- (NSData *)clientKeyDataWithXMPPStream:(XMPPStream *)sender;
+- (NSData *)clientKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender;
 
-- (NSData *)serverKeyDataWithXMPPStream:(XMPPStream *)sender;
+- (NSData *)serverKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender;
+
+- (NSString *)currentUserBareJidStrWithXMPPStream:(XMPPStream *)sender;
+
+- (NSString *)currentUserLoginIdStrWithXMPPStream:(XMPPStream *)sender;
+
+- (NSInteger)currentUserLoginIdTypeWithXMPPStream:(XMPPStream *)sender;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice

@@ -249,7 +249,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     NSData *saltData = [[self.salt dataUsingEncoding:NSUTF8StringEncoding] xmpp_base64Decoded];
     
     // TODO:判断clientKeyData和serverKeyData是否存在，不存在则重新计算
-    if (self.password.length > 0) {
+    if ((!self.clientKeyData || !self.serverKeyData) &&  self.password.length > 0) {
         
         NSData *passwordData = [self.password dataUsingEncoding:NSUTF8StringEncoding];
         

@@ -3,7 +3,6 @@
     <entity name="XMPPLoginUserCoreDataStorageObject" representedClassName="XMPPLoginUserCoreDataStorageObject" syncable="YES">
         <attribute name="autoLogin" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="clientKeyData" optional="YES" attributeType="Binary" syncable="YES"/>
-        <attribute name="currentLoginUser" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="loginId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="loginIdType" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="loginTime" optional="YES" attributeType="Date" syncable="YES"/>
@@ -11,6 +10,6 @@
         <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPLoginUserCoreDataStorageObject" positionX="-63" positionY="-18" width="128" height="165"/>
+        <element name="XMPPLoginUserCoreDataStorageObject" positionX="-63" positionY="-18" width="128" height="150"/>
     </elements>
 </model>

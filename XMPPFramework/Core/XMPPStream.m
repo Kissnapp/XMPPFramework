@@ -149,6 +149,9 @@ enum XMPPStreamConfig
     NSString *authenticateInputStr;
     XMPPLoginType authenticateInputType;
     BOOL hasMyJidFromServer;
+    
+    NSData *clientKeyData;
+    NSData *serverkeyData;
 }
 
 - (void)setIsSecure:(BOOL)flag;
@@ -2625,9 +2628,7 @@ enum XMPPStreamConfig
     if ([self supportsSCRAMSHA1Authentication])
     {
         if (inPassword == nil) {
-            NSData *clientKeyData = nil;
-            NSData *serverKeyData = nil;
-            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self clientKeyData:clientKeyData serverKeyData:serverKeyData];
+            someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self clientKeyData:clientKeyData serverKeyData:serverkeyData];
             result = [self authenticate:someAuth type:type error:&err];
         }else{
             someAuth = [[XMPPSCRAMSHA1Authentication alloc] initWithStream:self password:inPassword];
@@ -2679,7 +2680,7 @@ enum XMPPStreamConfig
     id delegate;
     dispatch_queue_t dq;
     
-    SEL selector = @selector(streamBareJidStrWithAuthenticateStr:authenticateType:);
+    SEL selector = @selector(streamBareJidStrWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
     dispatch_group_t delegateGroup = dispatch_group_create();
@@ -2690,7 +2691,7 @@ enum XMPPStreamConfig
     {
         dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
             
-            myJidStr = [delegate streamBareJidStrWithAuthenticateStr:authenticateStr authenticateType:authenticateType];
+            myJidStr = [delegate streamBareJidStrWithXMPPStream:self];
             dispatch_semaphore_signal(delegateSemaphore);
         }});
     }
@@ -2710,6 +2711,234 @@ enum XMPPStreamConfig
     return myJidStr;
 }
 
+- (NSData *)clientKeyDataInDatabase
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSData *data = nil;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(clientKeyDataInDatabaseWithXMPPStream:);
+    
+    dispatch_semaphore_t clientDataSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t clientDataGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(clientDataGroup, dq, ^{ @autoreleasepool {
+            
+            data = [delegate clientKeyDataInDatabaseWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(clientDataSemaphore);
+        }});
+        
+    }
+    
+     dispatch_group_wait(clientDataGroup, DISPATCH_TIME_FOREVER);
+     BOOL handled = (dispatch_semaphore_wait(clientDataSemaphore, DISPATCH_TIME_NOW) == 0);
+     
+     if (handled) {
+         return data;
+     }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(clientDataSemaphore);
+    dispatch_release(clientDataGroup);
+#endif
+    
+    return data;
+}
+
+
+- (NSData *)serverKeyDataInDatabase
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSData *data = nil;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(serverKeyDataInDatabaseWithXMPPStream:);
+    
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delegateGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+            
+            data = [delegate serverKeyDataInDatabaseWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(delegateSemaphore);
+        }});
+    }
+    
+    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    
+    if (handled) {
+        return data;
+    }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delegateGroup);
+#endif
+    
+    return data;
+}
+
+- (NSString *)currentUserLoginIdStr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSString *userLoginIdStr = nil;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(currentUserLoginIdStrWithXMPPStream:);
+    
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delegateGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+            
+            userLoginIdStr = [delegate currentUserLoginIdStrWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(delegateSemaphore);
+        }});
+    }
+    
+    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    
+    if (handled) {
+        return userLoginIdStr;
+    }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delegateGroup);
+#endif
+    
+    return userLoginIdStr;
+}
+
+- (NSString *)currentUserBareJidStr
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSString *userBareJidStr = nil;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(currentUserBareJidStrWithXMPPStream:);
+    
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delegateGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+            
+            userBareJidStr = [delegate currentUserBareJidStrWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(delegateSemaphore);
+        }});
+    }
+    
+    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    
+    if (handled) {
+        return userBareJidStr;
+    }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delegateGroup);
+#endif
+    
+    return userBareJidStr;
+}
+
+- (NSUInteger)currentUserLoginIdType
+{
+    NSAssert(dispatch_get_specific(xmppQueueTag), @"Invoked on incorrect queue");
+    
+    __block NSUInteger currentUserLoginIdType = XMPPLoginTypeDefault;
+    
+    // Notify all interested delegates.
+    // This must be done serially to allow them to alter the element in a thread-safe manner.
+    
+    id delegate;
+    dispatch_queue_t dq;
+    
+    SEL selector = @selector(currentUserLoginIdTypeWithXMPPStream:);
+    
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delegateGroup = dispatch_group_create();
+    
+    GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
+    {
+        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+            
+            currentUserLoginIdType = [delegate currentUserLoginIdTypeWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(delegateSemaphore);
+        }});
+    }
+    
+    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    
+    if (handled) {
+        return currentUserLoginIdType;
+    }
+    
+#if !OS_OBJECT_USE_OBJC
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delegateGroup);
+#endif
+    
+    return currentUserLoginIdType;
+}
+
+
 
 - (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr
 {
@@ -2722,7 +2951,7 @@ enum XMPPStreamConfig
     __block NSError   *err = nil;
     __block XMPPLoginType loginType = XMPPLoginTypeDefault;
     
-    dispatch_block_t block = ^{ @autoreleasepool {
+    dispatch_block_t block = ^{@autoreleasepool{
         
         __block NSString *myJidStr = nil;
         authenticateInputType = type;
@@ -2767,17 +2996,23 @@ enum XMPPStreamConfig
     __block XMPPLoginType loginType = XMPPLoginTypeDefault;
     
     dispatch_block_t block = ^{ @autoreleasepool {
-        /*
-        __block NSString *myJidStr = nil;
-        authenticateInputType = type;
-        authenticateInputStr = [loginName copy];
         
-        myJidStr = [self myJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
+        __block NSString *myJidStr = nil;
+        
+        myJidStr = [self currentUserBareJidStr];
+        
+        authenticateInputType = XMPPLoginTypeDefault;
+        authenticateInputStr = myJidStr;
+        
+        clientKeyData = [self clientKeyDataInDatabase];
+        serverkeyData = [self serverKeyDataInDatabase];
         
         //If the myJidStr is nil
         if (!myJidStr) {
-            myJidStr = [loginName copy];
-            loginType = type;
+            authenticateInputStr = [self currentUserLoginIdStr];
+            authenticateInputType = [self currentUserLoginIdType]+1;
+            myJidStr = authenticateInputStr;
+            loginType = authenticateInputType;
         }
         
         // authenticate form server
@@ -2788,7 +3023,7 @@ enum XMPPStreamConfig
         }
         
         [self setMyJID:localJID];
-        */
+        
         result = [self _authenticateWithPassword:nil type:loginType error:&err];
     }};
     
