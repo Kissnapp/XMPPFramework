@@ -2683,21 +2683,20 @@ enum XMPPStreamConfig
     SEL selector = @selector(streamBareJidStrWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
-    dispatch_group_t delegateGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+        dispatch_async(dq, ^{ @autoreleasepool {
             
             myJidStr = [delegate streamBareJidStrWithXMPPStream:self];
             dispatch_semaphore_signal(delegateSemaphore);
         }});
+        break;
     }
     
-    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
     
     if (handled) {
         return myJidStr;
@@ -2705,7 +2704,6 @@ enum XMPPStreamConfig
     
 #if !OS_OBJECT_USE_OBJC
     dispatch_release(delegateSemaphore);
-    dispatch_release(delegateGroup);
 #endif
     
     return myJidStr;
@@ -2724,8 +2722,7 @@ enum XMPPStreamConfig
     dispatch_queue_t dq;
     
     SEL selector = @selector(clientKeyDataInDatabaseWithXMPPStream:);
-    
-    dispatch_semaphore_t clientDataSemaphore = dispatch_semaphore_create(0);
+
     dispatch_group_t clientDataGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
@@ -2737,20 +2734,15 @@ enum XMPPStreamConfig
         dispatch_group_async(clientDataGroup, dq, ^{ @autoreleasepool {
             
             data = [delegate clientKeyDataInDatabaseWithXMPPStream:weakSelf];
-            dispatch_semaphore_signal(clientDataSemaphore);
+            
         }});
         
+        break;
     }
     
-     dispatch_group_wait(clientDataGroup, DISPATCH_TIME_FOREVER);
-     BOOL handled = (dispatch_semaphore_wait(clientDataSemaphore, DISPATCH_TIME_NOW) == 0);
-     
-     if (handled) {
-         return data;
-     }
+    dispatch_group_wait(clientDataGroup, DISPATCH_TIME_FOREVER);
     
 #if !OS_OBJECT_USE_OBJC
-    dispatch_release(clientDataSemaphore);
     dispatch_release(clientDataGroup);
 #endif
     
@@ -2773,7 +2765,6 @@ enum XMPPStreamConfig
     SEL selector = @selector(serverKeyDataInDatabaseWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
-    dispatch_group_t delegateGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2781,15 +2772,17 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
-            
+        dispatch_async(dq, ^{ @autoreleasepool {
+    
             data = [delegate serverKeyDataInDatabaseWithXMPPStream:weakSelf];
             dispatch_semaphore_signal(delegateSemaphore);
+            
         }});
+        
+        break;
     }
     
-    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
     
     if (handled) {
         return data;
@@ -2797,7 +2790,6 @@ enum XMPPStreamConfig
     
 #if !OS_OBJECT_USE_OBJC
     dispatch_release(delegateSemaphore);
-    dispatch_release(delegateGroup);
 #endif
     
     return data;
@@ -2817,7 +2809,6 @@ enum XMPPStreamConfig
     
     SEL selector = @selector(currentUserLoginIdStrWithXMPPStream:);
     
-    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
     dispatch_group_t delegateGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
@@ -2829,19 +2820,15 @@ enum XMPPStreamConfig
         dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
             
             userLoginIdStr = [delegate currentUserLoginIdStrWithXMPPStream:weakSelf];
-            dispatch_semaphore_signal(delegateSemaphore);
+    
         }});
+        
+        break;
     }
     
     dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
-    
-    if (handled) {
-        return userLoginIdStr;
-    }
-    
+
 #if !OS_OBJECT_USE_OBJC
-    dispatch_release(delegateSemaphore);
     dispatch_release(delegateGroup);
 #endif
     
@@ -2863,7 +2850,6 @@ enum XMPPStreamConfig
     SEL selector = @selector(currentUserBareJidStrWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
-    dispatch_group_t delegateGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2871,15 +2857,16 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+        dispatch_async(dq, ^{ @autoreleasepool {
             
             userBareJidStr = [delegate currentUserBareJidStrWithXMPPStream:weakSelf];
             dispatch_semaphore_signal(delegateSemaphore);
         }});
+        
+        break;
     }
     
-    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
     
     if (handled) {
         return userBareJidStr;
@@ -2887,7 +2874,6 @@ enum XMPPStreamConfig
     
 #if !OS_OBJECT_USE_OBJC
     dispatch_release(delegateSemaphore);
-    dispatch_release(delegateGroup);
 #endif
     
     return userBareJidStr;
@@ -2907,7 +2893,6 @@ enum XMPPStreamConfig
     
     SEL selector = @selector(currentUserLoginIdTypeWithXMPPStream:);
     
-    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
     dispatch_group_t delegateGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
@@ -2919,19 +2904,13 @@ enum XMPPStreamConfig
         dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
             
             currentUserLoginIdType = [delegate currentUserLoginIdTypeWithXMPPStream:weakSelf];
-            dispatch_semaphore_signal(delegateSemaphore);
         }});
+        break;
     }
     
     dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
-    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_NOW) == 0);
-    
-    if (handled) {
-        return currentUserLoginIdType;
-    }
     
 #if !OS_OBJECT_USE_OBJC
-    dispatch_release(delegateSemaphore);
     dispatch_release(delegateGroup);
 #endif
     
@@ -2949,32 +2928,22 @@ enum XMPPStreamConfig
     
     __block BOOL    result = NO;
     __block NSError   *err = nil;
-    __block XMPPLoginType loginType = XMPPLoginTypeDefault;
     
     dispatch_block_t block = ^{@autoreleasepool{
         
-        __block NSString *myJidStr = nil;
         authenticateInputType = type;
         authenticateInputStr = [loginName copy];
-        
-        myJidStr = [self myJidStrWithAuthenticateStr:[[XMPPJID jidWithString:authenticateInputStr] user] authenticateType:authenticateInputType];
-        
-        //If the myJidStr is nil
-        if (!myJidStr) {
-            myJidStr = [loginName copy];
-            loginType = type;
-        }
-        
+    
         // authenticate form server
         // we setting a @"mobile" for resource for local request jid
-        XMPPJID *localJID = [XMPPJID jidWithString:myJidStr];
+        XMPPJID *localJID = [XMPPJID jidWithString:authenticateInputStr];
         if (![[localJID resource] isEqualToString:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR]) {
-            localJID = [XMPPJID jidWithString:myJidStr resource:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR];
+            localJID = [XMPPJID jidWithString:authenticateInputStr resource:AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR];
         }
         
         [self setMyJID:localJID];
         
-        result = [self _authenticateWithPassword:Password type:loginType error:&err];
+        result = [self _authenticateWithPassword:Password type:authenticateInputType error:&err];
     }};
     
     

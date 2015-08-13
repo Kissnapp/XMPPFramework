@@ -324,6 +324,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
+- (BOOL)hasPasswordForCurrentUser
+{
+    return ([self clientDataCurrentLoginUser] && [self serverDataCurrentLoginUser]);
+}
+
 - (id)currentLoginUser
 {
     __block id currentLoginUser = nil;

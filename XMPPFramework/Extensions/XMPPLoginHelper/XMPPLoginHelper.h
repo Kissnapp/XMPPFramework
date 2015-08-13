@@ -52,6 +52,8 @@
 
 - (BOOL)autoLoginCurrentUser;
 
+- (BOOL)hasPasswordForCurrentUser;
+
 - (void)updateAutoLoginCurrentLoginUser:(BOOL)autoLogin;
 
 - (id)currentLoginUser;
