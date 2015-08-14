@@ -221,7 +221,7 @@
     
     if(!bareJidStr) return;
     
-    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag]];
+    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag iqId:nil]];
 }
 
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch{
@@ -310,7 +310,7 @@
              */
             // 3. Create the request iq
             
-            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr]];
+            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] iqId:requestKey];
             
             // 4. Send the request iq element to the server
             [[self xmppStream] sendElement:iqElement];
@@ -354,7 +354,7 @@
             
             NSString *photoHash = [_xmppvCardTempModuleStorage photoHashForvCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
             
-            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:photoHash];
+            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:photoHash iqId:requestKey];
             
             // 4. Send the request iq element to the server
             [[self xmppStream] sendElement:iqElement];

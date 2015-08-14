@@ -17,27 +17,46 @@
     __strong id <XMPPLoginHelperStorage> _xmppLoginHelperStorage;
 }
 
+@property (strong, readonly) id <XMPPLoginHelperStorage> xmppLoginHelperStorage;
+
 - (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage;
 - (id)initWithLoginHelperStorage:(id <XMPPLoginHelperStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-- (void)savePhoneNumber:(NSString *)phoneNumber;
-- (void)saveEmailAddress:(NSString *)emailAddress;
+- (void)saveLoginId:(NSString *)loginId loginIdType:(NSUInteger)loginIdType;
 
-- (void)updatePhoneNumber:(NSString *)phoneNumber;
-- (void)updateEmailAddress:(NSString *)emailAddress;
+- (void)updatePhoneNumberCurrentLoginUser:(NSString *)phoneNumber;
+- (void)updateEmailAddressCurrentLoginUser:(NSString *)emailAddress;
 - (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (void)updateStreamBareJidStrWithEmailAddress:(NSString *)emailAddress;
 
-- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber;
-- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress;
-- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (void)deleteUserCurrentLoginUser;
 
-- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
-- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
+- (NSString *)streamBareJidStrForCurrentUser;
+
 - (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
 - (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr;
 
-@property (strong, readonly) id <XMPPLoginHelperStorage> xmppLoginHelperStorage;
+- (NSString *)currentLoginIdStr;
+- (NSUInteger)currentLoginIdType;
+- (NSString *)currentUserBareJidStr;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forPhoneNumber:(NSString *)phoneNumber;
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forEmailAddress:(NSString *)emailAddress;
+- (void)saveCurrentUserClientData:(NSData *)clientData serverData:(NSData *)serverData;
+
+- (NSData *)clientDataCurrentLoginUser;
+
+- (NSData *)serverDataCurrentLoginUser;
+
+- (void)updateLoginTimeCurrentLoginUser;
+
+- (BOOL)autoLoginCurrentUser;
+
+- (BOOL)hasPasswordForCurrentUser;
+
+- (void)updateAutoLoginCurrentLoginUser:(BOOL)autoLogin;
+
+- (id)currentLoginUser;
 
 @end
 
@@ -50,22 +69,32 @@
 
 @optional
 
-- (void)savePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream;
-- (void)saveEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
-
 - (void)updatePhoneNumber:(NSString *)phoneNumber xmppStream:(XMPPStream *)stream;
 - (void)updateEmailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
 - (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber emailAddress:(NSString *)emailAddress xmppStream:(XMPPStream *)stream;
 
-- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber;
-- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress;
-- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (NSString *)streamBareJidStrForCurrentUser;
 
-- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
-- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress;
+- (NSString *)currentNeedLoginIdStr;
+- (NSUInteger)currentNeedLoginIdType;
+- (NSString *)currenNeedLoginStreamBareJidStr;
 
-- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr;
-- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr;
+- (void)saveLoginId:(NSString *)loginId loginIdType:(NSUInteger)loginIdType;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forPhoneNumber:(NSString *)phoneNumber;
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forEmailAddress:(NSString *)emailAddress;
+- (void)saveCurrentUserClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)stream;
+
+- (NSData *)clientDataCurrentUser;
+- (NSData *)serverDataCurrentUser;
+
+- (BOOL)autoLoginCurrentUser;
+
+- (id)currentLoginUser;
+
+- (void)deleteLoginUser;
+- (void)updateLoginTime;
+- (void)updateAutoLogin:(BOOL)autoLogin;
 
 @end
 
