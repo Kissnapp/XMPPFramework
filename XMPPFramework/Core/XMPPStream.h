@@ -59,7 +59,8 @@ typedef NS_ENUM(NSUInteger, XMPPRegisterType) {
     XMPPRegisterTypeEmail              //regist with a email address string
 };
 
-extern const NSTimeInterval XMPPStreamTimeoutNone;
+FOUNDATION_EXTERN NSTimeInterval const XMPPStreamTimeoutNone;
+FOUNDATION_EXTERN NSString *const AFT_KISSNAPP_IOS_XMPP_JID_RESOURCE_STR;
 
 @interface XMPPStream : NSObject <GCDAsyncSocketDelegate>
 
@@ -203,6 +204,8 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 @property (assign, readonly) XMPPLoginType authenticateType;
 
 @property (assign, readonly) BOOL hasMyJIDFromServer;
+
+@property (assign, nonatomic) BOOL loginWithCurrentUser;
 
 /**
  * Many routers will teardown a socket mapping if there is no activity on the socket.
@@ -500,6 +503,26 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 - (void)clearAllStreamInputInfo;
 
+/**
+ *  login the server with
+ *
+ *  @param loginName The name used for logining
+ *  @param password  The password used for logining
+ *  @param type      The login type which has been switch into three type
+ *      ##  XMPPLoginTypeDefault - login with a jid string
+ *      ##  XMPPLoginTypePhone - login with a phone number string
+ *      ##  XMPPLoginTypeEmail - login with a email address string
+ *  @param errPtr    Error information
+ *
+ *  @return YES,if logined succeed
+ *          NO,other case
+ */
+- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr;
+
+- (BOOL)loginWithCurrentUserWithError:(NSError **)errPtr;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Authentication
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -570,21 +593,7 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
  * This method exists for backwards compatibility, and may disappear in future versions.
 **/
 - (BOOL)authenticateWithPassword:(NSString *)password error:(NSError **)errPtr;
-/**
- *  login the server with
- *
- *  @param loginName The name used for logining
- *  @param password  The password used for logining
- *  @param type      The login type which has been switch into three type
- *      ##  XMPPLoginTypeDefault - login with a jid string
- *      ##  XMPPLoginTypePhone - login with a phone number string
- *      ##  XMPPLoginTypeEmail - login with a email address string
- *  @param errPtr    Error information
- *
- *  @return YES,if logined succeed
- *          NO,other case
- */
-- (BOOL)loginWithName:(NSString *)loginName password:(NSString *)password type:(XMPPLoginType)type error:(NSError **)errPtr;
+
 
 /**
  * Returns whether or not the xmpp stream is currently authenticating with the XMPP Server.
@@ -987,10 +996,23 @@ extern const NSTimeInterval XMPPStreamTimeoutNone;
 
 - (id <XMPPCustomBinding>)xmppStreamWillBind:(XMPPStream *)sender;
 
+// TODO:Here is some delegate methods for us
 /**
  * we can get the strean bare jid str with this method
  **/
-- (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType;
+- (NSString *)streamBareJidStrWithXMPPStream:(XMPPStream *)sender;
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)sender;
+
+- (NSData *)clientKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender;
+
+- (NSData *)serverKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender;
+
+- (NSString *)currentUserBareJidStrWithXMPPStream:(XMPPStream *)sender;
+
+- (NSString *)currentUserLoginIdStrWithXMPPStream:(XMPPStream *)sender;
+
+- (NSInteger)currentUserLoginIdTypeWithXMPPStream:(XMPPStream *)sender;
 
 /**
  * This method is called if the XMPP server doesn't allow our resource of choice

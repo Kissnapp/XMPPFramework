@@ -137,21 +137,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #pragma mark - public methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)savePhoneNumber:(NSString *)phoneNumber
+- (void)saveLoginId:(NSString *)loginId loginIdType:(NSUInteger)loginIdType
 {
     dispatch_block_t block = ^{
-        [_xmppLoginHelperStorage savePhoneNumber:phoneNumber xmppStream:xmppStream];
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-- (void)saveEmailAddress:(NSString *)emailAddress
-{
-    dispatch_block_t block = ^{
-        [_xmppLoginHelperStorage saveEmailAddress:emailAddress xmppStream:xmppStream];
+        [_xmppLoginHelperStorage saveLoginId:loginId loginIdType:loginIdType];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -160,7 +149,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)updatePhoneNumber:(NSString *)phoneNumber
+- (void)updatePhoneNumberCurrentLoginUser:(NSString *)phoneNumber
 {
     dispatch_block_t block = ^{
         [_xmppLoginHelperStorage updatePhoneNumber:phoneNumber xmppStream:xmppStream];
@@ -171,7 +160,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)updateEmailAddress:(NSString *)emailAddress
+
+- (void)updateEmailAddressCurrentLoginUser:(NSString *)emailAddress
 {
     dispatch_block_t block = ^{
         [_xmppLoginHelperStorage updateEmailAddress:emailAddress xmppStream:xmppStream];
@@ -206,34 +196,27 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)deleteLoginUserWithPhoneNumber:(NSString *)phoneNumber
-{}
-- (void)deleteLoginUserWithEmailAddress:(NSString *)emailAddress
-{}
-- (void)deleteLoginUserWithStreamBareJidStr:(NSString *)streamBareJidStr
-{}
-
-- (NSString *)streamBareJidStrWithPhoneNumber:(NSString *)phoneNumber
+- (void)deleteUserCurrentLoginUser
 {
-    __block NSString *result = nil;
-    
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage streamBareJidStrWithPhoneNumber:phoneNumber];
+        [_xmppLoginHelperStorage deleteLoginUser];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
-        dispatch_sync(moduleQueue, block);
-    
-    return result;
+        dispatch_async(moduleQueue, block);
+
 }
-- (NSString *)streamBareJidStrWithEmailAddress:(NSString *)emailAddress
+
+
+
+- (NSString *)streamBareJidStrForCurrentUser
 {
     __block NSString *result = nil;
     
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage streamBareJidStrWithEmailAddress:emailAddress];
+        result = [_xmppLoginHelperStorage streamBareJidStrForCurrentUser];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -244,12 +227,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
-- (NSString *)currentPhoneNumber
+- (NSString *)currentLoginIdStr
 {
     __block NSString *result = nil;
     
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage phoneNumberWithStreamBareJidStr:[[xmppStream myJID] bare]];
+        result = [_xmppLoginHelperStorage currentNeedLoginIdStr];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -259,12 +242,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
-- (NSString *)currentEmaiAddress
+
+- (NSUInteger)currentLoginIdType
 {
-    __block NSString *result = nil;
+    __block NSUInteger result = 0;
     
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage emailAddressWithStreamBareJidStr:[[xmppStream myJID] bare]];
+        result = [_xmppLoginHelperStorage currentNeedLoginIdType];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -274,12 +258,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
-- (NSString *)phoneNumberWithStreamBareJidStr:(NSString *)streamBareJidStr
+
+- (NSString *)currentUserBareJidStr
 {
     __block NSString *result = nil;
     
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage phoneNumberWithStreamBareJidStr:streamBareJidStr];
+        result = [_xmppLoginHelperStorage currenNeedLoginStreamBareJidStr];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -289,12 +274,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
-- (NSString *)emailAddressWithStreamBareJidStr:(NSString *)streamBareJidStr
+
+- (NSData *)clientDataCurrentLoginUser
 {
-    __block NSString *result = nil;
+    __block NSData *result = nil;
     
     dispatch_block_t block = ^{
-        result = [_xmppLoginHelperStorage emailAddressWithStreamBareJidStr:streamBareJidStr];
+        result = [_xmppLoginHelperStorage clientDataCurrentUser];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -304,6 +290,120 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
+
+- (NSData *)serverDataCurrentLoginUser
+{
+    __block NSData *result = nil;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage serverDataCurrentUser];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+
+- (BOOL)autoLoginCurrentUser
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = [_xmppLoginHelperStorage autoLoginCurrentUser];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (BOOL)hasPasswordForCurrentUser
+{
+    return ([self clientDataCurrentLoginUser] && [self serverDataCurrentLoginUser]);
+}
+
+- (id)currentLoginUser
+{
+    __block id currentLoginUser = nil;
+    
+    dispatch_block_t block = ^{
+        currentLoginUser = [_xmppLoginHelperStorage currentLoginUser];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return currentLoginUser;
+}
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forPhoneNumber:(NSString *)phoneNumber
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveClientData:clientData serverData:serverData forPhoneNumber:phoneNumber];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData forEmailAddress:(NSString *)emailAddress
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveClientData:clientData serverData:serverData forEmailAddress:emailAddress];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)saveCurrentUserClientData:(NSData *)clientData serverData:(NSData *)serverData
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage saveCurrentUserClientData:clientData serverData:serverData xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)updateLoginTimeCurrentLoginUser
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateLoginTime];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
+- (void)updateAutoLoginCurrentLoginUser:(BOOL)autoLogin
+{
+    dispatch_block_t block = ^{
+        [_xmppLoginHelperStorage updateAutoLogin:autoLogin];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,10 +413,14 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     XMPPLogTrace();
     switch (sender.authenticateType) {
         case XMPPLoginTypePhone:
-            [self savePhoneNumber:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+        {
+            [self saveLoginId:[[XMPPJID jidWithString:sender.authenticateStr] user] loginIdType:LoginHelperIdTypePhone];
+        }
             break;
         case XMPPLoginTypeEmail:
-            [self saveEmailAddress:[[XMPPJID jidWithString:sender.authenticateStr] user]];
+        {
+            [self saveLoginId:[[XMPPJID jidWithString:sender.authenticateStr] user] loginIdType:LoginHelperIdTypeEmail];
+        }
             break;
         default:
             break;
@@ -341,22 +445,48 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }
 }
 
-- (NSString *)streamBareJidStrWithAuthenticateStr:(NSString *)authenticateStr authenticateType:(XMPPLoginType)authenticateType
+- (NSString *)streamBareJidStrWithXMPPStream:(XMPPStream *)sender
 {
-    NSString *result = nil;
-    
-    switch (authenticateType) {
+    return [_xmppLoginHelperStorage streamBareJidStrForCurrentUser];;
+}
+
+- (void)saveClientData:(NSData *)clientData serverData:(NSData *)serverData xmppStream:(XMPPStream *)sender
+{
+    switch (sender.authenticateType) {
         case XMPPLoginTypePhone:
-            result = [self streamBareJidStrWithPhoneNumber:authenticateStr];
+            [self saveClientData:clientData serverData:serverData forPhoneNumber:[[XMPPJID jidWithString:sender.authenticateStr] user]];
             break;
-         case XMPPLoginTypeEmail:
-            result = [self streamBareJidStrWithEmailAddress:authenticateStr];
+        case XMPPLoginTypeEmail:
+            [self saveClientData:clientData serverData:serverData forEmailAddress:[[XMPPJID jidWithString:sender.authenticateStr] user]];
             break;
         default:
+            [self saveCurrentUserClientData:clientData serverData:serverData];
             break;
     }
-    
-    return result;
+}
+
+- (NSData *)clientKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender
+{
+    return [self clientDataCurrentLoginUser];
+}
+
+- (NSData *)serverKeyDataInDatabaseWithXMPPStream:(XMPPStream *)sender
+{
+    return [self serverDataCurrentLoginUser];
+}
+
+- (NSString *)currentUserBareJidStrWithXMPPStream:(XMPPStream *)sender
+{
+    return [self currentUserBareJidStr];
+}
+- (NSString *)currentUserLoginIdStrWithXMPPStream:(XMPPStream *)sender
+{
+    return [self currentLoginIdStr];
+}
+
+- (NSInteger)currentUserLoginIdTypeWithXMPPStream:(XMPPStream *)sender
+{
+    return [self currentLoginIdType];
 }
 
 

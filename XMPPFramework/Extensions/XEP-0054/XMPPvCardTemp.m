@@ -191,8 +191,17 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     
     //创建email节点的名为USERID的子节点
     NSXMLElement *number = [NSXMLElement elementWithName:@"NUMBER"];
-    [tel addChild:number];
     [number setStringValue:phoneNumber];
+    [tel addChild:number];
+    
+    // 下面的没有用
+    //创建email节点的名为USERID的子节点
+    NSXMLElement *home = [NSXMLElement elementWithName:@"HOME"];
+    [tel addChild:home];
+    
+    //创建email节点的名为USERID的子节点
+    NSXMLElement *cell = [NSXMLElement elementWithName:@"CELL"];
+    [tel addChild:cell];
 }
 
 - (NSString *)photoURL {
