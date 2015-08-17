@@ -23,6 +23,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
     XMPPStream *xmppStream;
     
     dispatch_queue_t moduleQueue;
+    dispatch_queue_t globalModuleQueue;
+    
     void *moduleQueueTag;
     
     id multicastDelegate;
@@ -33,6 +35,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 @property (readonly) dispatch_queue_t moduleQueue;
+@property (readonly) dispatch_queue_t globalModuleQueue;
+
 @property (readonly) void *moduleQueueTag;
 
 @property (strong, readonly) XMPPStream *xmppStream;
