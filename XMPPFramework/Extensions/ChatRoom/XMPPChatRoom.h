@@ -12,6 +12,7 @@
 #import "XMPPChatRoomCoreDataStorageObject.h"
 #import "XMPPChatRoomUserCoreDataStorageObject.h"
 #import "XMPPMessage+ChatRoomMessage.h"
+#import "NSDictionary+KeysTransfrom.h"
 
 
 #define _XMPP_CHAT_ROOM_H
@@ -243,6 +244,57 @@
  */
 - (XMPPChatRoomUserCoreDataStorageObject *)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr;
 
+
+#pragma mark - 创建聊天室或者任务或者事件或者文件收发
+// 通用创建聊天室方法
+- (void)createChatRoomWithName:(NSString *)chatRoomName
+                          type:(XMPPChatRoomType)type
+                         orgId:(NSString *)orgId
+                   bareJidStrs:(NSArray*)bareJidStrs
+               completionBlock:(CompletionBlock)completionBlock;
+
+- (void)createChatRoomWithName:(NSString *)chatRoomName
+                          type:(XMPPChatRoomType)type
+                         orgId:(NSString *)orgId
+               completionBlock:(CompletionBlock)completionBlock;
+// 创建任务
+- (void)createTask:(NSString *)taskName
+             orgId:(NSString *)orgId
+       bareJidStrs:(NSArray*)bareJidStrs
+   completionBlock:(CompletionBlock)completionBlock;
+
+- (void)createTask:(NSString *)taskName
+             orgId:(NSString *)orgId
+   completionBlock:(CompletionBlock)completionBlock;
+
+// 创建事件
+- (void)createEvent:(NSString *)eventName
+        bareJidStrs:(NSArray*)bareJidStrs
+    completionBlock:(CompletionBlock)completionBlock;
+
+- (void)createEvent:(NSString *)eventName
+   completionBlock:(CompletionBlock)completionBlock;
+
+// 资料收发
+- (void)createFileTransfer:(NSString *)fileTransferName
+                   bareJidStrs:(NSArray*)bareJidStrs
+               completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 获取所有聊天室信息
+
+
+
+#pragma mark - 获取所有人员信息
+
+
+#pragma mark - 指定聊天室信息
+- (void)fetchChatRoomFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+                                      completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 指定聊天室人员列表信息
+- (void)fetchChatRoomUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+                                              completionBlock:(CompletionBlock)completionBlock;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,6 +343,10 @@
 #endif
 
 - (void)handleChatRoomUserDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream;
+- (void)insertOrUpdateUserWithChatRoomBareJidStr:(NSString *)chatRoomBareJidStr dic:(NSDictionary *)userDic xmppStream:(XMPPStream *)stream;
+
+- (void)insertChatRoomWithDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream;
+- (void)handleChatRoomUserChatRoomBareJidStr:(NSString *)chatRoomBareJidStr dictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream;
 
 @end
 

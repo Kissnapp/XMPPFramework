@@ -267,13 +267,15 @@
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
     NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
-    NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
-    NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
+    NSString *roomBareJidStr = [Dic objectForKey:@"chatRoomBareJidStr"];
+    NSString *nickNameStr = [Dic objectForKey:@"nickName"];
     NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
+    /*
     if (bareJidStr == nil && [bareJidStr isEqualToString:@""]){
         NSLog(@"XMPPChatRoomUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
+     */
     if (bareJidStr && ![bareJidStr isEqualToString:@""]) {
         self.bareJidStr = bareJidStr;
     }

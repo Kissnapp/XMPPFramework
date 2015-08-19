@@ -34,6 +34,12 @@
 @dynamic subscription, primitiveSubscription;
 @dynamic masterBareJidStr;
 
+@dynamic type;
+@dynamic startTime;
+@dynamic endTime;
+@dynamic progressType;
+@dynamic orgId;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,16 +170,106 @@
     [self didChangeValueForKey:@"masterBareJidStr"];
 }
 
+- (NSString *)photo
+{
+    [self willAccessValueForKey:@"photo"];
+    NSString *value = [self primitiveValueForKey:@"photo"];
+    [self didAccessValueForKey:@"photo"];
+    return value;
+}
+
+- (void)setPhoto:(NSString *)value
+{
+    [self willChangeValueForKey:@"photo"];
+    [self setPrimitiveValue:value forKey:@"photo"];
+    [self didChangeValueForKey:@"photo"];
+}
+
+- (NSNumber *)type
+{
+    [self willAccessValueForKey:@"type"];
+    NSNumber *value = [self primitiveValueForKey:@"type"];
+    [self didAccessValueForKey:@"type"];
+    return value;
+}
+
+- (void)setType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"type"];
+    [self setPrimitiveValue:value forKey:@"type"];
+    [self didChangeValueForKey:@"type"];
+}
+
+- (NSNumber *)progressType
+{
+    [self willAccessValueForKey:@"progressType"];
+    NSNumber *value = [self primitiveValueForKey:@"progressType"];
+    [self didAccessValueForKey:@"progressType"];
+    return value;
+}
+
+- (void)setProgressType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"progressType"];
+    [self setPrimitiveValue:value forKey:@"progressType"];
+    [self didChangeValueForKey:@"progressType"];
+}
+
+- (NSDate *)startTime
+{
+    [self willAccessValueForKey:@"startTime"];
+    NSDate *value = [self primitiveValueForKey:@"startTime"];
+    [self didAccessValueForKey:@"startTime"];
+    return value;
+}
+
+- (void)setStartTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"startTime"];
+    [self setPrimitiveValue:value forKey:@"startTime"];
+    [self didChangeValueForKey:@"startTime"];
+}
+
+- (NSDate *)endTime
+{
+    [self willAccessValueForKey:@"endTime"];
+    NSDate *value = [self primitiveValueForKey:@"endTime"];
+    [self didAccessValueForKey:@"endTime"];
+    return value;
+}
+
+- (void)setEndTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"endTime"];
+    [self setPrimitiveValue:value forKey:@"endTime"];
+    [self didChangeValueForKey:@"endTime"];
+}
+
+- (NSString *)orgId
+{
+    [self willAccessValueForKey:@"orgId"];
+    NSString *value = [self primitiveValueForKey:@"orgId"];
+    [self didAccessValueForKey:@"orgId"];
+    
+    return value;
+}
+
+- (void)setOrgId:(NSString *)value
+{
+    [self willChangeValueForKey:@"orgId"];
+    [self setPrimitiveValue:value forKey:@"orgId"];
+    [self didChangeValueForKey:@"orgId"];
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                            withID:(NSString *)id
+                            withID:(NSString *)chatRoomId
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    if (id == nil){
+    if (chatRoomId == nil){
         NSLog(@"XMPPChatRoomCoreDataStorageObject: invalid jid (nil)");
         return nil;
     }
@@ -185,7 +281,7 @@
     if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]){
         chatRoom.streamBareJidStr = streamBareJidStr;
     }
-    chatRoom.jid = id;
+    chatRoom.jid = chatRoomId;
     chatRoom.nickName = nil;
     chatRoom.subscription = nil;
     chatRoom.photo = nil;
@@ -232,13 +328,13 @@
 }
 
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
-                              withID:(NSString *)id
+                              withID:(NSString *)chatRoomId
 streamBareJidStr:(NSString *)streamBareJidStr
 {
-    if (id == nil) return NO;
+    if (chatRoomId == nil) return NO;
     if (moc == nil) return NO;
     
-    XMPPChatRoomCoreDataStorageObject *deleteObject = [XMPPChatRoomCoreDataStorageObject objectInManagedObjectContext:moc withID:id streamBareJidStr:streamBareJidStr];
+    XMPPChatRoomCoreDataStorageObject *deleteObject = [XMPPChatRoomCoreDataStorageObject objectInManagedObjectContext:moc withID:chatRoomId streamBareJidStr:streamBareJidStr];
     if (deleteObject){
         
         [moc deleteObject:deleteObject];
@@ -308,42 +404,55 @@ streamBareJidStr:(NSString *)streamBareJidStr
 
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *tempJidStr = [Dic objectForKey:@"groupid"];
-    NSString *tempNickNameStr = [Dic objectForKey:@"groupname"];
+    NSString *tempJidStr = [Dic objectForKey:@"jid"];
+    NSString *tempNickNameStr = [Dic objectForKey:@"nickName"];
     NSString *tempSubscriptionStr = [Dic objectForKey:@"subscription"];
-    NSString *tempMasterBareJidStr = [Dic objectForKey:@"master"];
+    NSString *tempMasterBareJidStr = [Dic objectForKey:@"masterBareJidStr"];
+    NSString *tempPhoto = Dic[@"photo"];
+    NSNumber *tempType = [NSNumber numberWithInteger:([Dic[@"type"] integerValue] - 1)];
+    NSNumber *tempProgressType = [NSNumber numberWithInteger:([Dic[@"progressType"] integerValue] - 1)];
+    NSDate *tempStartTime = Dic[@"startTime"];
+    NSDate *tempEndTime = Dic[@"endTime"];
+    NSString *tempOrgId = Dic[@"orgId"];
     
-    if (tempJidStr == nil && [tempJidStr isEqualToString:@""]){
+    /*
+    if (tempJidStr.length < 1){
         NSLog(@"XMPPUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
+     */
     
-    self.jid = tempJidStr;
-    if (tempNickNameStr && ![tempNickNameStr isEqualToString:@""]) self.nickName = tempNickNameStr;
-    if (tempSubscriptionStr && ![tempSubscriptionStr isEqualToString:@""]) self.subscription = tempSubscriptionStr;
-    if (tempMasterBareJidStr && ![tempMasterBareJidStr isEqualToString:@""]) self.masterBareJidStr = tempMasterBareJidStr;
-    
-    //TODO:这里需要处理photo属性
+    if (tempJidStr.length > 1) self.jid = tempJidStr;
+    if (tempNickNameStr) self.nickName = tempNickNameStr;
+    if (tempSubscriptionStr) self.subscription = tempSubscriptionStr;
+    if (tempMasterBareJidStr) self.masterBareJidStr = tempMasterBareJidStr;
+
+    if (tempPhoto) self.photo = tempPhoto;
+    if (tempType) self.type = tempType;
+    if (tempProgressType) self.progressType = tempProgressType;
+    if (tempStartTime) self.startTime = tempStartTime;
+    if (tempEndTime) self.endTime = tempEndTime;
+    if (tempOrgId) self.orgId = tempOrgId;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Check methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 + (id)fetchObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                 withID:(NSString *)id
+                                 withID:(NSString *)chatRoomId
                        streamBareJidStr:(NSString *)streamBareJidStr
 {
     return [XMPPChatRoomCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                    withID:id
+                                                                    withID:chatRoomId
                                                           streamBareJidStr:streamBareJidStr];
 }
 
 
 + (XMPPChatRoomCoreDataStorageObject *)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                                       withID:(NSString *)id
+                                                       withID:(NSString *)chatRoomId
                                              streamBareJidStr:(NSString *)streamBareJidStr
 {
-    if (id == nil) return nil;
+    if (chatRoomId == nil) return nil;
     if (moc == nil) return nil;
     
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPChatRoomCoreDataStorageObject"
@@ -351,10 +460,10 @@ streamBareJidStr:(NSString *)streamBareJidStr
     
     NSPredicate *predicate;
     if (streamBareJidStr == nil)
-        predicate = [NSPredicate predicateWithFormat:@"jid == %@", id];
+        predicate = [NSPredicate predicateWithFormat:@"jid == %@", chatRoomId];
     else
         predicate = [NSPredicate predicateWithFormat:@"jid == %@ AND streamBareJidStr == %@",
-                     id, streamBareJidStr];
+                     chatRoomId, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];

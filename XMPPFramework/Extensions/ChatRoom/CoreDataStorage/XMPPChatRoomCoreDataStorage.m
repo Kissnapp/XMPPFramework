@@ -100,6 +100,59 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
 #pragma mark - XMPPChatRoomStorage Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)insertChatRoomWithDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        [XMPPChatRoomCoreDataStorageObject insertInManagedObjectContext:moc
+                                                       withNSDictionary:dictionary
+                                                       streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+    }];
+}
+
+- (void)handleChatRoomUserChatRoomBareJidStr:(NSString *)chatRoomBareJidStr dictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    NSString *action = [dictionary objectForKey:@"action"];
+    NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
+    NSString *streamBarJidStr = [[stream myJID] bare];
+    
+    // 如果被删除的认识自己，那么需要删除自己本地的这个群组
+    if ([bareJidStr isEqualToString:streamBarJidStr] && [action isEqualToString:@"remove"]) {
+        
+        [self deleteChatRoomWithBareJidStr:chatRoomBareJidStr xmppStream:stream];
+        
+    }else {// 增加或者删除的是别人
+        
+        [self scheduleBlock:^{
+            
+            NSManagedObjectContext *moc = [self managedObjectContext];
+            
+            //When we add or update a object in the coredata system,we all use the updateOrInsert... method
+            if ([action isEqualToString:@"remove"]){// 删除被移除聊天室的人员信息
+                
+                [XMPPChatRoomUserCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                                             withID:bareJidStr
+                                                                        chatRoomJid:chatRoomBareJidStr
+                                                                   streamBareJidStr:streamBarJidStr];
+            }else/* if (![action isEqualToString:@"remove"]) */{// 增加或者跟新被增加人的信息
+                //action in coredata
+                [XMPPChatRoomUserCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                                 withNSDictionary:dictionary
+                                                                                      chatRoomJid:chatRoomBareJidStr
+                                                                                 streamBareJidStr:streamBarJidStr];
+            }
+            
+        }];
+    }
+
+}
+
 - (void)handleChatRoomUserDictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream
 {
     //MARK:here we will storage the chat room user in to the Core Data system
