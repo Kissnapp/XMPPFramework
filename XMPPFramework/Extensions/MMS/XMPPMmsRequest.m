@@ -136,14 +136,16 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// upload new file
-- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+
+- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{
         
         NSString *key = [[self xmppStream] generateUUID];
         
-        [self requestUploadInfoWithRequestKey:key completionBlock:completionBlock];
+        [self requestUploadInfoWithRequestKey:key
+                                      private:NO
+                              completionBlock:completionBlock];
         
     };
     
@@ -152,7 +154,34 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+- (void)requestPublicUploadInfoWithRequestKey:(NSString *)requestKey
+                              completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self requestUploadInfoWithRequestKey:requestKey
+                                  private:NO
+                          completionBlock:completionBlock];
+}
+// upload new file
+- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        NSString *key = [[self xmppStream] generateUUID];
+        
+        [self requestUploadInfoWithRequestKey:key
+                                      private:YES
+                              completionBlock:completionBlock];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey
+                                private:(BOOL)privateMode
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
     if (!requestKey) return;
     
@@ -170,6 +199,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             
             NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
             [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
+            [queryElement addAttributeWithName:@"private" boolValue:privateMode];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             

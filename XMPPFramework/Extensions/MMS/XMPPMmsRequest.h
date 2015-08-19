@@ -10,10 +10,16 @@
 
 @interface XMPPMmsRequest : XMPPModule
 
-// upload new file
+// privare upload new file
 - (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 - (void)requestUploadInfoWithRequestKey:(NSString *)requestKey
+                                private:(BOOL)privateMode
                          completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+
+// public upload new file
+- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)requestPublicUploadInfoWithRequestKey:(NSString *)requestKey
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 
 // upload exists file
 - (void)requestExistsUploadInfoWithFile:(NSString *)file
