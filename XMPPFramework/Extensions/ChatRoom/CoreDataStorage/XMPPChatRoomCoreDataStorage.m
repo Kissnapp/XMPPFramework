@@ -121,7 +121,20 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject]
+        // find the user we want whether 
+        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                           withBareJidStr:userDic[@"bareJidStr"]
+                                                                                                              chatRoomJid:chatRoomBareJidStr
+                                                                                                         streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        
+        if (user) {
+            [user updateWithDictionary:userDic];
+        }else{
+            user = [XMPPChatRoomUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      withNSDictionary:userDic
+                                                                           chatRoomJid:chatRoomBareJidStr
+                                                                      streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        }
         
         
     }];
