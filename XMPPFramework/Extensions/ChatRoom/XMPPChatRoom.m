@@ -1221,7 +1221,19 @@ enum XMPPChatRoomUserListFlags
         
         NSDictionary *dic = obj;
         
-        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
+         [xmppChatRoomStorage handleChatRoomDictionary:[dic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                     @"jid":@"groupid",
+                                                                                                     @"nickName":@"groupname",
+                                                                                                     @"masterBareJidStr":@"master",
+                                                                                                     @"subscription":@"subscription",
+                                                                                                     @"photo":@"avatar",
+                                                                                                     @"orgId":@"project",
+                                                                                                     @"type":@"type",
+                                                                                                     @"progressType":@"status",
+                                                                                                     @"startTime":@"startTime",
+                                                                                                     @"endTime":@"endTime"
+                                                                                                     }]
+                                            xmppStream:xmppStream];
         
         //If the autoFetchChatRoomUserList == YES,we should fetch the user list
         if ([self autoFetchChatRoomUserList]) {
@@ -1972,12 +1984,13 @@ enum XMPPChatRoomUserListFlags
 {
     //we will
     /*
-    <iq from="1341234578@localhost" type="result" to="1341234578@localhost/caoyue-PC" id="aad5a">
-     <query xmlns="aft:groupchat" query_type="get_groups">
-        [{"groupid": "100001","groupname": "First"，“master“：”123456789@192.168.1.167”},
-        {"groupid": "100002","groupname": "Second",“master“：”1234567890@192.168.1.167”}]
-     </query>
-    </iq>
+     <iq from="13412345678@localhost" type="result" to="13412345678@localhost/caoyue-PC" id="aad5ba">
+          <query xmlns="aft:groupchat" query_type="get_groups">
+               [{"groupid":"2","groupname":"FirstGroup","master":"13412345678@localhost","avatar":"adfadfadf","project":"1","type":"1","status":"1"},
+               {"groupid":"3","groupname":"FirstGroup","master":"13412345678@localhost","avatar":"adfadfadf","project":"1","type":"1","status":"1"},
+               {"groupid":"4","groupname":"FirstGroup","master":"13412345678@localhost","avatar":"adfadfadf","project":"1","type":"1","status":"1"}]
+          </query>
+     </iq>
      */
     dispatch_block_t block = ^{ @autoreleasepool {
         
