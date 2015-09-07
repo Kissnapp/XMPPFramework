@@ -328,7 +328,7 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:(message ? :@"") forKey:NSLocalizedDescriptionKey];
         NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",[self xmpp_module_error_domain]] code:[self xmpp_module_error_code] userInfo:userInfo];
         completionBlock(nil, error);
         

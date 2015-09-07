@@ -114,6 +114,20 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)insertOrUpdateUserWithChatRoomBareJidStr:(NSString *)chatRoomBareJidStr dic:(NSDictionary *)userDic xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        XMPPChatRoomUserCoreDataStorageObject *user = [XMPPChatRoomUserCoreDataStorageObject]
+        
+        
+    }];
+
+}
+
 - (void)handleChatRoomUserChatRoomBareJidStr:(NSString *)chatRoomBareJidStr dictionary:(NSDictionary *)dictionary xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();

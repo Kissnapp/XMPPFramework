@@ -26,7 +26,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 static NSString * const queryElementName = @"query";
 static NSString * const queryElementXmlns = @"aft:groupchat";
-static NSString * const error_code_element_xmlns = @"aft:errors";
+static NSString * const error_code_element_xmlns = @"aft:error";
 
 static NSString * const group_info_push = @"groupinfo";
 static NSString * const group_member_push = @"groupmember";
@@ -2208,7 +2208,7 @@ enum XMPPChatRoomUserListFlags
             
             [multicastDelegate xmppChatRoom:self didReceiveChatRoomPush:iq];
             
-        }else if([iq isResultIQ]){
+        }else {
             [xmppIDTracker invokeForElement:iq withObject:iq];
         }
         

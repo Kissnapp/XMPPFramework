@@ -29,7 +29,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 static NSString *const ORG_REQUEST_XMLNS = @"aft:project";
 static NSString *const ORG_PUSH_MSG_XMLNS = @"aft:project";
-static NSString *const ORG_REQUEST_ERROR_XMLNS = @"aft:errors";
+static NSString *const ORG_REQUEST_ERROR_XMLNS = @"aft:error";
 
 static NSString *const REQUEST_ALL_ORG_KEY = @"request_all_org_key";
 static NSString *const REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
@@ -1583,6 +1583,23 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 }
 
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId
+{
+    __block NSArray *users = nil;
+    
+    dispatch_block_t block = ^{
+        
+        users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return users;
+}
+
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId
                           dpName:(NSString *)dpName
                        ascending:(BOOL)ascending
 {
@@ -1624,6 +1641,28 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         dispatch_sync(moduleQueue, block);
     
     return positions;
+}
+
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId
+{
+    return [self requestDBAllSubUsersWithOrgId:orgId superUserBareJidStr:[[xmppStream myJID] bare]];
+}
+
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr
+{
+    __block NSArray *users = nil;
+    
+    dispatch_block_t block = ^{
+        
+        users = [_xmppOrgStorage subUsersWithOrgId:orgId superUserBareJidStr:superUserBareJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return users;
 }
 
 - (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
