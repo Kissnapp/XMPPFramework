@@ -21,6 +21,12 @@
 @protocol XMPPChatRoomStorage;
 @protocol XMPPChatRoomDelegate;
 
+@protocol XMPPChatRoomCoreDataStorageObject <NSObject>
+@end
+
+@protocol XMPPChatRoomUserCoreDataStorageObject <NSObject>
+@end
+
 @interface XMPPChatRoom : XMPPModule
 {
 
@@ -212,7 +218,7 @@
 /**
  *  Get all the list from the local core datasystem
  */
-- (NSArray *)fetchChatRoomListFromLocal;
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal;
 /**
  *  Fetch a chat room's all user with the given chat room bare jid string,
  *
@@ -225,7 +231,7 @@
  *
  *  @return The result array which contain some XMPPChatRoomUserCoreDataStorageObject obejct in it
  */
-- (NSArray *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
+- (NSArray<XMPPChatRoomUserCoreDataStorageObject> *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
 /**
  *  Get a XMPPChatRoomCoreDataStorageObject with given bare Jid string and bare Chat Room Jid string
  *
@@ -281,8 +287,8 @@
                completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取所有聊天室信息
-
-
+- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type;
 
 #pragma mark - 获取所有人员信息
 
@@ -322,7 +328,7 @@
 
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 - (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
-- (NSArray *)chatRoomListWithXMPPStream:(XMPPStream *)stream;
+- (NSArray *)chatRoomListWithType:(XMPPChatRoomType)type xmppStream:(XMPPStream *)stream;
 
 - (id)chatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;

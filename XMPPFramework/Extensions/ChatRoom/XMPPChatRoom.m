@@ -950,22 +950,50 @@ enum XMPPChatRoomUserListFlags
     
     return result;
 }
-- (NSArray *)fetchChatRoomListFromLocal
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal
 {
-    __block NSArray *results = nil;
-    
-    dispatch_block_t block = ^{
-        
-        results = [xmppChatRoomStorage chatRoomListWithXMPPStream:xmppStream];
-        
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_sync(moduleQueue, block);
-    
-    return results;
+     return [self fetchAllChatRoomsWithType:XMPPChatRoomTypeDefault];
+}
+
+- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock
+{
+     dispatch_block_t block = ^{
+          
+          NSArray *results = [xmppChatRoomStorage chatRoomListWithType:type xmppStream:xmppStream];
+          
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
+          ([results count] > 0) ? completionBlock(results, nil):[self _callBackWithMessage:@"this no data" completionBlock:completionBlock];
+#pragma clang diagnostic pop
+          
+     };
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_async(moduleQueue, block);
+     
+}
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
+{
+     __block NSArray *results = nil;
+     
+     dispatch_block_t block = ^{
+          
+          results = [xmppChatRoomStorage chatRoomListWithType:type xmppStream:xmppStream];
+          
+     };
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_sync(moduleQueue, block);
+     
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
+     return results;
+#pragma clang diagnostic pop
+
 }
 - (void)setMyNickNameForBareChatRoomJidStr:(NSString *)bareChatRoomJidStr withNickName:(NSString *)newNickName
 {
@@ -1260,7 +1288,19 @@ enum XMPPChatRoomUserListFlags
         
         NSDictionary *dic = obj;
         
-        [xmppChatRoomStorage handleChatRoomDictionary:dic xmppStream:xmppStream];
+         [xmppChatRoomStorage handleChatRoomDictionary:[dic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                     @"jid":@"groupid",
+                                                                                                     @"nickName":@"groupname",
+                                                                                                     @"masterBareJidStr":@"master",
+                                                                                                     @"subscription":@"subscription",
+                                                                                                     @"photo":@"avatar",
+                                                                                                     @"orgId":@"project",
+                                                                                                     @"type":@"type",
+                                                                                                     @"progressType":@"status",
+                                                                                                     @"startTime":@"startTime",
+                                                                                                     @"endTime":@"endTime"
+                                                                                                     }]
+                                            xmppStream:xmppStream];
         
     }];
 }
@@ -1279,7 +1319,12 @@ enum XMPPChatRoomUserListFlags
         
         NSDictionary *dic = obj;
         
-        [xmppChatRoomStorage handleChatRoomUserDictionary:dic xmppStream:xmppStream];
+         [xmppChatRoomStorage handleChatRoomUserDictionary:[dic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                             @"bareJidStr":@"userjid",
+                                                                                                             @"nickName":@"nickname",
+                                                                                                             @"chatRoomBareJidStr":@"groupid",
+                                                                                                             @"streamBareJidStr":@"streamBareJidStr"
+                                                                                                             }] xmppStream:xmppStream];
         
     }];
  
@@ -1302,7 +1347,12 @@ enum XMPPChatRoomUserListFlags
     [tempArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         
         NSDictionary *dic = obj;
-        [xmppChatRoomStorage handleChatRoomUserDictionary:dic xmppStream:xmppStream];
+         [xmppChatRoomStorage handleChatRoomUserDictionary:[dic destinationDictionaryWithNewKeysMapDic:@{
+                                                                                                             @"bareJidStr":@"userjid",
+                                                                                                             @"nickName":@"nickname",
+                                                                                                             @"chatRoomBareJidStr":@"groupid",
+                                                                                                             @"streamBareJidStr":@"streamBareJidStr"
+                                                                                                             }] xmppStream:xmppStream];
     }];
 }
 

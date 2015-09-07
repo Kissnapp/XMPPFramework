@@ -294,9 +294,9 @@
                   withNSDictionary:(NSDictionary *)Dic
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *jid = [Dic objectForKey:@"groupid"];
+    NSString *chatRoomId = Dic[@"jid"];
     
-    if (jid == nil){
+    if (chatRoomId == nil){
         NSLog(@"XMPPChatRoomCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return nil;
     }
@@ -404,10 +404,10 @@ streamBareJidStr:(NSString *)streamBareJidStr
 
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *tempJidStr = [Dic objectForKey:@"jid"];
-    NSString *tempNickNameStr = [Dic objectForKey:@"nickName"];
-    NSString *tempSubscriptionStr = [Dic objectForKey:@"subscription"];
-    NSString *tempMasterBareJidStr = [Dic objectForKey:@"masterBareJidStr"];
+    NSString *tempJidStr = Dic[@"jid"];
+    NSString *tempNickNameStr = Dic[@"nickName"];
+    NSString *tempSubscriptionStr = Dic[@"subscription"];
+    NSString *tempMasterBareJidStr = Dic[@"masterBareJidStr"];
     NSString *tempPhoto = Dic[@"photo"];
     NSNumber *tempType = [NSNumber numberWithInteger:([Dic[@"type"] integerValue] - 1)];
     NSNumber *tempProgressType = [NSNumber numberWithInteger:([Dic[@"progressType"] integerValue] - 1)];
@@ -422,7 +422,7 @@ streamBareJidStr:(NSString *)streamBareJidStr
     }
      */
     
-    if (tempJidStr.length > 1) self.jid = tempJidStr;
+    if (tempJidStr.length > 0) self.jid = tempJidStr;
     if (tempNickNameStr) self.nickName = tempNickNameStr;
     if (tempSubscriptionStr) self.subscription = tempSubscriptionStr;
     if (tempMasterBareJidStr) self.masterBareJidStr = tempMasterBareJidStr;

@@ -145,8 +145,8 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
 {
     XMPPLogTrace();
     
-    NSString *action = [dictionary objectForKey:@"action"];
-    NSString *bareJidStr = [dictionary objectForKey:@"bareJidStr"];
+    NSString *action = dictionary[@"action"];
+    NSString *bareJidStr = dictionary[@"bareJidStr"];
     NSString *streamBarJidStr = [[stream myJID] bare];
     
     // 如果被删除的认识自己，那么需要删除自己本地的这个群组
@@ -318,8 +318,8 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        NSString *jid = [dic objectForKey:@"groupid"];
-        NSString *action = [dic objectForKey:@"action"];
+        NSString *jid = dic[@"jid"];
+        NSString *action = dic[@"action"];
         
         if ([chatRoomPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]]){
           
@@ -697,7 +697,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
 
 }
 
-- (NSArray *)chatRoomListWithXMPPStream:(XMPPStream *)stream
+- (NSArray *)chatRoomListWithType:(XMPPChatRoomType)type xmppStream:(XMPPStream *)stream
 {
     
     XMPPLogTrace();
@@ -716,7 +716,7 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (stream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",[[self myJIDForXMPPStream:stream] bare]];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && type == %@",[[self myJIDForXMPPStream:stream] bare],@(type)];
             
             [fetchRequest setPredicate:predicate];
         }
