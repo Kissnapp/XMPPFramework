@@ -301,6 +301,10 @@
 - (void)fetchChatRoomUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
                                               completionBlock:(CompletionBlock)completionBlock;
 
+
+#pragma mark - 获取聊天室头像
+- (NSArray *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

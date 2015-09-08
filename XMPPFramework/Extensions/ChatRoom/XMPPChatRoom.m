@@ -834,6 +834,30 @@ enum XMPPChatRoomUserListFlags
 
 }
 
+#pragma mark - 获取聊天室头像
+- (NSArray *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+     if ( !bareChatRoomJidStr ) return nil;
+     
+     __block NSMutableArray *jids = nil;
+     
+     dispatch_block_t block = ^{
+          
+          id data = [xmppChatRoomStorage userListForChatRoomWithBareJidStr:bareChatRoomJidStr xmppStream:xmppStream];
+          [data enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+               XMPPChatRoomUserCoreDataStorageObject *user = obj;
+               [jids addObject:user.bareJidStr];
+          }];
+     };
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_sync(moduleQueue, block);
+     
+     return jids;
+}
+
 #pragma mark - 指定聊天室人员列表信息
 - (void)fetchChatRoomUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
                                               completionBlock:(CompletionBlock)completionBlock
