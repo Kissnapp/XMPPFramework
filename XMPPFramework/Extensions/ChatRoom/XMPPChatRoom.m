@@ -655,7 +655,6 @@ enum XMPPChatRoomUserListFlags
                 [self _executeRequestBlockWithRequestKey:requestKey errorMessage:[codeElement stringValue]];
                 
                 [multicastDelegate xmppChatRoom:self didCreateChatRoomError:iq];
-                
                 return ;
             }
             

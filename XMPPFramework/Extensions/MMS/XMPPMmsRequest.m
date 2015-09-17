@@ -139,67 +139,34 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 
 - (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    dispatch_block_t block = ^{
-        
-        NSString *key = [[self xmppStream] generateUUID];
-        
-        [self requestUploadInfoWithRequestKey:key
-                                      private:NO
-                              completionBlock:completionBlock];
-        
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePublic completionBlock:completionBlock];
 }
-- (void)requestPublicUploadInfoWithRequestKey:(NSString *)requestKey
-                              completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
-{
-    [self requestUploadInfoWithRequestKey:requestKey
-                                  private:NO
-                          completionBlock:completionBlock];
-}
+
 // upload new file
 - (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    dispatch_block_t block = ^{
-        
-        NSString *key = [[self xmppStream] generateUUID];
-        
-        [self requestUploadInfoWithRequestKey:key
-                                      private:YES
-                              completionBlock:completionBlock];
-        
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePrivateMessage completionBlock:completionBlock];
 }
-- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey
-                                private:(BOOL)privateMode
-                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+
+- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    if (!requestKey) return;
-    
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
             
+            NSString *requestKey = [[self xmppStream] generateUUID];
             [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
             
             /*
              <iq type="get" id="2115763">
-                <query xmlns="aft:mms" query_type="upload"></query>
+             <query xmlns="aft:mms" query_type="upload" type="1"></query>
              </iq>
              */
             
             NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
             [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
-            [queryElement addAttributeWithName:@"private" boolValue:privateMode];
+            [queryElement addAttributeWithName:@"type" unsignedIntegerValue:type];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             

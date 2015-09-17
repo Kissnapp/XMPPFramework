@@ -8,18 +8,24 @@
 
 #import <XMPPFramework/XMPPFramework.h>
 
+typedef NS_ENUM(NSUInteger, XMPPMmsRequestUploadType) {
+    XMPPMmsRequestUploadTypePublic = 1,
+    XMPPMmsRequestUploadTypePrivateMessage,
+    XMPPMmsRequestUploadTypePrivateFileLibrary
+};
+
 @interface XMPPMmsRequest : XMPPModule
 
 // privare upload new file
 - (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
-- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey
-                                private:(BOOL)privateMode
-                         completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 
 // public upload new file
 - (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
-- (void)requestPublicUploadInfoWithRequestKey:(NSString *)requestKey
-                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+
+
+- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+
 
 // upload exists file
 - (void)requestExistsUploadInfoWithFile:(NSString *)file
