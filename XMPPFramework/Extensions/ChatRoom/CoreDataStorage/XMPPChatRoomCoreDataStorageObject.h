@@ -9,22 +9,44 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+typedef NS_ENUM(NSUInteger, XMPPChatRoomType) {
+    XMPPChatRoomTypeDefault = 0,
+    XMPPChatRoomTypeWork,
+    XMPPChatRoomTypeEvent,
+    XMPPChatRoomTypeFileTransfer
+};
+
+typedef NS_ENUM(NSUInteger, XMPPChatRoomProgressType) {
+    XMPPChatRoomProgressTypeDuring,
+    XMPPChatRoomProgressTypeEnd
+};
 
 @interface XMPPChatRoomCoreDataStorageObject : NSManagedObject
 {
     NSString * jid;
     NSString * nickName;
-    UIImage  * photo;
+    NSString  * photo;
     NSString * streamBareJidStr;
     NSString * subscription;
     NSString * masterBareJidStr;
+    
+    NSNumber * type;
+    NSNumber * progressType;
+    NSDate * startTime;
+    NSDate * endTime;
 }
-@property (nonatomic, strong) NSString * jid;
-@property (nonatomic, strong) NSString * nickName;
-@property (nonatomic, strong) UIImage  * photo;
-@property (nonatomic, strong) NSString * streamBareJidStr;
-@property (nonatomic, strong) NSString * subscription;
-@property (nonatomic, strong) NSString * masterBareJidStr;
+@property (nonatomic, retain) NSString * jid;
+@property (nonatomic, retain) NSString * masterBareJidStr;
+@property (nonatomic, retain) NSString * nickName;
+@property (nonatomic, retain) NSString * photo;
+@property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, retain) NSString * subscription;
+
+@property (nonatomic, retain) NSNumber * type;
+@property (nonatomic, retain) NSDate * startTime;
+@property (nonatomic, retain) NSDate * endTime;
+@property (nonatomic, retain) NSNumber * progressType;
+@property (nonatomic, retain) NSString * orgId;
 /**
  *  Insert a new XMPPChatRoomCoreDataStorageObject into the CoraData System
  *
@@ -35,7 +57,7 @@
  *  @return YES,if succeed, NO for others
  */
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                           withID:(NSString *)id
+                           withID:(NSString *)chatRoomId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Insert a new XMPPChatRoomCoreDataStorageObject into the CoraData System
@@ -60,7 +82,7 @@
  *  @return YES,if succeed, NO for others
  */
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc
-                            withID:(NSString *)id
+                            withID:(NSString *)chatRoomId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Delete the chat room info Which info  is equal to the given info dictionary
@@ -111,7 +133,7 @@
  *  @return Fetched object,if succeed,nil for other cases
  */
 + (id)fetchObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                 withID:(NSString *)id
+                                 withID:(NSString *)chatRoomId
                        streamBareJidStr:(NSString *)streamBareJidStr;
 /**
  *  Fetch the XMPPChatRoomCoreDataStorageObject object from the CoreData system with room's jid
@@ -123,7 +145,7 @@
  *  @return XMPPChatRoomCoreDataStorageObject object,if succeed,nil for other cases
  */
 + (XMPPChatRoomCoreDataStorageObject *)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                                             withID:(NSString *)id
+                                                             withID:(NSString *)chatRoomId
                                                    streamBareJidStr:(NSString *)streamBareJidStr;
 
 /**

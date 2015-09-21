@@ -90,6 +90,10 @@
 - (void)requestServerAllSubPositionsWithOrgId:(NSString *)orgId
                               completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 查询自己可以添加的成员列表
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr;
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId;
+
 
 #pragma mark - 创建新的职位信息
 /**
@@ -162,6 +166,9 @@
 - (void)requestDBOrgDepartmentWithOrgId:(NSString *)orgId
                           relationOrgId:(NSString *)relationOrgId
                         completionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 查询成员列表
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId;
 
 #pragma mark - 按部门名称查询部门成员列表
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId 
@@ -248,6 +255,8 @@
 - (id)orgUsersWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (id)orgPhotoWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)subUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr xmppStream:(XMPPStream *)stream;
 
 - (id)usersInDepartmentWithDpName:(NSString *)dpName
                             orgId:(NSString *)orgId

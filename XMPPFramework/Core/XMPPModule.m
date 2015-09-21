@@ -43,6 +43,8 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 		moduleQueueTag = &moduleQueueTag;
 		dispatch_queue_set_specific(moduleQueue, moduleQueueTag, moduleQueueTag, NULL);
         
+        globalModuleQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        
         multicastDelegate = [[GCDMulticastDelegate alloc] init];
     
 	}
@@ -157,6 +159,11 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 - (dispatch_queue_t)moduleQueue
 {
 	return moduleQueue;
+}
+
+- (dispatch_queue_t)globalModuleQueue
+{
+    return globalModuleQueue;
 }
 
 - (void *)moduleQueueTag
@@ -321,7 +328,7 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:(message ? :@"") forKey:NSLocalizedDescriptionKey];
         NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",[self xmpp_module_error_domain]] code:[self xmpp_module_error_code] userInfo:userInfo];
         completionBlock(nil, error);
         

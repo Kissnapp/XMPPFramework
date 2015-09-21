@@ -118,4 +118,6 @@ streamBareJidStr:(NSString *)streamBareJidStr;
                                                          chatRoomJid:(NSString*)roomJid
                                                        streamBareJidStr:(NSString *)streamBareJidStr;
 
+- (void)updateWithDictionary:(NSDictionary *)Dic;
+
 @end

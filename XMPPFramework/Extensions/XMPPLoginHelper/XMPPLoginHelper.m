@@ -196,7 +196,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)deleteUserCurrentLoginUser
+- (void)deleteCurrentLoginUser
 {
     dispatch_block_t block = ^{
         [_xmppLoginHelperStorage deleteLoginUser];

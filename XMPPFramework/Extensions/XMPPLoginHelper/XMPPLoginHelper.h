@@ -29,7 +29,7 @@
 - (void)updateStreamBareJidStrWithPhoneNumber:(NSString *)phoneNumber;
 - (void)updateStreamBareJidStrWithEmailAddress:(NSString *)emailAddress;
 
-- (void)deleteUserCurrentLoginUser;
+- (void)deleteCurrentLoginUser;
 
 - (NSString *)streamBareJidStrForCurrentUser;
 
