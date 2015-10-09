@@ -14,6 +14,7 @@
 @dynamic bareJidStr;
 @dynamic streamBareJidStr;
 @dynamic unReadCount;
+@dynamic hasBeenEnd;
 
 #pragma mark -
 #pragma mark - Getter/Setters Methods
@@ -76,6 +77,26 @@
     [self willChangeValueForKey:@"lastChatTime"];
     [self setPrimitiveValue:value forKey:@"lastChatTime"];
     [self didChangeValueForKey:@"lastChatTime"];
+}
+
+- (NSNumber *)hasBeenEnd
+{
+    [self willAccessValueForKey:@"hasBeenEnd"];
+    NSNumber *value = [self primitiveValueForKey:@"hasBeenEnd"];
+    [self didAccessValueForKey:@"hasBeenEnd"];
+    return value;
+}
+
+- (void)setHasBeenEnd:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"hasBeenEnd"];
+    [self setPrimitiveValue:value forKey:@"hasBeenEnd"];
+    [self didChangeValueForKey:@"hasBeenEnd"];
+}
+
+- (void)awakeFromInsert
+{
+    self.hasBeenEnd = [NSNumber numberWithBool:NO];
 }
 
 #pragma mark -
