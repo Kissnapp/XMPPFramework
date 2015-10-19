@@ -212,7 +212,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             if (!file) {
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The upload file id can not been nil" forKey:NSLocalizedDescriptionKey];
                 NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-                completionBlock(nil,nil,nil,_error);
+                
+                dispatch_main_async_safe(^{
+                    completionBlock(nil,nil,nil,_error);
+                });
                 
                 return;
             }
@@ -276,7 +279,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             if (!file) {
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The download file id can not been nil" forKey:NSLocalizedDescriptionKey];
                 NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-                completionBlock(nil,_error);
+                
+                dispatch_main_async_safe(^{
+                    completionBlock(nil,_error);
+                });
                 
                 return;
             }
@@ -333,7 +339,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 UploadBlock uploadBlock = (UploadBlock)[dic objectForKey:requestKey];
                 
                 if (uploadBlock) {
-                    uploadBlock(nil, nil, nil, _error);
+                    dispatch_main_async_safe(^{
+                        uploadBlock(nil, nil, nil, _error);
+                    });
                 }
                 
                 
@@ -345,7 +353,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
                 if (downloadBlock) {
-                    downloadBlock(nil, _error);
+                    
+                    dispatch_main_async_safe(^{
+                        downloadBlock(nil, _error);
+                    });
                 }
                 
             }
@@ -378,7 +389,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
         if (uploadBlock) {
             
-            uploadBlock(nil,nil,nil, _error);
+            dispatch_main_async_safe(^{
+                uploadBlock(nil,nil,nil, _error);
+            });
             [uploadCompletionBlockDcitionary removeObjectForKey:key];
         }
         
@@ -389,7 +402,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
         
         if (downloadBlock) {
-            downloadBlock(nil, _error);
+            
+            dispatch_main_async_safe(^{
+                downloadBlock(nil, _error);
+            });
+
             [downloadCompletionBlockDcitionary removeObjectForKey:key];
         }
     }
@@ -464,7 +481,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 
                 if (uploadBlock) {
                     
-                    uploadBlock(token, file, expiration, nil);
+                    dispatch_main_async_safe(^{
+                        uploadBlock(token, file, expiration, nil);
+                    });
+                    
                     [uploadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
@@ -483,7 +503,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 
                 if (downloadBlock) {
                     
-                    downloadBlock([query stringValue], nil);
+                    dispatch_main_async_safe(^{
+                        downloadBlock([query stringValue], nil);
+                    });
+                    
                     [downloadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
@@ -512,7 +535,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         UploadBlock uploadBlock = (UploadBlock)obj;
         
         if (uploadBlock) {
-            uploadBlock(nil, nil, nil, _error);
+            dispatch_main_async_safe(^{
+                uploadBlock(nil, nil, nil, _error);
+            });
         }
         
     }];
@@ -524,7 +549,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         DownloadBlock downloadBlock = (DownloadBlock)[dic objectForKey:file];
         
         if (downloadBlock) {
-            downloadBlock(nil, _error);
+            dispatch_main_async_safe(^{
+                downloadBlock(nil, _error);
+            });
         }
         
     }];
