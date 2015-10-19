@@ -136,40 +136,37 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePublic completionBlock:completionBlock];
+}
+
 // upload new file
 - (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    dispatch_block_t block = ^{
-        
-        NSString *key = [[self xmppStream] generateUUID];
-        
-        [self requestUploadInfoWithRequestKey:key completionBlock:completionBlock];
-        
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePrivateMessage completionBlock:completionBlock];
 }
-- (void)requestUploadInfoWithRequestKey:(NSString *)requestKey completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+
+- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    if (!requestKey) return;
-    
     dispatch_block_t block = ^{@autoreleasepool{
         
         if ([self canSendRequest]) {
             
+            NSString *requestKey = [[self xmppStream] generateUUID];
             [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
             
             /*
              <iq type="get" id="2115763">
-                <query xmlns="aft:mms" query_type="upload"></query>
+             <query xmlns="aft:mms" query_type="upload" type="1"></query>
              </iq>
              */
             
             NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
             [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
+            [queryElement addAttributeWithName:@"type" unsignedIntegerValue:type];
             
             XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
             
@@ -215,7 +212,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             if (!file) {
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The upload file id can not been nil" forKey:NSLocalizedDescriptionKey];
                 NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-                completionBlock(nil,nil,nil,_error);
+                
+                dispatch_main_async_safe(^{
+                    completionBlock(nil,nil,nil,_error);
+                });
                 
                 return;
             }
@@ -279,7 +279,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             if (!file) {
                 NSDictionary *userInfo = [NSDictionary dictionaryWithObject:@"The download file id can not been nil" forKey:NSLocalizedDescriptionKey];
                 NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
-                completionBlock(nil,_error);
+                
+                dispatch_main_async_safe(^{
+                    completionBlock(nil,_error);
+                });
                 
                 return;
             }
@@ -336,7 +339,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 UploadBlock uploadBlock = (UploadBlock)[dic objectForKey:requestKey];
                 
                 if (uploadBlock) {
-                    uploadBlock(nil, nil, nil, _error);
+                    dispatch_main_async_safe(^{
+                        uploadBlock(nil, nil, nil, _error);
+                    });
                 }
                 
                 
@@ -348,7 +353,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
                 
                 if (downloadBlock) {
-                    downloadBlock(nil, _error);
+                    
+                    dispatch_main_async_safe(^{
+                        downloadBlock(nil, _error);
+                    });
                 }
                 
             }
@@ -381,7 +389,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
         if (uploadBlock) {
             
-            uploadBlock(nil,nil,nil, _error);
+            dispatch_main_async_safe(^{
+                uploadBlock(nil,nil,nil, _error);
+            });
             [uploadCompletionBlockDcitionary removeObjectForKey:key];
         }
         
@@ -392,7 +402,11 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         DownloadBlock downloadBlock = (DownloadBlock)[blockDic objectForKey:file];
         
         if (downloadBlock) {
-            downloadBlock(nil, _error);
+            
+            dispatch_main_async_safe(^{
+                downloadBlock(nil, _error);
+            });
+
             [downloadCompletionBlockDcitionary removeObjectForKey:key];
         }
     }
@@ -467,7 +481,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 
                 if (uploadBlock) {
                     
-                    uploadBlock(token, file, expiration, nil);
+                    dispatch_main_async_safe(^{
+                        uploadBlock(token, file, expiration, nil);
+                    });
+                    
                     [uploadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
@@ -486,7 +503,10 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 
                 if (downloadBlock) {
                     
-                    downloadBlock([query stringValue], nil);
+                    dispatch_main_async_safe(^{
+                        downloadBlock([query stringValue], nil);
+                    });
+                    
                     [downloadCompletionBlockDcitionary removeObjectForKey:key];
                 }
                 
@@ -515,7 +535,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         UploadBlock uploadBlock = (UploadBlock)obj;
         
         if (uploadBlock) {
-            uploadBlock(nil, nil, nil, _error);
+            dispatch_main_async_safe(^{
+                uploadBlock(nil, nil, nil, _error);
+            });
         }
         
     }];
@@ -527,7 +549,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         DownloadBlock downloadBlock = (DownloadBlock)[dic objectForKey:file];
         
         if (downloadBlock) {
-            downloadBlock(nil, _error);
+            dispatch_main_async_safe(^{
+                downloadBlock(nil, _error);
+            });
         }
         
     }];

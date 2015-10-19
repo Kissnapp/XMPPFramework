@@ -43,6 +43,9 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 		moduleQueueTag = &moduleQueueTag;
 		dispatch_queue_set_specific(moduleQueue, moduleQueueTag, moduleQueueTag, NULL);
         
+        mainQueue = dispatch_get_main_queue();
+        globalModuleQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        
         multicastDelegate = [[GCDMulticastDelegate alloc] init];
     
 	}
@@ -157,6 +160,16 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 - (dispatch_queue_t)moduleQueue
 {
 	return moduleQueue;
+}
+
+- (dispatch_queue_t)mainQueue
+{
+    return mainQueue;
+}
+
+- (dispatch_queue_t)globalModuleQueue
+{
+    return globalModuleQueue;
 }
 
 - (void *)moduleQueueTag
@@ -321,10 +334,12 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:(message ? :@"") forKey:NSLocalizedDescriptionKey];
         NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",[self xmpp_module_error_domain]] code:[self xmpp_module_error_code] userInfo:userInfo];
-        completionBlock(nil, error);
         
+        dispatch_main_async_safe(^{
+            completionBlock(nil, error);
+        });
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -340,7 +355,10 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:message forKey:NSLocalizedDescriptionKey];
     NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",[self xmpp_module_error_domain]] code:[self xmpp_module_error_code] userInfo:userInfo];
-    completionBlock(nil, error);
+    
+    dispatch_main_async_safe(^{
+        completionBlock(nil, error);
+    });
 }
 
 // call back with error info to who had used it
@@ -361,7 +379,10 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
             CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestKey];
             if (completionBlock != NULL ) {
                 
-                completionBlock(nil, _error);
+                //completionBlock(nil, _error);
+                dispatch_main_async_safe(^{
+                    completionBlock(nil, _error);
+                });
                 [dic removeObjectForKey:requestKey];
                 
             }
@@ -377,7 +398,10 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
     
     if (completionBlock != NULL ) {
         
-        completionBlock(valueObject, nil);
+        //completionBlock(valueObject, nil);
+        dispatch_main_async_safe(^{
+            completionBlock(valueObject, nil);
+        });
         [requestBlockDcitionary removeObjectForKey:requestkey];
     }
 }

@@ -705,7 +705,7 @@
 		E7AE677B19FFAC23008546EA /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		E7AE677C19FFAC23008546EA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E7C4DFA719D2AAB1000CB916 /* XMPPChatRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoom.h; sourceTree = "<group>"; };
-		E7C4DFA819D2AAB1000CB916 /* XMPPChatRoom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoom.m; sourceTree = "<group>"; };
+		E7C4DFA819D2AAB1000CB916 /* XMPPChatRoom.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 5; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoom.m; sourceTree = "<group>"; };
 		E7C4DFAC19D3A3D5000CB916 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		E7C4DFAD19D3A3D5000CB916 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomCoreDataStorageObject.h; sourceTree = "<group>"; };

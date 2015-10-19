@@ -16,6 +16,7 @@
 @property (nonatomic, retain) NSString * bareJidStr;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * unReadCount;
+@property (nonatomic, retain) NSNumber * hasBeenEnd;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDstr:(NSString *)jidStr

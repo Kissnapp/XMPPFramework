@@ -770,6 +770,45 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return allUsers;
 }
 
+- (id)subUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allUsers = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgUserCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        XMPPOrgUserCoreDataStorageObject *superUser = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                               orgId:orgId
+                                                                                                          userJidStr:superUserBareJidStr
+                                                                                                    streamBareJidStr:streamBareJidStr];
+        NSNumber *superLeft = superUser.userPtShip.ptLeft;
+        NSNumber *superRight = superUser.userPtShip.ptRight;
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr== %@ AND userPtShip.orgId == %@ AND userPtShip.ptLeft > %@ AND userPtShip.ptRight < %@",streamBareJidStr, orgId,superLeft,superRight];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        }
+    }];
+    
+    return allUsers;
+}
+
 - (id)usersInDepartmentWithDpName:(NSString *)dpName orgId:(NSString *)orgId ascending:(BOOL)ascending xmppStream:(XMPPStream *)stream
 {
     __block NSMutableArray *allUsers = [NSMutableArray array];

@@ -4,6 +4,21 @@
 
 #define XMPP_NOT_IN_MODULE_QUEUE NSAssert(dispatch_get_specific(moduleQueueTag),@"Invoked method (\"%@\") outside [\"%@\"] moduleQueue(Line:%d)",[NSString stringWithUTF8String:__func__],[self moduleName],__LINE__)
 
+#define dispatch_main_sync_safe(block)\
+if ([NSThread isMainThread]) {\
+    block();\
+} else {\
+    dispatch_sync(dispatch_get_main_queue(), block);\
+}
+
+#define dispatch_main_async_safe(block)\
+if ([NSThread isMainThread]) {\
+    block();\
+} else {\
+    dispatch_async(dispatch_get_main_queue(), block);\
+}
+
+
 typedef void(^CompletionBlock)(id data, NSError *error);
 
 @class XMPPStream;
@@ -23,6 +38,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
     XMPPStream *xmppStream;
     
     dispatch_queue_t moduleQueue;
+    dispatch_queue_t mainQueue;
+    dispatch_queue_t globalModuleQueue;
+    
     void *moduleQueueTag;
     
     id multicastDelegate;
@@ -33,6 +51,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 @property (readonly) dispatch_queue_t moduleQueue;
+@property (readonly) dispatch_queue_t mainQueue;
+@property (readonly) dispatch_queue_t globalModuleQueue;
+
 @property (readonly) void *moduleQueueTag;
 
 @property (strong, readonly) XMPPStream *xmppStream;

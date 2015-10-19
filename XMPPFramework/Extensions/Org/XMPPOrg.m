@@ -29,7 +29,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 static NSString *const ORG_REQUEST_XMLNS = @"aft:project";
 static NSString *const ORG_PUSH_MSG_XMLNS = @"aft:project";
-static NSString *const ORG_REQUEST_ERROR_XMLNS = @"aft:errors";
+static NSString *const ORG_REQUEST_ERROR_XMLNS = @"aft:error";
 
 static NSString *const REQUEST_ALL_ORG_KEY = @"request_all_org_key";
 static NSString *const REQUEST_ALL_TEMPLATE_KEY = @"request_all_template_key";
@@ -634,9 +634,13 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         id departMentArray = [_xmppOrgStorage orgDepartmentWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
         if ([departMentArray count] > 0) {
-            completionBlock(departMentArray, nil);
+            dispatch_main_async_safe(^{
+                completionBlock(departMentArray, nil);
+            });
         }else{
-            completionBlock(nil,nil);
+            dispatch_main_async_safe(^{
+                completionBlock(nil, nil);
+            });
             [self requestServerAllPositionListWithOrgId:orgId relationOrgId:relationOrgId];
             [self requestServerAllUserListWithOrgId:orgId relationOrgId:relationOrgId];
         }
@@ -663,8 +667,13 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
         
-        org ? completionBlock(org.orgName, nil) : [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
-        
+        if (org != nil) {
+            dispatch_main_async_safe(^{
+                completionBlock(org.orgName, nil);
+            });
+        }else{
+            [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+        }
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -683,8 +692,10 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationOrgId orgId:orgId xmppStream:xmppStream];
         
         if (relation != nil) {
-            
-            completionBlock(relation.relationOrgName, nil);
+    
+            dispatch_main_async_safe(^{
+                completionBlock(relation.relationOrgName, nil);
+            });
             
         }else{
             [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
@@ -708,7 +719,9 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         if (relation != nil) {
             
-            completionBlock(relation.relationPhoto, nil);
+            dispatch_main_async_safe(^{
+                completionBlock(relation.relationPhoto, nil);
+            });
             
         }else{
             [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
@@ -738,7 +751,13 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSArray *orgs = [_xmppOrgStorage allOrgsWithXMPPStream:xmppStream];
         
-        ([orgs count] > 0) ? completionBlock(orgs, nil) : [self _requestServerAllOrgListWithBlock:completionBlock];
+        if (orgs.count > 0) {
+            dispatch_main_async_safe(^{
+                completionBlock(orgs, nil);
+            });
+        }else{
+            [self _requestServerAllOrgListWithBlock:completionBlock];
+        }
         
     }};
     
@@ -874,8 +893,13 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSArray *templates = [_xmppOrgStorage allOrgTemplatesWithXMPPStream:xmppStream];
         
-        ([templates count] > 0) ? completionBlock(templates, nil) : [self _requestServerAllTemplatesWithBlock:completionBlock];
-        
+        if (templates.count > 0) {
+            dispatch_main_async_safe(^{
+                completionBlock(templates, nil);
+            });
+        }else{
+            [self _requestServerAllTemplatesWithBlock:completionBlock];
+        }
     }};
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -974,9 +998,15 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSArray *positions = [_xmppOrgStorage orgPositionsWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
-        ([positions count] > 0) ? completionBlock(positions, nil) : [self _requestServerAllPositionListWithOrgId:orgId
-                                                                                                   relationOrgId:relationOrgId
-                                                                                                 completionBlock:completionBlock];
+        if (positions.count > 0) {
+            dispatch_main_async_safe(^{
+                completionBlock(positions, nil);
+            });
+        }else{
+            [self _requestServerAllPositionListWithOrgId:orgId
+                                           relationOrgId:relationOrgId
+                                         completionBlock:completionBlock];
+        }
         
     }};
     
@@ -1069,9 +1099,15 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSArray *users = [_xmppOrgStorage orgUsersWithOrgId:(relationOrgId ? :orgId) xmppStream:xmppStream];
         
-        ([users count] > 0) ? completionBlock(users, nil) : [self _requestServerAllUserListWithOrgId:orgId
-                                                                                       relationOrgId:relationOrgId
-                                                                                     completionBlock:completionBlock];
+        if (users.count > 0) {
+            dispatch_main_async_safe(^{
+                completionBlock(users, nil);
+            });
+        }else{
+            [self _requestServerAllUserListWithOrgId:orgId
+                                       relationOrgId:relationOrgId
+                                     completionBlock:completionBlock];
+        }
         
     }};
     
@@ -1096,9 +1132,15 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         XMPPOrgRelationObject *relation = [_xmppOrgStorage relationOrgWithRelationId:relationId orgId:orgId xmppStream:xmppStream];
         
-        (relation) ? completionBlock(relation, nil) : [self _requestServerRelationOrgWithRelationId:relationId
-                                                                                              orgId:orgId
-                                                                                    completionBlock:completionBlock];
+        if (relation != nil) {
+            dispatch_main_async_safe(^{
+                completionBlock(relation, nil);
+            });
+        }else{
+            [self _requestServerRelationOrgWithRelationId:relationId
+                                                    orgId:orgId
+                                          completionBlock:completionBlock];
+        }
         
     }};
     
@@ -1275,8 +1317,14 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSArray *relations = [_xmppOrgStorage orgRelationsWithOrgId:orgId xmppStream:xmppStream];
         
-        ([relations count] > 0) ? completionBlock(relations, nil) : [self _requestServerAllRelationListWithOrgId:orgId
-                                                                                                 completionBlock:completionBlock];
+        if ([relations count] > 0) {
+            dispatch_main_async_safe(^{
+                completionBlock(relations, nil);
+            });
+        }else{
+            [self _requestServerAllRelationListWithOrgId:orgId
+                                         completionBlock:completionBlock];
+        }
         
     }};
     
@@ -1470,8 +1518,14 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         NSString *photo = [_xmppOrgStorage orgPhotoWithOrgId:orgId xmppStream:xmppStream];
         
-        (photo) ? completionBlock(photo, nil) : [self _requestDBOrgPhotoWithOrgId:orgId
-                                                                  completionBlock:completionBlock];
+        if (photo != nil) {
+            dispatch_main_async_safe(^{
+                completionBlock(photo, nil);
+            });
+        }else{
+            [self _requestDBOrgPhotoWithOrgId:orgId
+                              completionBlock:completionBlock];
+        }
         
     }};
     
@@ -1583,6 +1637,23 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 }
 
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId
+{
+    __block NSArray *users = nil;
+    
+    dispatch_block_t block = ^{
+        
+        users = [_xmppOrgStorage orgUsersWithOrgId:orgId xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return users;
+}
+
+- (id)requestDBAllUsersWithOrgId:(NSString *)orgId
                           dpName:(NSString *)dpName
                        ascending:(BOOL)ascending
 {
@@ -1626,6 +1697,28 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
     return positions;
 }
 
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId
+{
+    return [self requestDBAllSubUsersWithOrgId:orgId superUserBareJidStr:[[xmppStream myJID] bare]];
+}
+
+- (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr
+{
+    __block NSArray *users = nil;
+    
+    dispatch_block_t block = ^{
+        
+        users = [_xmppOrgStorage subUsersWithOrgId:orgId superUserBareJidStr:superUserBareJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return users;
+}
+
 - (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
                                    orgId:(NSString *)orgId
                          completionBlock:(CompletionBlock)completionBlock
@@ -1636,7 +1729,9 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                              orgId:orgId
                                                         xmppStream:xmppStream];
         
-        completionBlock(positions, nil);
+        dispatch_main_async_safe(^{
+            completionBlock(positions, nil);
+        });
         
     }};
     

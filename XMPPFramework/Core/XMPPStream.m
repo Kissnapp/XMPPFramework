@@ -3584,6 +3584,8 @@ enum XMPPStreamConfig
         
         if (state == STATE_XMPP_CONNECTED)
         {
+            NSLog(@"We Will Send A Element:%@",element.description);
+            
             [self sendElement:element withTag:TAG_XMPP_WRITE_STREAM];
         }
         else
