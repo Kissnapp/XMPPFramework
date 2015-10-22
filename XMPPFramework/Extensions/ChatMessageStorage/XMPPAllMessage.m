@@ -565,6 +565,39 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
+
+- (void)setAllSendingStateMessagesToFailureState
+{
+    dispatch_block_t block = ^{
+        [xmppMessageStorage setAllSendingStateMessagesToFailureStateWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)fetchAllSendingStateMessages:(CompletionBlock) completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        NSArray *allSendingStateMessages = [xmppMessageStorage allSendingStateMessagesWithXMPPStream:xmppStream];
+        
+        if (completionBlock != NULL) {
+            
+            dispatch_main_async_safe(^{
+                completionBlock(allSendingStateMessages, nil);
+            });
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
