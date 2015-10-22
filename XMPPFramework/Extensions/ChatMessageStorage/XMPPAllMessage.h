@@ -219,6 +219,10 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  */
 - (void)saveAndSendXMPPMessage:(XMPPMessage *)message;
 
+- (void)setAllSendingStateMessagesToFailureState;
+
+- (void)fetchAllSendingStateMessages:(CompletionBlock) completionBlock;
+
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
@@ -256,6 +260,10 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream;
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset xmppStream:(XMPPStream *)xmppStream;
 - (void)clearAllChatHistoryAndMessageWithXMPPStream:(XMPPStream *)xmppStream;
+
+- (void)setAllSendingStateMessagesToFailureStateWithXMPPStream:(XMPPStream *)stream;
+- (id)allSendingStateMessagesWithXMPPStream:(XMPPStream *)stream;
+
 @end
 
 
