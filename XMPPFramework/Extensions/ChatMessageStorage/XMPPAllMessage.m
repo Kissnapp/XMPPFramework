@@ -735,15 +735,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 
                 NSString *messageID = [message messageID];
                 [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceedType];
-                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:messageID];
                 
-//                double delayInSeconds = 1.0;
-//                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-//                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-//                    // code to be executed on the main queue after delay
-//                 
-//                    NSLog(@"1111");
-//                });
+                double delayInSeconds = 1.0;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                    
+                    // code to be executed on the main queue after delay
+                 
+                    XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:newMessage];
+                });
                 
             }
         }
@@ -772,9 +774,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             double delayInSeconds = 1.0;
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
             dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                
                 // code to be executed on the main queue after delay
-                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:messageID];
-                NSLog(@"1111");
+                
+                XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:newMessage];
             });
             
         }
