@@ -2,16 +2,14 @@
 //  XMPPCloudCoreDataStorageObject.h
 //  XMPP_Project
 //
-//  Created by jeff on 15/10/9.
+//  Created by jeff on 15/10/20.
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
 #import "XMPPManagedObject.h"
 
 typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
-    
     XMPPCloudCoreDataStorageObjectFolderTypeRoot = -1,
     XMPPCloudCoreDataStorageObjectFolderTypePublic,
     XMPPCloudCoreDataStorageObjectFolderTypePublicSub,
@@ -19,7 +17,6 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
     XMPPCloudCoreDataStorageObjectFolderTypePrivateFullShared,
     XMPPCloudCoreDataStorageObjectFolderTypePrivatePartShared,
     XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret
-    
 };
 
 @interface XMPPCloudCoreDataStorageObject : XMPPManagedObject
@@ -39,10 +36,11 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSDate * updateTime;
 @property (nonatomic, retain) NSString * versionCount;
 @property (nonatomic, retain) NSString * streamBareJidStr;
+@property (nonatomic, retain) NSNumber * folderIsMe;
 
-//+ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic orgID:(NSString *)orgID streamBareJidStr:(NSString *)streamBareJidStr;
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic;
-
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr;
 - (void)updateWithDic:(NSDictionary *)dic;
 
 @end

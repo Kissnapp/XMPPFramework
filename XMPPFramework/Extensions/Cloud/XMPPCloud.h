@@ -23,10 +23,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)initWithCloudStorage:(id <XMPPCloudStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 #pragma mark - 1.获取文件夹内容
-- (void)requestCloudFolderContentsWithFolder:(NSNumber *)folder projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
+- (void)requestCloudListFolderWithFolder:(NSNumber *)folder projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 #pragma mark - 2.创建文件夹
-- (void)requestCloudCreateFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
+- (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
 
 
 
@@ -187,6 +187,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @optional
 
 - (id)cloudFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream;
-- (void)insertCloudFolderDics:(NSArray *)folderDics cloudIDs:(NSArray *)cloudIDs projectID:(NSString *)projectID parent:(NSString *)parent xmppStream:(XMPPStream *)stream;
-
+- (void)insertCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream;
+- (void)deleteCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream;
 @end

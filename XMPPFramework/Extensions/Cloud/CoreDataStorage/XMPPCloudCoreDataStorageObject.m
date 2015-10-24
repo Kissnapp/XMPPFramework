@@ -2,7 +2,7 @@
 //  XMPPCloudCoreDataStorageObject.m
 //  XMPP_Project
 //
-//  Created by jeff on 15/10/9.
+//  Created by jeff on 15/10/20.
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
@@ -27,66 +27,181 @@
 @dynamic updateTime;
 @dynamic versionCount;
 @dynamic streamBareJidStr;
+@dynamic folderIsMe;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-- (NSMutableDictionary *)propertyTransformDictionary
-{
-    NSMutableDictionary *keysMapDic = [super propertyTransformDictionary];
-    return keysMapDic;
-}
+//- (NSMutableDictionary *)propertyTransformDictionary
+//{
+//    NSMutableDictionary *keysMapDic = [super propertyTransformDictionary];
+//    return keysMapDic;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - public Parameters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//- (NSString *)cloudID
-//{
-//    [self willAccessValueForKey:@"id"];
-//    NSString *value = [self primitiveValueForKey:@"id"];
-//    [self didAccessValueForKey:@"id"];
-//    return value;
-//}
-//- (void)setCloudID:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"id"];
-//    [self setPrimitiveValue:value forKey:@"id"];
-//    [self didChangeValueForKey:@"id"];
-//}
-//
-//
-//- (NSDate *)createTime
-//{
-//    [self willAccessValueForKey:@"Time"];
-//    NSDate *value = [self primitiveValueForKey:@"Time"];
-//    [self didAccessValueForKey:@"Time"];
-//    return value;
-//}
-//- (void)setCreateTime:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"Time"];
-//    [self setPrimitiveValue:value forKey:@"Time"];
-//    [self didChangeValueForKey:@"Time"];
-//}
-//
-//
-//- (NSString *)creator
-//{
-//    [self willAccessValueForKey:@"creator"];
-//    NSString *value = [self primitiveValueForKey:@"creator"];
-//    [self didAccessValueForKey:@"creator"];
-//    return value;
-//}
-//- (void)setCreator:(NSDate *)value
-//{
-//    [self willChangeValueForKey:@"creator"];
-//    [self setPrimitiveValue:value forKey:@"creator"];
-//    [self didChangeValueForKey:@"creator"];
-//}
-//
-//
+- (NSString *)cloudID
+{
+    [self willAccessValueForKey:@"cloudID"];
+    NSString *value = [self primitiveValueForKey:@"cloudID"];
+    [self didAccessValueForKey:@"cloudID"];
+    return value;
+}
+- (void)setCloudID:(NSString *)value
+{
+    [self willChangeValueForKey:@"cloudID"];
+    [self setPrimitiveValue:value forKey:@"cloudID"];
+    [self didChangeValueForKey:@"cloudID"];
+}
+
+- (NSDate *)createTime
+{
+    [self willAccessValueForKey:@"createTime"];
+    NSDate *value = [self primitiveValueForKey:@"createTime"];
+    [self didAccessValueForKey:@"createTime"];
+    return value;
+}
+- (void)setCreateTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"createTime"];
+    [self setPrimitiveValue:value forKey:@"createTime"];
+    [self didChangeValueForKey:@"createTime"];
+}
+
+
+- (NSString *)creator
+{
+    [self willAccessValueForKey:@"creator"];
+    NSString *value = [self primitiveValueForKey:@"creator"];
+    [self didAccessValueForKey:@"creator"];
+    return value;
+}
+- (void)setCreator:(NSString *)value
+{
+    [self willChangeValueForKey:@"creator"];
+    [self setPrimitiveValue:value forKey:@"creator"];
+    [self didChangeValueForKey:@"creator"];
+}
+
+
+- (NSNumber *)folderType
+{
+    [self willAccessValueForKey:@"folderType"];
+    NSNumber *value = [self primitiveValueForKey:@"folderType"];
+    [self didAccessValueForKey:@"folderType"];
+    return value;
+}
+- (void)setFolderType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"folderType"];
+    [self setPrimitiveValue:value forKey:@"folderType"];
+    [self didChangeValueForKey:@"folderType"];
+}
+
+- (NSString *)name
+{
+    [self willAccessValueForKey:@"name"];
+    NSString *value = [self primitiveValueForKey:@"name"];
+    [self didAccessValueForKey:@"name"];
+    return value;
+}
+- (void)setName:(NSString *)value
+{
+    [self willChangeValueForKey:@"name"];
+    [self setPrimitiveValue:value forKey:@"name"];
+    [self didChangeValueForKey:@"name"];
+}
+
+- (NSString *)owner
+{
+    [self willAccessValueForKey:@"owner"];
+    NSString *value = [self primitiveValueForKey:@"owner"];
+    [self didAccessValueForKey:@"owner"];
+    return value;
+}
+- (void)setOwner:(NSString *)value
+{
+    [self willChangeValueForKey:@"owner"];
+    [self setPrimitiveValue:value forKey:@"owner"];
+    [self didChangeValueForKey:@"owner"];
+}
+
+- (NSNumber *)parent
+{
+    [self willAccessValueForKey:@"parent"];
+    NSNumber *value = [self primitiveValueForKey:@"parent"];
+    [self didAccessValueForKey:@"parent"];
+    return value;
+}
+- (void)setParent:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"parent"];
+    [self setPrimitiveValue:value forKey:@"parent"];
+    [self didChangeValueForKey:@"parent"];
+}
+
+- (NSString *)project
+{
+    [self willAccessValueForKey:@"project"];
+    NSString *value = [self primitiveValueForKey:@"project"];
+    [self didAccessValueForKey:@"project"];
+    return value;
+}
+- (void)setProject:(NSString *)value
+{
+    [self willChangeValueForKey:@"project"];
+    [self setPrimitiveValue:value forKey:@"project"];
+    [self didChangeValueForKey:@"project"];
+}
+
+- (NSString *)streamBareJidStr
+{
+    [self willAccessValueForKey:@"streamBareJidStr"];
+    NSString *value = [self primitiveValueForKey:@"streamBareJidStr"];
+    [self didAccessValueForKey:@"streamBareJidStr"];
+    return value;
+}
+- (void)setStreamBareJidStr:(NSString *)value
+{
+    [self willChangeValueForKey:@"streamBareJidStr"];
+    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
+    [self didChangeValueForKey:@"streamBareJidStr"];
+}
+
+- (NSNumber *)folderOrFileType
+{
+    [self willAccessValueForKey:@"folderOrFileType"];
+    NSNumber *value = [self primitiveValueForKey:@"folderOrFileType"];
+    [self didAccessValueForKey:@"folderOrFileType"];
+    return value;
+}
+- (void)setFolderOrFileType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"folderOrFileType"];
+    [self setPrimitiveValue:value forKey:@"folderOrFileType"];
+    [self didChangeValueForKey:@"folderOrFileType"];
+}
+
+- (NSNumber *)folderIsMe
+{
+    [self willAccessValueForKey:@"folderIsMe"];
+    NSNumber *value = [self primitiveValueForKey:@"folderIsMe"];
+    [self didAccessValueForKey:@"folderIsMe"];
+    return value;
+}
+- (void)setFolderIsMe:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"folderIsMe"];
+    [self setPrimitiveValue:value forKey:@"folderIsMe"];
+    [self didChangeValueForKey:@"folderIsMe"];
+}
+
+
+
+
 //- (NSNumber *)download
 //{
 //    [self willAccessValueForKey:@"download"];
@@ -117,81 +232,6 @@
 //}
 //
 //
-//- (NSNumber *)folderType
-//{
-//    [self willAccessValueForKey:@"type"];
-//    NSNumber *value = [self primitiveValueForKey:@"type"];
-//    [self didAccessValueForKey:@"type"];
-//    return value;
-//}
-//- (void)setFolderType:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"type"];
-//    [self setPrimitiveValue:value forKey:@"type"];
-//    [self didChangeValueForKey:@"type"];
-//}
-//
-//
-//- (NSString *)name
-//{
-//    [self willAccessValueForKey:@"name"];
-//    NSString *value = [self primitiveValueForKey:@"name"];
-//    [self didAccessValueForKey:@"name"];
-//    return value;
-//}
-//- (void)setName:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"name"];
-//    [self setPrimitiveValue:value forKey:@"name"];
-//    [self didChangeValueForKey:@"name"];
-//}
-//
-//
-//- (NSString *)owner
-//{
-//    [self willAccessValueForKey:@"owner"];
-//    NSString *value = [self primitiveValueForKey:@"owner"];
-//    [self didAccessValueForKey:@"owner"];
-//    return value;
-//}
-//- (void)setOwner:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"owner"];
-//    [self setPrimitiveValue:value forKey:@"owner"];
-//    [self didChangeValueForKey:@"owner"];
-//}
-//
-//
-//- (NSNumber *)parent
-//{
-//    [self willAccessValueForKey:@"parent"];
-//    NSNumber *value = [self primitiveValueForKey:@"parent"];
-//    [self didAccessValueForKey:@"parent"];
-//    return value;
-//}
-//- (void)setParent:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"parent"];
-//    [self setPrimitiveValue:value forKey:@"parent"];
-//    [self didChangeValueForKey:@"parent"];
-//}
-//
-//
-//- (NSString *)project
-//{
-//    [self willAccessValueForKey:@"project"];
-//    NSString *value = [self primitiveValueForKey:@"project"];
-//    [self didAccessValueForKey:@"project"];
-//    return value;
-//}
-//- (void)setProject:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"project"];
-//    [self setPrimitiveValue:value forKey:@"project"];
-//    [self didChangeValueForKey:@"project"];
-//}
-//
-//
 //- (NSString *)size
 //{
 //    [self willAccessValueForKey:@"size"];
@@ -204,21 +244,6 @@
 //    [self willChangeValueForKey:@"size"];
 //    [self setPrimitiveValue:value forKey:@"size"];
 //    [self didChangeValueForKey:@"size"];
-//}
-//
-//
-//- (NSNumber *)folderOrFileType
-//{
-//    [self willAccessValueForKey:@"folderOrFileType"];
-//    NSNumber *value = [self primitiveValueForKey:@"folderOrFileType"];
-//    [self didAccessValueForKey:@"folderOrFileType"];
-//    return value;
-//}
-//- (void)setFolderOrFileType:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"folderOrFileType"];
-//    [self setPrimitiveValue:value forKey:@"folderOrFileType"];
-//    [self didChangeValueForKey:@"folderOrFileType"];
 //}
 //
 //
@@ -250,112 +275,74 @@
 //    [self setPrimitiveValue:value forKey:@"versionCount"];
 //    [self didChangeValueForKey:@"versionCount"];
 //}
-//
-//- (NSString *)streamBareJidStr
-//{
-//    [self willAccessValueForKey:@"streamBareJidStr"];
-//    NSString *value = [self primitiveValueForKey:@"streamBareJidStr"];
-//    [self didAccessValueForKey:@"streamBareJidStr"];
-//    return value;
-//}
-//- (void)setStreamBareJidStr:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"streamBareJidStr"];
-//    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
-//    [self didChangeValueForKey:@"streamBareJidStr"];
-//}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-//                             orgId:(NSString *)orgId
-//                           cloudID:(NSString *)cloudID
-//                  streamBareJidStr:(NSString *)streamBareJidStr
-//{
-//    if (orgId == nil) return nil;
-//    if (cloudID == nil) return nil;
-//    if (moc == nil) return nil;
-//    
-//    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPCloudCoreDataStorageObject" inManagedObjectContext:moc];
-//    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"orgId == %@ AND streamBareJidStr == %@ AND cloudID == %@", orgId, streamBareJidStr, cloudID];
-//    
-//    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-//    [fetchRequest setEntity:entity];
-//    [fetchRequest setPredicate:predicate];
-//    [fetchRequest setIncludesPendingChanges:YES];
-//    [fetchRequest setFetchLimit:1];
-//    
-//    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-//    
-//    return (XMPPCloudCoreDataStorageObject *)[results lastObject];
-//}
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (cloudID == nil) return NO;
+    if (moc == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    
+    XMPPCloudCoreDataStorageObject *deleteObject = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
+    if (deleteObject) {
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    return NO;
+}
 
-//+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-//                           withDic:(NSDictionary *)dic
-//                  streamBareJidStr:(NSString *)streamBareJidStr
-//{
-//    if (moc == nil) return nil;
-//    if (dic == nil) return nil;
-//    if (streamBareJidStr == nil) return nil;
-//
-//    NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-//    XMPPCloudCoreDataStorageObject *newCloud = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:moc];
-//    newCloud.streamBareJidStr = streamBareJidStr;
-//    [newCloud updateWithDic:dic];
-//    return newCloud;
-//}
-//
-//+ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic orgID:(NSString *)orgID streamBareJidStr:(NSString *)streamBareJidStr
-//{
-//    BOOL result = NO;
-//    if (moc == nil)  return result;
-//    
-//    NSString *tempOrgID = orgID ? : dic[@"orgID"];
-//    NSString *temCloudID = dic[@"cloudID"];
-//    
-//    if (tempOrgID == nil)  return result;
-//    if (temCloudID == nil)  return result;
-//    
-//    XMPPCloudCoreDataStorageObject *folder = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc orgId:tempOrgID cloudID:temCloudID streamBareJidStr:streamBareJidStr];
-//    if (folder) {
-//        [folder updateWithDic:dic];
-//        result = YES;
-//    } else {
-//        folder = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc withDic:dic streamBareJidStr:streamBareJidStr];
-//        result = YES;
-//    }
-//    return result;
-//}
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (cloudID == nil) return nil;
+    if (moc == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"cloudID == %@ AND streamBareJidStr == %@", cloudID, streamBareJidStr];
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    return (XMPPCloudCoreDataStorageObject *)[results lastObject];
+}
 
 
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc withDic:(NSDictionary *)dic
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
 {
     NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-    XMPPCloudCoreDataStorageObject *newOrg = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:moc];
-    [newOrg updateWithDic:dic];
-    return newOrg;
+    XMPPCloudCoreDataStorageObject *newCloud = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:moc];
+    newCloud.streamBareJidStr = streamBareJidStr;
+    [newCloud updateWithDic:dic];
+    return newCloud;
 }
 
 - (void)updateWithDic:(NSDictionary *)dic
 {
     NSString *tempCloudID = [dic objectForKey:@"id"];
-    NSString *tempCreateTime = [dic objectForKey:@"Time"];
+    NSString *tempCreateTime = [NSString stringWithFormat:@"%@", [dic objectForKey:@"Time"]];
     NSString *tempCreator = [dic objectForKey:@"creator"];
     NSNumber *tempFolderType = [NSNumber numberWithInteger:[[dic objectForKey:@"type"] integerValue]];
-    NSString *tempName = [dic objectForKey:@"name"];
+    NSString *tempName = [NSString stringWithFormat:@"%@", [dic objectForKey:@"name"]];
     NSString *tempOwner = [dic objectForKey:@"owner"];
     NSNumber *tempParent = [NSNumber numberWithInteger:[[dic objectForKey:@"parent"] integerValue]];
     NSString *tempProject = [dic objectForKey:@"project"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
+    NSNumber *tempFolderOrFileType = [NSNumber numberWithInteger:[[dic objectForKey:@"folderOrFileType"] integerValue]];
+    NSNumber *tempFolderIsMe = [NSNumber numberWithInteger:[[dic objectForKey:@"folderIsMe"] integerValue]];
     
-//    NSNumber *tempFolderOrFileType = [NSNumber numberWithInteger:[[dic objectForKey:@"folderOrFileType"] boolValue]];
-//    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
-//    NSString *tempVersionCount = [dic objectForKey:@"versionCount"];
-//    NSString *tempFileID = [dic objectForKey:@"fileID"];
-//    NSNumber *tempDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"download"] boolValue]];
+    //    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
+    //    NSString *tempVersionCount = [dic objectForKey:@"versionCount"];
+    //    NSString *tempFileID = [dic objectForKey:@"fileID"];
+    //    NSNumber *tempDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"download"] boolValue]];
     
     
     if (tempCloudID)            self.cloudID = tempCloudID;
@@ -367,12 +354,14 @@
     if (tempParent)             self.parent = tempParent;
     if (tempProject)            self.project = tempProject;
     if (tempStreamBareJidStr)   self.streamBareJidStr = tempStreamBareJidStr;
+    if (tempFolderOrFileType)   self.folderOrFileType = tempFolderOrFileType;
+    if (tempFolderIsMe)         self.folderIsMe = tempFolderIsMe;;
     
-//    if (tempVersionCount)       self.versionCount = tempVersionCount;
-//    if (tempDownload)           self.download = tempDownload;
-//    if (tempFileID)             self.fileID = tempFileID;
-//    if (tempFolderOrFileType)   self.folderOrFileType = tempFolderOrFileType;
-//    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
+    
+    //    if (tempVersionCount)       self.versionCount = tempVersionCount;
+    //    if (tempDownload)           self.download = tempDownload;
+    //    if (tempFileID)             self.fileID = tempFileID;
+    //    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
 }
 
 @end

@@ -2,7 +2,7 @@
 //  XMPPCloudCoreDataStorage.m
 //  XMPP_Project
 //
-//  Created by jeff on 15/9/22.
+//  Created by jeff on 15/10/20.
 //  Copyright (c) 2015年 Peter Lee. All rights reserved.
 //
 
@@ -14,10 +14,11 @@
 NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
 @interface XMPPCloudCoreDataStorage () <XMPPCloudStorage>
-
+@property (nonatomic, assign) int index;
 @end
 
 @implementation XMPPCloudCoreDataStorage
+
 
 static XMPPCloudCoreDataStorage *sharedInstance;
 
@@ -63,40 +64,56 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 
-- (void)insertCloudFolderDics:(NSArray *)folderDics cloudIDs:(NSArray *)cloudIDs projectID:(NSString *)projectID parent:(NSString *)parent xmppStream:(XMPPStream *)stream
+
+- (void)deleteCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream
 {
-    __block NSArray *allUsers = nil;
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        if (!streamBareJidStr) return;
+        if (!moc) return;
+        if (!serverDatas.count) return;
+        
+        NSDictionary *serverDic = [serverDatas firstObject];
+        NSString *cloudID = [serverDic objectForKey:@"id"];
+        
+        [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
+    }];
+}
+
+
+
+- (void)insertCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream
+{
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
         
         if (!streamBareJidStr) return;
-        if (!projectID) return;
-        if (!parent) return;
         if (!moc) return;
+        if (!serverDatas.count) return;
+        
         
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
+
+        NSDictionary *serverDic = [serverDatas firstObject];
+        NSString *projectID = [serverDic objectForKey:@"project"];
+        NSString *parent = [serverDic objectForKey:@"parent"];
         
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND (cloudID IN %@)",streamBareJidStr, projectID, parent, cloudIDs];
-        [fetchRequest setPredicate:predicate];
-//        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
-        
-        for ( NSDictionary *dic in folderDics ) {
-            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-            [dicM setObject:projectID forKey:@"project"];
-            [dicM setObject:parent forKey:@"parent"];
-            if ([parent isEqualToString:@"-1"]) {
-                [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderOrFileType"];
-            } else if (0) {
-                
+        for ( NSDictionary *dic in serverDatas ) {
+            NSString *cloudID = [dic objectForKey:@"id"];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID == %@", streamBareJidStr, projectID, parent, cloudID];
+            [fetchRequest setPredicate:predicate];
+            NSArray *array = [moc executeFetchRequest:fetchRequest error:nil];
+            
+            if ( !array.count ) {
+                [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
             }
-            [dicM setObject:streamBareJidStr forKey:@"streamBareJidStr"];
-            [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc withDic:dicM];
-            [self save];
         }
     }];
 }
@@ -116,14 +133,18 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        int tempIndex = 9;
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID.intValue <= %d",streamBareJidStr, projectID, parent, tempIndex];
+        NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:NO];
+        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd, nil];
+        [fetchRequest setPredicate:predicate];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@",streamBareJidStr, projectID, parent];
-        [fetchRequest setPredicate:predicate];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        
         allUsers = [moc executeFetchRequest:fetchRequest error:nil];
     }];
     return allUsers;
 }
-
 
 @end

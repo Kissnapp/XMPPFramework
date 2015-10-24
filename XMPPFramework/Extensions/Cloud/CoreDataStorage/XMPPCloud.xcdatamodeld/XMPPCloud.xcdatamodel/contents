@@ -4,9 +4,10 @@
         <attribute name="cloudID" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="createTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="creator" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="download" optional="YES" attributeType="Boolean" defaultValueString="0" syncable="YES"/>
+        <attribute name="download" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="fileID" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="folderOrFileType" optional="YES" attributeType="Boolean" defaultValueString="0" syncable="YES"/>
+        <attribute name="folderIsMe" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="folderOrFileType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="owner" optional="YES" attributeType="String" syncable="YES"/>
@@ -18,6 +19,6 @@
         <attribute name="versionCount" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPCloudCoreDataStorageObject" positionX="-4842" positionY="-1125" width="128" height="270"/>
+        <element name="XMPPCloudCoreDataStorageObject" positionX="-54" positionY="-9" width="128" height="285"/>
     </elements>
 </model>
