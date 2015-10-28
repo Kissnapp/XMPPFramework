@@ -565,6 +565,39 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
+
+- (void)setAllSendingStateMessagesToFailureState
+{
+    dispatch_block_t block = ^{
+        [xmppMessageStorage setAllSendingStateMessagesToFailureStateWithXMPPStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)fetchAllSendingStateMessages:(CompletionBlock) completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        NSArray *allSendingStateMessages = [xmppMessageStorage allSendingStateMessagesWithXMPPStream:xmppStream];
+        
+        if (completionBlock != NULL) {
+            
+            dispatch_main_async_safe(^{
+                completionBlock(allSendingStateMessages, nil);
+            });
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -695,31 +728,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     XMPPLogTrace();
     // Asynchronous operation (if outside xmppQueue)
     
-    dispatch_block_t block = ^{
-        @autoreleasepool{
+    if ([message isChatMessageWithInfo]) {
+        
+        NSString *messageID = [message messageID];
+        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceedType];
+        
+        double delayInSeconds = 1.0;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
             
-            if ([message isChatMessageWithInfo]) {
-                
-                NSString *messageID = [message messageID];
-                [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceedType];
-                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:messageID];
-                
-//                double delayInSeconds = 1.0;
-//                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-//                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-//                    // code to be executed on the main queue after delay
-//                 
-//                    NSLog(@"1111");
-//                });
-                
-            }
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+            // code to be executed on the main queue after delay
+            
+            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:newMessage];
+        });
+        
+    }
     
 }
 
@@ -729,52 +754,101 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     XMPPLogTrace();
     
-    dispatch_block_t block = ^{
-        if ([message isChatMessageWithInfo]) {
+    if ([message isChatMessageWithInfo]) {
+        
+        NSString *messageID = [message messageID];
+        
+        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailedType];
+        
+        double delayInSeconds = 1.0;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
             
-            NSString *messageID = [message messageID];
+            // code to be executed on the main queue after delay
             
-            [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailedType];
-     
-            double delayInSeconds = 1.0;
-            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-                // code to be executed on the main queue after delay
-                [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:messageID];
-                NSLog(@"1111");
-            });
+            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
             
-        }
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-
+            [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:newMessage];
+        });
+        
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
     XMPPLogTrace();
     
-    dispatch_block_t block = ^{
+    if ([message isChatMessageWithInfo]) {
         
-        if ([message isChatMessageWithInfo]) {
+        //save the message
+        XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+        
+        if (newMessage.messageType == XMPPExtendMessageAudioType) {
             
-            //save the message
-            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+            __weak typeof(self) weakSelf = self;
+            
+            dispatch_async(globalModuleQueue, ^{
+                
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                
+                NSData *fileData = newMessage.audio.fileData;
+                NSString *filePath = [strongSelf filePathWithName:newMessage.audio.fileName];
+                if (fileData.length > 0 &&
+                    [fileData writeToFile:filePath atomically:YES]) {
+                    newMessage.audio.fileData = nil;
+                    newMessage.audio.filePath = filePath;
+                    
+                    dispatch_block_t block = ^{
+                        
+                        [strongSelf saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
+                        [multicastDelegate xmppAllMessage:strongSelf didReceiveXMPPMessage:message];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
+                    };
+                    
+                    if (dispatch_get_specific(moduleQueueTag))
+                        block();
+                    else
+                        dispatch_async(moduleQueue, block);
+                }
+            });
+            
+        }else{
             [self saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:message];
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
-            
         }
+        
+    }
+}
+
+- (NSString *)filePathWithName:(NSString *)fileName
+{
+    __block NSString *name = nil;
+    
+    dispatch_block_t block = ^{
+        
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectory = [paths objectAtIndex:0];
+        
+        NSString *voiceDirectory = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",[[xmppStream myJID] user],@"voice"]];
+        
+        if (![[NSFileManager defaultManager] fileExistsAtPath:voiceDirectory]) {
+            [[NSFileManager defaultManager] createDirectoryAtPath:voiceDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
+        }
+        
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat: @"yyyyMMdd_HHmmss_SSS"];
+        
+       name = [voiceDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.spx", [dateFormatter stringFromDate:[NSDate date]]]];
+        
     };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
-        dispatch_async(moduleQueue, block);
+        dispatch_sync(moduleQueue, block);
+    
+    return name;
 }
 
 @end

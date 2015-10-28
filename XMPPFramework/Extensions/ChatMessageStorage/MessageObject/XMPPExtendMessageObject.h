@@ -99,7 +99,15 @@ typedef NS_ENUM(NSInteger, XMPPMessageSendStatusType)
 - (instancetype)initWithXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject;
 - (instancetype)initWithXMPPMessage:(XMPPMessage *)message  sendFromMe:(BOOL)sendFromMe hasBeenRead:(BOOL)hasBeenRead;
 
-- (instancetype)initWithFromUser:(NSString *)fromUser toUser:(NSString *)toUser type:(XMPPExtendMessageType)type sendFromMe:(BOOL)sendFromMe hasBeenRead:(NSInteger)hasBeenRead groupChat:(BOOL)groupChat sender:(NSString *)sender time:(NSDate *)time subObject:(id)subObject;
+- (instancetype)initWithFromUser:(NSString *)fromUser
+                          toUser:(NSString *)toUser
+                            type:(XMPPExtendMessageType)type
+                      sendFromMe:(BOOL)sendFromMe
+                     hasBeenRead:(NSInteger)hasBeenRead
+                       groupChat:(BOOL)groupChat
+                          sender:(NSString *)sender
+                            time:(NSDate *)time
+                       subObject:(id)subObject;
 
 /**
  *  Create the message id,we must do this before send this message
