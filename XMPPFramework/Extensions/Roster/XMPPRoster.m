@@ -853,16 +853,18 @@ enum XMPPRosterFlags
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)handleFetchRosterQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
-    
+- (void)handleFetchRosterQueryIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
     dispatch_block_t block = ^{ @autoreleasepool {
+        
+        if (iq == nil) return;
         
         NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
         
 		BOOL hasRoster = [self hasRoster];
 		
-		if (!hasRoster)
-		{
+		if (query && !hasRoster){
+            
             [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
             [self _setPopulatingRoster:YES];
             [multicastDelegate xmppRosterDidBeginPopulating:self];
@@ -874,8 +876,8 @@ enum XMPPRosterFlags
         
         [self _addRosterItems:items version:version];
 		
-		if (!hasRoster)
-		{
+		if (query && !hasRoster){
+            
 			// We should have our roster now
 			
 			[self _setHasRoster:YES];
@@ -885,8 +887,7 @@ enum XMPPRosterFlags
 			
 			// Process any premature presence elements we received.
 			
-			for (XMPPPresence *presence in earlyPresenceElements)
-			{
+			for (XMPPPresence *presence in earlyPresenceElements){
 				[self xmppStream:xmppStream didReceivePresence:presence];
 			}
             
