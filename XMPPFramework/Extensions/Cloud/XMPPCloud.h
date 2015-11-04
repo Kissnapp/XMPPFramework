@@ -28,29 +28,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 2.创建文件夹
 - (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
 
-
-
 #pragma mark - 3.添加文件
-/**
- 
- <iq type="set" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="add_file">
- {"parent":"", "name":"xxx", "uuid":"xxx", "size":"xxx"}  %% parent value empty mean self folder not exist.  jid same with mms's store jid.
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library" subtype="add_file">
- {"parent":"xxx", "files":[]}
- </query>
- </iq>
- 
- note(2, 3):如果在私人文件夹内创建文件夹或添加文件，个人文件夹还未创立，parent设为""，
- 服务器会根据""，如果没有创建去创建它，创建的id号在parent属性里，客户端根据此parent去更新一下本地,
- 如果有，则不用创建个人文件夹。
- 
- */
-
+- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSData *)size uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 4.删除文件夹/删除文件

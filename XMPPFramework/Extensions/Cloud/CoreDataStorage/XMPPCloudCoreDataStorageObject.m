@@ -288,31 +288,69 @@
     if (moc == nil) return NO;
     if (streamBareJidStr == nil) return NO;
     
-    XMPPCloudCoreDataStorageObject *deleteObject = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
-    if (deleteObject) {
-        [moc deleteObject:deleteObject];
-        return YES;
-    }
+//    XMPPCloudCoreDataStorageObject *deleteObject = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
+//    if (deleteObject) {
+//        [moc deleteObject:deleteObject];
+//        return YES;
+//    }
     return NO;
 }
 
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr
++ (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
+{
+    BOOL result = NO;
+    if (!dic) return result;
+    
+    NSString *cloudID = [dic objectForKey:@"id"];
+    NSString *projectID = [dic objectForKey:@"project"];
+    NSString *parent = [dic objectForKey:@"parent"];
+    if (!cloudID)  return result;
+    if (!projectID) return result;
+    if (!parent) return result;
+    
+    XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID projectID:projectID parent:parent streamBareJidStr:streamBareJidStr];
+    if (newCloud) {
+        [newCloud updateWithDic:dic];
+        result = YES;
+    } else {
+        XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
+        NSLog(@"newCloud = %@", newCloud);
+        result = YES;
+    }
+    return result;
+}
+
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID projectID:(NSString *)projectID parent:(NSString *)parent streamBareJidStr:(NSString *)streamBareJidStr
 {
     if (cloudID == nil) return nil;
     if (moc == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     
+    //        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    //        [fetchRequest setEntity:entity];
+    //        [fetchRequest setFetchBatchSize:saveThreshold];
+    //
+    //        for ( NSDictionary *dic in serverDatas ) {
+    //            NSString *cloudID = [dic objectForKey:@"id"];
+    //            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID == %@", streamBareJidStr, projectID, parent, cloudID];
+    //            [fetchRequest setPredicate:predicate];
+    //            NSArray *array = [moc executeFetchRequest:fetchRequest error:nil];
+    //
+    //            if ( !array.count ) {
+    //                [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
+    //            }
+    //        }
+    
     NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"cloudID == %@ AND streamBareJidStr == %@", cloudID, streamBareJidStr];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID == %@", streamBareJidStr, projectID, parent, cloudID];
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
     [fetchRequest setPredicate:predicate];
-    [fetchRequest setIncludesPendingChanges:YES];
     [fetchRequest setFetchLimit:1];
     
     NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-    return (XMPPCloudCoreDataStorageObject *)[results lastObject];
+    return (XMPPCloudCoreDataStorageObject *)[results firstObject];
 }
 
 
@@ -324,6 +362,7 @@
     [newCloud updateWithDic:dic];
     return newCloud;
 }
+
 
 - (void)updateWithDic:(NSDictionary *)dic
 {

@@ -95,16 +95,19 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         if (!moc) return;
         if (!serverDatas.count) return;
         
+//        for ( NSDictionary *dic in serverDatas ) {
+//            [XMPPCloudCoreDataStorageObject updateInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
+//        }
+        
+        NSDictionary *serverDic = [serverDatas firstObject];
+        NSString *projectID = [serverDic objectForKey:@"project"];
+        NSString *parent = [serverDic objectForKey:@"parent"];
         
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
 
-        NSDictionary *serverDic = [serverDatas firstObject];
-        NSString *projectID = [serverDic objectForKey:@"project"];
-        NSString *parent = [serverDic objectForKey:@"parent"];
-        
         for ( NSDictionary *dic in serverDatas ) {
             NSString *cloudID = [dic objectForKey:@"id"];
             NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID == %@", streamBareJidStr, projectID, parent, cloudID];
@@ -125,6 +128,17 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
+//            NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+//            NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+//            NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+//            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"project == %@ AND parent == %@", projectID, parent];
+//            NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:NO];
+//        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd, nil];
+//            [fetchRequest setPredicate:predicate];
+//            [fetchRequest setEntity:entity];
+//            [fetchRequest setSortDescriptors:sortDescriptors];
+//        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+//        NSLog(@"allUser----- %@", allUsers);
         NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
         if (!projectID) return;
         if (!parent) return;
