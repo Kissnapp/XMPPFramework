@@ -116,39 +116,173 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 #pragma mark - 处理服务器返回的数据
 
-#pragma mark - 1.处理获取文件夹内容
+#pragma mark - 1.处理获取文件夹内容 OK
 - (void)handleCloudListFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
-    
     NSArray *serverDatas = [self _handleCloudListFolderDatasWithDicDatas:dicDatas projectID:projectID];
     
-    [_xmppCloudStorage insertCloudDatas:serverDatas xmppStream:xmppStream];
+    for ( NSDictionary *dicDatas in serverDatas ) {
+        [_xmppCloudStorage insertCloudDatas:dicDatas xmppStream:xmppStream];
+    }
+    
 }
 
 - (NSArray *)_handleCloudListFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
 {
     /**
+     
+     <iq xmlns="jabber:client" from="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38" to="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38/mobile" id="E6BAD382-E91A-46DB-8F2C-DEA478BA8FF4" type="result">
+        <query xmlns="aft:library" subtype="list_folder" project="469">
+            {"parent":"-1", "folder":[{"id":"83", "type":"2", "name":"", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-05 16:47:24"},{"id":"60", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-11-04 16:14:05"},{"id":"56", "type":"0", "name":"资料归档", "creator":"admin", "owner":"admin", "Time":"2015-11-04 16:09:52"},{"id":"55", "type":"0", "name":"资料库", "creator":"admin", "owner":"admin", "Time":"2015-11-04 16:09:52"},{"id":"54", "type":"0", "name":"工作文件", "creator":"admin", "owner":"admin", "Time":"2015-11-04 16:09:52"}], "file":[]}
+        </query>
+     </iq>
+     
      {"parent":"-1", 
      "folder":[{"id":"10", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"},
      {"id":"9", "type":"0", "name":"资料归档", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
      {"id":"8", "type":"0", "name":"资料库", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
      {"id":"7", "type":"0", "name":"工作文件", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"}], 
      "file":[]}
+     客户端检查一下type=2的项，有没有owner=self jid，如果没有，显示一个自己的文件夹
      
      */
     NSString *myJidStr = [[xmppStream myJID] bare];
     NSString *parent = [dicDatas objectForKey:@"parent"];
     NSArray *folders = [dicDatas objectForKey:@"folder"];
     NSArray *files = [dicDatas objectForKey:@"file"];
-    
     NSMutableArray *arrayM = [NSMutableArray array];
-    for ( NSDictionary *dic in folders ) {
-        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-        [dicM setObject:projectID forKey:@"project"];
+    
+    
+    // 一.在root目录下
+    if ([parent isEqualToString:@"-1"]) {
+        
+        int count = 0;
+        
+        for ( NSDictionary *dic in folders ) {
+            // 1.判断是否有自己的私人文件夹
+            NSString *creator = [dic objectForKey:@"creator"];
+            NSString *owner = [dic objectForKey:@"owner"];
+            NSString *type = [dic objectForKey:@"type"];
+            NSString *name = [dic objectForKey:@"name"];
+            if ( [type isEqualToString:@"2"] &&
+                 [creator isEqualToString:myJidStr] &&
+                 [owner isEqualToString:myJidStr] &&
+                 [name isEqualToString:@""] ) {
+                count++;
+            }
+            
+            // 2.添加到新的字典 (服务器返回数据需要处理)
+            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+            [dicM setObject:projectID forKey:@"project"];
+            [dicM setObject:parent forKey:@"parent"];
+            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+            if ( [creator isEqualToString:myJidStr] ) {
+                [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+            } else {
+                [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+            }
+            [arrayM addObject:dicM];
+        }
+        
+        
+        // 3.处理有没有自己的私人文件夹
+        
+        // 3.1没有自己的私人文件夹 (需要创建一个属于自己的字典作为自己的私人文件夹)
+        if (count == 0) {
+            NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+            [dicM setObject:projectID forKey:@"project"];
+            [dicM setObject:parent forKey:@"parent"];
+            [dicM setObject:@"工作" forKey:@"name"];
+            [dicM setObject:@"" forKey:@"id"];
+            [dicM setObject:myJidStr forKey:@"owner"];
+            [dicM setObject:myJidStr forKey:@"creator"];
+            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+            [arrayM addObject:dicM];
+        }
+        // 3.2有自己的私人文件夹 (无需处理，已添加)
+        else {
+            
+        }
+    }
+    
+    
+    // 二. 不在root目录下的请求
+    else {
+        
+        // 1.添加folders到新的字典
+        for ( NSDictionary *dic in folders ) {
+            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+            [dicM setObject:projectID forKey:@"project"];
+            [dicM setObject:parent forKey:@"parent"];
+            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+            NSString *creator = [dic objectForKey:@"creator"];
+            if ( [creator isEqualToString:myJidStr] ) {
+                [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+            } else {
+                [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+            }
+            [arrayM addObject:dicM];
+        }
+        
+        /**
+         // 公共文件夹/子文件夹
+         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="4FB8B9C3-BB8A-4527-AF80-BC3FF05CEDC1" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"9", "folder":[{"id":"27", "type":"1", "name":"尼克", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 15:36:29"},{"id":"24", "type":"1", "name":"星期", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 11:19:35"},{"id":"22", "type":"1", "name":"心情", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 10:58:42"}], "file":[]}</query></iq>
+         // 私人文件夹
+         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="EF25643B-BD84-483C-BAF1-8476DA63E8D6" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"10", "folder":[{"id":"21", "type":"3", "name":"星期天", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-16 13:28:21"},{"id":"11", "type":"5", "name":"通讯录", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"}], "file":[]}</query></iq>
+         */
+        
+        // 2.添加files到新的字典
+        for ( NSDictionary *dic in files ) {
+            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+            [dicM setObject:projectID forKey:@"project"];
+            [dicM setObject:parent forKey:@"parent"];
+            [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
+            [arrayM addObject:dicM];
+        }
+    }
+    
+    return [NSArray arrayWithArray:arrayM];
+}
+
+
+#pragma mark 2.处理创建文件夹数据
+- (void)handleCloudAddFolderDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    NSArray *serverDatas = [self _handleCloudAddFolderDatasWithArrDatas:arrDatas projectID:projectID];
+    
+    for ( NSDictionary *dic in serverDatas ) {
+        [_xmppCloudStorage insertCloudDatas:dic xmppStream:xmppStream];
+    }
+}
+
+- (NSArray *)_handleCloudAddFolderDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID
+{
+    /**
+     // 1.没有私人文件夹id
+     [{"parent":"-1", "folder":[{"id":"199", "type":"2", "name":"", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 14:48:44"}]}, 
+     {"parent":"199", "folder":[{"id":"200", "type":"3", "name":"他哥哥", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38","owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 14:48:44"}]}]
+     // 2.有私人文件夹id
+     [{"parent":"189", "folder":[{"id":"191", "type":"3", "name":"断喉弩","creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","Time":"2015-11-07 12:58:16"}]}]
+     */
+    
+    NSString *myJidStr = [[xmppStream myJID] bare];
+    NSMutableArray *arrayM = [NSMutableArray array];
+    for ( NSDictionary *dic in arrDatas ) {
+        NSString *parent = [dic objectForKey:@"parent"];
+        NSArray *folders = [dic objectForKey:@"folder"];
+        
+        // 添加到新的字典
+        NSDictionary *folderDic = [folders firstObject];
+        NSString *creator = [folderDic objectForKey:@"creator"];
+        
+        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:folderDic];
         [dicM setObject:parent forKey:@"parent"];
+        [dicM setObject:projectID forKey:@"project"];
         [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
-        NSString *creator = [dic objectForKey:@"creator"];
         if ( [creator isEqualToString:myJidStr] ) {
             [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
         } else {
@@ -156,115 +290,68 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         }
         [arrayM addObject:dicM];
     }
-    
-    /**
-     // 公共文件夹/子文件夹
-     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="4FB8B9C3-BB8A-4527-AF80-BC3FF05CEDC1" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"9", "folder":[{"id":"27", "type":"1", "name":"尼克", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 15:36:29"},{"id":"24", "type":"1", "name":"星期", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 11:19:35"},{"id":"22", "type":"1", "name":"心情", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 10:58:42"}], "file":[]}</query></iq>
-     // 私人文件夹
-     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="EF25643B-BD84-483C-BAF1-8476DA63E8D6" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"10", "folder":[{"id":"21", "type":"3", "name":"星期天", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-16 13:28:21"},{"id":"11", "type":"5", "name":"通讯录", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"}], "file":[]}</query></iq>
-     */
-    for ( NSDictionary *dic in files ) {
-        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-        [dicM setObject:projectID forKey:@"project"];
-        [dicM setObject:parent forKey:@"parent"];
-        [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
-        [arrayM addObject:dicM];
-    }
     return [NSArray arrayWithArray:arrayM];
 }
 
-#pragma mark 2.处理创建文件夹数据
-- (void)handleCloudAddFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+- (NSString *)getPrivateOwnFolderCloudIDWithArr:(NSArray *)arr
 {
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    NSArray *serverDatas = [self _handleCloudAddFolderDatasWithDicDatas:dicDatas projectID:projectID];
-    
-    [_xmppCloudStorage insertCloudDatas:serverDatas xmppStream:xmppStream];
-}
-
-- (NSArray *)_handleCloudAddFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
-{
-    /**
-     [{"parent":"9", "folder":[{"id":"25", "type":"1", "name":"星期天", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 14:42:46"}]}]
-     */
-    
-    NSString *myJidStr = [[xmppStream myJID] bare];
-    NSString *parent = [dicDatas objectForKey:@"parent"];
-    NSArray *folders = [dicDatas objectForKey:@"folder"];
-    
-    NSMutableArray *arrayM = [NSMutableArray array];
-    for ( NSDictionary *dic in folders ) {
-        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-        [dicM setObject:projectID forKey:@"project"];
-        [dicM setObject:parent forKey:@"parent"];
-        [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
-        NSString *owner = [dic objectForKey:@"creator"];
-        if ( [owner isEqualToString:myJidStr] ) {
-            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
-        } else {
-            [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+    for ( NSDictionary *dic in arr ) {
+        NSString *parent = [dic objectForKey:@"parent"];
+        NSArray *folders = [dic objectForKey:@"folder"];
+        if (![parent isEqualToString:@"-1"]) {
+            for ( NSDictionary *folderDic in folders ) {
+                NSString *cloudID = [folderDic objectForKey:@"id"];
+                NSString *type = [folderDic objectForKey:@"type"];
+                if (![type isEqualToString:@"2"]) {
+                    return cloudID;
+                }
+            }
         }
-        [arrayM addObject:dicM];
     }
-    return [NSArray arrayWithArray:arrayM];
+    return nil;
 }
 
 
-#pragma mark 4.删除文件夹/删除文件
-- (void)handleCloudDeleteFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+#pragma mark 4.删除文件夹/删除文件 OK
+- (void)handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    NSArray *serverDatas = [self _handleCloudDeleteFolderDatasWithDicDatas:dicDatas projectID:projectID];
-    
-    [_xmppCloudStorage deleteCloudDatas:serverDatas xmppStream:xmppStream];
-}
-
-- (NSArray *)_handleCloudDeleteFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
-{
-    /**
-     {"id":"26"}
-     */
-    
-    NSMutableArray *arrayM = [NSMutableArray array];
-    [arrayM addObject:dicDatas];
-    return [NSArray arrayWithArray:arrayM];
+    [_xmppCloudStorage deleteClouDics:dicData xmppStream:xmppStream];
 }
 
 
-
-#pragma mark 9.获取共享人员列表
-- (void)handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    NSArray *serverDatas = [self _handleCloudSharedListDatasWithArrDatas:arrDatas projectID:projectID cloudID:cloudID];
-    
-    // no process
-    serverDatas = nil;
-//    [_xmppCloudStorage insertCloudDatas:serverDatas xmppStream:xmppStream];
-}
-
-- (NSArray *)_handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
-{
-    /**
-     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="request_all_cloud_key" type="result">
-     <query xmlns="aft:library" subtype="list_share_users" project="460">
-     ["1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","88f7c8781ae748959eb3d3d8de592e7b@120.24.94.38"]
-     </query>
-     </iq>
-     */
-    NSMutableArray *arrayM = [NSMutableArray array];
-    for ( NSString *jidStr in arrDatas ) {
-        NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
-        [dicM setObject:jidStr forKey:@"jid"];
-        [dicM setObject:projectID forKey:@"project"];
-        [dicM setObject:cloudID forKey:@"id"];
-        [arrayM addObject:dicM];
-    }
-    return arrayM;
-}
+#pragma mark 9.获取共享人员列表 无需存储 OK
+//- (void)handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
+//{
+//    if (!dispatch_get_specific(moduleQueueTag)) return;
+//    
+//    NSArray *serverDatas = [self _handleCloudSharedListDatasWithArrDatas:arrDatas projectID:projectID cloudID:cloudID];
+//    
+//    // no process
+//    serverDatas = nil;
+////    [_xmppCloudStorage insertCloudDatas:serverDatas xmppStream:xmppStream];
+//}
+//
+//- (NSArray *)_handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
+//{
+//    /**
+//     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="request_all_cloud_key" type="result">
+//     <query xmlns="aft:library" subtype="list_share_users" project="460">
+//     ["1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","88f7c8781ae748959eb3d3d8de592e7b@120.24.94.38"]
+//     </query>
+//     </iq>
+//     */
+//    NSMutableArray *arrayM = [NSMutableArray array];
+//    for ( NSString *jidStr in arrDatas ) {
+//        NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+//        [dicM setObject:jidStr forKey:@"jid"];
+//        [dicM setObject:projectID forKey:@"project"];
+//        [dicM setObject:cloudID forKey:@"id"];
+//        [arrayM addObject:dicM];
+//    }
+//    return arrayM;
+//}
 
 
 #pragma mark - 网盘网络接口
@@ -304,7 +391,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
  
  */
 
-- (void)requestCloudListFolderWithFolder:(NSNumber *)folder projectID:(NSString *)projectID block:(CompletionBlock)completionBlock
+- (void)requestCloudListFolderWithParent:(NSString *)parent projectID:(NSString *)projectID block:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -331,7 +418,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@", folder],@"folder", nil];
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:parent, @"folder", nil];
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
@@ -405,8 +492,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // If the templateId is nil，we should notice the user the info
             
             // 0. Create a key for storaging completion block
-            //        NSString *requestKey = [[self xmppStream] generateUUID];
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            NSString *requestKey = [[self xmppStream] generateUUID];
+//            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -419,14 +506,9 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
              </query>
              </iq>
              */
-            NSString *tempParent = parent;
-            if (!tempParent) {
-                // 数据库取
-                //            tempParent = 数据库id;
-            }
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:name, @"name", [NSString stringWithFormat:@"%@", tempParent ? tempParent: @""], @"parent", nil];
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:name, @"name", parent, @"parent", nil];
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
@@ -444,7 +526,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // 5. add a timer to call back to user after a long time without server's reponse
             [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
             
-        }else{
+        } else {
             // 0. tell the the user that can not send a request
             [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
         }
@@ -459,7 +541,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 
-#pragma mark - 3.添加文件
+#pragma mark 3.添加文件
 /**
  
  <iq type="set" id="1234" >
@@ -709,7 +791,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
  </iq>
  
  */
-- (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock
+- (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users hasShared:(BOOL)hasShared block:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -720,8 +802,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // If the templateId is nil，we should notice the user the info
             
             // 0. Create a key for storaging completion block
-            //        NSString *requestKey = [[self xmppStream] generateUUID];
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            NSString *requestKey = [[self xmppStream] generateUUID];
+//            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -738,7 +820,18 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
              */
             
             // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", users, @"users", nil];
+            NSDictionary *templateDic;
+            NSLog(@"hasShared --- %d", hasShared);
+            if (hasShared) {
+                NSArray *temp =  [NSArray array];
+                templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", temp, @"users", nil];
+            } else {
+                if (users.count) {
+                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", users, @"users", nil];
+                } else {
+                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", nil];
+                }
+            }
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
@@ -1107,7 +1200,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             NSString *projectID = [project attributeStringValueForName:@"project"];
             
             
-#pragma mark - 1.list_folder
+#pragma mark - 1.list_folder -- ok
             if ([projectType isEqualToString:@"list_folder"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1118,30 +1211,17 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 }
                 
                 /**
-                 结果：
-                 note: 客户端根据owner中的jid从本地数据库中，获取此人的职位并显示, 如果是admin不做此操作。
+    list_root result:
+                 {"parent":"-1", "folder":
+                    [{"id":"10", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"},
+                     {"id":"9", "type":"0", "name":"资料归档", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},	
+                     {"id":"8", "type":"0", "name":"资料库","creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
+                     {"id":"7", "type":"0", "name":"工作文件", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"}], "file":[]}
                  
-                 list_root result:
-                 <iq type="result" id="1234" >
-                 <query xmlns="aft:library" subtype="list_folder">
-                 {"parent":"xxx", "folders":[], "files":[]}
-                 %%[{"folder":"1", "id":"1",  "type":"0" "name":"资料库",      "creator":"admin", "owner":"admin", "time":"2015-09-01"},
-                 %%{"folder":"1", "id":"2",  "type":"0" "name":"资料归档",  "creator":"admin", "owner":"admin", "time":"2015-09-01"},
-                 %%{"folder":"1", "id":"3",  "type":"0" "name":"工作文件",  "creator":"admin", "owner":"admin", "time":"2015-09-01"},
-                 %%{"folder":"1", "id":"4",  "type":"2" "name":"张三",          "creator":"jid",      "owner":"admin",  "time":"2015-09-01"}
-                 </query>
-                 </iq>
-                 
-                 note: 客户端检查一下type=2的项，有没有owner=self jid，如果没有，显示一个自己的文件夹。
-                 
-                 list other folder result:
-                 <iq type="result" id="1234" >
-                 <query xmlns="aft:library" project="xxx" subtype="list_folder">
-                 {"parent":"xxx", "folders":[], "files":[]}
-                 %%[{"folder":"1", "id":"4", "parent":"xx", "type":"1" "name":"效果图", "creator":"jid", "owner":"admin", "time":"2015-09-01"},
-                 %% {"folder":"0", "id":"5", "parent":"xx", "uuid":"xxx", "name":"通迅录.xls", "version":"3", "creator":"jid", "time":"2015-09-01"}]
-                 </query>
-                 </iq>
+    list other folder result:
+                 {"parent":"10", "folder":
+                    [{"id":"21", "type":"3", "name":"星期天", 		"creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"Time":"2015-10-16 13:28:21"},
+                    {"id":"11", "type":"5", "name":"通讯录", 		"creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"Time":"2015-10-15 17:57:03"}], "file":[]}
                  
                  */
                 
@@ -1152,14 +1232,14 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+                    NSArray *folder = [_xmppCloudStorage cloudGetFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
                 }
                 return YES;
             }
             
-#pragma mark - 2.add_folder
+#pragma mark - 2.add_folder -- ok
             else if ([projectType isEqualToString:@"add_folder"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1173,30 +1253,30 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 }
                 
                 /**
-                 <iq xmlns="jabber:client" from="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38" to="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38/mobile" id="request_all_cloud_key" type="result">
-                 <query xmlns="aft:library" subtype="add_folder" project="460">
-                 [{"parent":"9", "folder":[{"id":"25", "type":"1", "name":"星期天", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 14:42:46"}]}]
-                 </query>
+                 <iq xmlns="jabber:client" from="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38" to="33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38/mobile" id="1A803CCE-122A-4916-BBDA-2B3E7626F77E" type="result">
+                    <query xmlns="aft:library" subtype="add_folder" project="469">
+                        [{"parent":"83", "folder":[{"id":"89", "type":"3", "name":"体育馆","creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38","Time":"2015-11-05 18:29:19"}]}]
+                    </query>
                  </iq>
                  
                  */
                 
                 id data = [[project stringValue] objectFromJSONString];
-                NSArray *dic = (NSArray *)data;
-                NSDictionary *dicData = [dic firstObject];
-                [self handleCloudAddFolderDatasWithDicDatas:dicData projectID:projectID];
+                NSArray *arrData = (NSArray *)data;
+                NSString *cloudID = [self getPrivateOwnFolderCloudIDWithArr:arrData];
+                [self handleCloudAddFolderDatasWithArrDatas:arrData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+                    NSArray *folder = [_xmppCloudStorage cloudAddFolderWithProjectID:projectID cloudID:cloudID xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
                 }
                 return YES;
             }
             
-#pragma mark - 4.1.delete_folder -- no handle
+#pragma mark - 4.1.delete_folder -- ok
             else if ([projectType isEqualToString:@"delete_folder"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1220,14 +1300,21 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-                [self handleCloudDeleteFolderDatasWithDicDatas:dicData projectID:projectID];
+                // 数据库删除
+                [self handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+                    NSArray *folder = [_xmppCloudStorage cloudDeleteWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
+                    id temp;
+                    if (!folder.count) {
+                        temp = dicData;
+                    } else {
+                        temp = folder;
+                    }
                     // 3.用block返回数据
-                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:temp];
                 }
                 return YES;
             }
@@ -1307,14 +1394,14 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+                    NSArray *folder = [_xmppCloudStorage cloudGetFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
                 }
                 return YES;
             }
             
-#pragma mark - 6.share -- no process
+#pragma mark - 6.share
             else if ([projectType isEqualToString:@"share"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1332,20 +1419,17 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                  */
                 
                 id data = [[project stringValue] objectFromJSONString];
-//                NSDictionary *dicData = (NSDictionary *)data;
-//                [self handleCloudListFolderDatasWithDicDatas:dicData projectID:projectID];
-//                
-//                // 1.判断是否向逻辑层返回block
-//                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
-//                    // 2.向数据库获取数据
-//                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
-//                    // 3.用block返回数据
-//                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-//                }
+                NSDictionary *dicData = (NSDictionary *)data;
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 2.用block返回数据 (无需储存)
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
                 return YES;
             }
             
-#pragma mark - 9.list_share_users
+#pragma mark - 9.list_share_users -- ok
             else if ([projectType isEqualToString:@"list_share_users"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1376,9 +1460,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
-                    // 2.向数据库获取数据
-//                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
-                    // 3.用block返回数据
+                    // 2.用block返回数据 (无需存储)
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:arrData];
                 }
                 return YES;

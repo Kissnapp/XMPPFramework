@@ -23,7 +23,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)initWithCloudStorage:(id <XMPPCloudStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 #pragma mark - 1.获取文件夹内容
-- (void)requestCloudListFolderWithFolder:(NSNumber *)folder projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
+- (void)requestCloudListFolderWithParent:(NSString *)parent projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 #pragma mark - 2.创建文件夹
 - (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
@@ -41,7 +41,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 #pragma mark - 6.共享
-- (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock;
+- (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users hasShared:(BOOL)hasShared block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 7.移动 **
@@ -164,8 +164,19 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (BOOL)configureWithParent:(XMPPCloud *)aParent queue:(dispatch_queue_t)queue;
 
 @optional
+#pragma mark - hand datas to database
+- (void)insertCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteClouDics:(NSDictionary *)serverDics xmppStream:(XMPPStream *)stream;
 
-- (id)cloudFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream;
-- (void)insertCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream;
-- (void)deleteCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream;
+
+#pragma mark - getDatas
+#pragma mark 1.获取文件夹内容
+- (id)cloudGetFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream;
+
+#pragma mark 2.创建文件夹
+- (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
+
+#pragma mark - 4.删除文件夹/删除文件
+- (id)cloudDeleteWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
+
 @end

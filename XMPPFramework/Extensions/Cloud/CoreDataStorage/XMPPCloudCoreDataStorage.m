@@ -63,9 +63,8 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     return [super configureWithParent:aParent queue:queue];
 }
 
-
-
-- (void)deleteCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream
+#pragma mark - hand datas to database
+- (void)insertCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -73,10 +72,24 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         
         if (!streamBareJidStr) return;
         if (!moc) return;
-        if (!serverDatas.count) return;
+        if (!serverDic) return;
         
-        NSDictionary *serverDic = [serverDatas firstObject];
+        [XMPPCloudCoreDataStorageObject updateInManagedObjectContext:moc dic:serverDic streamBareJidStr:streamBareJidStr];
+    }];
+}
+
+- (void)deleteClouDics:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        if (!streamBareJidStr) return;
+        if (!moc) return;
+        if (!serverDic) return;
+        
         NSString *cloudID = [serverDic objectForKey:@"id"];
+        if (!cloudID) return;
         
         [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
     }];
@@ -84,81 +97,91 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 
 
 
-- (void)insertCloudDatas:(NSArray *)serverDatas xmppStream:(XMPPStream *)stream
-{
-    [self scheduleBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-        
-        if (!streamBareJidStr) return;
-        if (!moc) return;
-        if (!serverDatas.count) return;
-        
-//        for ( NSDictionary *dic in serverDatas ) {
-//            [XMPPCloudCoreDataStorageObject updateInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-//        }
-        
-        NSDictionary *serverDic = [serverDatas firstObject];
-        NSString *projectID = [serverDic objectForKey:@"project"];
-        NSString *parent = [serverDic objectForKey:@"parent"];
-        
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        [fetchRequest setEntity:entity];
-        [fetchRequest setFetchBatchSize:saveThreshold];
-
-        for ( NSDictionary *dic in serverDatas ) {
-            NSString *cloudID = [dic objectForKey:@"id"];
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID == %@", streamBareJidStr, projectID, parent, cloudID];
-            [fetchRequest setPredicate:predicate];
-            NSArray *array = [moc executeFetchRequest:fetchRequest error:nil];
-            
-            if ( !array.count ) {
-                [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-            }
-        }
-    }];
-}
-
-- (id)cloudFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream
+#pragma mark - getDatas
+#pragma mark - 1.获取文件的信息
+- (id)cloudGetFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream
 {
     __block NSArray *allUsers = nil;
+    
     [self executeBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-        
-//            NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-//            NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-//            NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-//            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"project == %@ AND parent == %@", projectID, parent];
-//            NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:NO];
-//        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd, nil];
-//            [fetchRequest setPredicate:predicate];
-//            [fetchRequest setEntity:entity];
-//            [fetchRequest setSortDescriptors:sortDescriptors];
-//        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
-//        NSLog(@"allUser----- %@", allUsers);
         NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+        
         if (!projectID) return;
         if (!parent) return;
         if (!moc) return;
         if (!streamBareJidStr) return;
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        int tempIndex = 9;
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND cloudID.intValue <= %d",streamBareJidStr, projectID, parent, tempIndex];
-        NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:NO];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@",streamBareJidStr, projectID, [NSNumber numberWithInteger:[parent integerValue]]];
+        NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:YES];
         NSArray *sortDescriptors = [NSArray arrayWithObjects:sd, nil];
-        [fetchRequest setPredicate:predicate];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setPredicate:predicate];
         [fetchRequest setSortDescriptors:sortDescriptors];
         
         allUsers = [moc executeFetchRequest:fetchRequest error:nil];
     }];
     return allUsers;
 }
+
+#pragma mark - 2.创建文件夹
+- (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allUsers = nil;
+    
+    [self executeBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+        
+        if (!projectID) return;
+        if (!cloudID) return;
+        if (!moc) return;
+        if (!streamBareJidStr) return;
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND cloudID == %@",streamBareJidStr, projectID, cloudID];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setPredicate:predicate];
+        
+        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+    }];
+    return allUsers;
+}
+
+
+#pragma mark - 4.删除文件夹/删除文件
+- (id)cloudDeleteWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream
+{
+    __block NSArray *allUsers = nil;
+    
+    [self executeBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+        
+        if (!projectID) return;
+        if (!cloudID) return;
+        if (!moc) return;
+        if (!streamBareJidStr) return;
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND cloudID == %@",streamBareJidStr, projectID, cloudID];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setPredicate:predicate];
+        
+        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+    }];
+    return allUsers;
+}
+
 
 @end
