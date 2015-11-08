@@ -231,6 +231,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
          <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="4FB8B9C3-BB8A-4527-AF80-BC3FF05CEDC1" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"9", "folder":[{"id":"27", "type":"1", "name":"尼克", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 15:36:29"},{"id":"24", "type":"1", "name":"星期", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 11:19:35"},{"id":"22", "type":"1", "name":"心情", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 10:58:42"}], "file":[]}</query></iq>
          // 私人文件夹
          <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="EF25643B-BD84-483C-BAF1-8476DA63E8D6" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"10", "folder":[{"id":"21", "type":"3", "name":"星期天", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-16 13:28:21"},{"id":"11", "type":"5", "name":"通讯录", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"}], "file":[]}</query></iq>
+         
+         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="18ADBB05-A195-4770-A3E0-8585C6A41261" type="result"><query xmlns="aft:library" subtype="list_folder" project="483">{"parent":"199", "folder":[{"id":"201", "type":"3", "name":"天天天", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 15:01:49"},{"id":"200", "type":"3", "name":"他哥哥", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 14:48:44"}], "file":[]}</query></iq>
          */
         
         // 2.添加files到新的字典
@@ -247,7 +249,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-#pragma mark 2.处理创建文件夹数据
+#pragma mark 2.处理创建文件夹 OK
 - (void)handleCloudAddFolderDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
@@ -312,7 +314,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-#pragma mark 4.删除文件夹/删除文件 OK
+#pragma mark 4.删除文件夹/删除文件 文件夹OK
 - (void)handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
@@ -321,42 +323,69 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
+#pragma mark 5.重命名
+- (void)handleCloudRenameDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [_xmppCloudStorage updateSpecialCloudDatas:dicData xmppStream:xmppStream];
+}
+
+
+#pragma mark 6.共享 OK
+- (void)handleCloudShareDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    NSDictionary *serverDic = [self _handleCloudShareDatasWithDicData:dicData];
+    
+    [_xmppCloudStorage updateSpecialCloudDatas:serverDic xmppStream:xmppStream];
+}
+
+- (NSDictionary *)_handleCloudShareDatasWithDicData:(NSDictionary *)dicData
+{
+    /**
+     
+     1.(私密共享),右下角有锁  共享开关关闭着 没有成员列表 type = 5
+        eg:{"id":"73"}
+     2.(部分共享),右上角有红箭头  共享开关关闭着 有成员列表 type = 4
+        eg:{"id":"74","users":["33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38","4c76a063541d48da9b46a7bce4f1eca8@120.24.94.38"]}
+     3.(完全共享),没标记  共享开关开着 没有成员列表 type = 3
+        eg:{"id":"75","users":[]}
+     */
+    
+    NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+    NSArray *keys = [dicData allKeys];
+    NSString *cloudID;
+    NSString *type;
+    
+    for ( NSString *key in keys ) {
+        if ([key isEqualToString:@"id"]) {
+            cloudID = [dicData objectForKey:@"id"];
+            continue;
+        } else if ([key isEqualToString:@"users"]) {
+            NSArray *users = [dicData objectForKey:@"users"];
+            if (users.count) {
+                type = @"4";
+            } else if (users.count == 0) {
+                type = @"3";
+            }
+        }
+    }
+    if (!type) {
+        type = @"5";
+    }
+    
+    [dicM setObject:cloudID forKey:@"id"];
+    [dicM setObject:type forKey:@"type"];
+    return [NSDictionary dictionaryWithDictionary:dicM];
+}
+
 #pragma mark 9.获取共享人员列表 无需存储 OK
-//- (void)handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
-//{
-//    if (!dispatch_get_specific(moduleQueueTag)) return;
-//    
-//    NSArray *serverDatas = [self _handleCloudSharedListDatasWithArrDatas:arrDatas projectID:projectID cloudID:cloudID];
-//    
-//    // no process
-//    serverDatas = nil;
-////    [_xmppCloudStorage insertCloudDatas:serverDatas xmppStream:xmppStream];
-//}
-//
-//- (NSArray *)_handleCloudSharedListDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID cloudID:(NSString *)cloudID
-//{
-//    /**
-//     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="request_all_cloud_key" type="result">
-//     <query xmlns="aft:library" subtype="list_share_users" project="460">
-//     ["1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","88f7c8781ae748959eb3d3d8de592e7b@120.24.94.38"]
-//     </query>
-//     </iq>
-//     */
-//    NSMutableArray *arrayM = [NSMutableArray array];
-//    for ( NSString *jidStr in arrDatas ) {
-//        NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
-//        [dicM setObject:jidStr forKey:@"jid"];
-//        [dicM setObject:projectID forKey:@"project"];
-//        [dicM setObject:cloudID forKey:@"id"];
-//        [arrayM addObject:dicM];
-//    }
-//    return arrayM;
-//}
 
 
 #pragma mark - 网盘网络接口
-
-#pragma mark - 1.获取文件夹内容
+#pragma mark - 1.获取文件夹内容 OK
 /**
  <iq type="get" id="1234" >
  <query xmlns="aft:library" project="xxx" subtype="list_folder">
@@ -449,7 +478,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-#pragma mark 2.创建文件夹
+#pragma mark 2.创建文件夹 OK
 /*
  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
  <project xmlns="aft:project" type="project_name_exist">
@@ -621,7 +650,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 
-#pragma mark 4.删除文件夹/删除文件
+#pragma mark 4.删除文件夹/删除文件 文件夹 OK
 /**
  
  <iq type="set" id="1234" >
@@ -727,8 +756,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // If the templateId is nil，we should notice the user the info
             
             // 0. Create a key for storaging completion block
-            //        NSString *requestKey = [[self xmppStream] generateUUID];
-            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            NSString *requestKey = [[self xmppStream] generateUUID];
+//            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
             
             // 1. add the completionBlock to the dcitionary
             [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
@@ -775,7 +804,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-#pragma mark 6.共享
+#pragma mark 6.共享 OK
 /**
  
  <iq type="set" id="1234" >
@@ -936,7 +965,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         dispatch_async(moduleQueue, block);
 }
 
-#pragma mark 9.获取共享人员列表
+#pragma mark 9.获取共享人员列表 OK
 /**
  
  <iq type="get" id="1234" >
@@ -1361,15 +1390,13 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-//                [self handleCloudListFolderDatasWithDicDatas:dicData projectID:projectID];
-//                
-//                // 1.判断是否向逻辑层返回block
-//                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
-//                    // 2.向数据库获取数据
-//                    NSArray *folder = [_xmppCloudStorage cloudFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
-//                    // 3.用block返回数据
-//                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-//                }
+                [self handleCloudRenameDatasWithDicData:dicData projectID:projectID];
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 2.用block返回数据 (无需储存)
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
                 return YES;
             }
 
@@ -1401,7 +1428,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-#pragma mark - 6.share
+#pragma mark - 6.share -- ok
             else if ([projectType isEqualToString:@"share"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -1420,6 +1447,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
+                [self handleCloudShareDatasWithDicData:dicData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {

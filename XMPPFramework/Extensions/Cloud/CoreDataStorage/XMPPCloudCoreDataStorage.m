@@ -95,6 +95,20 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     }];
 }
 
+// 更新特殊的key
+- (void)updateSpecialCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        if (!streamBareJidStr) return;
+        if (!moc) return;
+        if (!serverDic) return;
+        
+        [XMPPCloudCoreDataStorageObject updateSpecialInManagedObjectContext:moc dic:serverDic streamBareJidStr:streamBareJidStr];
+    }];
+}
 
 
 #pragma mark - getDatas
@@ -182,6 +196,5 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     }];
     return allUsers;
 }
-
 
 @end

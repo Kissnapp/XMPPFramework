@@ -362,6 +362,33 @@
     return result;
 }
 
++ (BOOL)updateSpecialInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
+{
+    BOOL result = NO;
+    NSString *cloudID = [dic objectForKey:@"id"];
+    if (!cloudID) return result;
+    
+    XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];
+    if (newCloud) {
+        for ( NSString *key in dic.allKeys ) {
+            if ([key isEqualToString:@"type"]) {
+                NSNumber *tempFolderType = [NSNumber numberWithInteger:[[dic objectForKey:key] integerValue]];
+                newCloud.folderType = tempFolderType;
+            } else if ([key isEqualToString:@"name"]) {
+                NSString *tempName = [NSString stringWithFormat:@"%@", [dic objectForKey:@"name"]];
+                newCloud.name = tempName;
+            }
+        }
+        NSLog(@"newCloud = %@", newCloud);
+        result = YES;
+    } else {
+        XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
+        NSLog(@"newCloud = %@", newCloud);
+        result = YES;
+    }
+    return result;
+}
+
 #pragma mark - 新增
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
 {
