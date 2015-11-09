@@ -165,9 +165,9 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 @optional
 #pragma mark - hand datas to database
-- (void)insertCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
-- (void)deleteClouDics:(NSDictionary *)serverDics xmppStream:(XMPPStream *)stream;
-- (void)updateSpecialCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteClouDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 
 #pragma mark - getDatas
 #pragma mark 1.获取文件夹内容

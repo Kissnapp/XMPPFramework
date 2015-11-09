@@ -122,8 +122,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     if (!dispatch_get_specific(moduleQueueTag)) return;
     NSArray *serverDatas = [self _handleCloudListFolderDatasWithDicDatas:dicDatas projectID:projectID];
     
-    for ( NSDictionary *dicDatas in serverDatas ) {
-        [_xmppCloudStorage insertCloudDatas:dicDatas xmppStream:xmppStream];
+    for ( NSDictionary *dicData in serverDatas ) {
+        [_xmppCloudStorage insertCloudDic:dicData xmppStream:xmppStream];
     }
     
 }
@@ -257,7 +257,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     NSArray *serverDatas = [self _handleCloudAddFolderDatasWithArrDatas:arrDatas projectID:projectID];
     
     for ( NSDictionary *dic in serverDatas ) {
-        [_xmppCloudStorage insertCloudDatas:dic xmppStream:xmppStream];
+        [_xmppCloudStorage insertCloudDic:dic xmppStream:xmppStream];
     }
 }
 
@@ -319,16 +319,16 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    [_xmppCloudStorage deleteClouDics:dicData xmppStream:xmppStream];
+    [_xmppCloudStorage deleteClouDic:dicData xmppStream:xmppStream];
 }
 
 
-#pragma mark 5.重命名
+#pragma mark 5.重命名 OK
 - (void)handleCloudRenameDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    [_xmppCloudStorage updateSpecialCloudDatas:dicData xmppStream:xmppStream];
+    [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
 }
 
 
@@ -339,7 +339,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     
     NSDictionary *serverDic = [self _handleCloudShareDatasWithDicData:dicData];
     
-    [_xmppCloudStorage updateSpecialCloudDatas:serverDic xmppStream:xmppStream];
+    [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
 }
 
 - (NSDictionary *)_handleCloudShareDatasWithDicData:(NSDictionary *)dicData
@@ -729,7 +729,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-#pragma mark 5.重命名
+#pragma mark 5.重命名 OK
 /**
  
  <iq type="set" id="1234" >
@@ -1373,7 +1373,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-#pragma mark - 5.1.rename_folder -- no handle
+#pragma mark - 5.1.rename_folder -- ok
             if ([projectType isEqualToString:@"rename_folder"]) {
                 
                 if ([[iq type] isEqualToString:@"error"]) {

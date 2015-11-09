@@ -64,7 +64,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 #pragma mark - hand datas to database
-- (void)insertCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+- (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -78,7 +78,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     }];
 }
 
-- (void)deleteClouDics:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+- (void)deleteClouDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -96,7 +96,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 // 更新特殊的key
-- (void)updateSpecialCloudDatas:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+- (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
