@@ -117,5 +117,9 @@
 #import "XMPPOrgPositionCoreDataStorageObject.h"
 #import "XMPPOrgSubcribeCoreDataStorageObject.h"
 
+#import "XMPPCloud.h"
+#import "XMPPCloudCoreDataStorage.h"
+#import "XMPPCloudCoreDataStorageObject.h"
+
 #import "XMPPManagedObject.h"
 #import "NSDictionary+KeysTransfrom.h"
