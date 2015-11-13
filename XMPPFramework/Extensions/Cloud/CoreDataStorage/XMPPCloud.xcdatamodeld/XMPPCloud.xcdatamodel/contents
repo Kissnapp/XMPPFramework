@@ -5,7 +5,6 @@
         <attribute name="createTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="creator" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="download" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="fileID" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="folderIsMe" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderOrFileType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
@@ -16,7 +15,8 @@
         <attribute name="size" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="updateTime" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="versionCount" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="version_count" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
         <element name="XMPPCloudCoreDataStorageObject" positionX="-54" positionY="-9" width="128" height="285"/>

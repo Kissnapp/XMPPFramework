@@ -25,7 +25,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSDate * createTime;
 @property (nonatomic, retain) NSString * creator;
 @property (nonatomic, retain) NSNumber * download;
-@property (nonatomic, retain) NSString * fileID;
+@property (nonatomic, retain) NSString * uuid;
 @property (nonatomic, retain) NSNumber * folderType;
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSString * owner;
@@ -34,13 +34,14 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSString * size;
 @property (nonatomic, retain) NSNumber * folderOrFileType;
 @property (nonatomic, retain) NSDate * updateTime;
-@property (nonatomic, retain) NSString * versionCount;
+@property (nonatomic, retain) NSString * version_count;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * folderIsMe;
 
 
 #pragma mark - 查找
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr;
+
 #pragma mark - 更新
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr;
 + (BOOL)updateSpecialInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr;

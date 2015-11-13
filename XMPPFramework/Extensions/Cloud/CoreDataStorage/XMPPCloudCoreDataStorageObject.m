@@ -16,7 +16,7 @@
 @dynamic createTime;
 @dynamic creator;
 @dynamic download;
-@dynamic fileID;
+@dynamic uuid;
 @dynamic folderType;
 @dynamic name;
 @dynamic owner;
@@ -25,7 +25,7 @@
 @dynamic size;
 @dynamic folderOrFileType;
 @dynamic updateTime;
-@dynamic versionCount;
+@dynamic version_count;
 @dynamic streamBareJidStr;
 @dynamic folderIsMe;
 
@@ -199,8 +199,61 @@
     [self didChangeValueForKey:@"folderIsMe"];
 }
 
+- (NSString *)fileID
+{
+    [self willAccessValueForKey:@"fileID"];
+    NSString *value = [self primitiveValueForKey:@"fileID"];
+    [self didAccessValueForKey:@"fileID"];
+    return value;
+}
+- (void)setFileID:(NSString *)value
+{
+    [self willChangeValueForKey:@"fileID"];
+    [self setPrimitiveValue:value forKey:@"fileID"];
+    [self didChangeValueForKey:@"fileID"];
+}
 
+- (NSString *)size
+{
+    [self willAccessValueForKey:@"size"];
+    NSString *value = [self primitiveValueForKey:@"size"];
+    [self didAccessValueForKey:@"size"];
+    return value;
+}
+- (void)setSize:(NSString *)value
+{
+    [self willChangeValueForKey:@"size"];
+    [self setPrimitiveValue:value forKey:@"size"];
+    [self didChangeValueForKey:@"size"];
+}
 
+- (NSString *)uuid
+{
+    [self willAccessValueForKey:@"uuid"];
+    NSString *value = [self primitiveValueForKey:@"uuid"];
+    [self didAccessValueForKey:@"uuid"];
+    return value;
+}
+- (void)setUuid:(NSString *)value
+{
+    [self willChangeValueForKey:@"uuid"];
+    [self setPrimitiveValue:value forKey:@"uuid"];
+    [self didChangeValueForKey:@"uuid"];
+}
+
+- (NSString *)version_count
+{
+    [self willAccessValueForKey:@"version_count"];
+    NSString *value = [self primitiveValueForKey:@"version_count"];
+    [self didAccessValueForKey:@"version_count"];
+    return value;
+}
+- (void)setVersion_count:(NSString *)value
+{
+    [self willChangeValueForKey:@"version_count"];
+    [self setPrimitiveValue:value forKey:@"version_count"];
+    [self didChangeValueForKey:@"version_count"];
+}
 
 //- (NSNumber *)download
 //{
@@ -215,37 +268,6 @@
 //    [self setPrimitiveValue:value forKey:@"download"];
 //    [self didChangeValueForKey:@"download"];
 //}
-//
-//
-//- (NSString *)fileID
-//{
-//    [self willAccessValueForKey:@"fileID"];
-//    NSString *value = [self primitiveValueForKey:@"fileID"];
-//    [self didAccessValueForKey:@"fileID"];
-//    return value;
-//}
-//- (void)setFileID:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"fileID"];
-//    [self setPrimitiveValue:value forKey:@"fileID"];
-//    [self didChangeValueForKey:@"fileID"];
-//}
-//
-//
-//- (NSString *)size
-//{
-//    [self willAccessValueForKey:@"size"];
-//    NSString *value = [self primitiveValueForKey:@"size"];
-//    [self didAccessValueForKey:@"size"];
-//    return value;
-//}
-//- (void)setSize:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"size"];
-//    [self setPrimitiveValue:value forKey:@"size"];
-//    [self didChangeValueForKey:@"size"];
-//}
-//
 //
 //- (NSDate *)updateTime
 //{
@@ -262,19 +284,7 @@
 //}
 //
 //
-//- (NSString *)versionCount
-//{
-//    [self willAccessValueForKey:@"versionCount"];
-//    NSString *value = [self primitiveValueForKey:@"versionCount"];
-//    [self didAccessValueForKey:@"versionCount"];
-//    return value;
-//}
-//- (void)setVersionCount:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"versionCount"];
-//    [self setPrimitiveValue:value forKey:@"versionCount"];
-//    [self didChangeValueForKey:@"versionCount"];
-//}
+
 
 
 
@@ -344,7 +354,7 @@
     if (!cloudID) return result;
     if (!parent) return result;
     
-    // 有了自己的私人文件夹 删除以前自己创建的私人文件夹 ******
+    // 有了自己的私人文件夹 删除以前自己创建的私人文件夹
     if ( [parent isEqualToString:@"-1"] && (type.integerValue == 2) ) {
         result = [XMPPCloudCoreDataStorageObject deleteOriginalPrivateFolderObjectInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
     }
@@ -424,10 +434,11 @@
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     NSNumber *tempFolderOrFileType = [NSNumber numberWithInteger:[[dic objectForKey:@"folderOrFileType"] integerValue]];
     NSNumber *tempFolderIsMe = [NSNumber numberWithInteger:[[dic objectForKey:@"folderIsMe"] integerValue]];
+    NSString *tempUuid = [dic objectForKey:@"uuid"];
+    NSString *tempSize = [dic objectForKey:@"size"];
+    NSString *tempVersion_count = [dic objectForKey:@"version_count"];
     
     //    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
-    //    NSString *tempVersionCount = [dic objectForKey:@"versionCount"];
-    //    NSString *tempFileID = [dic objectForKey:@"fileID"];
     //    NSNumber *tempDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"download"] boolValue]];
     
     
@@ -441,12 +452,12 @@
     if (tempProject)            self.project = tempProject;
     if (tempStreamBareJidStr)   self.streamBareJidStr = tempStreamBareJidStr;
     if (tempFolderOrFileType)   self.folderOrFileType = tempFolderOrFileType;
-    if (tempFolderIsMe)         self.folderIsMe = tempFolderIsMe;;
-    
-    
-    //    if (tempVersionCount)       self.versionCount = tempVersionCount;
+    if (tempFolderIsMe)         self.folderIsMe = tempFolderIsMe;
+    if (tempUuid)               self.uuid = tempUuid;
+    if (tempSize)               self.size = tempSize;
+    if (tempVersion_count)      self.version_count = tempVersion_count;
+
     //    if (tempDownload)           self.download = tempDownload;
-    //    if (tempFileID)             self.fileID = tempFileID;
     //    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
 }
 
