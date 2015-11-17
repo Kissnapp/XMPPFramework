@@ -2438,6 +2438,67 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 
 }
 
+- (void)setOrgPhotoWithOrgId:(NSString *)orgId
+                      fileId:(NSString *)fileId
+             completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (orgId.length <= 0 && fileId.length <= 0) {
+            [self _callBackWithMessage:@"you can not send this request because that this is no orgId or fileId" completionBlock:completionBlock];
+            return ;
+        }
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = orgId;
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq from="c834580a878d43088fa382bac1530603@192.168.1.130/Gajim" id="5244001" type="set">
+             <project xmlns="aft:project" type="set_photo">
+             {"project":"404", "photo":"uuid"}
+             </project>
+             </iq>
+             */
+            // 3. Create the request iq
+            
+            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project", fileId, @"photo", nil];
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{
+                                                                                     @"type":@"set_photo"
+                                                                                     }
+                                                                       stringValue:[tmpDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"set"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
@@ -3252,8 +3313,6 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             }else if([projectType isEqualToString:@"get_template_hash"]){
                 if ([[iq type] isEqualToString:@"error"]) {
                     
-                    
-                    
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
                     NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
                     
@@ -3334,7 +3393,37 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
 
                 return YES;
+            }else if([projectType isEqualToString:@"set_photo"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
+                    
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    
+                    return YES;
+                }
+                
+                // TODO:这个正确结果不要，因为没有头像url，推送会返回头像url，所以block要在推送中回掉
+                /*
+                <iq from="c834580a878d43088fa382bac1530603@192.168.1.130/Gajim" id="5244001" type="result">
+                <project xmlns="aft:project" type="set_photo">
+                {"project":"xxx", "photo":"uuid"}
+                </project>
+                </iq>
+                 */
+                
+                // do nothing here
+                /*
+                id  data = [[project stringValue] objectFromJSONString];
+                
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
+                 */
+                
+                return YES;
+                
             }
+            
             // add case
         }
     }
@@ -3572,6 +3661,35 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             // 2.回掉通知
             [multicastDelegate xmppOrg:self didReceiveRemoveSubcribeFromOrgId:toOrgId fromOrgName:toOrgName toOrgId:formOrgId];
+            
+        }else if ([[sysElement attributeStringValueForName:@"type"] isEqualToString:@"set_photo"]){// 设置项目头像
+            /*
+             <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
+                <sys xmlns="aft.sys.project" projectid="1" type="set_photo">
+                    {"project":"xxx", "photo":"url"}
+                </sys>
+             </message>
+             */
+            
+            id data = [[sysElement stringValue] objectFromJSONString];
+            NSString *orgId = [data objectForKey:@"project"];
+            NSString *photoUrl = [data objectForKey:@"photo"];
+            
+            // 0.删除数据库关联组织信息
+            [_xmppOrgStorage setPhotoURL:photoUrl
+                                forOrgId:orgId
+                              xmppStream:xmppStream];
+            
+        
+            // 1.从数据库取出新的头像，执行回掉block
+            
+            NSString *newPhotoURL = [_xmppOrgStorage photoURLWithOrgId:orgId
+                                                            xmppStream:xmppStream];
+            
+            if (newPhotoURL) {
+                [self _executeRequestBlockWithRequestKey:orgId valueObject:newPhotoURL];
+            }
+            
         }
     }
 }

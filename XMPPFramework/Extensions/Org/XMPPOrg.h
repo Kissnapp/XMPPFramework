@@ -211,7 +211,14 @@
 - (void)requestDBOrgPhotoWithOrgId:(NSString *)orgId
                    completionBlock:(CompletionBlock)completionBlock;
 
--(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
+#pragma mark - 获取模板的hash
+-(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock;
+
+#pragma mark - 根据组织id 设置组织的头像
+
+- (void)setOrgPhotoWithOrgId:(NSString *)orgId
+                      fileId:(NSString *)fileId
+             completionBlock:(CompletionBlock)completionBlock;
 
 @end
 
@@ -327,5 +334,9 @@
 - (void)updateSubcribeObjectWithDic:(NSDictionary *)dic accept:(BOOL)accept xmppStream:(XMPPStream *)stream;
 - (void)addOrgId:(NSString *)fromOrgId orgName:(NSString *)formOrgName toOrgId:(NSString *)toTogId xmppStream:(XMPPStream *)stream;
 - (void)removeOrgId:(NSString *)removeOrgId fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
+
+// 设置头像
+- (void)setPhotoURL:(NSString *)photoURL forOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)photoURLWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end
