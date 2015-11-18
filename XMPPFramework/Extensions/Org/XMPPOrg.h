@@ -37,9 +37,11 @@
 - (void)clearAllTemplates;
 
 #pragma mark - 获取一个组织的所有职位信息
-- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId;
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+                                   isTemplate:(BOOL)isTemplate;
 
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                               isTemplate:(BOOL)isTemplate
                           completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有成员信息
@@ -53,12 +55,14 @@
                           completionBlock:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 获取一个组织关联组织的所有职位信息
-- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
-                                relationOrgId:(NSString *)relationOrgId;
+#pragma mark - 获取一个组织或者关联组织的所有职位信息
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId 
+                                relationOrgId:(NSString *)relationOrgId
+                                   isTemplate:(BOOL)isTemplate;
 
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
                             relationOrgId:(NSString *)relationOrgId
+                               isTemplate:(BOOL)isTemplate
                           completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有成员信息
@@ -88,6 +92,7 @@
                          completionBlock:(CompletionBlock)completionBlock;
 
 - (void)requestServerAllSubPositionsWithOrgId:(NSString *)orgId
+                                         ptId:(NSString *)ptId
                               completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 查询自己可以添加的成员列表
@@ -124,7 +129,9 @@
 
 #pragma mark - 从某个组织删人
 - (void)removeUserBareJidStr:(NSString *)userBareJidStr
+                        ptId:(NSString *)ptId
                      formOrg:(NSString *)orgId
+                withSelfPtId:(NSString *)selfPtId
              completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 订阅某个组织
@@ -201,21 +208,51 @@
                                      orgId:(NSString *)orgId
                            completionBlock:(CompletionBlock)completionBlock;
 
-#pragma mark - 自己是否是该工程的admin
+
+/**
+ *  自己是否是该工程的admin
+ *
+ *  @param orgId 项目id
+ *
+ *  @return YES:如果自己是该项目的管理员，NO:自己不是该项目管理员
+ */
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
-#pragma mark - 查询某个用户是否在某个组织中
+/**
+ *  查询某个用户是否在某个组织中
+ *
+ *  @param bareJidStr 被查询用户的jid
+ *  @param orgId      被查用户指定的项目id
+ *
+ *  @return YES：如果该用户在改组织中，NO：该用户不在该项目中
+ */
 - (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr inOrgWithId:(NSString *)orgId;
 
-#pragma mark - 根据组织id 查询该组织的头像url
+/**
+ *  根据项目组织id或者模板id获取该项目或者模板的头像
+ *
+ *  @param orgId           项目或者模板的头像
+ *  @param isTemplate      请求的是否是模板的头像
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBOrgPhotoWithOrgId:(NSString *)orgId
+                        isTemplate:(BOOL)isTemplate
                    completionBlock:(CompletionBlock)completionBlock;
 
-#pragma mark - 获取模板的hash
+/**
+ *  获取模板的hash
+ *
+ *  @param completionBlock 回掉block
+ */
 -(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock;
 
-#pragma mark - 根据组织id 设置组织的头像
-
+/**
+ *  根据组织id 设置组织的头像
+ *
+ *  @param orgId           项目id
+ *  @param fileId          文件的fileId
+ *  @param completionBlock 回掉block
+ */
 - (void)setOrgPhotoWithOrgId:(NSString *)orgId
                       fileId:(NSString *)fileId
              completionBlock:(CompletionBlock)completionBlock;
@@ -280,6 +317,7 @@
 - (id)orgRelationsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
+                       isTemplate:(BOOL)isTemplate
                        xmppStream:(XMPPStream *)stream
                         userBlock:(void (^)(NSString *orgId))userBlock
                     positionBlock:(void (^)(NSString *orgId))positionBlock
@@ -338,5 +376,7 @@
 // 设置头像
 - (void)setPhotoURL:(NSString *)photoURL forOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)photoURLWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (BOOL)bareJidStr:(NSString *)bareJidStr isSubPositionOfBareJidStr:(NSString *)fatherBareJidStr inOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end

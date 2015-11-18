@@ -1185,6 +1185,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
 }
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
+                       isTemplate:(BOOL)isTemplate
                        xmppStream:(XMPPStream *)stream 
                         userBlock:(void (^)(NSString *orgId))userBlock
                     positionBlock:(void (^)(NSString *orgId))positionBlock
@@ -1229,6 +1230,10 @@ static XMPPOrgCoreDataStorage *sharedInstance;
             
             [orgObject updateWithDic:dic];
             
+        }
+        
+        if (isTemplate) {
+            orgObject.orgState = @(XMPPOrgCoreDataStorageObjectStateTemplate);
         }
     
     }];
@@ -1578,6 +1583,75 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         }
         
     }];
+}
+
+- (void)setPhotoURL:(NSString *)photoURL forOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:orgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        if (org) {
+           org.orgPhoto = photoURL;
+        }
+        
+    }];
+}
+- (id)photoURLWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block NSString *photoURL = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:orgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        if (org) {
+            photoURL = org.orgPhoto;
+        }
+        
+        
+    }];
+    
+    return photoURL;
+}
+
+- (BOOL)bareJidStr:(NSString *)bareJidStr
+isSubPositionOfBareJidStr:(NSString *)fatherBareJidStr
+           inOrgId:(NSString *)orgId
+        xmppStream:(XMPPStream *)stream
+{
+    __block BOOL isSubPosition = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgUserCoreDataStorageObject *subUser = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                             orgId:orgId
+                                                                                                        userJidStr:bareJidStr
+                                                                                                  streamBareJidStr:streamBareJidStr];
+        XMPPOrgUserCoreDataStorageObject *fatherUser = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                orgId:orgId
+                                                                                                           userJidStr:fatherBareJidStr
+                                                                                                     streamBareJidStr:streamBareJidStr];
+        
+        isSubPosition = (subUser.userPtShip.ptLeft > fatherUser.userPtShip.ptLeft) &&  (subUser.userPtShip.ptRight < fatherUser.userPtShip.ptRight);
+        
+        
+    }];
+    
+    return isSubPosition;
 }
 
 @end

@@ -18,6 +18,7 @@
 @dynamic ptRight;
 @dynamic dpId;
 @dynamic dpName;
+@dynamic dpLevel;
 @dynamic orgId;
 @dynamic streamBareJidStr;
 @dynamic ptUserShip;
@@ -130,6 +131,23 @@
     [self setPrimitiveValue:value forKey:@"dpName"];
     [self didChangeValueForKey:@"dpName"];
 }
+
+- (NSNumber *)dpLevel
+{
+    [self willAccessValueForKey:@"dpLevel"];
+    NSNumber *value = [self primitiveValueForKey:@"dpLevel"];
+    [self didAccessValueForKey:@"dpLevel"];
+    
+    return value;
+}
+
+- (void)setDpLevel:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"dpLevel"];
+    [self setPrimitiveValue:value forKey:@"dpLevel"];
+    [self didChangeValueForKey:@"dpLevel"];
+}
+
 - (NSString *)orgId
 {
     [self willAccessValueForKey:@"orgId"];
@@ -311,6 +329,7 @@
     NSNumber *tempPtRight = [NSNumber numberWithInteger:[[dic objectForKey:@"ptRight"] integerValue]];
     NSString *tempDpId = [dic objectForKey:@"dpId"];
     NSString *tempDpName = [dic objectForKey:@"dpName"];
+    NSNumber *tempDpLevel = [NSNumber numberWithInteger:[[dic objectForKey:@"dpLevel"] integerValue]];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
     
     if (tempPtId) self.ptId = tempPtId;
@@ -320,6 +339,7 @@
     if ([tempPtRight integerValue] > 0) self.ptRight = tempPtRight;
     if (tempDpId) self.dpId = tempDpId;
     if (tempDpName) self.dpName = tempDpName;
+    if (tempDpLevel) self.dpLevel = tempDpLevel;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
 }
 
