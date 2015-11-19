@@ -43,7 +43,7 @@
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
                                isTemplate:(BOOL)isTemplate
                           completionBlock:(CompletionBlock)completionBlock;
-
+ 
 #pragma mark - 获取一个组织的所有成员信息
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
 - (void)requestDBAllUserListWithOrgId:(NSString *)orgId
@@ -108,12 +108,14 @@
  *  @param parentPtId      职位所属上级职位的id
  *  @param ptName          职位名称
  *  @param dpName          职位所属部门名称
+ *  @param dpLevel         职位所属部门等级
  *  @param completionBlock 返回结果block
  */
 - (void)createPositionWithOrgId:(NSString *)orgId
                      parentPtId:(NSString *)parentPtId
                          ptName:(NSString *)ptName
                          dpName:(NSString *)dpName
+                        dpLevel:(NSInteger)dpLevel
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人

@@ -292,55 +292,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                                                                                }]
                                               xmppStream:xmppStream];
 }
-/*
-- (void)_insertOrUpateOrgWithOrgId:(NSString *)orgId orgDic:(NSDictionary *)orgDic userDic:(NSDictionary *)userDic
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    
-    __weak typeof(self) weakSelf = self;
-    [_xmppOrgStorage insertOrUpdateOrgInDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                @"orgId":@"id",
-                                                                                                @"orgName":@"name",
-                                                                                                @"orgPhoto":@"photo",
-                                                                                                @"orgState":@"status",
-                                                                                                @"orgStartTime":@"start_time",
-                                                                                                @"orgEndTime":@"end_time",
-                                                                                                @"orgAdminJidStr":@"admin",
-                                                                                                @"orgDescription":@"description",
-                                                                                                @"ptTag":@"job_tag",
-                                                                                                @"userTag":@"member_tag",
-                                                                                                @"orgRelationShipTag":@"link_tag",
-                                                                                                }]
-                                    xmppStream:xmppStream
-                                     userBlock:^(NSString *orgId) {
-                                         
-                                         // 0.request all user info from server
-                                         
-                                         [weakSelf requestServerAllUserListWithOrgId:orgId];
-                                         
-                                     } positionBlock:^(NSString *orgId) {
-                                         
-                                         // 1.request all position info from server
-                                         
-                                         [weakSelf requestServerAllPositionListWithOrgId:orgId];
-                                         
-                                     } relationBlock:^(NSString *orgId) {
-                                         
-                                         // 2.request all relation org info from server
-                                         
-                                         [weakSelf requestServerAllRelationListWithOrgId:orgId];
-                                     }];
-    
-    [_xmppOrgStorage insertOrUpdateUserInDBWithOrgId:orgId dic:[userDic destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                                 @"userJidStr":@"jid",
-                                                                                                                 @"orgId":@"orgId",
-                                                                                                                 @"ptId":@"job_id",
-                                                                                                                 @"ptName":@"job_name"
-                                                                                                                 }]
-                                          xmppStream:xmppStream];
-}
-*/
+
 - (NSArray *)_specifiedValuesWithKey:(NSString *)key fromDics:(NSArray *)dics
 {
     if (!dispatch_get_specific(moduleQueueTag)) return nil;
@@ -1825,6 +1777,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                      parentPtId:(NSString *)parentPtId
                          ptName:(NSString *)ptName
                          dpName:(NSString *)dpName
+                        dpLevel:(NSInteger)dpLevel
                 completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
@@ -1850,7 +1803,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             // 3. Create the request iq
             
-            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project",parentPtId,@"parent_job_id",ptName,@"job_name",dpName,@"part", nil];
+            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project",parentPtId,@"parent_job_id",ptName,@"job_name",dpName,@"part", @(dpLevel), @"part_level", nil];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -2980,7 +2933,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  <project xmlns="aft:project"  type="create">
                  {
                  "project":{"id":"xxx", "name":"xxx", "job_tag":"xxx", "member_tag":"xxx", "link_tag":"xxx", "start_time":"xxx"} ,
-                 "job":{"job_id":"xxx", "job_name":"xxx", "left":"xxx", "right":"xxx", "part":"xxx"},
+                 "job":{"job_id":"xxx", "job_name":"xxx", "left":"xxx", "right":"xxx", "part":"xxx","part_level":"xxx"},
                  "member":{"jid":"xxx"},
                  }
                  </project>
@@ -3058,7 +3011,8 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 /*
                  <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
                  <project xmlns="aft:project"  type="list_children_jobs">
-                 {project_id_value:[{"job_id":"123", "job_name":"", "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx"} ]}
+                 {"project":"xxx", "job":[{"job_id":"123", "job_name":"", "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx", "part_level":"xxx"} ]}
+                 //{project_id_value:[{"job_id":"123", "job_name":"", "part":"xxx"}, {"job_id":"356", "job_name":"xxx", "part":"xxx", "part_level":"xxx"} ]}
                  </project>
                  </iq>
                  */
@@ -3085,7 +3039,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  <project xmlns="aft:project"  type="add_job">
                  {
                     "project":"12345",
-                    "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}
+                    "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx",, "part_level":"xxx"}
                  }
                  </project>
                  </iq>
@@ -3390,48 +3344,6 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
                 // 2.向数据库获取数据
                 [self _executeRequestBlockWithRequestKey:requestkey valueObject:photoURL];
-                
-                /*
-                __weak typeof(self) weakSelf = self;
-                
-                [_xmppOrgStorage insertOrUpdateOrgInDBWith:[orgDic destinationDictionaryWithNewKeysMapDic:@{
-                                                                                                            @"orgId":@"id",
-                                                                                                            @"orgName":@"name",
-                                                                                                            @"orgState":@"status",
-                                                                                                            @"orgStartTime":@"start_time",
-                                                                                                            @"orgEndTime":@"end_time",
-                                                                                                            @"orgAdminJidStr":@"admin",
-                                                                                                            @"orgDescription":@"description",
-                                                                                                            @"ptTag":@"job_tag",
-                                                                                                            @"userTag":@"member_tag",
-                                                                                                            @"orgRelationShipTag":@"link_tag"
-                                                                                                            }]
-                                                xmppStream:xmppStream
-                                                 userBlock:^(NSString *orgId) {
-                                                     
-                                                     // 0.request all user info from server
-                                                     
-                                                     [weakSelf requestServerAllUserListWithOrgId:orgId];
-                                                     
-                                                 } positionBlock:^(NSString *orgId) {
-                                                     
-                                                     // 1.request all position info from server
-                                                     
-                                                     [weakSelf requestServerAllPositionListWithOrgId:orgId];
-                                                     
-                                                 } relationBlock:^(NSString *orgId) {
-                                                     
-                                                     // 2.request all relation org info from server
-                                                     
-                                                     [weakSelf requestServerAllRelationListWithOrgId:orgId];
-                                                 }];
-                 
-                // 2.向数据库获取数据
-                id data = [_xmppOrgStorage orgPhotoWithOrgId:orgId xmppStream:xmppStream];
-                
-                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
-                 
-                 */
 
                 return YES;
             }else if([projectType isEqualToString:@"set_photo"]){
