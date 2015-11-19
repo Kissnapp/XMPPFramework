@@ -698,7 +698,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
                                                   inManagedObjectContext:moc];
         
         
-        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"ptLeft" ascending:YES];
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"dpLevel" ascending:YES];
         NSArray *sortDescriptors = @[sd1];
         
         // init a NSFetchRequest instance
