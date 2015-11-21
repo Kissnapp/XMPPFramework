@@ -387,6 +387,9 @@
             } else if ([key isEqualToString:@"name"]) {
                 NSString *tempName = [NSString stringWithFormat:@"%@", [dic objectForKey:@"name"]];
                 newCloud.name = tempName;
+            } else if ([key isEqualToString:@"dest_parent"]) {
+                NSNumber *tempParent = [NSNumber numberWithInteger:[[dic objectForKey:@"dest_parent"] integerValue]];
+                newCloud.parent = tempParent;
             }
         }
         NSLog(@"newCloud = %@", newCloud);

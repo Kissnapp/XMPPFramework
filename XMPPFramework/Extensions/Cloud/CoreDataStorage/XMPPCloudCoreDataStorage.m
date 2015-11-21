@@ -170,8 +170,8 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 
-#pragma mark - 4.删除文件夹/删除文件
-- (id)cloudDeleteWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream
+#pragma mark - 3.cloudID查找数据 (删除,重命名)
+- (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 {
     __block NSArray *allUsers = nil;
     

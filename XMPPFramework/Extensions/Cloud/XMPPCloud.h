@@ -30,7 +30,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 3.添加文件
+#pragma mark - 3.添加文件 OK
 - (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
 
@@ -46,7 +46,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users hasShared:(BOOL)hasShared block:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 7.移动 **
+#pragma mark - 7.移动 OK
 - (void)requestCloudMoveWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID destinationParent:(NSString *)destinationParent folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
 
@@ -56,7 +56,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 9.获取共享人员列表 OK
 - (void)requestCloudSharedListWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
-#pragma mark - 10.获取文件版本
+#pragma mark - 10.获取文件版本 问题
 /**
  
  <iq type="get" id="1234" >
@@ -76,7 +76,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 
-#pragma mark - 11.网盘文件下载:TOFIX
+#pragma mark - 11.网盘文件下载:TOFIX 问题
 /**
  
  <iq type="get" id="1234" >
@@ -95,49 +95,19 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 
-#pragma mark - 12.获取日志 问题
-/**
- <iq type="get" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="get_log">
- {"before"/"after":"1", "count:"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="get_log">    %%规定一下count最大为20条，这样可以在一个结果里全部返回，不用一条一条的返回。
- {"count":"xxx", "logs":[{"id":"xxx", "jid":"xxx", "operation":"xxx", "text":"xxx", "time":"xxx", "project":"xxx"}, ...] } %% logs 需要客户端自己根据id去升序排序。
- </query>
- </iq>
- */
-- (void)requestCloudGetLogWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before block:(CompletionBlock)completionBlock;
+#pragma mark - 12.获取日志
+- (void)requestCloudGetLogWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 13.获取我的回收站
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="get_trash">
- {"before"/"after":1, "count":"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="get_trash">    %%规定一下count最大为20条，这样可以在一个结果里全部返回，不用一条一条的返回。
- {"count":"xxx", "files":[] } %% logs 需要客户端自己根据id去升序排序。
- </query>
- </iq>
- 
- 注意：如果file的location里有"@"请替换为自己的姓名。
- 
- */
-
+- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 14.清空回收站
 - (void)requestCloudClearTrashWithProjectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 15.恢复
+#pragma mark - 15.恢复 问题
 /**
  
  <iq type="set" id="1234" >
@@ -178,7 +148,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark 2.创建文件夹
 - (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 
-#pragma mark - 4.删除文件夹/删除文件
-- (id)cloudDeleteWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
+#pragma mark - 3.cloudID查找数据 (删除,重命名)
+- (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 
 @end
