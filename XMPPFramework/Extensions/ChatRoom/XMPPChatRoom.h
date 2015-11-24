@@ -93,10 +93,10 @@
 @property (assign, readonly) BOOL hasChatRoomList;
 
 /**
- *  fetch all the chat room list from the server, 
+ *  fetch all the chat room list from the server,
  *  NOTE:This method is not a method that fetch list from the CoreData system
  */
-- (void)fetchChatRoomListFromServer;
+- (void)fetchChatRoomListFromServerWithSinceId:(NSString *)sinceId;
 /**
  *  fetch the Chat Room From Server With the given bare chat room jid string
  *
@@ -108,7 +108,7 @@
  *
  *  @param bareChatRoomJidStr The given bare chat room jid str
  */
-- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr sinceId:(NSString *)sinceId;
 /**
  *  create room with a nick name
  *
@@ -287,7 +287,8 @@
                completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取所有聊天室信息
-- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
+- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
+                  completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
 - (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type;
 
 #pragma mark - 获取所有人员信息
