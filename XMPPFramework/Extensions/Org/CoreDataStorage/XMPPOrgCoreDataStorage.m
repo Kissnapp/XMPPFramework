@@ -1625,6 +1625,29 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return photoURL;
 }
 
+- (id)adminBareJidStrWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
+{
+    __block id admin = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgCoreDataStorageObject *org = [XMPPOrgCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                             withOrgId:orgId
+                                                                                      streamBareJidStr:streamBareJidStr];
+        
+        if (org) {
+            admin = org.orgAdminJidStr;
+        }
+        
+        
+    }];
+    
+    return admin;
+}
+
 - (BOOL)bareJidStr:(NSString *)bareJidStr
 isSubPositionOfBareJidStr:(NSString *)fatherBareJidStr
            inOrgId:(NSString *)orgId

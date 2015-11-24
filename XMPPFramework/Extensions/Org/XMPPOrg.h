@@ -243,6 +243,15 @@
  */
 - (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId;
 
+/**
+ *  在本地数据库查询一个项目的管理员
+ *
+ *  @param orgId 项目id
+ *
+ *  @return 管理员的对象（CoreData NSmanagerObject）
+ */
+- (id)requestDBAdminInfoFromOrgId:(NSString *)orgId;
+
 
 #pragma mark - 创建新的职位信息
 /**
@@ -524,5 +533,7 @@
 - (id)photoURLWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (BOOL)bareJidStr:(NSString *)bareJidStr isSubPositionOfBareJidStr:(NSString *)fatherBareJidStr inOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)adminBareJidStrWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end
