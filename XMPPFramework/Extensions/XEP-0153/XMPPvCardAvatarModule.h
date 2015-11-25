@@ -50,14 +50,29 @@
 - (id)initWithvCardTempModule:(XMPPvCardTempModule *)xmppvCardTempModule  dispatchQueue:(dispatch_queue_t)queue;
 
 
+
 - (NSData *)photoDataForJID:(XMPPJID *)jid;
 - (NSString *)phoneNumberForJID:(XMPPJID *)jid;
 - (NSString *)emailAddressForJID:(XMPPJID *)jid;
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)photoURLForBareJidStr:(NSString *)bareJidStr;
 
-- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock;
-- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock;
+
+- (void)fetchPhotoDataWithBareJidStr:(NSString *)bareJidStr
+                     completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchPhoneNumberWithBareJidStr:(NSString *)bareJidStr
+                       completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchEmailAddressWithBareJidStr:(NSString *)bareJidStr
+                              completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchNickNameWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchPhotoURLWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock;
+
+- (void)vCardWithBareJidStr:(NSString *)bareJidStr
+            completionBlock:(CompletionBlock)completionBlock;
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr
+                   completionBlock:(CompletionBlock)completionBlock;
 
 @end
 
