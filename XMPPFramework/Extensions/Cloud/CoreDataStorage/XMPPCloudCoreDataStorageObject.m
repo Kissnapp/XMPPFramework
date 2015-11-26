@@ -28,6 +28,7 @@
 @dynamic version_count;
 @dynamic streamBareJidStr;
 @dynamic folderIsMe;
+@dynamic hasBeenDelete;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -255,6 +256,22 @@
     [self didChangeValueForKey:@"version_count"];
 }
 
+
+- (NSNumber *)hasBeenDelete
+{
+    [self willAccessValueForKey:@"hasBeenDelete"];
+    NSNumber *value = [self primitiveValueForKey:@"hasBeenDelete"];
+    [self didAccessValueForKey:@"hasBeenDelete"];
+    return value;
+}
+- (void)setHasBeenDelete:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"hasBeenDelete"];
+    [self setPrimitiveValue:value forKey:@"hasBeenDelete"];
+    [self didChangeValueForKey:@"hasBeenDelete"];
+}
+
+
 //- (NSNumber *)download
 //{
 //    [self willAccessValueForKey:@"download"];
@@ -366,8 +383,7 @@
         result = YES;
     } else {
         XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-        NSLog(@"newCloud = %@", newCloud);
-        result = YES;
+        if (newCloud) result = YES;
     }
     return result;
 }
@@ -390,14 +406,15 @@
             } else if ([key isEqualToString:@"dest_parent"]) {
                 NSNumber *tempParent = [NSNumber numberWithInteger:[[dic objectForKey:@"dest_parent"] integerValue]];
                 newCloud.parent = tempParent;
+            } else if ([key isEqualToString:@"hasBeenDelete"]) {
+                NSNumber *tempHasBeenDelete = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDelete"] integerValue]];
+                newCloud.hasBeenDelete = tempHasBeenDelete;
             }
         }
-        NSLog(@"newCloud = %@", newCloud);
         result = YES;
     } else {
         XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-        NSLog(@"newCloud = %@", newCloud);
-        result = YES;
+        if (newCloud) result = YES;
     }
     return result;
 }
@@ -440,6 +457,7 @@
     NSString *tempUuid = [dic objectForKey:@"uuid"];
     NSString *tempSize = [dic objectForKey:@"size"];
     NSString *tempVersion_count = [dic objectForKey:@"version_count"];
+    NSNumber *tempHasBeenDelete = [dic objectForKey:@"hasBeenDelete"];
     
     //    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
     //    NSNumber *tempDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"download"] boolValue]];
@@ -459,7 +477,8 @@
     if (tempUuid)               self.uuid = tempUuid;
     if (tempSize)               self.size = tempSize;
     if (tempVersion_count)      self.version_count = tempVersion_count;
-
+    if (tempHasBeenDelete)      self.hasBeenDelete = tempHasBeenDelete;
+    
     //    if (tempDownload)           self.download = tempDownload;
     //    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
 }

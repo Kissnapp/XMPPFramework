@@ -37,6 +37,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSString * version_count;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * folderIsMe;
+@property (nonatomic, retain) NSNumber * hasBeenDelete;
 
 
 #pragma mark - 查找

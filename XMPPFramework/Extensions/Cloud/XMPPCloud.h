@@ -100,7 +100,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 #pragma mark - 13.获取我的回收站
-- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before block:(CompletionBlock)completionBlock;
+- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 14.清空回收站
