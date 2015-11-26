@@ -118,10 +118,13 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 - (void)handleCloudListFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
+    
     NSArray *serverDatas = [self _handleCloudListFolderDatasWithDicDatas:dicDatas projectID:projectID];
     
-    for ( NSDictionary *dicData in serverDatas ) {
-        [_xmppCloudStorage insertCloudDic:dicData xmppStream:xmppStream];
+    [self _handleCloudListFolderDeleteDatasWithDicDatas:dicDatas serverDatas:serverDatas projectID:projectID];
+    
+    for (NSDictionary *dic in serverDatas) {
+        [_xmppCloudStorage insertCloudDic:dic xmppStream:xmppStream];
     }
     
 }
@@ -266,6 +269,36 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     return [NSArray arrayWithArray:arrayM];
 }
 
+- (void)_handleCloudListFolderDeleteDatasWithDicDatas:(NSDictionary *)dicDatas serverDatas:(NSArray *)serverDatas projectID:(NSString *)projectID
+{
+    NSArray *DBDatas = [_xmppCloudStorage cloudGetFolderWithParent:[dicDatas objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+    if (DBDatas.count) { // 比较
+        for (XMPPCloudCoreDataStorageObject *DBCloud in DBDatas) {
+            
+            int count = 0;
+            for (NSDictionary *serDic in serverDatas) {
+                if ([DBCloud.cloudID isEqualToString:[serDic valueForKey:@"id"]]) {
+                    count++;
+                    break;
+                }
+            }
+            
+            if (count == 0) { // 实体有删除，更新数据库
+                NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+                [dicM setObject:DBCloud.cloudID forKey:@"id"];
+                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
+                [_xmppCloudStorage updateSpecialCloudDic:dicM xmppStream:xmppStream];
+                
+            } else if (count > 0) { // 实体没有删除，数据库无需处理
+                
+            }
+            
+        }
+        
+    }
+
+}
+
 
 #pragma mark 2.处理创建文件夹 OK
 - (void)handleCloudAddFolderDatasWithArrDatas:(NSArray *)arrDatas projectID:(NSString *)projectID
@@ -391,9 +424,17 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    [_xmppCloudStorage deleteClouDic:dicData xmppStream:xmppStream];
+    NSDictionary *serverDic = [self _handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
+    
+    [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
 }
 
+- (NSDictionary *)_handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dicData];
+    [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
+    return [NSDictionary dictionaryWithDictionary:dicM];
+}
 
 #pragma mark 5.重命名 OK
 - (void)handleCloudRenameDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
@@ -1217,7 +1258,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
  注意：如果file的location里有"@"请替换为自己的姓名。
  
  */
-- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before block:(CompletionBlock)completionBlock
+- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
 {
     dispatch_block_t block = ^{@autoreleasepool{
         if (!dispatch_get_specific(moduleQueueTag)) return;
@@ -1242,6 +1283,16 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
              */
             
             // 3. Create the request iq
+            NSString *key;
+            NSString *attribute;
+            if (after.length <= 0) {
+                attribute = before;
+                key = @"before";
+            } else if (before.length <= 0) {
+                attribute = after;
+                key = @"after";
+            }
+            
             NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:count, @"count", before, @"before", nil];
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
@@ -1544,14 +1595,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
                     NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
-                    id temp;
-                    if (!folder.count) {
-                        temp = dicData;
-                    } else {
-                        temp = folder;
-                    }
                     // 3.用block返回数据
-                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:temp];
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
                 }
                 return YES;
             }
@@ -1728,15 +1773,12 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-//                [self handleCloudMoveDatasWithDicData:dicData projectID:projectID];
-//                
-//                // 1.判断是否向逻辑层返回block
-//                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
-//                    // 2.向数据库获取数据
-//                    NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
-//                    // 3.用block返回数据
-//                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-//                }
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 2.用block返回数据
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
                 return YES;
             }
             
@@ -1761,15 +1803,12 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-                //                [self handleCloudMoveDatasWithDicData:dicData projectID:projectID];
-                //
-                //                // 1.判断是否向逻辑层返回block
-                //                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
-                //                    // 2.向数据库获取数据
-                //                    NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
-                //                    // 3.用block返回数据
-                //                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-                //                }
+
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 3.用block返回数据
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
                 return YES;
             }
             

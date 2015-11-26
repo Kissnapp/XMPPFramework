@@ -128,8 +128,11 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         if (!moc) return;
         if (!streamBareJidStr) return;
         
+        NSNumber *parentNum = [NSNumber numberWithInteger:[parent integerValue]];
+        NSNumber *hasBeenDelete = [NSNumber numberWithBool:NO];
+        
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@",streamBareJidStr, projectID, [NSNumber numberWithInteger:[parent integerValue]]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND parent == %@ AND hasBeenDelete == %@",streamBareJidStr, projectID, parentNum, hasBeenDelete];
         NSSortDescriptor *sd = [[NSSortDescriptor alloc] initWithKey:@"cloudID" ascending:YES];
         NSArray *sortDescriptors = [NSArray arrayWithObjects:sd, nil];
         [fetchRequest setEntity:entity];
