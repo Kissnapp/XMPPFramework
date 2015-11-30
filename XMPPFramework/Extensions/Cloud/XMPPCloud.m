@@ -455,14 +455,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
 }
 
-#pragma mark 7.移动 OK
-- (void)handleCloudMoveDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
-}
-
 - (NSDictionary *)_handleCloudShareDatasWithDicData:(NSDictionary *)dicData
 {
     /**
@@ -502,7 +494,36 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     return [NSDictionary dictionaryWithDictionary:dicM];
 }
 
+
+#pragma mark 7.移动 OK
+- (void)handleCloudMoveDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
+}
+
+
+
 #pragma mark 9.获取共享人员列表 无需存储 OK
+
+
+#pragma mark 15 恢复
+- (void)handleCloudRecoverFileDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    NSDictionary *dicData = [self _handleCloudRecoverFileDatasWithDicDatas:dicDatas projectID:projectID];
+    
+    [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
+}
+
+- (NSDictionary *)_handleCloudRecoverFileDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+{
+    NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dicDatas];
+    [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"hasBeenDelete"];
+    return [NSDictionary dictionaryWithDictionary:dicM];
+}
 
 
 #pragma mark - 二. 网盘网络接口
@@ -972,7 +993,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             
             // 3. Create the request iq
             NSDictionary *templateDic;
-            NSLog(@"hasShared --- %d", hasShared);
             if (hasShared) {
                 NSArray *temp =  [NSArray array];
                 templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", temp, @"users", nil];
@@ -1368,6 +1388,81 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                                                                       xmlns:@"aft:library"
                                                                   attribute:@{@"subtype":@"clear_trash", @"project":projectID}
                                                                 stringValue:nil];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"set"
+                                                             id:requestKey
+                                                   childElement:cloudElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
+
+#pragma mark - 15.恢复
+/**
+ 
+ <iq type="set" id="1234" >
+ <query xmlns="aft:library" project="49" subtype="recover_file">
+ {"id":"9", "name":"全体通过录2", "dest_parent":"2"}  % name may be a new name as dest folder has duplication name.
+ </query>
+ </iq>
+ 
+ <iq type="result" id="1234" >
+ <query xmlns="aft:library" project="xxx" subtype="recover_file">
+ {"id":"xxx", "dest_parent":"xxx"}
+ </query>
+ </iq>
+ 
+ */
+- (void)requestCloudRecoverFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID name:(NSString *)name destParent:(NSString *)destParent block:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        if (!dispatch_get_specific(moduleQueueTag)) return;
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            
+            // 0. Create a key for storaging completion block
+            //            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /**
+             <iq type="set" id="1234" >
+             <query xmlns="aft:library" project="49" subtype="recover_file">
+             {"id":"9", "name":"全体通过录2", "dest_parent":"2"}  % name may be a new name as dest folder has duplication name.
+             </query>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", name, @"name", destParent, @"dest_parent", nil];
+            
+            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
+                                                                      xmlns:@"aft:library"
+                                                                  attribute:@{@"subtype":@"recover_file", @"project":projectID}
+                                                                stringValue:[templateDic JSONString]];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
                                                              to:nil
@@ -1842,7 +1937,34 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-            
+#pragma mark - 14.recover_file
+            else if ([projectType isEqualToString:@"recover_file"]) {
+                if ([[iq type] isEqualToString:@"error"]) {
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",CLOUD_REQUEST_ERROR_XMLNS]];
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    return YES;
+                }
+                
+                /**
+                 <iq type="result" id="1234" >
+                 <query xmlns="aft:library" project="xxx" subtype="recover_file">
+                 {"id":"xxx", "dest_parent":"xxx"}
+                 </query>
+                 </iq>
+                 */
+                
+                id data = [[project stringValue] objectFromJSONString];
+                NSDictionary *dicData = (NSDictionary *)data;
+                [self handleCloudRecoverFileDatasWithDicDatas:dicData projectID:projectID];
+
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 3.用block返回数据
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
+                return YES;
+            }
             
             
         }
