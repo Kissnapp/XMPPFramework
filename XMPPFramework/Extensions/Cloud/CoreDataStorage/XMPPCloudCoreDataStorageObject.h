@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPManagedObject.h"
+#import <CoreData/CoreData.h>
 
 typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
     XMPPCloudCoreDataStorageObjectFolderTypeRoot = -1,
@@ -19,7 +20,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
     XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret
 };
 
-@interface XMPPCloudCoreDataStorageObject : XMPPManagedObject
+@interface XMPPCloudCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString * cloudID;
 @property (nonatomic, retain) NSDate * createTime;

@@ -9,9 +9,25 @@
 #import "XMPPCloudCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPCloud.h"
+#import "XMPPLogging.h"
+
+
+
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
+
+#if DEBUG
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
+#else
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+#endif
+
 
 #define AssertPrivateQueue() \
 NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
+
 
 @interface XMPPCloudCoreDataStorage () <XMPPCloudStorage>
 @property (nonatomic, assign) int index;
@@ -39,6 +55,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 
 - (void)commonInit
 {
+    XMPPLogTrace();
     [super commonInit];
     
     // This method is invoked by all public init methods of the superclass
