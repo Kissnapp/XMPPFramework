@@ -240,6 +240,25 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 
 }
 
+- (void)fromXMPPMessage:(XMPPMessage *)message
+{
+    XMPPExtendMessage *copyExtendMessage = [XMPPExtendMessage xmppExtendMessageFromElement:message];
+    
+    self.msgType = copyExtendMessage.msgType;
+    self.msgId = copyExtendMessage.msgId;
+    self.msgFrom = copyExtendMessage.msgFrom;
+    self.msgTo = copyExtendMessage.msgTo;
+    self.msgSender = copyExtendMessage.msgSender;
+    self.msgTime = copyExtendMessage.msgTime;
+    
+    self.msgBeenRead = copyExtendMessage.msgBeenRead;
+    self.msgIsGroup = copyExtendMessage.msgIsGroup;
+    self.msgOutgoing = copyExtendMessage.msgOutgoing;
+    self.msgSendState = copyExtendMessage.msgSendState;
+    
+    self.msgSubData = copyExtendMessage.msgSubData;
+}
+
 
 - (void)fromXMPPMessageCoreDataStorageObject:(XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObject
 {
