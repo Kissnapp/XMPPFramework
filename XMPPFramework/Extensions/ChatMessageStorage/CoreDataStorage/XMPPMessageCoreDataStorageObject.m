@@ -7,8 +7,7 @@
 //
 
 #import "XMPPMessageCoreDataStorageObject.h"
-#import "XMPPExtendMessage.h"
-#import "XMPPBaseMessageObject.h"
+
 
 @implementation XMPPMessageCoreDataStorageObject
 

@@ -18,6 +18,13 @@
 
 @implementation XMPPBaseMessageObject
 
+
++ (XMPPBaseMessageObject *)xmppBaseMessageObjectFromElement:(NSXMLElement *)element
+{
+    object_setClass(element, [XMPPBaseMessageObject class]);
+    return (XMPPBaseMessageObject *)element;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark NSCoding protocol

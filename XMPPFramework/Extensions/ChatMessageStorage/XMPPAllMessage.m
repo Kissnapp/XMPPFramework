@@ -544,7 +544,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 
 }
-- (void)sendXMPPExtendMessageObject:(XMPPExtendMessage *)message
+- (void)sendXMPPExtendMessage:(XMPPExtendMessage *)message
 {
     dispatch_block_t block = ^{
         
@@ -729,7 +729,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     if ([message isChatMessageWithInfo]) {
         
-        NSString *messageID = [[XMPPExtendMessage xmppExtendMessageFromXMPPMessage:message] msgId];
+        NSString *messageID = [(XMPPExtendMessage *)message msgId];
         [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceed];
         
         double delayInSeconds = 1.0;
@@ -755,7 +755,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     if ([message isChatMessageWithInfo]) {
         
-        NSString *messageID = [[XMPPExtendMessage xmppExtendMessageFromXMPPMessage:message] msgId];
+        NSString *messageID = [(XMPPExtendMessage *)message msgId];
         
         [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailed];
         
@@ -790,7 +790,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 
                 __strong typeof(weakSelf) strongSelf = weakSelf;
                 
-                XMPPAudioMessageObject *audio = newMessage.msgSubData;
+                XMPPAudioMessageObject *audio = [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:(NSXMLElement *)newMessage.msgSubData];
                 
                 NSData *fileData = audio.fileData;
                 NSString *filePath = [strongSelf filePathWithName:audio.fileName];

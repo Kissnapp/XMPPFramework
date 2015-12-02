@@ -9,9 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
-
-@class XMPPExtendMessage;
-@class XMPPBaseMessageObject;
+#import "XMPPExtendMessage.h"
+#import "XMPPBaseMessageObject.h"
 
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
 

@@ -34,7 +34,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #define MESSAGE_OUTGOING_ATTRIBUTE_NAME         @"outgoing"
 
 #define EXTEND_MESSAGE_TO_USER_ATTRIBUTE_NAME       @"to"
-#define EXTEND_MESSAGE_FROM_USER_ATTRIBUTE_NAME     @"form"
+#define EXTEND_MESSAGE_FROM_USER_ATTRIBUTE_NAME     @"from"
 #define EXTEND_MESSAGE_READ_STATUS_ATTRIBUTE_NAME   @"beenRead"
 #define EXTEND_MESSAGE_SEND_STATE_ATTRIBUTE_NAME    @"sendState"
 
@@ -71,7 +71,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 #pragma mark - class methods
 + (XMPPExtendMessage *)xmppExtendMessage
 {
-    NSXMLElement *messageElement = [XMPPMessage message/*WithType:@"chat"*/];
+    NSXMLElement *messageElement = [XMPPMessage messageWithType:@"chat"];
     return [XMPPExtendMessage xmppExtendMessageFromElement:messageElement];
 }
 
@@ -164,9 +164,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
                       sender:(NSString *)sender
                      subData:(id)subData
 {
-    self = [super init];
+    self = [XMPPExtendMessage xmppExtendMessage];
     
     if (self) {
+        [self createMessageId];
         self.msgFrom = from;
         self.msgTo = to;
         self.msgType = type;
@@ -348,14 +349,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
 - (void)setMsgFrom:(NSString *)msgFrom
 {
     if (msgFrom) {
-        
         [self addAttributeWithName:EXTEND_MESSAGE_FROM_USER_ATTRIBUTE_NAME stringValue:msgFrom];
     }
 }
 
 - (NSString *)msgTo
 {
-    return [self attributeStringValueForName:EXTEND_MESSAGE_TO_USER_ATTRIBUTE_NAME];
+    return [[self to] bare];
 }
 
 - (void)setMsgTo:(NSString *)msgTo
@@ -422,7 +422,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     if (msgTime) {
         
         NSXMLElement *infoElement = [self infoElementWithCreate:YES];
-        [infoElement addAttributeWithName:MESSAGE_ID_ATTRIBUTE_NAME stringValue:[msgTime DateToString]];
+        [infoElement addAttributeWithName:MESSAGE_TIME_ATTRIBUTE_NAME stringValue:[msgTime LocalDateToUTCString]];
     }
 }
 
@@ -525,10 +525,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
             }
         }
         
-        result = (XMPPBaseMessageObject *)subDataElement;
+        result = [XMPPBaseMessageObject xmppBaseMessageObjectFromElement:subDataElement];
     }
     
-    return nil;
+    return [result copy];
 }
 
 - (void)setMsgSubData:(XMPPBaseMessageObject *)msgSubData
@@ -538,8 +538,77 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     // 删除旧的msgSubData节点
     [infoElement removeElementsForName:[msgSubData name]];
     
-    // 添加新的
-    [infoElement addChild:msgSubData];
+    if (msgSubData) {
+        // 添加新的
+        [infoElement addChild:[msgSubData copy]];
+    }
 }
+
+#pragma mark - NSCoding methods
+- (id)initWithCoder:(NSCoder *)coder
+{
+    NSString *xmlString;
+    if([coder allowsKeyedCoding])
+    {
+        if([coder respondsToSelector:@selector(requiresSecureCoding)] &&
+           [coder requiresSecureCoding])
+        {
+            xmlString = [coder decodeObjectOfClass:[NSString class] forKey:@"xmlString"];
+        }
+        else
+        {
+            xmlString = [coder decodeObjectForKey:@"xmlString"];
+        }
+    }
+    else
+    {
+        xmlString = [coder decodeObject];
+    }
+    
+    // The method [super initWithXMLString:error:] may return a different self.
+    // In other words, it may [self release], and alloc/init/return a new self.
+    //
+    // So to maintain the proper class (XMPPIQ, XMPPMessage, XMPPPresence, etc)
+    // we need to get a reference to the class before invoking super.
+    
+    Class selfClass = [self class];
+    
+    if ((self = [super initWithXMLString:xmlString error:nil]))
+    {
+        object_setClass(self, selfClass);
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    NSString *xmlString = [self compactXMLString];
+    
+    if([coder allowsKeyedCoding])
+    {
+        [coder encodeObject:xmlString forKey:@"xmlString"];
+    }
+    else
+    {
+        [coder encodeObject:xmlString];
+    }
+}
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Copying
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSXMLElement *elementCopy = [XMPPExtendMessage xmppExtendMessageFromElement:[super copyWithZone:zone]];
+    object_setClass(elementCopy, [self class]);
+    
+    return elementCopy;
+}
+
 
 @end
