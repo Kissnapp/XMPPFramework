@@ -8,33 +8,44 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPAdditionalCoreDataMessageObject.h"
+#import "XMPPUnReadMessageCoreDataStorageObject.h"
+
+@class XMPPExtendMessage;
+@class XMPPBaseMessageObject;
 
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
 
+@property (nonatomic, retain) NSString                              * msgId;
+@property (nonatomic, retain) NSString                              * sender;
 @property (nonatomic, retain) NSString                              * bareJidStr;
-@property (nonatomic, retain) NSNumber                              * messageType;
-@property (nonatomic, retain) NSNumber                              * hasBeenRead;
-@property (nonatomic, retain) NSNumber                              * isGroupChat;
-@property (nonatomic, retain) NSString                              * messageID;
-@property (nonatomic, retain) NSDate                                * messageTime;
-@property (nonatomic, retain) NSNumber                              * sendFromMe;
 @property (nonatomic, retain) NSString                              * streamBareJidStr;
-@property (nonatomic, retain) XMPPAdditionalCoreDataMessageObject   * additionalMessage;
+
+@property (nonatomic, retain) NSNumber                              * msgType;
+@property (nonatomic, retain) NSNumber                              * outgoing;
+@property (nonatomic, retain) NSNumber                              * beenRead;
+@property (nonatomic, retain) NSNumber                              * sendState;
+@property (nonatomic, retain) NSNumber                              * isGroup;
+
+@property (nonatomic, retain) NSDate                                * msgTime;
+@property (nonatomic, retain) XMPPBaseMessageObject                 * subData;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withPredicate:(NSPredicate *)predicate;
+                         predicate:(NSPredicate *)predicate;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withMessageID:(NSString *)messageID
+                             msgId:(NSString *)msgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-             withMessageDictionary:(NSDictionary *)messageDic
+                            active:(BOOL)active
+                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                             withMessageDictionary:(NSDictionary *)messageDic
+                                            active:(BOOL)active
+                                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                                   streamBareJidStr:(NSString *)streamBareJidStr;
+
+- (void)updateFromXMPPExtendMessage:(XMPPExtendMessage *)xmppExtendMessage streamBareJidStr:(NSString *)streamBareJidStr;
 
 @end

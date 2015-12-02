@@ -108,9 +108,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     return result;
 }
-- (XMPPMessageSendStatusType)xmppMessageSendStatusWithMessageID:(NSString *)messageID
+- (XMPPMessageSendState)xmppMessageSendStatusWithMessageID:(NSString *)messageID
 {
-    __block XMPPMessageSendStatusType result = XMPPMessageSendingType;
+    __block XMPPMessageSendState result = XMPPMessageSending;
     
     dispatch_block_t block = ^{ @autoreleasepool {
         

@@ -11,7 +11,9 @@
 #import "NSXMLElement+XMPP.h"
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPMessageCoreDataStorageObject.h"
-#import "XMPPExtendMessageObject.h"
+#import "XMPPExtendMessage.h"
+#import "XMPPFramework.h"
+
 
 
 /**
@@ -102,7 +104,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @param messageID The given messageID
  */
-- (void)readMessageWithMessageID:(NSString *)messageID;
+- (void)readMessageWithMessageId:(NSString *)msgId;
 /**
  *  Delete a message object with given message id
  *
@@ -114,7 +116,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @param messageID The given message id
  */
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType;
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendState)sendType;
 /**
  *  Set a message's hasBeenRead status into YES;
  *
@@ -139,21 +141,21 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  @param filePath The given file path
  *  @param message  The message which we will changed
  */
-- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessage:(XMPPExtendMessage *)message;
 /**
  *  Add a file Path to the XMPPExtendMessageObject in CoreData system
  *
  *  @param filePath  The given file path
  *  @param messageID The ID of a message which we will changed
  */
-- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID;
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageWithMessageId:(NSString *)messageId;
 /**
  *  update a file Path to the XMPPExtendMessageObject in CoreData system
  *
  *  @param filePath The given file path
  *  @param message  The message which we will changed
  */
-- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessage:(XMPPExtendMessage *)message;
 /**
  *  update a file Path to the XMPPExtendMessageObject in CoreData system
  *
@@ -186,19 +188,19 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *
  *  @param message The given XMPPExtendMessageObject object
  */
-- (void)saveAndSendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message;
 /**
  *  Save a XMPPExtendMessageObject object
  *
  *  @param message The given message object
  */
-- (void)saveXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message;
 /**
  *  Send a XMPPExtendMessageObject object
  *
  *  @param message The given message obejct
  */
-- (void)sendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message;
+- (void)sendXMPPExtendMessage:(XMPPExtendMessage *)message;
 /**
  *  Save the XMPPMessage object
  *  Notice:When we send a message we should call this method first
@@ -242,7 +244,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @required
 
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
-- (void)archiveMessage:(XMPPExtendMessageObject *)message active:(BOOL)active xmppStream:(XMPPStream *)stream;
+- (void)archiveMessage:(XMPPExtendMessage *)message active:(BOOL)active xmppStream:(XMPPStream *)stream;
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 
@@ -255,7 +257,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream;
 
 - (void)updateMessageWithNewFilePath:(NSString *)newFilePath messageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream;
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)xmppStream;
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendState)sendType xmppStream:(XMPPStream *)xmppStream;
 - (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream;
 - (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream;
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset xmppStream:(XMPPStream *)xmppStream;
@@ -276,7 +278,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPMessage:(XMPPMessage *)message;
 - (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage willSendXMPPMessage:(XMPPMessage *)message;
-- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPExtendMessage:(XMPPExtendMessageObject *)message;
+- (void)xmppAllMessage:(XMPPAllMessage *)xmppAllMessage didReceiveXMPPExtendMessage:(XMPPExtendMessage *)message;
 
 @end
 

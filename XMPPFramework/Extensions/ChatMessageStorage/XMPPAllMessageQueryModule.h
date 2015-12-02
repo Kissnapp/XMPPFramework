@@ -13,7 +13,7 @@
 #endif
 
 #import "XMPP.h"
-#import "XMPPExtendMessageObject.h"
+#import "XMPPExtendMessage.h"
 
 @class XMPPAllMessage;
 @class XMPPMessageCoreDataStorageObject;
@@ -32,7 +32,7 @@
 - (id)initWithAllMessage:(XMPPAllMessage *)xmppAllMessage  dispatchQueue:(dispatch_queue_t)queue;
 
 - (XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObjectWithMessageID:(NSString *)messageID;
-- (XMPPMessageSendStatusType)xmppMessageSendStatusWithMessageID:(NSString *)messageID;
+- (XMPPMessageSendState)xmppMessageSendStatusWithMessageID:(NSString *)messageID;
 
 
 @end

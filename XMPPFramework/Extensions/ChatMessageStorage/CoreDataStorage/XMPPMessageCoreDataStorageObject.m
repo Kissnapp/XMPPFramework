@@ -7,22 +7,57 @@
 //
 
 #import "XMPPMessageCoreDataStorageObject.h"
-#import "XMPPUnReadMessageCoreDataStorageObject.h"
+#import "XMPPExtendMessage.h"
+#import "XMPPBaseMessageObject.h"
 
 @implementation XMPPMessageCoreDataStorageObject
 
+@dynamic msgId;
+@dynamic sender;
 @dynamic bareJidStr;
-@dynamic hasBeenRead;
-@dynamic messageType;
-@dynamic isGroupChat;
-@dynamic messageID;
-@dynamic additionalMessage;
-@dynamic messageTime;
-@dynamic sendFromMe;
 @dynamic streamBareJidStr;
+@dynamic msgType;
+@dynamic outgoing;
+@dynamic beenRead;
+@dynamic sendState;
+@dynamic isGroup;
+@dynamic msgTime;
+@dynamic subData;
+
 
 //This the getter and setters
 #pragma mark - Getters/Setters methods
+
+- (NSString *)msgId
+{
+    [self willAccessValueForKey:@"msgId"];
+    NSString *value = [self primitiveValueForKey:@"msgId"];
+    [self didAccessValueForKey:@"msgId"];
+    return value;
+}
+
+- (void)setMsgId:(NSString *)value
+{
+    [self willChangeValueForKey:@"msgId"];
+    [self setPrimitiveValue:value forKey:@"msgId"];
+    [self didChangeValueForKey:@"msgId"];
+}
+
+- (NSString *)sender
+{
+    [self willAccessValueForKey:@"sender"];
+    NSString *value = [self primitiveValueForKey:@"sender"];
+    [self didAccessValueForKey:@"sender"];
+    return value;
+}
+
+- (void)setSender:(NSString *)value
+{
+    [self willChangeValueForKey:@"sender"];
+    [self setPrimitiveValue:value forKey:@"sender"];
+    [self didChangeValueForKey:@"sender"];
+}
+
 - (NSString *)bareJidStr
 {
     [self willAccessValueForKey:@"bareJidStr"];
@@ -36,94 +71,6 @@
     [self willChangeValueForKey:@"bareJidStr"];
     [self setPrimitiveValue:value forKey:@"bareJidStr"];
     [self didChangeValueForKey:@"bareJidStr"];
-}
-
-- (NSNumber *)hasBeenRead
-{
-    [self willAccessValueForKey:@"hasBeenRead"];
-    NSNumber *value = [self primitiveValueForKey:@"hasBeenRead"];
-    [self didAccessValueForKey:@"hasBeenRead"];
-    return value;
-}
-
-- (void)setHasBeenRead:(NSNumber *)value
-{
-    [self willChangeValueForKey:@"hasBeenRead"];
-    [self setPrimitiveValue:value forKey:@"hasBeenRead"];
-    [self didChangeValueForKey:@"hasBeenRead"];
-}
-- (NSNumber *)isGroupChat
-{
-    [self willAccessValueForKey:@"isGroupChat"];
-    NSNumber *value = [self primitiveValueForKey:@"isGroupChat"];
-    [self didAccessValueForKey:@"isGroupChat"];
-    return value;
-}
-
-- (void)setIsGroupChat:(NSNumber *)value
-{
-    [self willChangeValueForKey:@"isGroupChat"];
-    [self setPrimitiveValue:value forKey:@"isGroupChat"];
-    [self didChangeValueForKey:@"isGroupChat"];
-}
-- (XMPPAdditionalCoreDataMessageObject *)additionalMessage
-{
-    [self willAccessValueForKey:@"additionalMessage"];
-    XMPPAdditionalCoreDataMessageObject *value = [self primitiveValueForKey:@"additionalMessage"];
-    [self didAccessValueForKey:@"additionalMessage"];
-    return value;
-}
-
-- (void)setAdditionalMessage:(XMPPAdditionalCoreDataMessageObject *)value
-{
-    [self willChangeValueForKey:@"additionalMessage"];
-    [self setPrimitiveValue:value forKey:@"additionalMessage"];
-    [self didChangeValueForKey:@"additionalMessage"];
-}
-- (NSNumber *)sendFromMe
-{
-    [self willAccessValueForKey:@"sendFromMe"];
-    NSNumber *value = [self primitiveValueForKey:@"sendFromMe"];
-    [self didAccessValueForKey:@"sendFromMe"];
-    return value;
-}
-
-- (void)setSendFromMe:(NSNumber *)value
-{
-    [self willChangeValueForKey:@"sendFromMe"];
-    [self setPrimitiveValue:value forKey:@"sendFromMe"];
-    [self didChangeValueForKey:@"sendFromMe"];
-}
-
-- (NSNumber *)messageType
-{
-    [self willAccessValueForKey:@"messageType"];
-    NSNumber *value = [self primitiveValueForKey:@"messageType"];
-    [self didAccessValueForKey:@"messageType"];
-    return value;
-}
-
-- (void)setMessageType:(NSNumber *)value
-{
-    [self willChangeValueForKey:@"messageType"];
-    [self setPrimitiveValue:value forKey:@"messageType"];
-    [self didChangeValueForKey:@"messageType"];
-}
-
-
-- (NSDate *)messageTime
-{
-    [self willAccessValueForKey:@"messageTime"];
-    NSDate *value = [self primitiveValueForKey:@"messageTime"];
-    [self didAccessValueForKey:@"messageTime"];
-    return value;
-}
-
-- (void)setMessageTime:(NSDate *)value
-{
-    [self willChangeValueForKey:@"messageTime"];
-    [self setPrimitiveValue:value forKey:@"messageTime"];
-    [self didChangeValueForKey:@"messageTime"];
 }
 
 - (NSString *)streamBareJidStr
@@ -141,20 +88,113 @@
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
-- (NSString *)messageID
+- (NSNumber *)msgType
 {
-    [self willAccessValueForKey:@"messageID"];
-    NSString *value = [self primitiveValueForKey:@"messageID"];
-    [self didAccessValueForKey:@"messageID"];
+    [self willAccessValueForKey:@"msgType"];
+    NSNumber *value = [self primitiveValueForKey:@"msgType"];
+    [self didAccessValueForKey:@"msgType"];
     return value;
 }
 
-- (void)setMessageID:(NSString *)value
+- (void)setMsgType:(NSNumber *)value
 {
-    [self willChangeValueForKey:@"messageID"];
-    [self setPrimitiveValue:value forKey:@"messageID"];
-    [self didChangeValueForKey:@"messageID"];
+    [self willChangeValueForKey:@"msgType"];
+    [self setPrimitiveValue:value forKey:@"msgType"];
+    [self didChangeValueForKey:@"msgType"];
 }
+
+- (NSNumber *)outgoing
+{
+    [self willAccessValueForKey:@"outgoing"];
+    NSNumber *value = [self primitiveValueForKey:@"outgoing"];
+    [self didAccessValueForKey:@"outgoing"];
+    return value;
+}
+
+- (void)setOutgoing:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"outgoing"];
+    [self setPrimitiveValue:value forKey:@"outgoing"];
+    [self didChangeValueForKey:@"outgoing"];
+}
+
+
+- (NSNumber *)beenRead
+{
+    [self willAccessValueForKey:@"beenRead"];
+    NSNumber *value = [self primitiveValueForKey:@"beenRead"];
+    [self didAccessValueForKey:@"beenRead"];
+    return value;
+}
+
+- (void)setBeenRead:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"beenRead"];
+    [self setPrimitiveValue:value forKey:@"beenRead"];
+    [self didChangeValueForKey:@"beenRead"];
+}
+
+- (NSNumber *)sendState
+{
+    [self willAccessValueForKey:@"sendState"];
+    NSNumber *value = [self primitiveValueForKey:@"sendState"];
+    [self didAccessValueForKey:@"sendState"];
+    return value;
+}
+
+- (void)setSendState:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"sendState"];
+    [self setPrimitiveValue:value forKey:@"sendState"];
+    [self didChangeValueForKey:@"sendState"];
+}
+
+- (NSNumber *)isGroup
+{
+    [self willAccessValueForKey:@"isGroup"];
+    NSNumber *value = [self primitiveValueForKey:@"isGroup"];
+    [self didAccessValueForKey:@"isGroup"];
+    return value;
+}
+
+- (void)setIsGroup:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"isGroup"];
+    [self setPrimitiveValue:value forKey:@"isGroup"];
+    [self didChangeValueForKey:@"isGroup"];
+}
+
+- (NSDate *)msgTime
+{
+    [self willAccessValueForKey:@"msgTime"];
+    NSDate *value = [self primitiveValueForKey:@"msgTime"];
+    [self didAccessValueForKey:@"msgTime"];
+    return value;
+}
+
+- (void)setMsgTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"msgTime"];
+    [self setPrimitiveValue:value forKey:@"msgTime"];
+    [self didChangeValueForKey:@"msgTime"];
+}
+
+
+- (XMPPBaseMessageObject *)subData
+{
+    [self willAccessValueForKey:@"subData"];
+    XMPPBaseMessageObject *value = [self primitiveValueForKey:@"subData"];
+    [self didAccessValueForKey:@"subData"];
+    return value;
+}
+
+- (void)setSubData:(XMPPBaseMessageObject *)value
+{
+    [self willChangeValueForKey:@"subData"];
+    [self setPrimitiveValue:value forKey:@"subData"];
+    [self didChangeValueForKey:@"subData"];
+}
+
 
 - (void)awakeFromInsert
 {
@@ -164,13 +204,12 @@
 #pragma mark -
 #pragma mark - Public Methods
 
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withPredicate:(NSPredicate *)predicate
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc predicate:(NSPredicate *)predicate
 {
     if (moc == nil) return nil;
     if (predicate == nil) return nil;
     
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+    NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([self class])
                                               inManagedObjectContext:moc];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -185,18 +224,19 @@
 }
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                     withMessageID:(NSString *)messageID
+                             msgId:(NSString *)msgId
                   streamBareJidStr:(NSString *)streamBareJidStr
+
 {
-    if (messageID == nil) return nil;
+    if (msgId == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     if (moc == nil) return nil;
     
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+    NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([self class])
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"messageID == %@ AND streamBareJidStr == %@",
-                              messageID, streamBareJidStr];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"msgId == %@ AND streamBareJidStr == %@",
+                              msgId, streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -210,51 +250,72 @@
 }
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-             withMessageDictionary:(NSDictionary *)messageDic
+                            active:(BOOL)active
+                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *messageID = [messageDic objectForKey:@"messageID"];
-    if (messageID == nil) return nil;
+    NSString *msgId = [xmppExtendMessage msgId];
+    
+    if (msgId == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     if (moc == nil) return nil;
     
-    XMPPMessageCoreDataStorageObject *newObject = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPMessageCoreDataStorageObject"
-                                              inManagedObjectContext:moc];
+    XMPPMessageCoreDataStorageObject *newObject = [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass([self class])
+                                                                                inManagedObjectContext:moc];
     
-    [newObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
+    [newObject updateFromXMPPExtendMessage:xmppExtendMessage streamBareJidStr:streamBareJidStr];
     
     //Add the unread message count or insert a new unread message info
     [XMPPUnReadMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                                        withUserJIDstr:[messageDic objectForKey:@"bareJidStr"]
-                                                                    unReadMessageCount:[(NSNumber *)[messageDic objectForKey:@"unReadMessageCount"] unsignedIntegerValue] lastChatTime:[messageDic objectForKey:@"messageTime"]
+                                                                        withUserJIDstr:xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom
+                                                                    unReadMessageCount:(active ? 0:1)
+                                                                          lastChatTime:xmppExtendMessage.msgTime
                                                                       streamBareJidStr:streamBareJidStr];
     
     return newObject;
 }
 
+- (void)updateFromXMPPExtendMessage:(XMPPExtendMessage *)xmppExtendMessage streamBareJidStr:(NSString *)streamBareJidStr
+{
+    self.msgId = xmppExtendMessage.msgId;
+    self.sender = xmppExtendMessage.msgSender;
+    self.outgoing = @(xmppExtendMessage.msgOutgoing);
+    self.bareJidStr = xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom;
+    self.msgType = @(xmppExtendMessage.msgType);
+    self.beenRead = xmppExtendMessage.msgOutgoing ? @(YES):@(xmppExtendMessage.msgBeenRead);
+    self.sendState = xmppExtendMessage.msgOutgoing ? @(xmppExtendMessage.msgSendState):@(XMPPMessageSendSucceed);
+    self.isGroup = @(xmppExtendMessage.msgIsGroup);
+    self.msgTime = xmppExtendMessage.msgTime;
+    self.subData = xmppExtendMessage.msgSubData;
+    self.streamBareJidStr = streamBareJidStr;
+}
+
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                             withMessageDictionary:(NSDictionary *)messageDic
+                                            active:(BOOL)active
+                                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    NSString *messageID = [messageDic objectForKey:@"messageID"];
-    if (messageID == nil) return NO;
+    NSString *msgId = xmppExtendMessage.msgId;
+    
+    if (msgId == nil) return NO;
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
     
     XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                                      withMessageID:messageID
+                                                                                                              msgId:msgId
                                                                                                    streamBareJidStr:streamBareJidStr];
     //if the object we find alreadly in the coredata system ,we should update it
     if (updateObject){
         
-        [updateObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
+        [updateObject updateFromXMPPExtendMessage:xmppExtendMessage streamBareJidStr:streamBareJidStr];
         
         return YES;
         
     }else{//if not find the object in the CoreData system ,we should insert the new object to it
         //FIXME:There is a bug meybe here
         updateObject = [XMPPMessageCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                withMessageDictionary:messageDic
+                                                                               active:active
+                                                                    xmppExtendMessage:xmppExtendMessage
                                                                      streamBareJidStr:streamBareJidStr];
         
         if(updateObject != nil) return YES;
@@ -262,23 +323,6 @@
     
     return NO;
 
-}
-
-#pragma mark -
-#pragma mark - Private Methods
-- (void)updateWithDictionary:(NSDictionary *)messageDic streamBareJidStr:(NSString *)streamBareJidStr
-{
-    NSDate *messageSendTime = [messageDic objectForKey:@"messageTime"];
-    
-    [self setMessageID:[messageDic objectForKey:@"messageID"]];
-    [self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
-    [self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
-    [self setMessageTime:(messageSendTime ? messageSendTime:[NSDate date])];
-    [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
-    [self setMessageType:[messageDic objectForKey:@"messageType"]];
-    [self setStreamBareJidStr:streamBareJidStr];
-    [self setIsGroupChat:[messageDic objectForKey:@"isGroupChat"]];
-    [self setAdditionalMessage:[messageDic objectForKey:@"additionalMessage"]];
 }
 
 @end
