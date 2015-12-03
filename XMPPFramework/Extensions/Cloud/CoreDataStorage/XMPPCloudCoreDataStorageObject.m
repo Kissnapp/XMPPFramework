@@ -345,7 +345,6 @@
     // 自己的创建的 name 和 空id
     NSString *original_name = @"工作";
     NSString *original_cloudID = @"";
-    NSArray *results;
     
     // 找到自己创建的私人文件夹 (还有其他人的)
     if ([name isEqualToString:@""] && ![cloudID isEqualToString:original_cloudID]) {
@@ -357,7 +356,7 @@
         [fetchRequest setPredicate:predicate];
         [fetchRequest setIncludesPendingChanges:YES];
         [fetchRequest setFetchLimit:1];
-        results = [moc executeFetchRequest:fetchRequest error:nil];
+        NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
         
         for ( XMPPCloudCoreDataStorageObject *cloud in results ) {
             [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloud.cloudID streamBareJidStr:streamBareJidStr];
