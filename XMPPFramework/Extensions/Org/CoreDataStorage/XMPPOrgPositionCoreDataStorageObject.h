@@ -19,6 +19,7 @@
 @property (nonatomic, retain) NSNumber * ptRight;
 @property (nonatomic, retain) NSString * dpId;
 @property (nonatomic, retain) NSString * dpName;
+@property (nonatomic, retain) NSNumber * dpLevel;
 @property (nonatomic, retain) NSString * orgId;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSSet *ptUserShip;

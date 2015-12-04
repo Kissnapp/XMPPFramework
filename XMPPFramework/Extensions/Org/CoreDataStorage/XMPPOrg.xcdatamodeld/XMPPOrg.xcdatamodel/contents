@@ -16,6 +16,7 @@
     </entity>
     <entity name="XMPPOrgPositionCoreDataStorageObject" representedClassName="XMPPOrgPositionCoreDataStorageObject" syncable="YES">
         <attribute name="dpId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="dpLevel" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="dpName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="orgId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ptId" optional="YES" attributeType="String" syncable="YES"/>
@@ -50,7 +51,7 @@
     </entity>
     <elements>
         <element name="XMPPOrgCoreDataStorageObject" positionX="-1359" positionY="-274" width="189" height="225"/>
-        <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="180"/>
+        <element name="XMPPOrgPositionCoreDataStorageObject" positionX="-1107" positionY="-279" width="236" height="195"/>
         <element name="XMPPOrgRelationObject" positionX="-1143" positionY="-216" width="128" height="150"/>
         <element name="XMPPOrgSubcribeCoreDataStorageObject" positionX="-1152" positionY="-180" width="128" height="150"/>
         <element name="XMPPOrgUserCoreDataStorageObject" positionX="-828" positionY="-271" width="207" height="90"/>
