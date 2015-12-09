@@ -81,7 +81,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 #pragma mark - hand datas to database
-- (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -95,7 +95,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     }];
 }
 
-- (void)deleteClouDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -112,8 +112,26 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)deleteProjectWithCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        if (!streamBareJidStr) return;
+        if (!moc) return;
+        if (!serverDic) return;
+        
+        NSString *project = [serverDic objectForKey:@"project"];
+        NSNumber *hasBeenDelete = [serverDic objectForKey:@"hasBeenDelete"];
+        if (hasBeenDelete.integerValue) {
+            [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc hasBeenDelete:hasBeenDelete project:project streamBareJidStr:streamBareJidStr];
+        }
+    }];
+}
+
 // 更新特殊的key
-- (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream
 {
     [self scheduleBlock:^{
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -162,35 +180,8 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     return allUsers;
 }
 
-#pragma mark - 2.创建文件夹
-- (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream
-{
-    __block NSArray *allUsers = nil;
-    
-    [self executeBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-        
-        if (!projectID) return;
-        if (!cloudID) return;
-        if (!moc) return;
-        if (!streamBareJidStr) return;
-        
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND cloudID == %@",streamBareJidStr, projectID, cloudID];
-        [fetchRequest setEntity:entity];
-        [fetchRequest setFetchBatchSize:saveThreshold];
-        [fetchRequest setPredicate:predicate];
-        
-        allUsers = [moc executeFetchRequest:fetchRequest error:nil];
-    }];
-    return allUsers;
-}
 
-
-#pragma mark - 3.cloudID查找数据 (删除,重命名)
+#pragma mark - 2.cloudID查找数据 (删除,重命名...)
 - (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 {
     __block NSArray *allUsers = nil;

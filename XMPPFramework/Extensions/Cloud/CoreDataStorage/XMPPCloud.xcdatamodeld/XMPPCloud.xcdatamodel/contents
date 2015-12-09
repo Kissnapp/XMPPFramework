@@ -4,11 +4,11 @@
         <attribute name="cloudID" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="createTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="creator" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="download" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderIsMe" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderOrFileType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="folderType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="hasBeenDelete" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="hasBeenDownload" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="owner" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="parent" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>

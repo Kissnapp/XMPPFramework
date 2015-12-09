@@ -44,7 +44,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestCloudMoveWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID destinationParent:(NSString *)destinationParent folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
 #pragma mark - 8.上传版本 问题
-//- (void)requestCloudUploadVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock;
+- (void)requestCloudAddVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock;
 
 #pragma mark - 9.获取共享人员列表
 - (void)requestCloudSharedListWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
@@ -69,23 +69,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 
 
-#pragma mark - 11.网盘文件下载:TOFIX 问题
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library"  project="xxx"  subtype="download">
- {"id":"xxx",  "uuid":"xxx"} %% id: file id
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- {"id":"xxx", "uuid":"xxx", "url":"xxx"}
- </query>
- </iq>
- 
- */
-
+#pragma mark - 11.网盘文件下载:TOFIX
+- (void)requestCloudDownloadWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
 
 #pragma mark - 12.获取日志
@@ -113,17 +98,15 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 @optional
 #pragma mark - handle datas to database
 - (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
-- (void)deleteClouDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteProjectWithCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 - (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 
 #pragma mark - getDatas
 #pragma mark 1.获取文件夹内容
 - (id)cloudGetFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream;
 
-#pragma mark 2.创建文件夹
-- (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
-
-#pragma mark - 3.cloudID查找数据 (删除,重命名)
+#pragma mark - 2.cloudID查找数据 (删除,重命名...)
 - (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 
 @end

@@ -25,7 +25,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSString * cloudID;
 @property (nonatomic, retain) NSDate * createTime;
 @property (nonatomic, retain) NSString * creator;
-@property (nonatomic, retain) NSNumber * download;
+@property (nonatomic, retain) NSNumber * hasBeenDownload;
 @property (nonatomic, retain) NSString * uuid;
 @property (nonatomic, retain) NSNumber * folderType;
 @property (nonatomic, retain) NSString * name;
@@ -53,5 +53,6 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 
 #pragma mark - 删除
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr;
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc hasBeenDelete:(NSNumber *)hasBeenDelete project:(NSString *)project streamBareJidStr:(NSString *)streamBareJidStr;
 
 @end
