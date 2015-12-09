@@ -1960,7 +1960,7 @@ enum XMPPChatRoomUserListFlags
                     
                     
                     // 如果请求是最后一个，表明请求已经完成
-                    if (userDics.count == 0) {
+                    if (userDics.count < group_user_list_count) {
                          // 2.判断是否向逻辑层返回block
                          // 3.向数据库获取数据
                          id chatRoom = [xmppChatRoomStorage userListForChatRoomWithBareJidStr:bareChatRoomJidStr xmppStream:xmppStream];
@@ -2154,14 +2154,21 @@ enum XMPPChatRoomUserListFlags
           //TODO:Save all the chat room list here
           NSArray *array = [jsonStr objectFromJSONString];
           
-          if ([array count] > 0) {
+          if ([array count] >= group_list_count) {
                
                // 1.request for next action
                [self _fetchChatRoomListFromServerWithSinceId:[[array lastObject] objectForKey:@"groupid"]];
                
+               
+          }
+          else if ([array count] > 0) {
+               
                // 2.sava the result
                [self transFormDataAndFetchUseListWithArray:array];
+               
           }
+          
+          
           
           if (!hasChatRoom){
                // We should have our ChatRoom now
