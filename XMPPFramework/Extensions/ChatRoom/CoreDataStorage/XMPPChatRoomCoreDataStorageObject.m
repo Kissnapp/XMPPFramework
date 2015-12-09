@@ -304,7 +304,7 @@
     XMPPChatRoomCoreDataStorageObject *chatRoom;
     chatRoom = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPChatRoomCoreDataStorageObject"
                                              inManagedObjectContext:moc];
-    if (streamBareJidStr && ![streamBareJidStr isEqualToString:@""]){
+    if (streamBareJidStr.length > 0 ){
         chatRoom.streamBareJidStr = streamBareJidStr;
     }
     
