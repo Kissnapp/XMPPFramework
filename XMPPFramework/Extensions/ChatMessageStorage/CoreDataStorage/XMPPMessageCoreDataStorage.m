@@ -533,4 +533,69 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     
     return result;
 }
+
+- (void)setAllSendingStateMessagesToFailureStateWithXMPPStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && sendFromMe == %@ && hasBeenRead == %@",streamBareJidStr,@(YES),@(0)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allSendingStateMessages = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        [allSendingStateMessages enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            
+            XMPPMessageCoreDataStorageObject *message = obj;
+            
+            message.hasBeenRead = @(-1);
+        }];
+    }];
+
+}
+- (id)allSendingStateMessagesWithXMPPStream:(XMPPStream *)stream
+{
+    __block NSArray *allSendingStateMessages = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:YES];
+        
+        NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor1, nil];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && sendFromMe == %@ && hasBeenRead == %@",streamBareJidStr,@(YES),@(0)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        allSendingStateMessages = [moc executeFetchRequest:fetchRequest error:nil];
+    }];
+    
+    return allSendingStateMessages;
+}
+
 @end
