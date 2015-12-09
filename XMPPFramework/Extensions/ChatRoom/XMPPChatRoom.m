@@ -2186,10 +2186,16 @@ enum XMPPChatRoomUserListFlags
           
           if ([array count] > 0) {
                
+               
+          }
+          else if ([array count] > 0) {
+               
                // 2.sava the result
                [self transFormDataAndFetchUseListWithArray:array];
                
           }
+          
+          
           
           if (!hasChatRoom){
                // We should have our ChatRoom now
