@@ -16,7 +16,7 @@ static const NSInteger MMS_ERROR_CODE = 9999;
 //static const NSString *MMS_DOWNLOAD_TOKEN_KEY = @"download_key_string";
 
 typedef void(^DownloadBlock)(NSString *string, NSError *error);
-typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration, NSError *error);
+typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error);
 
 @interface XMPPMmsRequest ()
 
@@ -137,19 +137,21 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+- (void)privateUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
 {
-    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePublic completionBlock:completionBlock];
+    return [self uploadWithType:XMPPMmsRequestUploadTypePrivateMessage
+                completionBlock:completionBlock];
 }
 
-// upload new file
-- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+// public upload new file
+- (void)publicUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
 {
-    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePrivateMessage completionBlock:completionBlock];
+    return[self uploadWithType:XMPPMmsRequestUploadTypePublic
+               completionBlock:completionBlock];
 }
 
-- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
-                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+- (void)uploadWithType:(XMPPMmsRequestUploadType)type
+       completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -321,6 +323,58 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         dispatch_async(moduleQueue, block);
 }
 
+
+#pragma mark - multipart upload
+
+// privare upload new file
+- (void)multipartPrivateUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
+{
+    return [self multipartUploadInfoWithType:XMPPMmsRequestUploadTypePrivateMessage
+                                    completionBlock:completionBlock];
+}
+
+// public upload new file
+- (void)multipartPublicUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
+{
+    return [self multipartUploadInfoWithType:XMPPMmsRequestUploadTypePublic
+                                    completionBlock:completionBlock];
+}
+
+- (void)multipartUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                           completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {
+            
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            [uploadCompletionBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            /*
+             <iq type="get" id="2115763">
+             <query xmlns="aft:mms" query_type="upload" type="1" multipart="1"></query>
+             </iq>
+             */
+            
+            NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
+            [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
+            [queryElement addAttributeWithName:@"type" unsignedIntegerValue:type];
+            [queryElement addAttributeWithName:@"multipart" boolValue:YES];
+            
+            XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
+            
+            [[self xmppStream] sendElement:iq];
+            
+            [self _removeCompletionBlockWithDictionary:uploadCompletionBlockDcitionary requestKey:requestKey];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +394,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 
                 if (uploadBlock) {
                     dispatch_main_async_safe(^{
-                        uploadBlock(nil, nil, nil, _error);
+                        uploadBlock(nil, nil, nil, nil, _error);
                     });
                 }
                 
@@ -390,7 +444,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         if (uploadBlock) {
             
             dispatch_main_async_safe(^{
-                uploadBlock(nil,nil,nil, _error);
+                uploadBlock(nil,nil,nil, nil, _error);
             });
             [uploadCompletionBlockDcitionary removeObjectForKey:key];
         }
@@ -473,16 +527,29 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                         <expiration>1428994820549535</expiration>
                     </query>
                  </iq>
+                 
+                 or
+                 
+                 <iq from='alice@localhost' to='alice@localhost' id='2115763' type='result'>
+                    <query xmlns='aft:mms' query_type='upload' type="1" multipart="1">
+                        <token>3e4963702884b4ddf72a696c81ee49b</token>
+                        <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
+                        <expiration>1428994820549535</expiration>
+                        <uploadid>ADKDLLSUO12KKK</uploadid> <!-- for multipart upload -->
+                    </query>
+                 </iq>
                  */
                 NSString *token = [[query elementForName:@"token"] stringValue];
                 NSString *file = [[query elementForName:@"file"] stringValue];
                 NSString *expiration = [[query elementForName:@"expiration"] stringValue];
+                NSString *uploadid = [[query elementForName:@"uploadid"] stringValue];
+                
                 UploadBlock uploadBlock = (UploadBlock)[uploadCompletionBlockDcitionary objectForKey:key];
                 
                 if (uploadBlock) {
                     
                     dispatch_main_async_safe(^{
-                        uploadBlock(token, file, expiration, nil);
+                        uploadBlock(token, file, expiration, uploadid, nil);
                     });
                     
                     [uploadCompletionBlockDcitionary removeObjectForKey:key];
@@ -536,7 +603,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
         if (uploadBlock) {
             dispatch_main_async_safe(^{
-                uploadBlock(nil, nil, nil, _error);
+                uploadBlock(nil, nil, nil, nil, _error);
             });
         }
         
@@ -559,5 +626,33 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
     [uploadCompletionBlockDcitionary removeAllObjects];
     [downloadCompletionBlockDcitionary removeAllObjects];
 }
+@end
+
+
+@implementation XMPPMmsRequest (Deprecated)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - Deprecated methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePublic completionBlock:completionBlock];
+}
+
+// upload new file
+- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self requestUploadInfoWithType:XMPPMmsRequestUploadTypePrivateMessage completionBlock:completionBlock];
+}
+
+- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    return [self uploadWithType:type
+                completionBlock:^(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error) {
+                    completionBlock(token, file, expiration, error);
+                }];
+}
+
 
 @end
