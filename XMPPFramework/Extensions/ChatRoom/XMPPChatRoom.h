@@ -216,9 +216,16 @@
  */
 - (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 /**
- *  Get all the list from the local core datasystem
+ *  Get all the chat room(not task and event) list from the local core datasystem
  */
 - (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal;
+
+/**
+ *  Get all type chat room （just as chat room、task、event）
+ *
+ *  @return All chat room
+ */
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllTypeChatRoomListFromLocal;
 /**
  *  Fetch a chat room's all user with the given chat room bare jid string,
  *
@@ -334,6 +341,7 @@
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 - (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (NSArray *)chatRoomListWithType:(XMPPChatRoomType)type xmppStream:(XMPPStream *)stream;
+- (NSArray *)chatRoomListWitXMPPStream:(XMPPStream *)stream;
 
 - (id)chatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;

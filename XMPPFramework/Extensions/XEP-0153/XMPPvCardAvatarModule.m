@@ -377,14 +377,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
 {
-    dispatch_block_t block = ^{
-        [_xmppvCardTempModule requestvCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self vCardWithBareJidStr:bareJidStr
+              completionBlock:completionBlock];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

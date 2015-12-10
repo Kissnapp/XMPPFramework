@@ -152,66 +152,17 @@
 
 - (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr
 {
-    [self requestvCardTempWithTagForJID:bareJidStr ignoreStorage:NO];
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr]];
 }
 
 - (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
 {
-    
-    dispatch_block_t block = ^{ @autoreleasepool {
-        
-        NSString *photoHash = [_xmppvCardTempModuleStorage photoHashForvCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
-        
-        XMPPvCardTemp *vCardTemp = nil;
-        
-        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
-        
-        if (!ignoreStorage)
-        {
-            // Try loading from storage
-            vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
-        }
-        
-        if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
-        {
-            [self _requestvCardTempWithTag:photoHash bareJidStr:bareJidStr];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
 }
 
 - (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
 {
-    
-    dispatch_block_t block = ^{ @autoreleasepool {
-        
-        XMPPvCardTemp *vCardTemp = nil;
-        
-        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
-        
-        if (!ignoreStorage)
-        {
-            // Try loading from storage
-            vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:jid xmppStream:xmppStream];
-        }
-        
-        if (vCardTemp == nil && [_xmppvCardTempModuleStorage shouldFetchvCardTempForJID:jid xmppStream:xmppStream])
-        {
-            [self _requestvCardTempWithTag:tag bareJidStr:bareJidStr];
-        }
-
-        
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-    
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
 }
 
 - (void)_requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr
@@ -332,46 +283,7 @@
 
 - (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
 {
-    dispatch_block_t block = ^{@autoreleasepool{
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [self requestKey];;
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /*
-             <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="get">
-             <project xmlns="aft:project" type="get_template_hash">
-             </project>
-             </iq>
-             */
-            // 3. Create the request iq
-            
-            NSString *photoHash = [_xmppvCardTempModuleStorage photoHashForvCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
-            
-            XMPPIQ *iqElement = [XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:photoHash iqId:requestKey];
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self vCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +348,7 @@
     
     NSXMLElement *vCardTempTagElement = [iq elementForName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp];
     
+    // 该判断过程已经废弃，暂时保留代码
     if (vCardTempTagElement != nil) {// 是比较tag的请求
         
         NSXMLElement *vCardElement = [vCardTempTagElement elementForName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];

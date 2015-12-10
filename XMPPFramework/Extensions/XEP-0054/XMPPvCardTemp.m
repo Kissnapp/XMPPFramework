@@ -104,7 +104,15 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     [iq addChild:vCardElem];
     return iq;
 }
-
+/**
+ *  向服务器发送带有本地hash的请求
+ *
+ *  @param jid       jid
+ *  @param photoHash photo hash 值
+ *  @param iqId      iq的指定id
+ *
+ *  @return 向服务器请求的iq
+ */
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash iqId:(NSString *)iqId
 {
     NSString *iqElementId = iqId ? :[XMPPStream generateUUID];

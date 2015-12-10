@@ -101,7 +101,7 @@ extern NSString *const kXMPPvCardTempTagElement;
 + (XMPPvCardTemp *)vCardTempCopyFromIQ:(XMPPIQ *)iq;
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid;
 + (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid iqId:(NSString *)iqId;
-+ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash iqId:(NSString *)iqId;
++ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid photoHash:(NSString *)photoHash iqId:(NSString *)iqId NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用+ (XMPPIQ *)iqvCardRequestForJID:(XMPPJID *)jid iqId:(NSString *)iqId");
 
 
 - (void)addAddress:(XMPPvCardTempAdr *)adr;
