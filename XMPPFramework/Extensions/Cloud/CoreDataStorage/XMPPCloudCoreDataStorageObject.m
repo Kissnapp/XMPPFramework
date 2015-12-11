@@ -438,6 +438,9 @@
             } else if ([key isEqualToString:@"hasBeenDownload"]) {
                 NSNumber *tempHasBeenDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDownload"] integerValue]];
                 newCloud.hasBeenDownload = tempHasBeenDownload;
+            } else if ([key isEqualToString:@"version_count"]) {
+                NSString *tempVersion_count = [NSString stringWithFormat:@"%@", [dic objectForKey:@"version_count"]];
+                newCloud.version_count = tempVersion_count;
             }
         }
         result = YES;

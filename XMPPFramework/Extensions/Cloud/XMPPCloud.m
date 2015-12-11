@@ -521,6 +521,23 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
 }
 
+#pragma mark 8.上传新版本
+- (void)handleCloudAddVersionWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+
+    NSDictionary *serverDic = [self _handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
+    [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
+}
+
+- (NSDictionary *)_handleCloudAddVersionWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+{
+    NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+    [dicM setObject:[dicData objectForKey:@"id"] forKey:@"id"];
+    [dicM setObject:@"2" forKey:@"version_count"];
+    return [NSDictionary dictionaryWithDictionary:dicM];
+}
+
 
 
 #pragma mark 9.获取共享人员列表 无需存储 OK
@@ -1336,6 +1353,81 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 
+#pragma mark - 10.获取文件版本 问题
+/**
+ 
+ <iq type="get" id="1234" >
+ <query xmlns="aft:library"  project="xxx" subtype="list_version">
+ {"id":"xxx"}
+ </query>
+ </iq>
+ 
+ <iq type="result" id="1234" >
+ <query xmlns="aft:library"  project="xxx" subtype="list_version">
+ %% id是file version id, file是文件id. 如果id为-1则是最近的版本。
+ {"id":"xxx", "file":[{"id":"-1", "file","xxx", "uuid":"xxx", "size":"xxx", "creator":"xxx", "time":"xxx"}, ...]}
+ </query>
+ </iq>
+ 
+ */
+- (void)requestCloudListVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        if (!dispatch_get_specific(moduleQueueTag)) return;
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            //            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /**
+             <iq type="get" id="1234" >
+             <query xmlns="aft:library"  project="xxx" subtype="list_version">
+             {"id":"xxx"}
+             </query>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", nil];
+            
+            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
+                                                                      xmlns:@"aft:library"
+                                                                  attribute:@{@"subtype":@"list_version", @"project":projectID}
+                                                                stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:cloudElement];
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
+
 
 #pragma mark  11.网盘文件下载:TOFIX
 /**
@@ -2092,7 +2184,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-                [self handleCloudMoveDatasWithDicData:dicData projectID:projectID];
+                [self handleCloudAddVersionWithDicData:dicData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
@@ -2126,6 +2218,37 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                     <query xmlns="aft:library" subtype="list_share_users" project="460">
                     ["1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38","88f7c8781ae748959eb3d3d8de592e7b@120.24.94.38"]
                     </query>
+                 </iq>
+                 
+                 */
+                
+                id data = [[project stringValue] objectFromJSONString];
+                NSArray *arrData = (NSArray *)data;
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 2.用block返回数据 (无需存储)
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:arrData];
+                }
+                return YES;
+            }
+            
+#pragma mark - 10.list_version
+            else if ([projectType isEqualToString:@"list_version"]) {
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",CLOUD_REQUEST_ERROR_XMLNS]];
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    return YES;
+                }
+                
+                /**
+                 <iq type="result" id="1234" >
+                 <query xmlns="aft:library"  project="xxx" subtype="list_version">
+                 %% id是file version id, file是文件id. 如果id为-1则是最近的版本。
+                 {"id":"xxx", "file":[{"id":"-1", "file","xxx", "uuid":"xxx", "size":"xxx", "creator":"xxx", "time":"xxx"}, ...]}
+                 </query>
                  </iq>
                  
                  */
@@ -2258,7 +2381,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-#pragma mark - 14.recover_file
+#pragma mark - 15.recover_file
             else if ([projectType isEqualToString:@"recover_file"]) {
                 if ([[iq type] isEqualToString:@"error"]) {
                     NSXMLElement *errorElement = [iq elementForName:@"error"];

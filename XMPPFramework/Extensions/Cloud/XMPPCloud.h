@@ -44,32 +44,16 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestCloudMoveWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID destinationParent:(NSString *)destinationParent folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
 #pragma mark - 8.上传版本 问题
-- (void)requestCloudAddVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock;
+- (void)requestCloudAddVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID uuid:(NSString *)uuid size:(NSString *)size block:(CompletionBlock)completionBlock;
 
 #pragma mark - 9.获取共享人员列表
 - (void)requestCloudSharedListWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 #pragma mark - 10.获取文件版本 问题
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- {"id":"xxx"}
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- %% id是file version id, file是文件id. 如果id为-1则是最近的版本。
- {"id":"xxx", "file":[{"id":"-1", "file","xxx", "uuid":"xxx", "size":"xxx", "creator":"xxx", "time":"xxx"}, ...]}
- </query>
- </iq>
- 
- */
+- (void)requestCloudListVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 
-
-#pragma mark - 11.网盘文件下载:TOFIX
+#pragma mark - 11.网盘文件下载
 - (void)requestCloudDownloadWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
 
