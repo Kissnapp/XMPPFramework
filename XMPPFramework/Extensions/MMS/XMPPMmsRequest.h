@@ -37,6 +37,8 @@ typedef NS_ENUM(NSUInteger, XMPPMmsRequestUploadType) {
                            completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
 
 
+- (void)completeMultipartUploadWithFile:(NSString *)file uploadId:(NSString *)uploadId completionBlock:(CompletionBlock)completionBlock;
+
 #pragma mark - upload exists file
 - (void)requestExistsUploadInfoWithFile:(NSString *)file
                         completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
