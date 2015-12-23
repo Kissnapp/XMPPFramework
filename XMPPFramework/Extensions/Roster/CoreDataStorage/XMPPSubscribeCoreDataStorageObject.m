@@ -196,6 +196,7 @@
                           bareJidStr:(NSString *)bareJidStr
                             nickName:(NSString *)nickName
                              message:(NSString *)message
+                                time:(NSDate *)time
                                state:(XMPPSubscribeState)state
                          updateState:(BOOL)updateState
                     streamBareJidStr:(NSString *)streamBareJidStr
@@ -214,6 +215,7 @@
         
         if (nickName.length > 0) subcribe.nickName = nickName;
         if (message.length > 0) subcribe.message = message;
+        if (time != nil) subcribe.time = time;
         if (updateState) subcribe.state = @(state);
         
         result = YES;

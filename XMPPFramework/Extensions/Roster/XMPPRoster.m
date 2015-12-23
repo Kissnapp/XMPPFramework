@@ -9,6 +9,12 @@
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
+NSString *const addFriendNickNameNodeName = @"nick";
+NSString *const addFriendNickNameNodeXmlns = @"http://jabber.org/protocol/nick";
+
+NSString *const addFriendMessageNodeName = @"message";
+NSString *const addFriendMessageNodeXmlns = @"http://jabber.org/protocol/message";
+
 // Log levels: off, error, warn, info, verbose
 // Log flags: trace
 #if DEBUG
@@ -604,7 +610,7 @@ enum XMPPRosterFlags
 	
 	XMPPPresence *presence = [XMPPPresence presenceWithType:@"subscribe" to:[jid bareJID]];
     
-    NSXMLElement *nickNameXElement = [NSXMLElement elementWithName:ADD_FRIEND_NICKNAME xmlns:ADD_FRIEND_NICKNAME_XMLNS];
+    NSXMLElement *nickNameXElement = [NSXMLElement elementWithName:addFriendNickNameNodeName xmlns:addFriendNickNameNodeXmlns];
     //[presence elementForName: xmlns:]
     [nickNameXElement setStringValue:selfNickName];
     
@@ -692,6 +698,23 @@ enum XMPPRosterFlags
 	{
 		[self addUser:jid withSelfNickname:selfNickName otherNickName:otherNickName groups:nil subscribeToPresence:YES];
 	}
+    
+    // update the subscribe state to accept
+    [xmppRosterStorage accpetSubscribeWithBareJidStr:jid.bare xmppStream:xmppStream];
+}
+
+- (void)ignoreAllSubscriptionRequests
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        [xmppRosterStorage ignoreAllSubscriptionRequestsWithXMPPStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -791,6 +814,9 @@ enum XMPPRosterFlags
 	{
 		[self addUser:jid withNickname:nil];
 	}
+    
+    // update the subscribe state to accept
+    [xmppRosterStorage accpetSubscribeWithBareJidStr:jid.bare xmppStream:xmppStream];
 }
 
 - (void)rejectPresenceSubscriptionRequestFrom:(XMPPJID *)jid
@@ -803,6 +829,9 @@ enum XMPPRosterFlags
 	
 	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unsubscribed" to:[jid bareJID]];
 	[xmppStream sendElement:presence];
+    
+    [xmppRosterStorage refuseSubscribeWithBareJidStr:jid.bare
+                                          xmppStream:xmppStream];
 }
 
 - (void)fetchRoster
@@ -1000,9 +1029,9 @@ enum XMPPRosterFlags
 			//
             
             //write other's nickename to self roster
-            NSXMLElement *nickeNameElement = [presence elementForName:ADD_FRIEND_NICKNAME];
+            NSXMLElement *nickeNameElement = [presence elementForName:addFriendNickNameNodeName xmlns:addFriendNickNameNodeXmlns];
             
-            if (nickeNameElement && [[nickeNameElement xmlns] isEqualToString:ADD_FRIEND_NICKNAME_XMLNS]) {
+            if (nickeNameElement) {
                 
                 NSString *nickName = [nickeNameElement stringValue];
                 
@@ -1018,6 +1047,22 @@ enum XMPPRosterFlags
             
 		}else{
 			// Presence subscription request from someone who's NOT in our roster
+            /*
+             <presence xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38/mobile" type="subscribe">
+                    <nick xmlns="">何飞雄</nick>
+                    <x xmlns="vcard-temp:x:update">
+                        <photo>810110f03b7a68e3b785190296ab4ae6</photo>
+                    </x>
+             </presence>
+             */
+            XMPPJID *jid = [XMPPJID jidWithString:[NSString stringWithFormat:@"%@", [presence from]]];
+            NSString *nickName = [[presence elementForName:addFriendNickNameNodeName xmlns:addFriendNickNameNodeXmlns] stringValue];
+            NSString *message = [[presence elementForName:addFriendMessageNodeName xmlns:addFriendMessageNodeXmlns] stringValue];
+            
+            [xmppRosterStorage saveSubscribeWithBareJidStr:jid.bare
+                                                  nickName:nickName
+                                                   message:message
+                                                xmppStream:xmppStream];
 			
 			[multicastDelegate xmppRoster:self didReceivePresenceSubscriptionRequest:presence];
 		}

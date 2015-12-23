@@ -39,6 +39,7 @@ typedef NS_ENUM(NSUInteger, XMPPSubscribeState) {
                           bareJidStr:(NSString *)bareJidStr
                             nickName:(NSString *)nickName
                              message:(NSString *)message
+                                time:(NSDate *)time
                                state:(XMPPSubscribeState)state
                          updateState:(BOOL)updateState
                     streamBareJidStr:(NSString *)streamBareJidStr;
