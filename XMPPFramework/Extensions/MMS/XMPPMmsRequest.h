@@ -37,12 +37,15 @@ typedef NS_ENUM(NSUInteger, XMPPMmsRequestUploadType) {
                            completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
 
 
+- (void)completeMultipartUploadWithFile:(NSString *)file uploadId:(NSString *)uploadId completionBlock:(CompletionBlock)completionBlock;
+
 #pragma mark - upload exists file
-- (void)requestExistsUploadInfoWithFile:(NSString *)file
-                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
-- (void)requestExistsUploadInfoWithFile:(NSString *)file
-                             requestKey:(NSString *)requestKey
-                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)getExistedInfoWithFile:(NSString *)file
+               completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
+- (void)getExistedInfoWithFile:(NSString *)file
+                    requestKey:(NSString *)requestKey
+               completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
+
 
 #pragma mark - download
 - (void)requestDownloadURLWithFile:(NSString *)file
@@ -63,4 +66,11 @@ typedef NS_ENUM(NSUInteger, XMPPMmsRequestUploadType) {
 
 - (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
                   completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用uploadWithType:completionBlock:");
+
+#pragma mark - upload exists file
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用getExistedInfoWithFile:completionBlock:");
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                             requestKey:(NSString *)requestKey
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用getExistedInfoWithFile:requestKey:completionBlock:");
 @end

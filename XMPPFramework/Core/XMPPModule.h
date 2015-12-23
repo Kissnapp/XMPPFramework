@@ -83,6 +83,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 
 - (NSString *)requestKey;
 
+- (void)_addCompletionBlock:(CompletionBlock)completionBlock forKey:(NSString *)key;
+
 - (void)_callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock;
 - (void)_removeCompletionBlockWithDictionary:(NSMutableDictionary *)dic requestKey:(NSString *)requestKey;
 

@@ -15,7 +15,7 @@
 @dynamic cloudID;
 @dynamic createTime;
 @dynamic creator;
-@dynamic download;
+@dynamic hasBeenDownload;
 @dynamic uuid;
 @dynamic folderType;
 @dynamic name;
@@ -28,6 +28,7 @@
 @dynamic version_count;
 @dynamic streamBareJidStr;
 @dynamic folderIsMe;
+@dynamic hasBeenDelete;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -50,10 +51,10 @@
     [self didAccessValueForKey:@"cloudID"];
     return value;
 }
-- (void)setCloudID:(NSString *)value
+- (void)setCloudID:(NSString *)cloudID
 {
     [self willChangeValueForKey:@"cloudID"];
-    [self setPrimitiveValue:value forKey:@"cloudID"];
+    [self setPrimitiveValue:cloudID forKey:@"cloudID"];
     [self didChangeValueForKey:@"cloudID"];
 }
 
@@ -64,10 +65,10 @@
     [self didAccessValueForKey:@"createTime"];
     return value;
 }
-- (void)setCreateTime:(NSDate *)value
+- (void)setCreateTime:(NSDate *)createTime
 {
     [self willChangeValueForKey:@"createTime"];
-    [self setPrimitiveValue:value forKey:@"createTime"];
+    [self setPrimitiveValue:createTime forKey:@"createTime"];
     [self didChangeValueForKey:@"createTime"];
 }
 
@@ -79,10 +80,10 @@
     [self didAccessValueForKey:@"creator"];
     return value;
 }
-- (void)setCreator:(NSString *)value
+- (void)setCreator:(NSString *)creator
 {
     [self willChangeValueForKey:@"creator"];
-    [self setPrimitiveValue:value forKey:@"creator"];
+    [self setPrimitiveValue:creator forKey:@"creator"];
     [self didChangeValueForKey:@"creator"];
 }
 
@@ -94,10 +95,10 @@
     [self didAccessValueForKey:@"folderType"];
     return value;
 }
-- (void)setFolderType:(NSNumber *)value
+- (void)setFolderType:(NSNumber *)folderType
 {
     [self willChangeValueForKey:@"folderType"];
-    [self setPrimitiveValue:value forKey:@"folderType"];
+    [self setPrimitiveValue:folderType forKey:@"folderType"];
     [self didChangeValueForKey:@"folderType"];
 }
 
@@ -108,10 +109,10 @@
     [self didAccessValueForKey:@"name"];
     return value;
 }
-- (void)setName:(NSString *)value
+- (void)setName:(NSString *)name
 {
     [self willChangeValueForKey:@"name"];
-    [self setPrimitiveValue:value forKey:@"name"];
+    [self setPrimitiveValue:name forKey:@"name"];
     [self didChangeValueForKey:@"name"];
 }
 
@@ -122,10 +123,10 @@
     [self didAccessValueForKey:@"owner"];
     return value;
 }
-- (void)setOwner:(NSString *)value
+- (void)setOwner:(NSString *)owner
 {
     [self willChangeValueForKey:@"owner"];
-    [self setPrimitiveValue:value forKey:@"owner"];
+    [self setPrimitiveValue:owner forKey:@"owner"];
     [self didChangeValueForKey:@"owner"];
 }
 
@@ -136,10 +137,10 @@
     [self didAccessValueForKey:@"parent"];
     return value;
 }
-- (void)setParent:(NSNumber *)value
+- (void)setParent:(NSNumber *)parent
 {
     [self willChangeValueForKey:@"parent"];
-    [self setPrimitiveValue:value forKey:@"parent"];
+    [self setPrimitiveValue:parent forKey:@"parent"];
     [self didChangeValueForKey:@"parent"];
 }
 
@@ -150,10 +151,10 @@
     [self didAccessValueForKey:@"project"];
     return value;
 }
-- (void)setProject:(NSString *)value
+- (void)setProject:(NSString *)project
 {
     [self willChangeValueForKey:@"project"];
-    [self setPrimitiveValue:value forKey:@"project"];
+    [self setPrimitiveValue:project forKey:@"project"];
     [self didChangeValueForKey:@"project"];
 }
 
@@ -164,10 +165,10 @@
     [self didAccessValueForKey:@"streamBareJidStr"];
     return value;
 }
-- (void)setStreamBareJidStr:(NSString *)value
+- (void)setStreamBareJidStr:(NSString *)streamBareJidStr
 {
     [self willChangeValueForKey:@"streamBareJidStr"];
-    [self setPrimitiveValue:value forKey:@"streamBareJidStr"];
+    [self setPrimitiveValue:streamBareJidStr forKey:@"streamBareJidStr"];
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
@@ -178,10 +179,10 @@
     [self didAccessValueForKey:@"folderOrFileType"];
     return value;
 }
-- (void)setFolderOrFileType:(NSNumber *)value
+- (void)setFolderOrFileType:(NSNumber *)folderOrFileType
 {
     [self willChangeValueForKey:@"folderOrFileType"];
-    [self setPrimitiveValue:value forKey:@"folderOrFileType"];
+    [self setPrimitiveValue:folderOrFileType forKey:@"folderOrFileType"];
     [self didChangeValueForKey:@"folderOrFileType"];
 }
 
@@ -192,10 +193,10 @@
     [self didAccessValueForKey:@"folderIsMe"];
     return value;
 }
-- (void)setFolderIsMe:(NSNumber *)value
+- (void)setFolderIsMe:(NSNumber *)folderIsMe
 {
     [self willChangeValueForKey:@"folderIsMe"];
-    [self setPrimitiveValue:value forKey:@"folderIsMe"];
+    [self setPrimitiveValue:folderIsMe forKey:@"folderIsMe"];
     [self didChangeValueForKey:@"folderIsMe"];
 }
 
@@ -206,10 +207,10 @@
     [self didAccessValueForKey:@"fileID"];
     return value;
 }
-- (void)setFileID:(NSString *)value
+- (void)setFileID:(NSString *)fileID
 {
     [self willChangeValueForKey:@"fileID"];
-    [self setPrimitiveValue:value forKey:@"fileID"];
+    [self setPrimitiveValue:fileID forKey:@"fileID"];
     [self didChangeValueForKey:@"fileID"];
 }
 
@@ -220,10 +221,10 @@
     [self didAccessValueForKey:@"size"];
     return value;
 }
-- (void)setSize:(NSString *)value
+- (void)setSize:(NSString *)size
 {
     [self willChangeValueForKey:@"size"];
-    [self setPrimitiveValue:value forKey:@"size"];
+    [self setPrimitiveValue:size forKey:@"size"];
     [self didChangeValueForKey:@"size"];
 }
 
@@ -234,10 +235,10 @@
     [self didAccessValueForKey:@"uuid"];
     return value;
 }
-- (void)setUuid:(NSString *)value
+- (void)setUuid:(NSString *)uuid
 {
     [self willChangeValueForKey:@"uuid"];
-    [self setPrimitiveValue:value forKey:@"uuid"];
+    [self setPrimitiveValue:uuid forKey:@"uuid"];
     [self didChangeValueForKey:@"uuid"];
 }
 
@@ -248,27 +249,43 @@
     [self didAccessValueForKey:@"version_count"];
     return value;
 }
-- (void)setVersion_count:(NSString *)value
+- (void)setVersion_count:(NSString *)version_count
 {
     [self willChangeValueForKey:@"version_count"];
-    [self setPrimitiveValue:value forKey:@"version_count"];
+    [self setPrimitiveValue:version_count forKey:@"version_count"];
     [self didChangeValueForKey:@"version_count"];
 }
 
-//- (NSNumber *)download
-//{
-//    [self willAccessValueForKey:@"download"];
-//    NSNumber *value = [self primitiveValueForKey:@"download"];
-//    [self didAccessValueForKey:@"download"];
-//    return value;
-//}
-//- (void)setDownload:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"download"];
-//    [self setPrimitiveValue:value forKey:@"download"];
-//    [self didChangeValueForKey:@"download"];
-//}
-//
+
+- (NSNumber *)hasBeenDelete
+{
+    [self willAccessValueForKey:@"hasBeenDelete"];
+    NSNumber *value = [self primitiveValueForKey:@"hasBeenDelete"];
+    [self didAccessValueForKey:@"hasBeenDelete"];
+    return value;
+}
+- (void)setHasBeenDelete:(NSNumber *)hasBeenDelete
+{
+    [self willChangeValueForKey:@"hasBeenDelete"];
+    [self setPrimitiveValue:hasBeenDelete forKey:@"hasBeenDelete"];
+    [self didChangeValueForKey:@"hasBeenDelete"];
+}
+
+
+- (NSNumber *)hasBeenDownload
+{
+    [self willAccessValueForKey:@"hasBeenDownload"];
+    NSNumber *value = [self primitiveValueForKey:@"hasBeenDownload"];
+    [self didAccessValueForKey:@"hasBeenDownload"];
+    return value;
+}
+- (void)setHasBeenDownload:(NSNumber *)hasBeenDownload
+{
+    [self willChangeValueForKey:@"hasBeenDownload"];
+    [self setPrimitiveValue:hasBeenDownload forKey:@"hasBeenDownload"];
+    [self didChangeValueForKey:@"hasBeenDownload"];
+}
+
 //- (NSDate *)updateTime
 //{
 //    [self willAccessValueForKey:@"updateTime"];
@@ -286,6 +303,12 @@
 //
 
 
+
+- (void)awakeFromInsert
+{
+    [super awakeFromInsert];
+    
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +331,24 @@
     return (XMPPCloudCoreDataStorageObject *)[results firstObject];
 }
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc hasBeenDelete:(NSNumber *)hasBeenDelete project:(NSString *)project streamBareJidStr:(NSString *)streamBareJidStr
+{
+    NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND hasBeenDelete == %@ project == %@", streamBareJidStr, hasBeenDelete, project];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    return (XMPPCloudCoreDataStorageObject *)[results firstObject];
+}
+
+
+
+
 #pragma mark - 特殊情况 -- 有了自己的私人文件夹要删除掉之前所有的假的文件夹
 + (BOOL)deleteOriginalPrivateFolderObjectInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
 {
@@ -322,7 +363,6 @@
     // 自己的创建的 name 和 空id
     NSString *original_name = @"工作";
     NSString *original_cloudID = @"";
-    NSArray *results;
     
     // 找到自己创建的私人文件夹 (还有其他人的)
     if ([name isEqualToString:@""] && ![cloudID isEqualToString:original_cloudID]) {
@@ -334,7 +374,7 @@
         [fetchRequest setPredicate:predicate];
         [fetchRequest setIncludesPendingChanges:YES];
         [fetchRequest setFetchLimit:1];
-        results = [moc executeFetchRequest:fetchRequest error:nil];
+        NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
         
         for ( XMPPCloudCoreDataStorageObject *cloud in results ) {
             [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloud.cloudID streamBareJidStr:streamBareJidStr];
@@ -343,6 +383,9 @@
     }
     return result;
 }
+
+
+
 
 #pragma mark - 更新
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
@@ -366,8 +409,7 @@
         result = YES;
     } else {
         XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-        NSLog(@"newCloud = %@", newCloud);
-        result = YES;
+        if (newCloud) result = YES;
     }
     return result;
 }
@@ -387,17 +429,29 @@
             } else if ([key isEqualToString:@"name"]) {
                 NSString *tempName = [NSString stringWithFormat:@"%@", [dic objectForKey:@"name"]];
                 newCloud.name = tempName;
+            } else if ([key isEqualToString:@"dest_parent"]) {
+                NSNumber *tempParent = [NSNumber numberWithInteger:[[dic objectForKey:@"dest_parent"] integerValue]];
+                newCloud.parent = tempParent;
+            } else if ([key isEqualToString:@"hasBeenDelete"]) {
+                NSNumber *tempHasBeenDelete = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDelete"] integerValue]];
+                newCloud.hasBeenDelete = tempHasBeenDelete;
+            } else if ([key isEqualToString:@"hasBeenDownload"]) {
+                NSNumber *tempHasBeenDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDownload"] integerValue]];
+                newCloud.hasBeenDownload = tempHasBeenDownload;
+            } else if ([key isEqualToString:@"version_count"]) {
+                NSString *tempVersion_count = [NSString stringWithFormat:@"%@", [dic objectForKey:@"version_count"]];
+                newCloud.version_count = tempVersion_count;
             }
         }
-        NSLog(@"newCloud = %@", newCloud);
         result = YES;
     } else {
         XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject insertInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-        NSLog(@"newCloud = %@", newCloud);
-        result = YES;
+        if (newCloud) result = YES;
     }
     return result;
 }
+
+
 
 #pragma mark - 新增
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
@@ -410,6 +464,8 @@
 }
 
 
+
+
 #pragma mark - 删除
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr
 {
@@ -420,6 +476,18 @@
     }
     return NO;
 }
+
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc hasBeenDelete:(NSNumber *)hasBeenDelete project:(NSString *)project streamBareJidStr:(NSString *)streamBareJidStr
+{
+    XMPPCloudCoreDataStorageObject *deleteObject = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc hasBeenDelete:hasBeenDelete project:project streamBareJidStr:streamBareJidStr];
+    if (deleteObject) {
+        [moc deleteObject:deleteObject];
+        return YES;
+    }
+    return NO;
+}
+
+
 
 - (void)updateWithDic:(NSDictionary *)dic
 {
@@ -437,9 +505,10 @@
     NSString *tempUuid = [dic objectForKey:@"uuid"];
     NSString *tempSize = [dic objectForKey:@"size"];
     NSString *tempVersion_count = [dic objectForKey:@"version_count"];
+    NSNumber *tempHasBeenDelete = [dic objectForKey:@"hasBeenDelete"];
+    NSNumber *tempHasBeenDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDownload"] boolValue]];
     
     //    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
-    //    NSNumber *tempDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"download"] boolValue]];
     
     
     if (tempCloudID)            self.cloudID = tempCloudID;
@@ -456,8 +525,9 @@
     if (tempUuid)               self.uuid = tempUuid;
     if (tempSize)               self.size = tempSize;
     if (tempVersion_count)      self.version_count = tempVersion_count;
-
-    //    if (tempDownload)           self.download = tempDownload;
+    if (tempHasBeenDelete)      self.hasBeenDelete = tempHasBeenDelete;
+    if (tempHasBeenDownload)           self.hasBeenDownload = tempHasBeenDownload;
+    
     //    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
 }
 

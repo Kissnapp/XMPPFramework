@@ -22,138 +22,52 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (id)initWithCloudStorage:(id <XMPPCloudStorage>)storage;
 - (id)initWithCloudStorage:(id <XMPPCloudStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
-#pragma mark - 1.获取文件夹内容 OK
+#pragma mark - 1.获取文件夹内容
 - (void)requestCloudListFolderWithParent:(NSString *)parent projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
-
-#pragma mark - 2.创建文件夹 OK
+#pragma mark - 2.创建文件夹
 - (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
-
 
 #pragma mark - 3.添加文件
 - (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
-
-#pragma mark - 4.删除文件夹/删除文件 OK
+#pragma mark - 4.删除文件夹/删除文件
 - (void)requestCloudDeleteWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
-
-#pragma mark - 5.重命名 OK
+#pragma mark - 5.重命名
 - (void)requestCloudRenameWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID name:(NSString *)name folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
-
-#pragma mark - 6.共享 OK
+#pragma mark - 6.共享
 - (void)requestCloudShareWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users hasShared:(BOOL)hasShared block:(CompletionBlock)completionBlock;
 
-
-#pragma mark - 7.移动 **
+#pragma mark - 7.移动
 - (void)requestCloudMoveWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID destinationParent:(NSString *)destinationParent folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
 
-
 #pragma mark - 8.上传版本 问题
-- (void)requestCloudUploadVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID users:(NSArray *)users block:(CompletionBlock)completionBlock;
+- (void)requestCloudAddVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID uuid:(NSString *)uuid size:(NSString *)size block:(CompletionBlock)completionBlock;
 
-#pragma mark - 9.获取共享人员列表 OK
+#pragma mark - 9.获取共享人员列表
 - (void)requestCloudSharedListWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
-#pragma mark - 10.获取文件版本
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- {"id":"xxx"}
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- %% id是file version id, file是文件id. 如果id为-1则是最近的版本。
- {"id":"xxx", "file":[{"id":"-1", "file","xxx", "uuid":"xxx", "size":"xxx", "creator":"xxx", "time":"xxx"}, ...]}
- </query>
- </iq>
- 
- */
+#pragma mark - 10.获取文件版本 问题
+- (void)requestCloudListVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
 
-
-#pragma mark - 11.网盘文件下载:TOFIX
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library"  project="xxx"  subtype="download">
- {"id":"xxx",  "uuid":"xxx"} %% id: file id
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="list_version">
- {"id":"xxx", "uuid":"xxx", "url":"xxx"}
- </query>
- </iq>
- 
- */
+#pragma mark - 11.网盘文件下载
+- (void)requestCloudDownloadWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID uuid:(NSString *)uuid block:(CompletionBlock)completionBlock;
 
 
-
-#pragma mark - 12.获取日志 问题
-/**
- <iq type="get" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="get_log">
- {"before"/"after":"1", "count:"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="get_log">    %%规定一下count最大为20条，这样可以在一个结果里全部返回，不用一条一条的返回。
- {"count":"xxx", "logs":[{"id":"xxx", "jid":"xxx", "operation":"xxx", "text":"xxx", "time":"xxx", "project":"xxx"}, ...] } %% logs 需要客户端自己根据id去升序排序。
- </query>
- </iq>
- */
-- (void)requestCloudGetLogWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before block:(CompletionBlock)completionBlock;
-
+#pragma mark - 12.获取日志
+- (void)requestCloudGetLogWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
 
 #pragma mark - 13.获取我的回收站
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="get_trash">
- {"before"/"after":1, "count":"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="get_trash">    %%规定一下count最大为20条，这样可以在一个结果里全部返回，不用一条一条的返回。
- {"count":"xxx", "files":[] } %% logs 需要客户端自己根据id去升序排序。
- </query>
- </iq>
- 
- 注意：如果file的location里有"@"请替换为自己的姓名。
- 
- */
-
-
+- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
 
 #pragma mark - 14.清空回收站
 - (void)requestCloudClearTrashWithProjectID:(NSString *)projectID block:(CompletionBlock)completionBlock;
 
-
 #pragma mark - 15.恢复
-/**
- 
- <iq type="set" id="1234" >
- <query xmlns="aft:library" project="49" subtype="recover_file">
- {"id":"9", "name":"全体通过录2", "dest_parent":"2"}  % name may be a new name as dest folder has duplication name.
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="recover_file">
- {"id":"xxx", "dest_parent":"xxx"}
- </query>
- </iq>
- 
- */
-
+- (void)requestCloudRecoverFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID name:(NSString *)name destParent:(NSString *)destParent block:(CompletionBlock)completionBlock;
 
 
 @end
@@ -166,19 +80,17 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (BOOL)configureWithParent:(XMPPCloud *)aParent queue:(dispatch_queue_t)queue;
 
 @optional
-#pragma mark - hand datas to database
+#pragma mark - handle datas to database
 - (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
-- (void)deleteClouDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteProjectWithCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 - (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 
 #pragma mark - getDatas
 #pragma mark 1.获取文件夹内容
 - (id)cloudGetFolderWithParent:(NSString *)parent projectID:(NSString *)projectID xmppStream:(XMPPStream *)stream;
 
-#pragma mark 2.创建文件夹
-- (id)cloudAddFolderWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
-
-#pragma mark - 4.删除文件夹/删除文件
-- (id)cloudDeleteWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
+#pragma mark - 2.cloudID查找数据 (删除,重命名...)
+- (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 
 @end

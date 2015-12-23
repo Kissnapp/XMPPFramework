@@ -348,6 +348,13 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)_addCompletionBlock:(CompletionBlock)completionBlock forKey:(NSString *)key
+{
+    XMPP_NOT_IN_MODULE_QUEUE;
+    
+    [requestBlockDcitionary setObject:completionBlock forKey:key];
+}
+
 - (void)_callBackWithMessage:(NSString *)message completionBlock:(CompletionBlock)completionBlock
 {
     // if not this queue we should return

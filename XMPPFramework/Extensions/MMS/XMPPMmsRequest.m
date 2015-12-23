@@ -185,14 +185,18 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 }
 
 // upload exists file
-- (void)requestExistsUploadInfoWithFile:(NSString *)file
-                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+
+#pragma mark - upload exists file
+- (void)getExistedInfoWithFile:(NSString *)file
+               completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
 {
     dispatch_block_t block = ^{
         
         NSString *key = [[self xmppStream] generateUUID];
         
-        [self requestExistsUploadInfoWithFile:file requestKey:key completionBlock:completionBlock];
+        [self getExistedInfoWithFile:file
+                          requestKey:key
+                     completionBlock:completionBlock];
         
     };
     
@@ -201,9 +205,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)requestExistsUploadInfoWithFile:(NSString *)file
-                             requestKey:(NSString *)requestKey
-                              completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+- (void)getExistedInfoWithFile:(NSString *)file
+                    requestKey:(NSString *)requestKey
+               completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock
 {
     if (!requestKey) return;
     
@@ -216,7 +220,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 NSError *_error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@",MMS_ERROR_DOMAIN] code:MMS_ERROR_CODE userInfo:userInfo];
                 
                 dispatch_main_async_safe(^{
-                    completionBlock(nil,nil,nil,_error);
+                    completionBlock(nil, nil, nil, nil, _error);
                 });
                 
                 return;
@@ -226,9 +230,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             
             /*
              <iq type="get" id="2115763">
-                <query xmlns="aft:mms" query_type="upload">
-                    <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
-                </query>
+             <query xmlns="aft:mms" query_type="upload">
+             <file>1c7ca8f4-8e79-4e0a-8672-64b831da9a36</file>
+             </query>
              </iq>
              */
             
@@ -237,7 +241,7 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             [queryElement addAttributeWithName:@"query_type" stringValue:@"upload"];
             
             // file element
-             NSXMLElement *fileElement = [NSXMLElement elementWithName:@"file" stringValue:file];
+            NSXMLElement *fileElement = [NSXMLElement elementWithName:@"file" stringValue:file];
             [queryElement addChild:fileElement];
             
             // iq element
@@ -375,6 +379,46 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         dispatch_async(moduleQueue, block);
 }
 
+- (void)completeMultipartUploadWithFile:(NSString *)file uploadId:(NSString *)uploadId completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if ([self canSendRequest]) {
+            
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            [self _addCompletionBlock:completionBlock forKey:requestKey];
+            
+            /*
+             <iq type="set" id="2115763">
+             <query xmlns="aft:mms" query_type="complete">
+             <file>30a48fb596b447b485fb813bc813bea2</file>
+             <uploadid>9904501901A745D2B76A49AA8BE1A496</uploadid>
+             </query>
+             </iq>
+             */
+            
+            NSXMLElement *queryElement = [NSXMLElement elementWithName:@"query" xmlns:[NSString stringWithFormat:@"%@",MMS_REQUEST_XMLNS]];
+            
+            [queryElement addAttributeWithName:@"query_type" stringValue:@"complete"];
+            
+            [queryElement addChild:[NSXMLElement elementWithName:@"file" stringValue:file]];
+            [queryElement addChild:[NSXMLElement elementWithName:@"uploadid" stringValue:uploadId]];
+            
+            XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:requestKey child:queryElement];
+            
+            [[self xmppStream] sendElement:iq];
+            
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -410,6 +454,17 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                     
                     dispatch_main_async_safe(^{
                         downloadBlock(nil, _error);
+                    });
+                }
+                
+            }else if ([dic isEqual:requestBlockDcitionary]){
+                
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:requestKey];
+        
+                if (completionBlock) {
+                    
+                    dispatch_main_async_safe(^{
+                        completionBlock(nil, _error);
                     });
                 }
                 
@@ -491,6 +546,9 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
             else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"download"])
             {
                 [self requestDownloadErrorWithCode:MMS_ERROR_CODE description:@"send iq error" key:key];
+            }else if([[iq attributeStringValueForName:@"query_type"] isEqualToString:@"complete"])
+            {
+                [self _executeRequestBlockWithRequestKey:key errorMessage:@"send iq error"];
             }
             
             return YES;
@@ -578,6 +636,37 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
                 }
                 
             }
+            else if([[query attributeStringValueForName:@"query_type"] isEqualToString:@"complete"])
+            {
+                /*
+                 <iq type="result" id="2115763">
+                    <query xmlns="aft:mms" query_type="complete">
+                        <file>30a48fb596b447b485fb813bc813bea2</file>
+                        <uploadid>9904501901A745D2B76A49AA8BE1A496</uploadid>
+                    </query>
+                 </iq>
+                 */
+                
+                NSMutableDictionary *result = [NSMutableDictionary dictionary];
+                
+                NSString *file = [[query elementForName:@"file"] stringValue];
+                NSString *uploadid = [[query elementForName:@"uploadid"] stringValue];
+                
+                if (file.length > 0) [result setObject:file forKey:@"file"];
+                if (uploadid.length > 0) [result setObject:file forKey:@"uploadid"];
+                
+                CompletionBlock completionBlock = (CompletionBlock)[requestBlockDcitionary objectForKey:key];
+                
+                if (completionBlock) {
+                    
+                    dispatch_main_async_safe(^{
+                        completionBlock(result, nil);
+                    });
+                    
+                    [requestBlockDcitionary removeObjectForKey:key];
+                }
+                
+            }
 
             
             return YES;
@@ -623,6 +712,16 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
         
     }];
     
+    [requestBlockDcitionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+       
+        CompletionBlock completionBlock = (CompletionBlock)requestBlockDcitionary[key];
+        if (completionBlock) {
+            dispatch_main_async_safe(^{
+                completionBlock(nil, _error);
+            });
+        }
+    }];
+    [requestBlockDcitionary removeAllObjects];
     [uploadCompletionBlockDcitionary removeAllObjects];
     [downloadCompletionBlockDcitionary removeAllObjects];
 }
@@ -648,10 +747,29 @@ typedef void(^UploadBlock)(NSString *token, NSString *file, NSString *expiration
 - (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
                   completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
 {
-    return [self uploadWithType:type
-                completionBlock:^(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error) {
-                    completionBlock(token, file, expiration, error);
-                }];
+    [self uploadWithType:type
+         completionBlock:^(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error) {
+             completionBlock(token, file, expiration, error);
+         }];
+}
+
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self getExistedInfoWithFile:file
+                 completionBlock:^(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error) {
+        completionBlock(token, file, expiration, error);
+    }];
+}
+- (void)requestExistsUploadInfoWithFile:(NSString *)file
+                             requestKey:(NSString *)requestKey
+                        completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock
+{
+    [self getExistedInfoWithFile:file
+                      requestKey:requestKey
+                 completionBlock:^(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error) {
+        completionBlock(token, file, expiration, error);
+    }];
 }
 
 

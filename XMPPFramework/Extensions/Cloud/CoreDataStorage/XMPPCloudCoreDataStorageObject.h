@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPManagedObject.h"
+#import <CoreData/CoreData.h>
 
 typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
     XMPPCloudCoreDataStorageObjectFolderTypeRoot = -1,
@@ -19,12 +20,12 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
     XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret
 };
 
-@interface XMPPCloudCoreDataStorageObject : XMPPManagedObject
+@interface XMPPCloudCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString * cloudID;
 @property (nonatomic, retain) NSDate * createTime;
 @property (nonatomic, retain) NSString * creator;
-@property (nonatomic, retain) NSNumber * download;
+@property (nonatomic, retain) NSNumber * hasBeenDownload;
 @property (nonatomic, retain) NSString * uuid;
 @property (nonatomic, retain) NSNumber * folderType;
 @property (nonatomic, retain) NSString * name;
@@ -37,6 +38,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 @property (nonatomic, retain) NSString * version_count;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * folderIsMe;
+@property (nonatomic, retain) NSNumber * hasBeenDelete;
 
 
 #pragma mark - 查找
@@ -51,5 +53,6 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
 
 #pragma mark - 删除
 + (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc cloudID:(NSString *)cloudID streamBareJidStr:(NSString *)streamBareJidStr;
++ (BOOL)deleteInManagedObjectContext:(NSManagedObjectContext *)moc hasBeenDelete:(NSNumber *)hasBeenDelete project:(NSString *)project streamBareJidStr:(NSString *)streamBareJidStr;
 
 @end
