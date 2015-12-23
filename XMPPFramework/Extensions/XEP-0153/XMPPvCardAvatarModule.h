@@ -71,8 +71,6 @@
 
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr
             completionBlock:(CompletionBlock)completionBlock;
-- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr
-                   completionBlock:(CompletionBlock)completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用vCardWithBareJidStr:completionBlock:");
 
 @end
 
@@ -115,5 +113,11 @@
 **/
 - (void)clearvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
+@end
+
+@interface XMPPvCardAvatarModule (Deprecated)
+
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr
+                   completionBlock:(CompletionBlock)completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用vCardWithBareJidStr:completionBlock:");
 @end
 

@@ -52,12 +52,6 @@
 **/
 - (void)updateMyvCardTemp:(XMPPvCardTemp *)vCardTemp;
 
-- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用,请使用- (void)fetchvCardTempForJID:(XMPPJID *)jid");
-
-- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用- (void)fetchvCardTempForJID:(XMPPJID *)jid ignoreStorage:(BOOL)ignoreStorage");
-
-- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用");
-
 /**
  *  fetch a vCard from database ,if it not existed,we will request from server
  *
@@ -65,13 +59,7 @@
  *  @param completionBlock a block to return vCard
  */
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock;
-/**
- *  Request from server with a vCard photo hash string,The server will return us the different vCard
- *
- *  @param bareJidStr      The user's bare jid string
- *  @param completionBlock a block to return vCard
- */
-- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock");
+
 
 @end
 
@@ -137,4 +125,20 @@
 
 - (NSString *)photoHashForvCardTempForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 
+@end
+
+
+@interface  XMPPvCardTempModule (Deprecated)
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用,请使用- (void)fetchvCardTempForJID:(XMPPJID *)jid");
+
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用- (void)fetchvCardTempForJID:(XMPPJID *)jid ignoreStorage:(BOOL)ignoreStorage");
+
+- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用");
+/**
+ *  Request from server with a vCard photo hash string,The server will return us the different vCard
+ *
+ *  @param bareJidStr      The user's bare jid string
+ *  @param completionBlock a block to return vCard
+ */
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃请使用- (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock");
 @end

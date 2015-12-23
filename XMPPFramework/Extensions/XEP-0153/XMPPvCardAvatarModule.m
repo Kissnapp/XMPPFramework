@@ -375,12 +375,6 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
         dispatch_async(moduleQueue, block);
 }
 
-- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
-{
-    [self vCardWithBareJidStr:bareJidStr
-              completionBlock:completionBlock];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,5 +527,15 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 @synthesize xmppvCardTempModule = _xmppvCardTempModule;
 
+
+@end
+
+@implementation XMPPvCardAvatarModule (Deprecated)
+
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    [self vCardWithBareJidStr:bareJidStr
+              completionBlock:completionBlock];
+}
 
 @end

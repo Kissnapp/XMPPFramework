@@ -150,31 +150,6 @@
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr
-{
-    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr]];
-}
-
-- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
-{
-    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
-}
-
-- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
-{
-    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
-}
-
-- (void)_requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr
-{
-
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    if(!bareJidStr) return;
-    
-    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag iqId:nil]];
-}
-
 - (XMPPvCardTemp *)vCardTempForJID:(XMPPJID *)jid shouldFetch:(BOOL)shouldFetch{
     
     __block XMPPvCardTemp *result;
@@ -409,5 +384,35 @@
 {
     return [self _executeRequestBlockWithElementName:kXMPPvCardTempTagElement xmlns:kXMPPNSvCardTemp sendIQ:iq];
 }
+
+@end
+
+@implementation XMPPvCardTempModule (Deprecated)
+
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr
+{
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr]];
+}
+
+- (void)requestvCardTempWithTagForJID:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
+{
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
+}
+
+- (void)requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr ignoreStorage:(BOOL)ignoreStorage
+{
+    [self fetchvCardTempForJID:[XMPPJID jidWithString:bareJidStr] ignoreStorage:ignoreStorage];
+}
+
+- (void)_requestvCardTempWithTag:(NSString *)tag bareJidStr:(NSString *)bareJidStr
+{
+    
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    if(!bareJidStr) return;
+    
+    [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag iqId:nil]];
+}
+
 
 @end
