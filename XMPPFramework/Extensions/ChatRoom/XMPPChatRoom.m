@@ -2194,6 +2194,10 @@ enum XMPPChatRoomUserListFlags
           
           if ([array count] > 0) {
                
+               
+          }
+          else if ([array count] > 0) {
+               
                // 2.sava the result
                [self transFormDataAndFetchUseListWithArray:array];
                
@@ -2201,7 +2205,11 @@ enum XMPPChatRoomUserListFlags
           
           
           
+<<<<<<< HEAD
           if (!hasChatRoom ){
+=======
+          if (!hasChatRoom){
+>>>>>>> cloud
                // We should have our ChatRoom now
                
                [self _setHasChatRoom:YES];
