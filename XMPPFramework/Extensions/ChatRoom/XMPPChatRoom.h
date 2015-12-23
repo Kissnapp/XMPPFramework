@@ -93,10 +93,10 @@
 @property (assign, readonly) BOOL hasChatRoomList;
 
 /**
- *  fetch all the chat room list from the server, 
+ *  fetch all the chat room list from the server,
  *  NOTE:This method is not a method that fetch list from the CoreData system
  */
-- (void)fetchChatRoomListFromServer;
+- (void)fetchChatRoomListFromServerWithSinceId:(NSString *)sinceId;
 /**
  *  fetch the Chat Room From Server With the given bare chat room jid string
  *
@@ -108,7 +108,7 @@
  *
  *  @param bareChatRoomJidStr The given bare chat room jid str
  */
-- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+- (void)fetchUserListFromServerWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr sinceId:(NSString *)sinceId;
 /**
  *  create room with a nick name
  *
@@ -216,9 +216,16 @@
  */
 - (void)DeleteUserWithBareJidStrArray:(NSArray  *)bareJidStrArray fromChatRoomWithBareJidStr:(NSString *)bareChatRoomJidStr;
 /**
- *  Get all the list from the local core datasystem
+ *  Get all the chat room(not task and event) list from the local core datasystem
  */
 - (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal;
+
+/**
+ *  Get all type chat room （just as chat room、task、event）
+ *
+ *  @return All chat room
+ */
+- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllTypeChatRoomListFromLocal;
 /**
  *  Fetch a chat room's all user with the given chat room bare jid string,
  *
@@ -287,7 +294,8 @@
                completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取所有聊天室信息
-- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
+- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
+                  completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
 - (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type;
 
 #pragma mark - 获取所有人员信息
@@ -333,6 +341,7 @@
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 - (NSArray *)userListForChatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (NSArray *)chatRoomListWithType:(XMPPChatRoomType)type xmppStream:(XMPPStream *)stream;
+- (NSArray *)chatRoomListWitXMPPStream:(XMPPStream *)stream;
 
 - (id)chatRoomWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;

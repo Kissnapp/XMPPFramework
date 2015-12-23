@@ -16,30 +16,51 @@ typedef NS_ENUM(NSUInteger, XMPPMmsRequestUploadType) {
 
 @interface XMPPMmsRequest : XMPPModule
 
-// privare upload new file
-- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)privateUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
 
 // public upload new file
-- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)publicUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock ;
 
 
-- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
-                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
+- (void)uploadWithType:(XMPPMmsRequestUploadType)type
+       completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
+
+#pragma mark - multipart upload
+
+// privare upload new file
+- (void)multipartPrivateUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
+
+// public upload new file
+- (void)multipartPublicUploadWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
+
+- (void)multipartUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                           completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSString *uploadid, NSError *error))completionBlock;
 
 
-// upload exists file
+#pragma mark - upload exists file
 - (void)requestExistsUploadInfoWithFile:(NSString *)file
                         completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 - (void)requestExistsUploadInfoWithFile:(NSString *)file
                              requestKey:(NSString *)requestKey
                         completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock;
 
-
+#pragma mark - download
 - (void)requestDownloadURLWithFile:(NSString *)file
                     completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
 - (void)requestDownloadURLWithFile:(NSString *)file
                          requestKey:(NSString *)requestKey
                     completionBlock:(void (^)(NSString *URLString, NSError *error))completionBlock;
+@end
 
 
+@interface XMPPMmsRequest (Deprecated)
+// privare upload new file
+- (void)requestUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用privateUploadWithCompletionBlock:");
+
+// public upload new file
+- (void)requestPublicUploadInfoWithCompletionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用publicUploadWithCompletionBlock:");
+
+
+- (void)requestUploadInfoWithType:(XMPPMmsRequestUploadType)type
+                  completionBlock:(void (^)(NSString *token, NSString *file, NSString *expiration, NSError *error))completionBlock NS_DEPRECATED_IOS(6_0, 7_0, "该方法已经废弃，请使用uploadWithType:completionBlock:");
 @end

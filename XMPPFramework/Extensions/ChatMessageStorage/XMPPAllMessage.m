@@ -6,7 +6,6 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 #import "XMPPAllMessage.h"
-#import "XMPPFramework.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
 #import <objc/runtime.h>
@@ -308,7 +307,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         @autoreleasepool {
-            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:message];
+            XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:message];
             [self saveMessageWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
             [multicastDelegate xmppAllMessage:self willSendXMPPMessage:message];
         }
@@ -362,12 +361,12 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)readMessageWithMessageID:(NSString *)messageID
+- (void)readMessageWithMessageId:(NSString *)msgId
 {
-    if (!messageID) return;
+    if (!msgId) return;
     
     dispatch_block_t block = ^{
-        NSString *messageid = [messageID copy];
+        NSString *messageid = [msgId copy];
         [self readMessageFromStorgeWithMessageID:messageid xmppStream:xmppStream];
     };
     
@@ -391,7 +390,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendState)sendType
 {
     if (!messageID) return;
     
@@ -443,17 +442,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
-- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessage *)message
 {
-    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.messageID];
+    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.msgId];
 }
 - (void)addFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID
 {
     [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:messageID];
 }
-- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObject:(XMPPExtendMessage *)message
 {
-    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.messageID];
+    [self updateFilePath:filePath toXMPPExtendMessageObjectWithMessageID:message.msgId];
 }
 - (void)updateFilePath:(NSString *)filePath toXMPPExtendMessageObjectWithMessageID:(NSString *)messageID
 {
@@ -508,11 +507,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return  results;
 }
 
-- (void)saveAndSendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message
 {
     dispatch_block_t block = ^{
         
-        XMPPMessage *newMessage = [[message toXMPPMessage] copy];
+        XMPPMessage *newMessage = [message copy];
         //we should stroage this message firstly
         [self saveMessageWithXMPPStream:xmppStream message:message sendFromMe:YES];
         //send the message
@@ -530,11 +529,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (void)saveXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message
 {
     dispatch_block_t block = ^{
         
-        BOOL sendFromMe = message.sendFromMe;
+        BOOL sendFromMe = message.msgOutgoing;
         //we should stroage this message firstly
         [self saveMessageWithXMPPStream:xmppStream message:[message copy] sendFromMe:sendFromMe];
     };
@@ -545,11 +544,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 
 }
-- (void)sendXMPPExtendMessageObject:(XMPPExtendMessageObject *)message
+- (void)sendXMPPExtendMessage:(XMPPExtendMessage *)message
 {
     dispatch_block_t block = ^{
         
-        XMPPMessage *newMessage = [[message toXMPPMessage] copy];
+        XMPPMessage *newMessage = [message copy];
         
         //send the message
         [xmppStream sendElement:newMessage];
@@ -601,13 +600,13 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)saveMessageWithXMPPStream:(XMPPStream *)sender message:(XMPPExtendMessageObject *)message sendFromMe:(BOOL)sendFromMe
+- (void)saveMessageWithXMPPStream:(XMPPStream *)sender message:(XMPPExtendMessage *)message sendFromMe:(BOOL)sendFromMe
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
     //save the message
-    BOOL activeMessage = sendFromMe ? NO:[[self activeUser] isEqualToString:message.fromUser];
-    [message setSendFromMe:sendFromMe];
+    BOOL activeMessage = sendFromMe ? NO:[[self activeUser] isEqualToString:message.msgFrom];
+    [message setMsgOutgoing:sendFromMe];
 
     [xmppMessageStorage archiveMessage:message active:activeMessage xmppStream:sender];
     
@@ -643,7 +642,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if (!dispatch_get_specific(moduleQueueTag)) return;
     [xmppMessageStorage deleteMessageWithMessageID:messageID xmppStream:stream];
 }
-- (void)updateMessageSendStatusFromStorgeWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendStatusType)sendType xmppStream:(XMPPStream *)stream
+- (void)updateMessageSendStatusFromStorgeWithMessageID:(NSString *)messageID sendSucceed:(XMPPMessageSendState)sendType xmppStream:(XMPPStream *)stream
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     [xmppMessageStorage updateMessageSendStatusWithMessageID:messageID sendSucceed:sendType xmppStream:stream];
@@ -730,8 +729,8 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     if ([message isChatMessageWithInfo]) {
         
-        NSString *messageID = [message messageID];
-        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceedType];
+        NSString *messageID = [(XMPPExtendMessage *)message msgId];
+        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendSucceed];
         
         double delayInSeconds = 1.0;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
@@ -739,7 +738,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             
             // code to be executed on the main queue after delay
             
-            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+            XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:[message copy]];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_SUCCEED object:newMessage];
         });
@@ -756,9 +755,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     if ([message isChatMessageWithInfo]) {
         
-        NSString *messageID = [message messageID];
+        NSString *messageID = [(XMPPExtendMessage *)message msgId];
         
-        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailedType];
+        [self updateMessageSendStatusWithMessageID:messageID sendSucceed:XMPPMessageSendFailed];
         
         double delayInSeconds = 1.0;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
@@ -766,7 +765,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             
             // code to be executed on the main queue after delay
             
-            XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+            XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:[message copy]];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:SEND_XMPP_EXTEND_CHAT_MESSAGE_FAILED object:newMessage];
         });
@@ -781,9 +780,9 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     if ([message isChatMessageWithInfo]) {
         
         //save the message
-        XMPPExtendMessageObject *newMessage = [XMPPExtendMessageObject xmppExtendMessageObjectFromXMPPMessage:[message copy]];
+        XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:[message copy]];
         
-        if (newMessage.messageType == XMPPExtendMessageAudioType) {
+        if (newMessage.msgType == XMPPExtendSubMessageAudioType) {
             
             __weak typeof(self) weakSelf = self;
             
@@ -791,12 +790,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 
                 __strong typeof(weakSelf) strongSelf = weakSelf;
                 
-                NSData *fileData = newMessage.audio.fileData;
-                NSString *filePath = [strongSelf filePathWithName:newMessage.audio.fileName];
+                XMPPAudioMessageObject *audio = [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:(NSXMLElement *)newMessage.msgSubData];
+                
+                NSData *fileData = audio.fileData;
+                NSString *filePath = [strongSelf filePathWithName:audio.fileName];
                 if (fileData.length > 0 &&
                     [fileData writeToFile:filePath atomically:YES]) {
-                    newMessage.audio.fileData = nil;
-                    newMessage.audio.filePath = filePath;
+                    audio.fileData = nil;
+                    audio.filePath = filePath;
+                    newMessage.msgSubData = audio;
                     
                     dispatch_block_t block = ^{
                         

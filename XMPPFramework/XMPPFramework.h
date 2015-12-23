@@ -89,15 +89,19 @@
 #import "XMPPChatRoomCoreDataStorageObject.h"
 #import "XMPPChatRoomUserCoreDataStorageObject.h"
 
-#import "XMPPAdditionalCoreDataMessageObject.h"
-#import "XMPPExtendMessageObject.h"
+#import "XMPPExtendMessage.h"
 #import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
 
 #import "XMPPAllMessage.h"
 #import "XMPPAllMessageQueryModule.h"
 #import "XMPPMessageCoreDataStorage.h"
-#import "XMPPMessage+AdditionMessage.h"
+
+#import "XMPPAudioMessageObject.h"
+#import "XMPPTextMessageObject.h"
+#import "XMPPPictureMessageObject.h"
+#import "XMPPVideoMessageObject.h"
+#import "XMPPLocationMessageObject.h"
 
 #import "XMPPLoginHelper.h"
 #import "XMPPLoginHelperCoreDataStorage.h"
@@ -116,6 +120,10 @@
 #import "XMPPOrgRelationObject.h"
 #import "XMPPOrgPositionCoreDataStorageObject.h"
 #import "XMPPOrgSubcribeCoreDataStorageObject.h"
+
+#import "XMPPCloud.h"
+#import "XMPPCloudCoreDataStorage.h"
+#import "XMPPCloudCoreDataStorageObject.h"
 
 #import "XMPPManagedObject.h"
 #import "NSDictionary+KeysTransfrom.h"

@@ -238,6 +238,131 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
     return photoURL;
 }
 
+#pragma mark - asys methods
+- (void)fetchPhotoDataWithBareJidStr:(NSString *)bareJidStr
+                     completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                  
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.photo, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                  
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)fetchPhoneNumberWithBareJidStr:(NSString *)bareJidStr
+                       completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.phoneNumber, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)fetchEmailAddressWithBareJidStr:(NSString *)bareJidStr
+                        completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.emailAddress, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)fetchNickNameWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.nickname, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)fetchPhotoURLWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.photoURL, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
+
+
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{
@@ -252,14 +377,8 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 
 - (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
 {
-    dispatch_block_t block = ^{
-        [_xmppvCardTempModule requestvCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
-    };
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
+    [self vCardWithBareJidStr:bareJidStr
+              completionBlock:completionBlock];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

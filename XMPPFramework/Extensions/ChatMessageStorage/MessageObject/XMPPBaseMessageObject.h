@@ -12,4 +12,6 @@
 
 @interface XMPPBaseMessageObject : NSXMLElement<NSCoding, NSCopying>
 
++ (XMPPBaseMessageObject *)xmppBaseMessageObjectFromElement:(NSXMLElement *)element;
+
 @end

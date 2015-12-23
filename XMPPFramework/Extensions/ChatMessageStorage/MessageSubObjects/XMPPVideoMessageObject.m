@@ -12,89 +12,132 @@
 
 
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
-#define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_PATH_ATTRIBUTE_NAME            @"filePath"
+#define FILE_THUMBNAIL_ATTRIBUTE_NAME       @"thumbnail"
+#define FILE_SIZE_ATTRIBUTE_NAME            @"fileSize"
 #define TIME_LENGTH_ATTRIBUTE_NAME          @"timeLength"
 
 @implementation XMPPVideoMessageObject
 
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromElement:(NSXMLElement *)element{
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromElement:(NSXMLElement *)element
+{
     
     object_setClass(element, [XMPPVideoMessageObject class]);
     return (XMPPVideoMessageObject *)element;
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromInfoElement:(NSXMLElement *)infoElement{
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromInfoElement:(NSXMLElement *)infoElement
+{
     
     XMPPVideoMessageObject *xmppVideoMessageObject = nil;
     
     NSXMLElement *element = [infoElement elementForName:VIDEO_ELEMENT_NAME];
     if (element) {
     
-        xmppVideoMessageObject =         [XMPPVideoMessageObject xmppVideoMessageObjectFromInfoElement:element];
+        xmppVideoMessageObject = [XMPPVideoMessageObject xmppVideoMessageObjectFromElement:element];
     }
     
     return xmppVideoMessageObject;
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObject{
-    
+
++ (XMPPVideoMessageObject *)xmppVideoMessageObject
+{
     NSXMLElement *videoElement = [NSXMLElement elementWithName:VIDEO_ELEMENT_NAME];
     return [XMPPVideoMessageObject xmppVideoMessageObjectFromInfoElement:videoElement];
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileData:(NSData *)fileData time:(NSTimeInterval)time{
-    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFilePath:nil fileData:fileData time:time];
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath
+                                                          size:(NSString *)size
+                                                          time:(NSTimeInterval)time
+{
+    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:nil
+                                                             filePath:filePath
+                                                            thumbnail:nil
+                                                                 size:size
+                                                                 time:time];
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath time:(NSTimeInterval)time{
-    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFilePath:filePath fileData:nil time:time];
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName
+                                                      filePath:(NSString *)filePath
+                                                          size:(NSString *)size
+                                                          time:(NSTimeInterval)time
+{
+    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:fileName
+                                                             filePath:filePath
+                                                            thumbnail:nil
+                                                                 size:size
+                                                                 time:time];
 }
 
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
-    return [XMPPVideoMessageObject xmppVideoMessageObjectWithFileName:nil filePath:filePath fileData:fileData time:time];
-}
-
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName
+                                                      filePath:(NSString *)filePath
+                                                     thumbnail:(NSData *)thumbnail
+                                                          size:(NSString *)size
+                                                          time:(NSTimeInterval)time
+{
     
     XMPPVideoMessageObject *xmppVideoMessageObject = nil;
     NSXMLElement *element = [NSXMLElement elementWithName:VIDEO_ELEMENT_NAME];
     xmppVideoMessageObject = [XMPPVideoMessageObject xmppVideoMessageObjectFromElement:element];
     
-    [xmppVideoMessageObject setFileName:fileName ];
+    [xmppVideoMessageObject setFileName:fileName];
     [xmppVideoMessageObject setFilePath:filePath];
-    [xmppVideoMessageObject setFileData:fileData];
+    [xmppVideoMessageObject setFileSize:size];
     [xmppVideoMessageObject setTimeLength:time];
+    [xmppVideoMessageObject setThumbnail:thumbnail];
+    
     return xmppVideoMessageObject;
 }
 
 
+- (instancetype)init
+{
+    return [self initWithFilePath:nil
+                             size:nil
+                             time:0.0];
+}
+- (instancetype)initWithFilePath:(NSString *)filePath
+                            size:(NSString *)size
+                            time:(NSTimeInterval)time
+{
+    return [self initWithFileName:nil
+                         filePath:filePath
+                        thumbnail:nil
+                             size:size
+                             time:time];
+}
 
-- (instancetype)init{
-    return [self initWithFileData:nil time:0.0];
-}
-- (instancetype)initWithFileData:(NSData *)fileData time:(NSTimeInterval)time{
-    return [self initWithFileName:nil fileData:fileData time:time];
+- (instancetype)initWithFileName:(NSString *)fileName
+                        filePath:(NSString *)filePath
+                            size:(NSString *)size
+                            time:(NSTimeInterval)time
+{
+    return [self initWithFileName:filePath
+                         filePath:filePath
+                        thumbnail:nil
+                             size:size
+                             time:time];
 }
 
-- (instancetype)initWithFileName:(NSString *)fileName fileData:(NSData *)fileData time:(NSTimeInterval)time{
-    return [self initWithFileName:fileName filePath:nil fileData:fileData time:time];
-    
-}
-- (instancetype)initWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time{
-    
+- (instancetype)initWithFileName:(NSString *)fileName
+                        filePath:(NSString *)filePath
+                       thumbnail:(NSData *)thumbnail
+                            size:(NSString *)size
+                            time:(NSTimeInterval)time
+{
     self = [super initWithName:VIDEO_ELEMENT_NAME];
     if (self) {
         [self setFileName:fileName];
         [self setFilePath:filePath];
-        [self setFileData:fileData];
+        [self setFileSize:size];
+        [self setThumbnail:thumbnail];
         [self setTimeLength:time];
         
     }
     return  self;
 }
-
 
 
 - (NSString *)fileName
@@ -104,9 +147,7 @@
 
 - (void)setFileName:(NSString *)fileName
 {
-    if (!fileName) {
-        return;
-    }
+    if (!fileName) return;
     XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileName, FILE_NAME_ATTRIBUTE_NAME);
 }
 
@@ -117,13 +158,23 @@
 
 - (void)setFilePath:(NSString *)filePath
 {
-    if (!filePath) {
-        return;
-    }
+    if (!filePath) return;
     XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(filePath, FILE_PATH_ATTRIBUTE_NAME);
 }
 
-- (NSData *)fileData
+- (NSString *)fileSize
+{
+    return [self attributeStringValueForName:FILE_SIZE_ATTRIBUTE_NAME];
+}
+
+- (void)setFileSize:(NSString *)fileSize
+{
+    if (!fileSize) return;
+    
+    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileSize, FILE_SIZE_ATTRIBUTE_NAME);
+}
+
+- (NSData *)thumbnail
 {
     NSData *data = nil;
     
@@ -137,9 +188,11 @@
     return data;
 }
 
-- (void)setFileData:(NSData *)fileData
+- (void)setThumbnail:(NSData *)thumbnail
 {
-    XMPP_SUB_MSG_SET_STRING_VALUE([fileData xmpp_base64Encoded]);
+    if (!thumbnail) return;
+    
+    XMPP_SUB_MSG_SET_STRING_VALUE([thumbnail xmpp_base64Encoded]);
 }
 
 - (NSTimeInterval)timeLength

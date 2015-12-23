@@ -27,72 +27,230 @@
 - (id)initWithOrganizationStorage:(id <XMPPOrgStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
 
 #pragma mark - 获取所有项目
+/**
+ *  向服务器请求所有的项目
+ */
 - (void)requestServerAllOrgList;
+
+/**
+ *  向本地请求所有的项目，并返回结果
+ *
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllOrgListWithBlock:(CompletionBlock)completionBlock;
+
+/**
+ *  清除本地所有项目信息
+ */
 - (void)clearAllOrgs;
 
 #pragma mark - 获取所有模板
+/**
+ *  向服务器请求所有模板
+ */
 - (void)requestServerAllTemplates;
+
+/**
+ *  从本地数据库请求所有模板信息，并返回
+ *
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllTemplatesWithBlock:(CompletionBlock)completionBlock;
+
+/**
+ *  清除所有模板
+ */
 - (void)clearAllTemplates;
 
 #pragma mark - 获取一个组织的所有职位信息
-- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId;
 
+/**
+ *  向服务器请求一个项目或者模板的所有职位信息
+ *
+ *  @param orgId      项目或者模板id
+ *  @param isTemplate 是否是模板标志
+ */
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
+                                   isTemplate:(BOOL)isTemplate;
+
+/**
+ *  在本地取出一个项目或者模板的职位信息
+ *
+ *  @param orgId           项目或者模板id
+ *  @param isTemplate      是否模板标志
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
+                               isTemplate:(BOOL)isTemplate
                           completionBlock:(CompletionBlock)completionBlock;
-
+ 
 #pragma mark - 获取一个组织的所有成员信息
+/**
+ *  向服务器请求一个项目的成员信息
+ *
+ *  @param orgId 项目id
+ */
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId;
+
+/**
+ *  在本地取出一个项目的所有成员信息
+ *
+ *  @param orgId           项目id
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllUserListWithOrgId:(NSString *)orgId
                       completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有关键组织的id
+/**
+ *  向服务器请求一个项目的所有关联组织的信息
+ *
+ *  @param orgId 项目id
+ */
 - (void)requestServerAllRelationListWithOrgId:(NSString *)orgId;
+
+/**
+ *  在本地取出一个项目的所有关联组织信息
+ *
+ *  @param orgId           项目id
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllRelationListWithOrgId:(NSString *)orgId
                           completionBlock:(CompletionBlock)completionBlock;
 
 
-#pragma mark - 获取一个组织关联组织的所有职位信息
-- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId
-                                relationOrgId:(NSString *)relationOrgId;
+#pragma mark - 获取一个组织或者关联组织的所有职位信息
+/**
+ *  向服务器获取一个组织或者关联组织的所有职位信息
+ *
+ *  @param orgId         本项目id
+ *  @param relationOrgId 关联项目id
+ *  @param isTemplate    是否是模板
+ */
+- (void)requestServerAllPositionListWithOrgId:(NSString *)orgId 
+                                relationOrgId:(NSString *)relationOrgId
+                                   isTemplate:(BOOL)isTemplate;
 
+/**
+ *  本地取出一个组织或者关联组织的所有职位信息
+ *
+ *  @param orgId           本项目id
+ *  @param relationOrgId   关联项目id
+ *  @param isTemplate      是否是模板
+ *  @param completionBlock 回掉block(执行在主线程队列)
+ */
 - (void)requestDBAllPositionListWithOrgId:(NSString *)orgId
                             relationOrgId:(NSString *)relationOrgId
+                               isTemplate:(BOOL)isTemplate
                           completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 获取一个组织的所有成员信息
+/**
+ *  向服务器请求一个组织关联组织的人员信息
+ *
+ *  @param orgId         本组织id
+ *  @param relationOrgId 关联组织id
+ */
 - (void)requestServerAllUserListWithOrgId:(NSString *)orgId
                             relationOrgId:(NSString *)relationOrgId;
+
+/**
+ *  在本地取出一个关联项目的所有成员信息
+ *
+ *  @param orgId           本组织id
+ *  @param relationOrgId   关联组织id
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllUserListWithOrgId:(NSString *)orgId
                         relationOrgId:(NSString *)relationOrgId
                       completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 验证组织name
+
+/**
+ *  检查项目名称是否已经存在
+ *
+ *  @param name            项目名称
+ *  @param completionBlock 回掉block
+ */
 - (void)checkOrgName:(NSString *)name
      completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 创建组织
+/**
+ *  创建项目
+ *
+ *  @param name            名称
+ *  @param templateId      模板id
+ *  @param jobId           自己的职位id
+ *  @param completionBlock 回掉block
+ */
 - (void)createOrgWithName:(NSString *)name
                templateId:(NSString *)templateId
                 selfJobId:(NSString *)jobId
           completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 结束组织
+/**
+ *  结束一个项目
+ *
+ *  @param orgId           项目id
+ *  @param completionBlock 回掉block
+ */
 - (void)endOrgWithId:(NSString *)orgId
      completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 查询自己可以添加的职位（自己的子职位）列表
+/**
+ *  从本地取出一个职位的所有子职位
+ *
+ *  @param ptId            职位id
+ *  @param orgId           项目id
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBAllSubPositionsWithPtId:(NSString *)ptId
                                    orgId:(NSString *)orgId
                          completionBlock:(CompletionBlock)completionBlock;
 
+/**
+ *  向服务器查询一个职位的所有子职位
+ *
+ *  @param orgId           项目id
+ *  @param ptId            职位id
+ *  @param completionBlock 回掉block
+ */
 - (void)requestServerAllSubPositionsWithOrgId:(NSString *)orgId
+                                         ptId:(NSString *)ptId
                               completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 查询自己可以添加的成员列表
+/**
+ *  获取一个成员的所有的子职位
+ *
+ *  @param orgId               项目id
+ *  @param superUserBareJidStr 成员的jid
+ *
+ *  @return 所有子职位信息
+ */
 - (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId superUserBareJidStr:(NSString *)superUserBareJidStr;
+
+/**
+ *  获取自己的所有子职位
+ *
+ *  @param orgId 项目id
+ *
+ *  @return 自己的所有子职位信息
+ */
 - (id)requestDBAllSubUsersWithOrgId:(NSString *)orgId;
+
+/**
+ *  在本地数据库查询一个项目的管理员
+ *
+ *  @param orgId 项目id
+ *
+ *  @return 管理员的对象（CoreData NSmanagerObject）
+ */
+- (id)requestDBAdminInfoFromOrgId:(NSString *)orgId;
 
 
 #pragma mark - 创建新的职位信息
@@ -103,12 +261,14 @@
  *  @param parentPtId      职位所属上级职位的id
  *  @param ptName          职位名称
  *  @param dpName          职位所属部门名称
+ *  @param dpLevel         职位所属部门等级
  *  @param completionBlock 返回结果block
  */
 - (void)createPositionWithOrgId:(NSString *)orgId
                      parentPtId:(NSString *)parentPtId
                          ptName:(NSString *)ptName
                          dpName:(NSString *)dpName
+                        dpLevel:(NSInteger)dpLevel
                 completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 为某个组织加人
@@ -124,7 +284,9 @@
 
 #pragma mark - 从某个组织删人
 - (void)removeUserBareJidStr:(NSString *)userBareJidStr
+                        ptId:(NSString *)ptId
                      formOrg:(NSString *)orgId
+                withSelfPtId:(NSString *)selfPtId
              completionBlock:(CompletionBlock)completionBlock;
 
 #pragma mark - 订阅某个组织
@@ -201,17 +363,54 @@
                                      orgId:(NSString *)orgId
                            completionBlock:(CompletionBlock)completionBlock;
 
-#pragma mark - 自己是否是该工程的admin
+
+/**
+ *  自己是否是该工程的admin
+ *
+ *  @param orgId 项目id
+ *
+ *  @return YES:如果自己是该项目的管理员，NO:自己不是该项目管理员
+ */
 - (BOOL)isSelfAdminOfOrgWithOrgId:(NSString *)orgId;
 
-#pragma mark - 查询某个用户是否在某个组织中
+/**
+ *  查询某个用户是否在某个组织中
+ *
+ *  @param bareJidStr 被查询用户的jid
+ *  @param orgId      被查用户指定的项目id
+ *
+ *  @return YES：如果该用户在改组织中，NO：该用户不在该项目中
+ */
 - (BOOL)existedUserWithBareJidStr:(NSString *)bareJidStr inOrgWithId:(NSString *)orgId;
 
-#pragma mark - 根据组织id 查询该组织的头像url
+/**
+ *  根据项目组织id或者模板id获取该项目或者模板的头像
+ *
+ *  @param orgId           项目或者模板的头像
+ *  @param isTemplate      请求的是否是模板的头像
+ *  @param completionBlock 回掉block
+ */
 - (void)requestDBOrgPhotoWithOrgId:(NSString *)orgId
+                        isTemplate:(BOOL)isTemplate
                    completionBlock:(CompletionBlock)completionBlock;
 
--(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock ;
+/**
+ *  获取模板的hash
+ *
+ *  @param completionBlock 回掉block
+ */
+-(void)getTempHashWithcompletionBlock:(CompletionBlock)completionBlock;
+
+/**
+ *  根据组织id 设置组织的头像
+ *
+ *  @param orgId           项目id
+ *  @param fileId          文件的fileId
+ *  @param completionBlock 回掉block
+ */
+- (void)setOrgPhotoWithOrgId:(NSString *)orgId
+                      fileId:(NSString *)fileId
+             completionBlock:(CompletionBlock)completionBlock;
 
 @end
 
@@ -273,6 +472,7 @@
 - (id)orgRelationsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 - (void)insertOrUpdateOrgInDBWith:(NSDictionary *)dic
+                       isTemplate:(BOOL)isTemplate
                        xmppStream:(XMPPStream *)stream
                         userBlock:(void (^)(NSString *orgId))userBlock
                     positionBlock:(void (^)(NSString *orgId))positionBlock
@@ -327,5 +527,13 @@
 - (void)updateSubcribeObjectWithDic:(NSDictionary *)dic accept:(BOOL)accept xmppStream:(XMPPStream *)stream;
 - (void)addOrgId:(NSString *)fromOrgId orgName:(NSString *)formOrgName toOrgId:(NSString *)toTogId xmppStream:(XMPPStream *)stream;
 - (void)removeOrgId:(NSString *)removeOrgId fromOrgId:(NSString *)fromOrgId xmppStream:(XMPPStream *)stream;
+
+// 设置头像
+- (void)setPhotoURL:(NSString *)photoURL forOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)photoURLWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (BOOL)bareJidStr:(NSString *)bareJidStr isSubPositionOfBareJidStr:(NSString *)fatherBareJidStr inOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+
+- (id)adminBareJidStrWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 
 @end

@@ -10,6 +10,7 @@
 #import "XMPPBaseMessageSubObject.h"
 #define TEXT_ELEMENT_NAME                  @"text"
 @interface XMPPTextMessageObject : XMPPBaseMessageSubObject
+
 @property (nonatomic, strong) NSString * text;
 //class init methods
 
