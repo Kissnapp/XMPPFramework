@@ -22,6 +22,14 @@
         <attribute name="streamBareJidStr" attributeType="String" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="version" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
+    <entity name="XMPPSubscribeCoreDataStorageObject" representedClassName="XMPPSubscribeCoreDataStorageObject" syncable="YES">
+        <attribute name="bareJidStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="nickName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="state" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="streamBareJidStr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="Date" syncable="YES"/>
+    </entity>
     <entity name="XMPPUserCoreDataStorageObject" representedClassName="XMPPUserCoreDataStorageObject" syncable="YES">
         <attribute name="ask" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="displayName" attributeType="String" indexed="YES" syncable="YES"/>
@@ -45,7 +53,8 @@
     <elements>
         <element name="XMPPGroupCoreDataStorageObject" positionX="0" positionY="0" width="128" height="75"/>
         <element name="XMPPResourceCoreDataStorageObject" positionX="394" positionY="54" width="200" height="225"/>
-        <element name="XMPPUserCoreDataStorageObject" positionX="126" positionY="108" width="171" height="315"/>
         <element name="XMPPRosterVersionCoreDataStorageObject" positionX="207" positionY="153" width="128" height="75"/>
+        <element name="XMPPUserCoreDataStorageObject" positionX="126" positionY="108" width="171" height="315"/>
+        <element name="XMPPSubscribeCoreDataStorageObject" positionX="198" positionY="144" width="128" height="135"/>
     </elements>
 </model>
