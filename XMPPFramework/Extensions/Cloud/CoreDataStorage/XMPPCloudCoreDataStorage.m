@@ -181,11 +181,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
 }
 
 
-<<<<<<< HEAD
 #pragma mark - 2.cloudID查找数据 (删除,重命名...)
-=======
-#pragma mark - 3.cloudID查找数据 (删除,重命名)
->>>>>>> cloud
 - (id)cloudIDInfoWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 {
     __block NSArray *allUsers = nil;

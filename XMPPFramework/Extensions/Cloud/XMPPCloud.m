@@ -288,11 +288,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
                 [dicM setObject:DBCloud.cloudID forKey:@"id"];
                 [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
-<<<<<<< HEAD
                 [_xmppCloudStorage deleteCloudDic:dicM xmppStream:xmppStream];
-=======
-                [_xmppCloudStorage deleteClouDic:dicM xmppStream:xmppStream];
->>>>>>> cloud
                 
             }
             
@@ -525,7 +521,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
 }
 
-<<<<<<< HEAD
 #pragma mark 8.上传新版本
 - (void)handleCloudAddVersionWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
@@ -543,8 +538,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
     return [NSDictionary dictionaryWithDictionary:dicM];
 }
 
-=======
->>>>>>> cloud
 
 
 #pragma mark 9.获取共享人员列表 无需存储 OK
@@ -604,29 +597,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 #pragma mark - 二. 网盘网络接口
 
-<<<<<<< HEAD
-=======
-#pragma mark 15 恢复
-- (void)handleCloudRecoverFileDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
-{
-    if (!dispatch_get_specific(moduleQueueTag)) return;
-    
-    NSDictionary *dicData = [self _handleCloudRecoverFileDatasWithDicDatas:dicDatas projectID:projectID];
-    
-    [_xmppCloudStorage updateSpecialCloudDic:dicData xmppStream:xmppStream];
-}
-
-- (NSDictionary *)_handleCloudRecoverFileDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
-{
-    NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dicDatas];
-    [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"hasBeenDelete"];
-    return [NSDictionary dictionaryWithDictionary:dicM];
-}
-
-
-#pragma mark - 二. 网盘网络接口
-
->>>>>>> cloud
 #pragma mark - 1.获取文件夹内容 OK
 /**
  <iq type="get" id="1234" >
@@ -1382,12 +1352,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-<<<<<<< HEAD
 
 #pragma mark - 10.获取文件版本 问题
-=======
-#pragma mark 12.获取日志
->>>>>>> cloud
 /**
  
  <iq type="get" id="1234" >
@@ -1404,11 +1370,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
  </iq>
  
  */
-<<<<<<< HEAD
 - (void)requestCloudListVersionWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID block:(CompletionBlock)completionBlock
-=======
-- (void)requestCloudGetLogWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock
->>>>>>> cloud
 {
     dispatch_block_t block = ^{@autoreleasepool{
         if (!dispatch_get_specific(moduleQueueTag)) return;
@@ -1427,125 +1389,18 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // 2. Listing the request iq XML
             /**
              <iq type="get" id="1234" >
-<<<<<<< HEAD
              <query xmlns="aft:library"  project="xxx" subtype="list_version">
              {"id":"xxx"}
-=======
-                <query xmlns="aft:library" project="xxx" subtype="get_log">
-                    {"before"/"after":"1", "count:"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
-                </query>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            NSString *key;
-            NSString *attribute;
-            if (after.length <= 0) {
-                attribute = before;
-                key = @"before";
-            } else if (before.length <= 0) {
-                attribute = after;
-                key = @"after";
-            }
-            
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:count, @"count", attribute, key, nil];
-            
-            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
-                                                                      xmlns:@"aft:library"
-                                                                  attribute:@{@"subtype":@"get_log", @"project":projectID}
-                                                                stringValue:[templateDic JSONString]];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"get"
-                                                             id:requestKey
-                                                   childElement:cloudElement];
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
-
-#pragma mark 13.获取我的回收站
-/**
- 
- <iq type="get" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="get_trash">
- {"before"/"after":1, "count":"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library"  project="xxx" subtype="get_trash">    %%规定一下count最大为20条，这样可以在一个结果里全部返回，不用一条一条的返回。
- {"count":"xxx", "files":[] } %% logs 需要客户端自己根据id去升序排序。
- </query>
- </iq>
- 
- 注意：如果file的location里有"@"请替换为自己的姓名。
- 
- */
-- (void)requestCloudGetTrashWithProjectID:(NSString *)projectID count:(NSString *)count before:(NSString *)before after:(NSString *)after block:(CompletionBlock)completionBlock;
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        if (!dispatch_get_specific(moduleQueueTag)) return;
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            // If the templateId is nil，we should notice the user the info
-            
-            // 0. Create a key for storaging completion block
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /**
-             <iq type="get" id="1234" >
-             <query xmlns="aft:library" project="xxx" subtype="get_trash">
-             {"before"/"after":1, "count":"xxx"} %% 如果为before且值为""，则表示获取最近的多少条。
->>>>>>> cloud
              </query>
              </iq>
              */
             
             // 3. Create the request iq
-<<<<<<< HEAD
             NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", nil];
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
                                                                   attribute:@{@"subtype":@"list_version", @"project":projectID}
-=======
-            NSString *key;
-            NSString *attribute;
-            if (after.length <= 0) {
-                attribute = before;
-                key = @"before";
-            } else if (before.length <= 0) {
-                attribute = after;
-                key = @"after";
-            }
-            
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:count, @"count", before, @"before", nil];
-            
-            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
-                                                                      xmlns:@"aft:library"
-                                                                  attribute:@{@"subtype":@"get_trash", @"project":projectID}
->>>>>>> cloud
                                                                 stringValue:[templateDic JSONString]];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
@@ -1600,10 +1455,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             // If the templateId is nil，we should notice the user the info
             
             // 0. Create a key for storaging completion block
-<<<<<<< HEAD
-=======
-//            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
->>>>>>> cloud
             NSString *requestKey = [[self xmppStream] generateUUID];
             
             // 1. add the completionBlock to the dcitionary
@@ -1619,93 +1470,11 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
              */
             
             // 3. Create the request iq
-<<<<<<< HEAD
             NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", uuid, @"uuid", nil];
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
                                                                   attribute:@{@"subtype":@"download", @"project":projectID}
-=======
-            
-            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
-                                                                      xmlns:@"aft:library"
-                                                                  attribute:@{@"subtype":@"clear_trash", @"project":projectID}
-                                                                stringValue:nil];
-            
-            IQElement *iqElement = [IQElement iqElementWithFrom:nil
-                                                             to:nil
-                                                           type:@"set"
-                                                             id:requestKey
-                                                   childElement:cloudElement];
-            
-            // 4. Send the request iq element to the server
-            [[self xmppStream] sendElement:iqElement];
-            
-            // 5. add a timer to call back to user after a long time without server's reponse
-            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
-            
-        }else{
-            // 0. tell the the user that can not send a request
-            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
-        }
-    }};
-    
-    if (dispatch_get_specific(moduleQueueTag))
-        block();
-    else
-        dispatch_async(moduleQueue, block);
-}
-
-
-
-#pragma mark - 15.恢复
-/**
- 
- <iq type="set" id="1234" >
- <query xmlns="aft:library" project="49" subtype="recover_file">
- {"id":"9", "name":"全体通过录2", "dest_parent":"2"}  % name may be a new name as dest folder has duplication name.
- </query>
- </iq>
- 
- <iq type="result" id="1234" >
- <query xmlns="aft:library" project="xxx" subtype="recover_file">
- {"id":"xxx", "dest_parent":"xxx"}
- </query>
- </iq>
- 
- */
-- (void)requestCloudRecoverFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID name:(NSString *)name destParent:(NSString *)destParent block:(CompletionBlock)completionBlock
-{
-    dispatch_block_t block = ^{@autoreleasepool{
-        if (!dispatch_get_specific(moduleQueueTag)) return;
-        
-        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
-            // If the templateId is nil，we should notice the user the info
-            
-            // 0. Create a key for storaging completion block
-            //            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
-            NSString *requestKey = [[self xmppStream] generateUUID];
-            
-            // 1. add the completionBlock to the dcitionary
-            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
-            
-            // 2. Listing the request iq XML
-            /**
-             <iq type="set" id="1234" >
-             <query xmlns="aft:library" project="49" subtype="recover_file">
-             {"id":"9", "name":"全体通过录2", "dest_parent":"2"}  % name may be a new name as dest folder has duplication name.
-             </query>
-             </iq>
-             */
-            
-            // 3. Create the request iq
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", name, @"name", destParent, @"dest_parent", nil];
-            
-            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
-                                                                      xmlns:@"aft:library"
-                                                                  attribute:@{@"subtype":@"recover_file", @"project":projectID}
->>>>>>> cloud
                                                                 stringValue:[templateDic JSONString]];
             
             IQElement *iqElement = [IQElement iqElementWithFrom:nil
@@ -1732,18 +1501,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
-<<<<<<< HEAD
-=======
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark - 三. XMPPStreamDelegate
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
-{
-    // This method is invoked on the moduleQueue.
-    
-    [self setCanSendRequest:YES];
-}
->>>>>>> cloud
 
 
 
@@ -2183,13 +1940,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-<<<<<<< HEAD
                     NSArray *ownerFolder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:ownerCloudID xmppStream:xmppStream];
                     NSArray *addFolder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:addCloudID xmppStream:xmppStream];
-=======
-                    NSArray *ownerFolder = [_xmppCloudStorage cloudAddFolderWithProjectID:projectID cloudID:ownerCloudID xmppStream:xmppStream];
-                    NSArray *addFolder = [_xmppCloudStorage cloudAddFolderWithProjectID:projectID cloudID:addCloudID xmppStream:xmppStream];
->>>>>>> cloud
                     NSMutableArray *results = [NSMutableArray array];
                     [results addObjectsFromArray:ownerFolder];
                     [results addObjectsFromArray:addFolder];
@@ -2246,13 +1998,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-<<<<<<< HEAD
                     NSArray *ownerFolder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:ownerCloudID xmppStream:xmppStream];
                     NSArray *addFolder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:addCloudID xmppStream:xmppStream];
-=======
-                    NSArray *ownerFolder = [_xmppCloudStorage cloudAddFolderWithProjectID:projectID cloudID:ownerCloudID xmppStream:xmppStream];
-                    NSArray *addFolder = [_xmppCloudStorage cloudAddFolderWithProjectID:projectID cloudID:addCloudID xmppStream:xmppStream];
->>>>>>> cloud
                     NSMutableArray *results = [NSMutableArray array];
                     [results addObjectsFromArray:ownerFolder];
                     [results addObjectsFromArray:addFolder];
@@ -2412,7 +2159,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                     NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-<<<<<<< HEAD
                 }
                 return YES;
             }
@@ -2446,8 +2192,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                     NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
-=======
->>>>>>> cloud
                 }
                 return YES;
             }
@@ -2489,7 +2233,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-<<<<<<< HEAD
 #pragma mark - 10.list_version
             else if ([projectType isEqualToString:@"list_version"]) {
                 
@@ -2553,8 +2296,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-=======
->>>>>>> cloud
 #pragma mark - 12.get_log
             else if ([projectType isEqualToString:@"get_log"]) {
                 if ([[iq type] isEqualToString:@"error"]) {
@@ -2628,10 +2369,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                  </query>
                  </iq>
                  */
-<<<<<<< HEAD
                 [self handleCloudClearTrashDatasProjectID:projectID];
-=======
->>>>>>> cloud
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
@@ -2643,11 +2381,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 return YES;
             }
             
-<<<<<<< HEAD
 #pragma mark - 15.recover_file
-=======
-#pragma mark - 14.recover_file
->>>>>>> cloud
             else if ([projectType isEqualToString:@"recover_file"]) {
                 if ([[iq type] isEqualToString:@"error"]) {
                     NSXMLElement *errorElement = [iq elementForName:@"error"];
