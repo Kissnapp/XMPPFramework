@@ -2175,6 +2175,14 @@ enum XMPPChatRoomUserListFlags
                [xmppChatRoomStorage beginChatRoomPopulationForXMPPStream:xmppStream];
           }
           
+          if (!hasChatRoom){
+               
+               [xmppChatRoomStorage clearAllChatRoomsForXMPPStream:xmppStream];
+               [self _setPopulatingChatRoom:YES];
+               [multicastDelegate xmppChatRoomDidBeginPopulating:self];
+               [xmppChatRoomStorage beginChatRoomPopulationForXMPPStream:xmppStream];
+          }
+          
           //TODO:Save all the chat room list here
           NSArray *array = [jsonStr objectFromJSONString];
           
@@ -2186,22 +2194,12 @@ enum XMPPChatRoomUserListFlags
           
           if ([array count] > 0) {
                
-               
-          }
-          else {
-               
-          }
-          
-          if ([array count] > 0) {
-               
                // 2.sava the result
                [self transFormDataAndFetchUseListWithArray:array];
                
           }
           
-          
-          
-          if (!hasChatRoom ){
+          if (!hasChatRoom){
                // We should have our ChatRoom now
                
                [self _setHasChatRoom:YES];
@@ -2216,6 +2214,7 @@ enum XMPPChatRoomUserListFlags
                [multicastDelegate xmppChatRoomDidEndPopulating:self];
                [xmppChatRoomStorage endChatRoomPopulationForXMPPStream:xmppStream];
           }
+
 
           
      }};
