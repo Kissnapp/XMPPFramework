@@ -742,6 +742,24 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        [XMPPSubscribeCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                              bareJidStr:bareJidStr
+                                                        streamBareJidStr:streamBareJidStr];
+    }];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPRosterQueryModuleStorage
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

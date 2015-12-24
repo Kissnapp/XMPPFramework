@@ -288,6 +288,8 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
                                 otherNickName:(NSString *)otherNickName
                                andAddToRoster:(BOOL)flag;
 
+- (void)deleteSubscribeWithBareJidStr:(NSString *)bareJidStr;
+
 - (void)ignoreAllSubscriptionRequests;
 
 @end
@@ -370,6 +372,8 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
                            xmppStream:(XMPPStream *)stream;
 
 - (void)ignoreAllSubscriptionRequestsWithXMPPStream:(XMPPStream *)stream;
+
+- (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 @optional
 

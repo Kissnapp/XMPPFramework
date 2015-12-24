@@ -717,6 +717,19 @@ enum XMPPRosterFlags
 
 }
 
+- (void)deleteSubscribeWithBareJidStr:(NSString *)bareJidStr
+{
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        [xmppRosterStorage deleteSubscribeRequestWithBareJidStr:bareJidStr xmppStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)unsubscribePresenceFromUser:(XMPPJID *)jid
