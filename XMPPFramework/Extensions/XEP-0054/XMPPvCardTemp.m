@@ -100,7 +100,6 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     NSString *iqElementId = iqId ? :[XMPPStream generateUUID];
     XMPPIQ *iq = [XMPPIQ iqWithType:@"get" to:[jid bareJID] elementID:iqElementId];
     NSXMLElement *vCardElem = [NSXMLElement elementWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
-    
     [iq addChild:vCardElem];
     return iq;
 }

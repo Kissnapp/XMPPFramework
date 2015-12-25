@@ -1068,11 +1068,10 @@ enum XMPPRosterFlags
                     </x>
              </presence>
              */
-            XMPPJID *jid = [XMPPJID jidWithString:[NSString stringWithFormat:@"%@", [presence from]]];
             NSString *nickName = [[presence elementForName:addFriendNickNameNodeName xmlns:addFriendNickNameNodeXmlns] stringValue];
             NSString *message = [[presence elementForName:addFriendMessageNodeName xmlns:addFriendMessageNodeXmlns] stringValue];
             
-            [xmppRosterStorage saveSubscribeWithBareJidStr:jid.bare
+            [xmppRosterStorage saveSubscribeWithBareJidStr:[[presence from] bare]
                                                   nickName:nickName
                                                    message:message
                                                 xmppStream:xmppStream];
