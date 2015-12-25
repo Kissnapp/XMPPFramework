@@ -82,9 +82,9 @@
 
 - (void)setMessage:(NSString *)value
 {
-    [self willChangeValueForKey:@"formOrgId"];
-    [self setPrimitiveValue:value forKey:@"formOrgId"];
-    [self didChangeValueForKey:@"formOrgId"];
+    [self willChangeValueForKey:@"message"];
+    [self setPrimitiveValue:value forKey:@"message"];
+    [self didChangeValueForKey:@"message"];
 }
 
 
@@ -182,12 +182,13 @@
     XMPPSubscribeCoreDataStorageObject *newSubcribe = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                                                       inManagedObjectContext:moc];
     
-    newSubcribe.streamBareJidStr = streamBareJidStr;
-    newSubcribe.bareJidStr = bareJidStr;
-    newSubcribe.nickName = nickName;
-    newSubcribe.message = message;
+    if (streamBareJidStr) newSubcribe.streamBareJidStr = streamBareJidStr;
+    if (bareJidStr) newSubcribe.bareJidStr = bareJidStr;
+    if (nickName) newSubcribe.nickName = nickName;
+    if (message) newSubcribe.message = message;
     newSubcribe.time = [NSDate date];
     newSubcribe.state = @(XMPPSubscribeStateReceive);
+    newSubcribe.bareJidStr = bareJidStr;
     
     return newSubcribe;
 }
