@@ -10,9 +10,11 @@
 
 #define _XMPP_ROSTER_H
 
-#define ADD_FRIEND_NICKNAME @"nick"
-#define ADD_FRIEND_NICKNAME_XMLNS @"http://jabber.org/protocol/nick"
+FOUNDATION_EXTERN NSString *const addFriendNickNameNodeName;
+FOUNDATION_EXTERN NSString *const addFriendNickNameNodeXmlns;
 
+FOUNDATION_EXTERN NSString *const addFriendMessageNodeName;
+FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 
 @protocol XMPPRosterStorage;
 @class DDList;
@@ -281,19 +283,14 @@
  *  @param otherNickName  The user's nick name
  *  @param flag      The tag whether to add this user to our roster
  */
-- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid  withSelfNickName:(NSString *)selfNickName  otherNickName:(NSString *)otherNickName andAddToRoster:(BOOL)flag;
+- (void)acceptPresenceSubscriptionRequestFrom:(XMPPJID *)jid
+                             withSelfNickName:(NSString *)selfNickName
+                                otherNickName:(NSString *)otherNickName
+                               andAddToRoster:(BOOL)flag;
 
-// 
-// 
-// You can access/enumerate the users & resources via the roster storage class (xmppRosterStorage property).
-// 
-// Rember, XMPPRoster is just the scaffolding for a complete and customizable roster solution.
-// The roster storage classes hold the majority of the magic.
-// 
-// And since you're free to plug-n-play storage classes, and customize them as much as you want.
-// This is where you can really tailor the xmpp stack to meet the needs of your application.
-// 
-// 
+- (void)deleteSubscribeWithBareJidStr:(NSString *)bareJidStr;
+
+- (void)ignoreAllSubscriptionRequests;
 
 @end
 
@@ -362,6 +359,21 @@
 
 - (NSString *)versionWithXMPPStream:(XMPPStream *)stream;
 - (void)insertOrUpdateRosterVersion:(NSString *)rosterVersion xmppStream:(XMPPStream *)stream;
+
+- (void)saveSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           nickName:(NSString *)nickName
+                            message:(NSString *)message
+                         xmppStream:(XMPPStream *)stream;
+
+- (void)accpetSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           xmppStream:(XMPPStream *)stream;
+
+- (void)refuseSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           xmppStream:(XMPPStream *)stream;
+
+- (void)ignoreAllSubscriptionRequestsWithXMPPStream:(XMPPStream *)stream;
+
+- (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 @optional
 

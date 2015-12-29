@@ -617,7 +617,147 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         [XMPPRosterVersionCoreDataStorageObject updateOrInsertInManagedObjectContext:moc
                                                                              version:rosterVersion
                                                                     streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+    }];
+}
+
+
+- (void)saveSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           nickName:(NSString *)nickName
+                            message:(NSString *)message
+                         xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPSubscribeCoreDataStorageObject *subscribe = [XMPPSubscribeCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              bareJidStr:bareJidStr
+                                                                                                        streamBareJidStr:streamBareJidStr];
+        if (subscribe) {
+            
+            if (nickName.length > 0) subscribe.nickName = nickName;
+            if (message.length > 0) subscribe.message = message;
+            subscribe.time = [NSDate date];
+            
+        }else{
+            subscribe = [XMPPSubscribeCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                              bareJidStr:bareJidStr
+                                                                                nickName:nickName
+                                                                                 message:message
+                                                                        streamBareJidStr:streamBareJidStr];
+        }
+    }];
+}
+
+- (void)accpetSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPSubscribeCoreDataStorageObject *subscribe = [XMPPSubscribeCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              bareJidStr:bareJidStr
+                                                                                                        streamBareJidStr:streamBareJidStr];
+        if (subscribe) {
+            
+            subscribe.state = @(XMPPSubscribeStateAccept);
+            
+        }
+    }];
+}
+
+- (void)refuseSubscribeWithBareJidStr:(NSString *)bareJidStr
+                           xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPSubscribeCoreDataStorageObject *subscribe = [XMPPSubscribeCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                              bareJidStr:bareJidStr
+                                                                                                        streamBareJidStr:streamBareJidStr];
+        if (subscribe) {
+            
+            subscribe.state = @(XMPPSubscribeStateRefuse);
+            
+        }
+    }];
+}
+
+- (void)ignoreAllSubscriptionRequestsWithXMPPStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPSubscribeCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND state == %@", streamBareJidStr, @(XMPPSubscribeStateReceive)];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *subscribes = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        [subscribes enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            
+            XMPPSubscribeCoreDataStorageObject *subscribe = obj;
+            
+            subscribe.state = @(XMPPSubscribeStateIgnore);
         }];
+        
+
+    }];
+}
+
+- (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr =[[self myJIDForXMPPStream:stream] bare];
+        
+        [XMPPSubscribeCoreDataStorageObject deleteInManagedObjectContext:moc
+                                                              bareJidStr:bareJidStr
+                                                        streamBareJidStr:streamBareJidStr];
+    }];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
