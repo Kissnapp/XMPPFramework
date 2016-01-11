@@ -1,5 +1,5 @@
 //
-//  XMPPUnReadMessageCoreDataStorageObject.h
+//  XMPPMessageHistoryCoreDataStorageObject.h
 //  XMPP_Project
 //
 //  Created by Peter Lee on 14/10/21.
