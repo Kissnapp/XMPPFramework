@@ -265,12 +265,11 @@
     [newObject updateFromXMPPExtendMessage:xmppExtendMessage streamBareJidStr:streamBareJidStr];
     
     //Add the unread message count or insert a new unread message info
-    [XMPPUnReadMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                                        withUserJIDstr:xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom
-                                                                    unReadMessageCount:(active ? 0:1)
-                                                                          lastChatTime:xmppExtendMessage.msgTime
-                                                                      streamBareJidStr:streamBareJidStr];
-    
+    [XMPPMessageHistoryCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                             bareJidStr:(xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom)
+                                                                                 unRead:(xmppExtendMessage.msgOutgoing ? NO:!active)
+                                                                                   time:xmppExtendMessage.msgTime
+                                                                       streamBareJidStr:streamBareJidStr];
     return newObject;
 }
 

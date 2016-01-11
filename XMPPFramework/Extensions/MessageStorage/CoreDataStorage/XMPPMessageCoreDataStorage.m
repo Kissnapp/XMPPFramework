@@ -9,7 +9,7 @@
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPMessageCoreDataStorageObject.h"
-#import "XMPPUnReadMessageCoreDataStorageObject.h"
+#import "XMPPMessageHistoryCoreDataStorageObject.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
@@ -87,17 +87,20 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 }
 
 - (void)archiveMessage:(XMPPExtendMessage *)message
-                active:(BOOL)active xmppStream:(XMPPStream *)xmppStream
+                active:(BOOL)active
+            xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
-        [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                                              active:active
-                                                                   xmppExtendMessage:message
-                                                                    streamBareJidStr:myBareJidStr];
+        if ([XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                                  active:active
+                                                                       xmppExtendMessage:message
+                                                                        streamBareJidStr:myBareJidStr]) {
+            // do nothing
+        }
     }];
 }
 
@@ -107,13 +110,12 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     [self scheduleBlock:^{
         
         [message setBeenRead:@(YES)];
-        
-        
+    
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        [XMPPUnReadMessageCoreDataStorageObject readOneObjectInManagedObjectContext:moc
-                                                                     withUserJIDstr:message.bareJidStr
-                                                                   streamBareJidStr:message.bareJidStr];
+        [XMPPMessageHistoryCoreDataStorageObject readOneObjectInManagedObjectContext:moc
+                                                                          bareJidStr:message.bareJidStr
+                                                                    streamBareJidStr:message.streamBareJidStr];
         
     }];
 }
@@ -127,16 +129,18 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
         if (xmppStream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"msgId",messageID,@"streamBareJidStr",
-                                      streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"msgId == %@ && \
+                                                                        streamBareJidStr == %@",
+                                                                          messageID,
+                                                                          streamBareJidStr];
             
             XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject objectInManagedObjectContext:moc
                                                                                                                   predicate:predicate];
             if (!updateObject) return;
             
             [updateObject setBeenRead:@(YES)];
-            [XMPPUnReadMessageCoreDataStorageObject readOneObjectInManagedObjectContext:moc
-                                                                         withUserJIDstr:updateObject.bareJidStr
+            [XMPPMessageHistoryCoreDataStorageObject readOneObjectInManagedObjectContext:moc
+                                                                         bareJidStr:updateObject.bareJidStr
                                                                        streamBareJidStr:updateObject.streamBareJidStr];
         }
     }];
@@ -151,7 +155,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -161,8 +165,16 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         if (stream){
             NSPredicate *predicate;
             //!!!!:Notice:This method should not read the voice message
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@ && %K == %@ && %K != %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
-                         streamBareJidStr,@"outgoing",@0,@"beenRead",@0,@"msgType",@1];
+            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && \
+                                                            streamBareJidStr == %@ && \
+                                                            outgoing == %@ && \
+                                                            beenRead == %@ &&   \
+                                                            msgType != %@",
+                                                            bareUserJid,
+                                                            streamBareJidStr,
+                                                            @0,
+                                                            @0,
+                                                            @(XMPPExtendSubMessageAudioType)];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -183,10 +195,13 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         }
         
         //Update the unread message object
-        [XMPPUnReadMessageCoreDataStorageObject readObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
+        [XMPPMessageHistoryCoreDataStorageObject readObjectInManagedObjectContext:moc
+                                                                       bareJidStr:bareUserJid
+                                                                 streamBareJidStr:streamBareJidStr];
 
     }];
 }
+
 //When there is only one message ,we should delete the unread message history
 - (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
 {
@@ -202,11 +217,13 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             if (!updateObject) return;
         
             //The all message count
-            NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+            NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                       inManagedObjectContext:moc];
             
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",updateObject.bareJidStr,@"streamBareJidStr",
-                                      updateObject.streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && \
+                                                                        streamBareJidStr == %@",
+                                                                        updateObject.bareJidStr,
+                                                                        updateObject.streamBareJidStr];
             
             NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
             [fetchRequest setEntity:entity];
@@ -218,8 +235,8 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             
             //When the all message count is only one,we should delete the chat history
             if ([allMessages count] < 2) {
-                [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc
-                                                                            withUserJIDstr:updateObject.bareJidStr
+                [XMPPMessageHistoryCoreDataStorageObject deleteObjectInManagedObjectContext:moc
+                                                                                 bareJidStr:updateObject.bareJidStr
                                                                           streamBareJidStr:streamBareJidStr];
             }
             
@@ -238,11 +255,13 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
         //The all message count
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",message.bareJidStr,@"streamBareJidStr",
-                                  message.streamBareJidStr];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bareJidStr== %@ && \
+                                                                    streamBareJidStr == %@",
+                                                                      message.bareJidStr,
+                                                                      message.streamBareJidStr];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
@@ -254,8 +273,8 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         //When the all message count is only one,we should delete the chat history
         if ([allMessages count] < 2) {
-            [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc
-                                                                        withUserJIDstr:message.bareJidStr
+            [XMPPMessageHistoryCoreDataStorageObject deleteObjectInManagedObjectContext:moc
+                                                                             bareJidStr:message.bareJidStr
                                                                       streamBareJidStr:streamBareJidStr];
         }
         
@@ -271,7 +290,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -280,8 +299,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         if (stream){
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
-                         streamBareJidStr];
+            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && \
+                                                            streamBareJidStr == %@",
+                                                             bareUserJid,
+                                                             streamBareJidStr];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -299,7 +320,9 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             }
         }
         //Delete the unread message object
-        [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
+        [XMPPMessageHistoryCoreDataStorageObject deleteObjectInManagedObjectContext:moc
+                                                                         bareJidStr:bareUserJid
+                                                                   streamBareJidStr:streamBareJidStr];
     }];
 }
 
@@ -309,9 +332,9 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
-        NSEntityDescription *messageEntity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *messageEntity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                          inManagedObjectContext:moc];
-        NSEntityDescription *historyEntity = [NSEntityDescription entityForName:@"XMPPUnReadMessageCoreDataStorageObject"
+        NSEntityDescription *historyEntity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageHistoryCoreDataStorageObject class])
                                                          inManagedObjectContext:moc];
         
         NSFetchRequest *messageFetchRequest = [[NSFetchRequest alloc] init];
@@ -325,8 +348,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         if (xmppStream){
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@",@"streamBareJidStr",
-                         streamBareJidStr];
+            predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",streamBareJidStr];
             
             [messageFetchRequest setPredicate:predicate];
             [historyFetchRequest setPredicate:predicate];
@@ -346,7 +368,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             }
         }
         
-        for (XMPPUnReadMessageCoreDataStorageObject *history in allChatHistorys){
+        for (XMPPMessageHistoryCoreDataStorageObject *history in allChatHistorys){
             [moc deleteObject:history];
             
             if (++unsavedCount >= saveThreshold){
@@ -436,7 +458,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"messageTime" ascending:YES];
@@ -449,8 +471,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (xmppStream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
-                         streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && \
+                                                                        streamBareJidStr == %@",
+                                                                        bareJidStr,
+                                                                        streamBareJidStr];
         
             [fetchRequest setPredicate:predicate];
         }
@@ -463,7 +487,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return result;
 }
 
-- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr fetchSize:(NSInteger)fetchSize fetchOffset:(NSInteger)fetchOffset xmppStream:(XMPPStream *)xmppStream
+- (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr
+                               fetchSize:(NSInteger)fetchSize
+                             fetchOffset:(NSInteger)fetchOffset
+                              xmppStream:(XMPPStream *)xmppStream
 {
     if (bareJidStr == nil || xmppStream == nil) return nil;
     
@@ -474,7 +501,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSSortDescriptor *sortDescriptor1 = [[NSSortDescriptor alloc] initWithKey:@"msgTime" ascending:NO];
@@ -489,8 +516,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (xmppStream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",bareJidStr,@"streamBareJidStr",
-                                      streamBareJidStr];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && \
+                                                                        streamBareJidStr == %@",
+                                                                        bareJidStr,
+                                                                        streamBareJidStr];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -512,7 +541,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -522,8 +551,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         if (stream)
         {
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"msgId",messageID,@"streamBareJidStr",
-                         [[self myJIDForXMPPStream:stream] bare]];
+            predicate = [NSPredicate predicateWithFormat:@"msgId == %@ && \
+                                                            streamBareJidStr == %@",
+                                                            messageID,
+                                                            [[self myJIDForXMPPStream:stream] bare]];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -543,7 +574,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -553,8 +584,10 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         if (stream)
         {
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"msgId",messageID,@"streamBareJidStr",
-                         [[self myJIDForXMPPStream:stream] bare]];
+            predicate = [NSPredicate predicateWithFormat:@"msgId== %@ && \
+                                                            streamBareJidStr == %@",
+                                                            messageID,
+                                                            [[self myJIDForXMPPStream:stream] bare]];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -582,7 +615,12 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (stream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && outgoing == %@ && sendState == %@",streamBareJidStr,@(YES),@(0)];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && \
+                                                                        outgoing == %@ && \
+                                                                        sendState == %@",
+                                                                        streamBareJidStr,
+                                                                        @(YES),
+                                                                        @(0)];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -593,7 +631,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
             
             XMPPMessageCoreDataStorageObject *message = obj;
             
-            message.sendState = @(-1);
+            message.sendState = @(XMPPMessageSendFailed);
         }];
     }];
 
@@ -620,7 +658,12 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [fetchRequest setFetchBatchSize:saveThreshold];
         
         if (stream){
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && outgoing == %@ && sendState == %@",streamBareJidStr,@(YES),@(0)];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && \
+                                                                        outgoing == %@ && \
+                                                                        sendState == %@",
+                                                                        streamBareJidStr,
+                                                                        @(YES),
+                                                                        @(0)];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -629,6 +672,21 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     }];
     
     return allSendingStateMessages;
+}
+
+- (void)stopUpdatingMessageHistoryWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPMessageHistoryCoreDataStorageObject *messageHistory = [XMPPMessageHistoryCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                             bareJidStr:bareJidStr
+                                                                                                                       streamBareJidStr:streamBareJidStr];
+        if (messageHistory) messageHistory.hasBeenEnd = @(YES);
+    }];
+
 }
 
 @end

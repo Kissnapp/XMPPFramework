@@ -597,6 +597,20 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)stopUpdatingMessageHistoryWithBareJidStr:(NSString *)bareJidStr
+{
+    dispatch_block_t block = ^{
+        
+        [xmppMessageStorage stopUpdatingMessageHistoryWithBareJidStr:bareJidStr
+                                                          xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

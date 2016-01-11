@@ -10,7 +10,7 @@
 #import <CoreData/CoreData.h>
 
 
-@interface XMPPUnReadMessageCoreDataStorageObject : NSManagedObject
+@interface XMPPMessageHistoryCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSDate * lastChatTime;
 @property (nonatomic, retain) NSString * bareJidStr;
@@ -18,39 +18,32 @@
 @property (nonatomic, retain) NSNumber * unReadCount;
 @property (nonatomic, retain) NSNumber * hasBeenEnd;
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                        bareJidStr:(NSString *)bareJidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
-                    withUserJIDstr:(NSString *)jidStr
-                unReadMessageCount:(NSUInteger)unReatCount
-                      lastChatTime:(NSDate *)lastMessageTime
+                        bareJidStr:(NSString *)bareJidStr
+                            unRead:(BOOL)unRead
+                              time:(NSDate *)time
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                            withUserJIDstr:(NSString *)jidStr
+                                bareJidStr:(NSString *)bareJidStr
                           streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                                    withUserJIDstr:(NSString *)jidStr
-                                unReadMessageCount:(NSUInteger)unReadCount
-                                      lastChatTime:(NSDate *)lastMessageTime
+                                        bareJidStr:(NSString *)bareJidStr
+                                            unRead:(BOOL)unRead
+                                              time:(NSDate *)time
                                   streamBareJidStr:(NSString *)streamBareJidStr;
-//The method is not implemented
-/*
-+ (BOOL)editObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                          withUserJIDstr:(NSString *)jidStr
-                       nReadMessageCount:(NSUInteger)unReadCount
-                        streamBareJidStr:(NSString *)streamBareJidStr;
- */
-
-+ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
-                    withUserJIDStr:(NSString *)jidStr
-                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)readObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                            withUserJIDstr:(NSString *)jidStr
-                          streamBareJidStr:(NSString *)streamBareJidStr;
+                              bareJidStr:(NSString *)bareJidStr
+                        streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)readOneObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                             withUserJIDstr:(NSString *)jidStr
+                                 bareJidStr:(NSString *)bareJidStr
                            streamBareJidStr:(NSString *)streamBareJidStr;
 
 //The method is not implemented

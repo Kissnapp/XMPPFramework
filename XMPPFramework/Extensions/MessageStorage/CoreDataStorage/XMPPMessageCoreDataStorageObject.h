@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "XMPPUnReadMessageCoreDataStorageObject.h"
+#import "XMPPMessageHistoryCoreDataStorageObject.h"
 #import "XMPPExtendMessage.h"
 #import "XMPPBaseMessageObject.h"
 

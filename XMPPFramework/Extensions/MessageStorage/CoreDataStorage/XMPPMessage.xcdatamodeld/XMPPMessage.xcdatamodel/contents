@@ -13,25 +13,17 @@
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="subData" optional="YES" attributeType="Transformable" syncable="YES"/>
     </entity>
-    <entity name="XMPPServerPushCoreDataStorageObject" syncable="YES"/>
-    <entity name="XMPPUnReadMessageCoreDataStorageObject" representedClassName="XMPPUnReadMessageCoreDataStorageObject" syncable="YES">
+    <entity name="XMPPMessageHistoryCoreDataStorageObject" representedClassName="XMPPUnReadMessageCoreDataStorageObject" syncable="YES">
         <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="hasBeenEnd" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="lastChatTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="unReadCount" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
     </entity>
-    <entity name="XMPPUserRequestCoreDataStorageObject" syncable="YES">
-        <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
-        <attribute name="isPrivate" optional="YES" attributeType="Boolean" syncable="YES"/>
-        <attribute name="requestStatus" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <attribute name="requestTime" attributeType="Date" indexed="YES" syncable="YES"/>
-        <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
-    </entity>
+    <entity name="XMPPServerPushCoreDataStorageObject" syncable="YES"/>
     <elements>
         <element name="XMPPMessageCoreDataStorageObject" positionX="0" positionY="0" width="128" height="210"/>
         <element name="XMPPServerPushCoreDataStorageObject" positionX="0" positionY="0" width="128" height="45"/>
-        <element name="XMPPUnReadMessageCoreDataStorageObject" positionX="0" positionY="0" width="128" height="120"/>
-        <element name="XMPPUserRequestCoreDataStorageObject" positionX="0" positionY="0" width="128" height="120"/>
+        <element name="XMPPMessageHistoryCoreDataStorageObject" positionX="0" positionY="0" width="128" height="120"/>
     </elements>
 </model>
