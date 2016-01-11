@@ -13,7 +13,7 @@
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="subData" optional="YES" attributeType="Transformable" syncable="YES"/>
     </entity>
-    <entity name="XMPPMessageHistoryCoreDataStorageObject" representedClassName="XMPPUnReadMessageCoreDataStorageObject" syncable="YES">
+    <entity name="XMPPMessageHistoryCoreDataStorageObject" representedClassName="XMPPMessageHistoryCoreDataStorageObject" syncable="YES">
         <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="hasBeenEnd" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="lastChatTime" optional="YES" attributeType="Date" syncable="YES"/>
