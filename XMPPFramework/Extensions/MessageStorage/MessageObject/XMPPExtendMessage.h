@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, XMPPMessageSendState)
 @property (assign, nonatomic) BOOL                              msgOutgoing;       //Whether the message is send from myself
 @property (assign, nonatomic) XMPPMessageSendState              msgSendState;        // Whether the message has been send
 
-@property (strong, nonatomic) XMPPBaseMessageObject             *msgSubData;
+@property (strong, nonatomic) id                                msgSubData;
 
 
 + (XMPPExtendMessage *)xmppExtendMessage;

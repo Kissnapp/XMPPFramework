@@ -505,7 +505,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     [infoElement addAttributeWithName:EXTEND_MESSAGE_SEND_STATE_ATTRIBUTE_NAME integerValue:msgSendState];
 }
 
-- (XMPPBaseMessageObject *)msgSubData
+- (id)msgSubData
 {
     XMPPBaseMessageObject *result = nil;
     
@@ -531,16 +531,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_ERROR;
     return [result copy];
 }
 
-- (void)setMsgSubData:(XMPPBaseMessageObject *)msgSubData
+- (void)setMsgSubData:(id)msgSubData
 {
     NSXMLElement *infoElement = [self infoElementWithCreate:YES];
     
     // 删除旧的msgSubData节点
-    [infoElement removeElementsForName:[msgSubData name]];
+    [infoElement removeElementsForName:[(NSXMLElement *)msgSubData name]];
     
     if (msgSubData) {
         // 添加新的
-        [infoElement addChild:[msgSubData copy]];
+        [infoElement addChild:[(NSXMLElement *)msgSubData copy]];
     }
 }
 
