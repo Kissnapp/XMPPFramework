@@ -21,7 +21,7 @@
 
 
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectFromElement:(NSXMLElement *)element
-{Id
+{
     
     object_setClass(element, [XMPPVideoMessageObject class]);
     return (XMPPVideoMessageObject *)element;
