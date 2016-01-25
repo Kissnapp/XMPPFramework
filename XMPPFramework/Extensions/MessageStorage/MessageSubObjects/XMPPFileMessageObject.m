@@ -33,7 +33,7 @@
     NSXMLElement *element = [infoElement elementForName:FILE_ELEMENT_NAME];
     if (element) {
         
-        xmppFileMessageObject = [XMPPFileMessageObject xmppFileMessageObjectFromElement:element];Id
+        xmppFileMessageObject = [XMPPFileMessageObject xmppFileMessageObjectFromElement:element];
     }
     
     return xmppFileMessageObject;
