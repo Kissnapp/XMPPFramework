@@ -1775,10 +1775,10 @@
 		E7A765D81C43959B0009F2D4 /* MessageSubObjects */ = {
 			isa = PBXGroup;
 			children = (
-				E7A765D91C43959B0009F2D4 /* XMPPAudioMessageObject.h */,
-				E7A765DA1C43959B0009F2D4 /* XMPPAudioMessageObject.m */,
 				E7A765DB1C43959B0009F2D4 /* XMPPBaseMessageSubObject.h */,
 				E7A765DC1C43959B0009F2D4 /* XMPPBaseMessageSubObject.m */,
+				E7A765D91C43959B0009F2D4 /* XMPPAudioMessageObject.h */,
+				E7A765DA1C43959B0009F2D4 /* XMPPAudioMessageObject.m */,
 				E7A765DD1C43959B0009F2D4 /* XMPPLocationMessageObject.h */,
 				E7A765DE1C43959B0009F2D4 /* XMPPLocationMessageObject.m */,
 				E7A765DF1C43959B0009F2D4 /* XMPPPictureMessageObject.h */,

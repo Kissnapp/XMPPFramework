@@ -13,40 +13,40 @@
 @interface XMPPVideoMessageObject : XMPPBaseMessageSubObject
 
 @property (strong, nonatomic) NSString *fileName;
-@property (strong, nonatomic) NSString *filePath;
+@property (strong, nonatomic) NSString *fileId;
 @property (strong, nonatomic) NSString *fileSize;
 @property (strong, nonatomic) NSData   *thumbnail;
 @property (assign, nonatomic) NSTimeInterval timeLength;
 
 //class init methods
 + (XMPPVideoMessageObject *)xmppVideoMessageObject;
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFilePath:(NSString *)filePath
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileId:(NSString *)fileId
                                                           size:(NSString *)size
                                                           time:(NSTimeInterval)time;
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName
-                                                      filePath:(NSString *)filePath
+                                                      fileId:(NSString *)fileId
                                                           size:(NSString *)size
                                                           time:(NSTimeInterval)time;
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectWithFileName:(NSString *)fileName
-                                                      filePath:(NSString *)filePath
+                                                      fileId:(NSString *)fileId
                                                      thumbnail:(NSData *)thumbnail
                                                           size:(NSString *)size
                                                           time:(NSTimeInterval)time;
 
 
 + (XMPPVideoMessageObject *)xmppVideoMessageObjectFromElement:(NSXMLElement *)element;
-+ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
++ (XMPPVideoMessageObject *)xmppVideoMessageObjectFromInfoElement:(NSXMLElement *)infoElemIdent;
 
 - (instancetype)init;
-- (instancetype)initWithFilePath:(NSString *)filePath
+- (instancetype)initWithFileId:(NSString *)fileId
                             size:(NSString *)size
                             time:(NSTimeInterval)time;
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                             size:(NSString *)size
                             time:(NSTimeInterval)time;
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                        thumbnail:(NSData *)thumbnail
                             size:(NSString *)size
                             time:(NSTimeInterval)time;

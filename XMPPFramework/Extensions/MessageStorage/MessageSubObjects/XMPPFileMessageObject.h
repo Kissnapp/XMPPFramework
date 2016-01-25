@@ -13,21 +13,21 @@
 @interface XMPPFileMessageObject : XMPPBaseMessageSubObject
 
 @property (strong, nonatomic) NSString *fileName;
-@property (strong, nonatomic) NSString *filePath;
+@property (strong, nonatomic) NSString *fileId;
 @property (strong, nonatomic) NSString *fileSize;
 @property (strong, nonatomic) NSData   *thumbnail;
 
 //class init methods
 + (XMPPFileMessageObject *)xmppFileMessageObject;
-+ (XMPPFileMessageObject *)xmppFileMessageObjectWithFilePath:(NSString *)filePath
++ (XMPPFileMessageObject *)xmppFileMessageObjectWithFileId:(NSString *)fileId
                                                         size:(NSString *)size;
 
 + (XMPPFileMessageObject *)xmppFileMessageObjectWithFileName:(NSString *)fileName
-                                                    filePath:(NSString *)filePath
+                                                    fileId:(NSString *)fileId
                                                         size:(NSString *)size;
 
 + (XMPPFileMessageObject *)xmppFileMessageObjectWithFileName:(NSString *)fileName
-                                                    filePath:(NSString *)filePath
+                                                    fileId:(NSString *)fileId
                                                    thumbnail:(NSData *)thumbnail
                                                         size:(NSString *)size;
 
@@ -37,15 +37,15 @@
 
 - (instancetype)init;
 
-- (instancetype)initWithFilePath:(NSString *)filePath
+- (instancetype)initWithFileId:(NSString *)fileId
                             size:(NSString *)size;
 
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                             size:(NSString *)size;
 
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                        thumbnail:(NSData *)thumbnail
                             size:(NSString *)size;
 
