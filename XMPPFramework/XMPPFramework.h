@@ -101,6 +101,7 @@
 #import "XMPPTextMessageObject.h"
 #import "XMPPPictureMessageObject.h"
 #import "XMPPVideoMessageObject.h"
+#import "XMPPFileMessageObject.h"
 #import "XMPPLocationMessageObject.h"
 
 #import "XMPPLoginHelper.h"
