@@ -36,13 +36,9 @@ typedef NS_ENUM(NSUInteger, XMPPExtendSubMessageType){
      */
     XMPPExtendSubMessagePositionType,
     /**
-     *  a control message to control the speak
+     *  a file information message
      */
-    XMPPExtendSubMessageControlType,
-    /**
-     *  a request message to request for media chat
-     */
-    XMPPExtendSubMessageMediaRequestType
+    XMPPExtendSubMessageFileType
 };
 
 typedef NS_ENUM(NSInteger, XMPPMessageSendState)
