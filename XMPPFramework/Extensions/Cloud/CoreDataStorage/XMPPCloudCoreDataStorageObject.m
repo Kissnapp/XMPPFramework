@@ -335,7 +335,7 @@
 {
     NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND hasBeenDelete == %@ project == %@", streamBareJidStr, hasBeenDelete, project];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND hasBeenDelete == %@ AND project == %@", streamBareJidStr, hasBeenDelete, project];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
@@ -492,7 +492,7 @@
 - (void)updateWithDic:(NSDictionary *)dic
 {
     NSString *tempCloudID = [dic objectForKey:@"id"];
-    NSString *tempCreateTime = [NSString stringWithFormat:@"%@", [dic objectForKey:@"Time"]];
+    NSString *tempCreateTime = [NSString stringWithFormat:@"%@", [dic objectForKey:@"time"]];
     NSString *tempCreator = [dic objectForKey:@"creator"];
     NSNumber *tempFolderType = [NSNumber numberWithInteger:[[dic objectForKey:@"type"] integerValue]];
     NSString *tempName = [NSString stringWithFormat:@"%@", [dic objectForKey:@"name"]];
