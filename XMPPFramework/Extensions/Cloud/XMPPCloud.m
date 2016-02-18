@@ -541,6 +541,20 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 #pragma mark 9.获取共享人员列表 无需存储 OK
+- (NSArray *)_handleCloudListShareUsersWithDicData:(NSArray *)arrData projectID:(NSString *)projectID
+{
+    NSString *myJidStr = xmppStream.myJID.bare;
+    NSMutableArray *arrayM = [NSMutableArray array];
+    for (NSString *jidStr in arrData) {
+        if (![jidStr isEqualToString:myJidStr]) {
+            [arrayM addObject:jidStr];
+        }
+    }
+    return [NSArray arrayWithArray:arrayM];
+}
+
+
+
 #pragma mark 11.下载
 - (void)handleDownloadDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
@@ -2224,11 +2238,12 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSArray *arrData = (NSArray *)data;
+                NSArray *results = [self _handleCloudListShareUsersWithDicData:arrData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.用block返回数据 (无需存储)
-                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:arrData];
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:results];
                 }
                 return YES;
             }
