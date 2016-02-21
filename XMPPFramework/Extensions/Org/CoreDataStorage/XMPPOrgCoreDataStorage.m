@@ -1466,7 +1466,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
     }];
     
-    return nil;
+    return name;
 }
 
 - (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
