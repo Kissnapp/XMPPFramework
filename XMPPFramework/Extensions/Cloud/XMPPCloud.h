@@ -83,6 +83,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - handle datas to database
 - (void)insertCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 - (void)deleteCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
+- (void)deleteCloudID:(NSString *)cloudID xmppStream:(XMPPStream *)stream;
 - (void)deleteProjectWithCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 - (void)updateSpecialCloudDic:(NSDictionary *)serverDic xmppStream:(XMPPStream *)stream;
 

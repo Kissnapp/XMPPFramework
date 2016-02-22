@@ -192,14 +192,20 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         
         
         // 3.处理有没有自己的私人文件夹
-        // 3.1没有自己的私人文件夹 (需要创建一个属于自己的字典作为自己的私人文件夹)
+        // 3.1没有自己的私人文件夹 (需要创建一个属于自己假的私人文件夹)
         if (count == 0) {
             NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
             [dicM setObject:projectID forKey:@"project"];
             [dicM setObject:parent forKey:@"parent"];
             [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"type"];
+            
+            /**
+             *  区分假的私人文件夹
+             */
             [dicM setObject:@"工作" forKey:@"name"];
             [dicM setObject:@"" forKey:@"id"];
+            
+            
             [dicM setObject:myJidStr forKey:@"owner"];
             [dicM setObject:myJidStr forKey:@"creator"];
             [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
@@ -272,7 +278,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 - (void)_handleCloudListFolderDeleteDatasWithDicDatas:(NSDictionary *)dicDatas serverDatas:(NSArray *)serverDatas projectID:(NSString *)projectID
 {
     NSArray *DBDatas = [_xmppCloudStorage cloudGetFolderWithParent:[dicDatas objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
-    if (DBDatas.count) { // 比较
+    if (DBDatas.count) { // 比较(数据库和服务器)
         for (XMPPCloudCoreDataStorageObject *DBCloud in DBDatas) {
             
             int count = 0;
@@ -438,17 +444,27 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 #pragma mark 4.删除文件夹/删除文件 OK
-- (void)handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+- (void)handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID folderOrFileType:(BOOL)folderOrFileType
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    NSDictionary *serverDic = [self _handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
-    
-    [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
+    NSDictionary *dics =  [self _handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID folderOrFileType:folderOrFileType];
+    [_xmppCloudStorage updateSpecialCloudDic:dics xmppStream:xmppStream];
 }
 
-- (NSDictionary *)_handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
+- (NSDictionary *)_handleCloudDeleteFolderDatasWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID folderOrFileType:(BOOL)folderOrFileType
 {
+    if (folderOrFileType) {
+        NSArray *results = (NSArray *)[_xmppCloudStorage cloudGetFolderWithParent:dicData[@"id"] projectID:projectID xmppStream:xmppStream];
+        if (results.count) {
+            for (XMPPCloudCoreDataStorageObject *cloud in results) {
+                NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+                [dicM setObject:cloud.cloudID forKey:@"id"];
+                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
+                [_xmppCloudStorage updateSpecialCloudDic:[NSDictionary dictionaryWithDictionary:dicM] xmppStream:xmppStream];
+            }
+        }
+    }
     NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dicData];
     [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
     return [NSDictionary dictionaryWithDictionary:dicM];
@@ -526,7 +542,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
 
-    NSDictionary *serverDic = [self _handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
+    NSDictionary *serverDic = [self _handleCloudAddVersionWithDicData:dicData projectID:projectID];
     [_xmppCloudStorage updateSpecialCloudDic:serverDic xmppStream:xmppStream];
 }
 
@@ -1367,7 +1383,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 
-#pragma mark - 10.获取文件版本 问题
+#pragma mark 10.获取文件版本 问题
 /**
  
  <iq type="get" id="1234" >
@@ -1753,7 +1769,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 
 
-#pragma mark - 15.恢复
+#pragma mark 15.恢复
 /**
  
  <iq type="set" id="1234" >
@@ -2048,8 +2064,15 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
+                BOOL folderOrFileType;
+                if ([projectType isEqualToString:@"delete_folder"]) {
+                    folderOrFileType = YES;
+                }
+                else {
+                    folderOrFileType = NO;
+                }
                 // 数据库删除
-                [self handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID];
+                [self handleCloudDeleteFolderDatasWithDicData:dicData projectID:projectID folderOrFileType:(BOOL)folderOrFileType];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
