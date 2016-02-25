@@ -311,7 +311,7 @@
 
 
 #pragma mark - 获取聊天室头像
-- (NSArray *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+- (NSArray <NSString *> *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 
 @end
 

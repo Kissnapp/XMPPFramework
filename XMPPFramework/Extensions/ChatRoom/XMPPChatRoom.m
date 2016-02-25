@@ -880,11 +880,11 @@ enum XMPPChatRoomUserListFlags
 }
 
 #pragma mark - 获取聊天室头像
-- (NSArray *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+- (NSArray <NSString *> *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
 {
      if ( !bareChatRoomJidStr ) return nil;
      
-     __block NSMutableArray *jids = nil;
+     __block NSMutableArray *jids = [NSMutableArray new];
      
      dispatch_block_t block = ^{
           
