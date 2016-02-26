@@ -285,7 +285,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
                              xmppStream:(XMPPStream *)stream
-                        completionBlock:(void (^_Nullable)(NSString *bareJidStr))completionBlock
+                        completionBlock:(void (^)(NSString *bareJidStr))completionBlock
 {
     [self scheduleBlock:^{
         

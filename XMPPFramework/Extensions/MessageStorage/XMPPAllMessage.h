@@ -263,7 +263,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
                              xmppStream:(XMPPStream *)xmppStream
-                        completionBlock:(void (^_Nullable)(NSString *bareJidStr))completionBlock;
+                        completionBlock:(void (^)(NSString *bareJidStr))completionBlock;
 
 @optional
 
