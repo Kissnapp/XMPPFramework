@@ -338,7 +338,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         NSString *bareUserJidStr = [[userJid copy] bare];
-        [self clearChatHistoryWithBareUserJidStr:bareUserJidStr xmppStream:xmppStream];
+        [self clearChatHistoryWithBareUserJidStr:bareUserJidStr xmppStream:xmppStream completionBlock:NULL];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
@@ -346,6 +346,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
 }
+
+- (void)clearChatHistoryWithBareJidStr:(NSString *)bareJidStr
+                       completionBlock:(void (^_Nullable)(NSString *bareJidStr))completionBlock
+{
+    if (bareJidStr.length < 1) return;
+    
+    dispatch_block_t block = ^{
+        [self clearChatHistoryWithBareUserJidStr:bareJidStr xmppStream:xmppStream completionBlock:completionBlock];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 - (void)readAllUnreadMessageWithUserJid:(XMPPJID *)userJid
 {
     if (!userJid) return;
@@ -631,11 +647,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
 }
 
-- (void)clearChatHistoryWithBareUserJidStr:(NSString *)userJidStr xmppStream:(XMPPStream *)stream
+- (void)clearChatHistoryWithBareUserJidStr:(NSString *)userJidStr
+                                xmppStream:(XMPPStream *)stream
+                           completionBlock:(void (^)(NSString *bareJidStr))completionBlock
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    [xmppMessageStorage clearChatHistoryWithBareUserJid:userJidStr xmppStream:stream];
+    [xmppMessageStorage clearChatHistoryWithBareUserJid:userJidStr
+                                             xmppStream:stream
+                                        completionBlock:completionBlock];
 }
 
 - (void)readAllUnreadMessageWithBareUserJidStr:(NSString *)userJidStr xmppStream:(XMPPStream *)stream

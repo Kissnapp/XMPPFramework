@@ -283,7 +283,9 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     }];
 }
 
-- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
+                             xmppStream:(XMPPStream *)stream
+                        completionBlock:(void (^_Nullable)(NSString *bareJidStr))completionBlock
 {
     [self scheduleBlock:^{
         
@@ -323,6 +325,12 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [XMPPMessageHistoryCoreDataStorageObject deleteObjectInManagedObjectContext:moc
                                                                          bareJidStr:bareUserJid
                                                                    streamBareJidStr:streamBareJidStr];
+        
+        if (completionBlock != NULL) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionBlock([bareUserJid copy]);
+            });
+        }
     }];
 }
 

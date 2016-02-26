@@ -89,6 +89,11 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  @param userJid user JID
  */
 - (void)clearChatHistoryWithUserJid:(XMPPJID *)userJid;
+
+
+- (void)clearChatHistoryWithBareJidStr:(NSString *)bareJidStr
+                       completionBlock:(void (^)(NSString *bareJidStr))completionBlock;
+
 /**
  *  Delete all the messages
  */
@@ -248,7 +253,9 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
 - (void)archiveMessage:(XMPPExtendMessage *)message active:(BOOL)active xmppStream:(XMPPStream *)stream;
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
-- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
+                             xmppStream:(XMPPStream *)xmppStream
+                        completionBlock:(void (^_Nullable)(NSString *bareJidStr))completionBlock;
 
 @optional
 
