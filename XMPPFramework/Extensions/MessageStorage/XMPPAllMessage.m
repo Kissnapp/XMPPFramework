@@ -627,7 +627,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
-- (BOOL)islistHistoryOnTopWithBareJidStr:(NSString *)bareJidStr
+- (BOOL)isListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr
 {
     if (!bareJidStr) return NO;
     
