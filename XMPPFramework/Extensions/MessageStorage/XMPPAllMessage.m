@@ -627,6 +627,43 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (BOOL)islistHistoryOnTopWithBareJidStr:(NSString *)bareJidStr
+{
+    if (!bareJidStr) return NO;
+    
+    __block BOOL listOnTop = NO;
+    
+    dispatch_block_t block = ^{
+        
+        listOnTop = [xmppMessageStorage isListHistoryOnTopWithBareJidStr:bareJidStr
+                                                              xmppStream:xmppStream];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return  listOnTop;
+}
+
+- (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr
+{
+    if (!bareJidStr) return;
+    
+    dispatch_block_t block = ^{
+        
+        [xmppMessageStorage listHistoryOnTopWithBareJidStr:bareJidStr
+                                                xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

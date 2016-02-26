@@ -13,6 +13,7 @@
 @interface XMPPMessageHistoryCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSDate * lastChatTime;
+@property (nonatomic, retain) NSDate * topTime;
 @property (nonatomic, retain) NSString * bareJidStr;
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * unReadCount;

@@ -52,6 +52,18 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
     BOOL receiveSystemPushMessage;
     NSXMLElement *preferences;
 }
+
+
+@property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
+
+@property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
+@property (readwrite, assign) BOOL receiveUserRequestMessage;
+@property (readwrite, assign) BOOL receiveSystemPushMessage;
+
+@property (nonatomic, strong) NSString *activeUser;
+
+@property (readwrite, copy) NSXMLElement *preferences;
+
 /**
  *  Init with the storage
  *
@@ -232,15 +244,9 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)stopUpdatingMessageHistoryWithBareJidStr:(NSString *)bareJidStr;
 
-@property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
+- (BOOL)isListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr;
 
-@property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
-@property (readwrite, assign) BOOL receiveUserRequestMessage;
-@property (readwrite, assign) BOOL receiveSystemPushMessage;
-
-@property (nonatomic, strong) NSString *activeUser;
-
-@property (readwrite, copy) NSXMLElement *preferences;
+- (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr;
 
 @end
 
@@ -251,6 +257,8 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @required
 
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
+- (BOOL)isListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
+- (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (void)archiveMessage:(XMPPExtendMessage *)message active:(BOOL)active xmppStream:(XMPPStream *)stream;
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
