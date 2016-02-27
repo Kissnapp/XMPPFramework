@@ -811,7 +811,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                 if (fileData.length > 0 &&
                     [fileData writeToFile:filePath atomically:YES]) {
                     audio.fileData = nil;
-                    audio.filePath = filePath;
+                    audio.fileId = filePath;
                     newMessage.msgSubData = audio;
                     
                     dispatch_block_t block = ^{

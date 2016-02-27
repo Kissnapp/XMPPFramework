@@ -674,12 +674,13 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPChatRoomUserCoreDataStorageObject"
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPChatRoomUserCoreDataStorageObject class])
                                                   inManagedObjectContext:moc];
         
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
         [fetchRequest setEntity:entity];
         [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setFetchLimit:9];
         
         if (stream){
             NSPredicate *predicate;

@@ -12,7 +12,7 @@
 
 
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
-#define FILE_PATH_ATTRIBUTE_NAME            @"filePath"
+#define FILE_ID_ATTRIBUTE_NAME              @"fileId"
 #define FILE_THUMBNAIL_ATTRIBUTE_NAME       @"thumbnail"
 #define FILE_SIZE_ATTRIBUTE_NAME            @"fileSize"
 
@@ -46,27 +46,27 @@
     return [XMPPFileMessageObject xmppFileMessageObjectFromInfoElement:fileElement];
 }
 
-+ (XMPPFileMessageObject *)xmppFileMessageObjectWithFilePath:(NSString *)filePath
++ (XMPPFileMessageObject *)xmppFileMessageObjectWithFileId:(NSString *)fileId
                                                           size:(NSString *)size
 {
     return [XMPPFileMessageObject xmppFileMessageObjectWithFileName:nil
-                                                           filePath:filePath
+                                                           fileId:fileId
                                                           thumbnail:nil
                                                                size:size];
 }
 
 + (XMPPFileMessageObject *)xmppFileMessageObjectWithFileName:(NSString *)fileName
-                                                    filePath:(NSString *)filePath
+                                                    fileId:(NSString *)fileId
                                                         size:(NSString *)size
 {
     return [XMPPFileMessageObject xmppFileMessageObjectWithFileName:fileName
-                                                             filePath:filePath
+                                                             fileId:fileId
                                                             thumbnail:nil
                                                                  size:size];
 }
 
 + (XMPPFileMessageObject *)xmppFileMessageObjectWithFileName:(NSString *)fileName
-                                                    filePath:(NSString *)filePath
+                                                    fileId:(NSString *)fileId
                                                    thumbnail:(NSData *)thumbnail
                                                         size:(NSString *)size
 {
@@ -76,7 +76,7 @@
     xmppFileMessageObject = [XMPPFileMessageObject xmppFileMessageObjectFromElement:element];
     
     [xmppFileMessageObject setFileName:fileName];
-    [xmppFileMessageObject setFilePath:filePath];
+    [xmppFileMessageObject setFileId:fileId];
     [xmppFileMessageObject setFileSize:size];
     [xmppFileMessageObject setThumbnail:thumbnail];
     
@@ -86,37 +86,37 @@
 
 - (instancetype)init
 {
-    return [self initWithFilePath:nil
+    return [self initWithFileId:nil
                              size:nil];
 }
-- (instancetype)initWithFilePath:(NSString *)filePath
+- (instancetype)initWithFileId:(NSString *)fileId
                             size:(NSString *)size
 {
     return [self initWithFileName:nil
-                         filePath:filePath
+                         fileId:fileId
                         thumbnail:nil
                              size:size];
 }
 
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                             size:(NSString *)size
 {
-    return [self initWithFileName:filePath
-                         filePath:filePath
+    return [self initWithFileName:fileId
+                         fileId:fileId
                         thumbnail:nil
                              size:size];
 }
 
 - (instancetype)initWithFileName:(NSString *)fileName
-                        filePath:(NSString *)filePath
+                        fileId:(NSString *)fileId
                        thumbnail:(NSData *)thumbnail
                             size:(NSString *)size
 {
     self = [super initWithName:VIDEO_ELEMENT_NAME];
     if (self) {
         [self setFileName:fileName];
-        [self setFilePath:filePath];
+        [self setFileId:fileId];
         [self setFileSize:size];
         [self setThumbnail:thumbnail];
     }
@@ -135,15 +135,15 @@
     XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileName, FILE_NAME_ATTRIBUTE_NAME);
 }
 
-- (NSString *)filePath
+- (NSString *)fileId
 {
-    return [self attributeStringValueForName:FILE_PATH_ATTRIBUTE_NAME];
+    return [self attributeStringValueForName:FILE_ID_ATTRIBUTE_NAME];
 }
 
-- (void)setFilePath:(NSString *)filePath
+- (void)setFileId:(NSString *)fileId
 {
-    if (!filePath) return;
-    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(filePath, FILE_PATH_ATTRIBUTE_NAME);
+    if (!fileId) return;
+    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileId, FILE_ID_ATTRIBUTE_NAME);
 }
 
 - (NSString *)fileSize

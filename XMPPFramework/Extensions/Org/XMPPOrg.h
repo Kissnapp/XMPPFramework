@@ -331,6 +331,7 @@
 
 #pragma mark - 查询成员列表
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId;
+- (id)requestDBUserPositionNameWithOrgId:(NSString *)orgId bareJidStr:(NSString *)bareJidStr;
 
 #pragma mark - 按部门名称查询部门成员列表
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId 
@@ -503,7 +504,7 @@
                               positionBlock:(void (^)(NSString *orgId,  NSString *relationOrgId))positionBlock;
 
 - (id)endOrgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
-
+- (id)positionNameWithOrgId:(NSString *)orgId bareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (id)subPositionsWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 

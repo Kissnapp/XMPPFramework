@@ -12,7 +12,7 @@
 
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
-#define FILE_PATH_ATTRIBUTE_NAME            @"filePath"
+#define FILE_ID_ATTRIBUTE_NAME              @"fileId"
 #define TIME_LENGTH_ATTRIBUTE_NAME          @"timeLength"
 
 @implementation XMPPAudioMessageObject
@@ -43,21 +43,21 @@
     return [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:audioElement];
 }
 
-+ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFilePath:(NSString *)filePath time:(NSTimeInterval)time
++ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileId:(NSString *)fileId time:(NSTimeInterval)time
 {
-    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:filePath fileData:nil time:time];
+    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFileId:fileId fileData:nil time:time];
 }
 + (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileData:(NSData *)fileData time:(NSTimeInterval)time
 {
-    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFilePath:nil fileData:fileData time:time];
+    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFileId:nil fileData:fileData time:time];
 }
 
-+ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFilePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time
++ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileId:(NSString *)fileId fileData:(NSData *)fileData time:(NSTimeInterval)time
 {
-    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFileName:nil filePath:filePath fileData:fileData time:time];
+    return [XMPPAudioMessageObject xmppAudioMessageObjectWithFileName:nil fileId:fileId fileData:fileData time:time];
 }
 
-+ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time
++ (XMPPAudioMessageObject *)xmppAudioMessageObjectWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData time:(NSTimeInterval)time
 {
     XMPPAudioMessageObject *xmppAudioMessageObject = nil;
     
@@ -66,7 +66,7 @@
     xmppAudioMessageObject = [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:element];
     
     [xmppAudioMessageObject setFileName:fileName];
-    [xmppAudioMessageObject setFilePath:filePath];
+    [xmppAudioMessageObject setFileId:fileId];
     [xmppAudioMessageObject setFileData:fileData];
     [xmppAudioMessageObject setTimeLength:time];
     
@@ -86,15 +86,15 @@
 
 - (instancetype)initWithFileName:(NSString *)fileName fileData:(NSData *)fileData time:(NSTimeInterval)time
 {
-    return [self initWithFileName:fileName filePath:nil fileData:fileData time:time];
+    return [self initWithFileName:fileName fileId:nil fileData:fileData time:time];
 }
 
-- (instancetype)initWithFileName:(NSString *)fileName filePath:(NSString *)filePath fileData:(NSData *)fileData time:(NSTimeInterval)time
+- (instancetype)initWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData time:(NSTimeInterval)time
 {
     self = [super initWithName:AUDIO_ELEMENT_NAME];
     if (self) {
         [self setFileName:fileName];
-        [self setFilePath:filePath];
+        [self setFileId:fileId];
         [self setFileData:fileData];
         [self setTimeLength:time];
     }
@@ -115,17 +115,17 @@
     XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileName, FILE_NAME_ATTRIBUTE_NAME);
 }
 
-- (NSString *)filePath
+- (NSString *)fileId
 {
-    return [self attributeStringValueForName:FILE_PATH_ATTRIBUTE_NAME];
+    return [self attributeStringValueForName:FILE_ID_ATTRIBUTE_NAME];
 }
 
-- (void)setFilePath:(NSString *)filePath
+- (void)setFileId:(NSString *)fileId
 {
-    if (!filePath) {
+    if (!fileId) {
         return;
     }
-    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(filePath, FILE_PATH_ATTRIBUTE_NAME);
+    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileId, FILE_ID_ATTRIBUTE_NAME);
 }
 
 - (NSData *)fileData

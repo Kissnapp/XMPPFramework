@@ -1611,6 +1611,23 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
     return isAdmin;
 }
 
+- (id)requestDBUserPositionNameWithOrgId:(NSString *)orgId bareJidStr:(NSString *)bareJidStr
+{
+    __block NSString *name = nil;
+    
+    dispatch_block_t block = ^{
+        
+        name = [_xmppOrgStorage positionNameWithOrgId:orgId bareJidStr:bareJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return name;
+}
+
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId
 {
     __block NSArray *users = nil;
