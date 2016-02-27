@@ -283,7 +283,9 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     }];
 }
 
-- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
+                             xmppStream:(XMPPStream *)stream
+                        completionBlock:(void (^)(NSString *bareJidStr))completionBlock
 {
     [self scheduleBlock:^{
         
@@ -323,6 +325,12 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         [XMPPMessageHistoryCoreDataStorageObject deleteObjectInManagedObjectContext:moc
                                                                          bareJidStr:bareUserJid
                                                                    streamBareJidStr:streamBareJidStr];
+        
+        if (completionBlock != NULL) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionBlock([bareUserJid copy]);
+            });
+        }
     }];
 }
 
@@ -444,6 +452,42 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
         }
 
+    }];
+}
+
+- (BOOL)isListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!bareJidStr || !stream) return NO;
+    
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPMessageHistoryCoreDataStorageObject *historyMessage = [XMPPMessageHistoryCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                             bareJidStr:bareJidStr
+                                                                                                                       streamBareJidStr:streamBareJidStr];
+        if (historyMessage) {
+            result = (historyMessage.topTime != nil);
+        }
+    }];
+    
+    return result;
+}
+- (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPMessageHistoryCoreDataStorageObject *historyMessage = [XMPPMessageHistoryCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                             bareJidStr:bareJidStr
+                                                                                                                       streamBareJidStr:streamBareJidStr];
+        if (historyMessage) {
+            historyMessage.topTime = [NSDate date];
+        }
     }];
 }
 

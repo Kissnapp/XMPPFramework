@@ -757,6 +757,7 @@ enum XMPPChatRoomUserListFlags
                           */
                          
                          // 0.获得返回数据
+     
                          NSDictionary *chatRoomDic = [query attributesAsDictionary];
                          NSArray *chatRoomUserDics = [[query stringValue] objectFromJSONString];
                          
@@ -775,7 +776,16 @@ enum XMPPChatRoomUserListFlags
                                                                                                                                  }]
                                                                 xmppStream:xmppStream];
                          
+                         // 返回的成员信息中是否有创建者自己的
+                         BOOL existMasterInUsers = NO;
+                         NSString *master = chatRoomDic[@"master"];
+                         
                          for (NSDictionary * dic in chatRoomUserDics) {
+                              
+                              NSString *bareJidStr = dic[@"userjid"];
+                              
+                              if ([bareJidStr isEqualToString:master]) existMasterInUsers = YES;
+                              
                               [xmppChatRoomStorage insertOrUpdateUserWithChatRoomBareJidStr:chatRoomDic[@"groupid"]
                                                                                         dic:[dic destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                                           @"bareJidStr":@"userjid",
@@ -783,6 +793,17 @@ enum XMPPChatRoomUserListFlags
                                                                                                                                           @"chatRoomBareJidStr":@"groupid",
                                                                                                                                           @"streamBareJidStr":@"streamBareJidStr"
                                                                                                                                           }]
+                                                                                 xmppStream:xmppStream];
+                         }
+                         
+                         // 没有自己信息时添加上
+                         if (!existMasterInUsers) {
+                              // 添加自己的信息
+                              [xmppChatRoomStorage insertOrUpdateUserWithChatRoomBareJidStr:chatRoomDic[@"groupid"]
+                                                                                        dic:@{
+                                                                                              @"bareJidStr":master,
+                                                                                              @"chatRoomBareJidStr":chatRoomDic[@"groupid"]
+                                                                                              }
                                                                                  xmppStream:xmppStream];
                          }
                          
@@ -1020,13 +1041,13 @@ enum XMPPChatRoomUserListFlags
      
      return result;
 }
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchChatRoomListFromLocal
 {
      return [self fetchAllChatRoomsWithType:XMPPChatRoomTypeDefault];
 }
 
 
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllTypeChatRoomListFromLocal
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchAllTypeChatRoomListFromLocal
 {
      __block NSArray *results = nil;
      
@@ -1040,24 +1061,18 @@ enum XMPPChatRoomUserListFlags
           block();
      else
           dispatch_sync(moduleQueue, block);
-     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
+
      return results;
-#pragma clang diagnostic pop
 
 }
 
-- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock
+- (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject *> *data, NSError *error))completionBlock
 {
      dispatch_block_t block = ^{
           
           NSArray *results = [xmppChatRoomStorage chatRoomListWithType:type xmppStream:xmppStream];
           
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wincompatible-pointer-types"
           ([results count] > 0) ? completionBlock(results, nil):[self _callBackWithMessage:@"this no data" completionBlock:completionBlock];
-#pragma clang diagnostic pop
           
      };
      
@@ -1067,7 +1082,7 @@ enum XMPPChatRoomUserListFlags
           dispatch_async(moduleQueue, block);
      
 }
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
 {
      __block NSArray *results = nil;
      
@@ -2227,6 +2242,7 @@ enum XMPPChatRoomUserListFlags
 }
 
 - (void)handleCreateChatRoomAndInviteUserIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
+     // 这数据中没有创建者自己的信息
      /*
       <iq from="13412345678@localhost" type="result" to="13412345678@localhost/caoyue-PC" id="2115763">
       <query xmlns="aft:groupchat" query_type="group_member" groupid="1" groupname="FirstGroup" master="12345678@120.140.80.54">
@@ -2263,17 +2279,18 @@ enum XMPPChatRoomUserListFlags
                          //The user list here
                          NSArray *userArray = [[query stringValue] objectFromJSONString];
                          NSMutableArray *array = [NSMutableArray array];
-                         [userArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                    
+                         [userArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                               /*
                                NSString *bareJidStr = [Dic objectForKey:@"bareJidStr"];
                                NSString *roomBareJidStr = [Dic objectForKey:@"RoomBareJidStr"];
                                NSString *nickNameStr = [Dic objectForKey:@"nicknameStr"];
                                NSString *streamBareJidStr = [Dic objectForKey:@"streamBareJidStr"];
                                */
-                              NSDictionary *tempDic = obj;
+                    
                               NSDictionary *dic = @{
-                                                    @"bareJidStr":[tempDic objectForKey:@"userjid"],
-                                                    @"nicknameStr":[tempDic objectForKey:@"nickname"],
+                                                    @"bareJidStr":obj[@"userjid"],
+                                                    @"nicknameStr":obj[@"nickname"],
                                                     @"RoomBareJidStr":[roomID copy]
                                                     };
                               [array addObject:dic];

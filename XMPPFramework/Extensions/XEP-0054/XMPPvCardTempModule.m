@@ -256,11 +256,6 @@
         dispatch_async(moduleQueue, block);
 }
 
-- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
-{
-    [self vCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Private
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -414,5 +409,9 @@
     [xmppStream sendElement:[XMPPvCardTemp iqvCardRequestForJID:[XMPPJID jidWithString:bareJidStr] photoHash:tag iqId:nil]];
 }
 
+- (void)requestvCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
+{
+    [self vCardWithBareJidStr:bareJidStr completionBlock:completionBlock];
+}
 
 @end

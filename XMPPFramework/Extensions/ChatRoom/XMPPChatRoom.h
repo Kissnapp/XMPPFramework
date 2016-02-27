@@ -21,12 +21,6 @@
 @protocol XMPPChatRoomStorage;
 @protocol XMPPChatRoomDelegate;
 
-@protocol XMPPChatRoomCoreDataStorageObject <NSObject>
-@end
-
-@protocol XMPPChatRoomUserCoreDataStorageObject <NSObject>
-@end
-
 @interface XMPPChatRoom : XMPPModule
 {
 
@@ -218,14 +212,14 @@
 /**
  *  Get all the chat room(not task and event) list from the local core datasystem
  */
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchChatRoomListFromLocal;
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchChatRoomListFromLocal;
 
 /**
  *  Get all type chat room （just as chat room、task、event）
  *
  *  @return All chat room
  */
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllTypeChatRoomListFromLocal;
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchAllTypeChatRoomListFromLocal;
 /**
  *  Fetch a chat room's all user with the given chat room bare jid string,
  *
@@ -238,7 +232,7 @@
  *
  *  @return The result array which contain some XMPPChatRoomUserCoreDataStorageObject obejct in it
  */
-- (NSArray<XMPPChatRoomUserCoreDataStorageObject> *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
+- (NSArray<XMPPChatRoomUserCoreDataStorageObject *> *)fetchUserListFromLocalWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr requestFromServerIfNotExist:(BOOL)requestFromServer;
 /**
  *  Get a XMPPChatRoomCoreDataStorageObject with given bare Jid string and bare Chat Room Jid string
  *
@@ -295,8 +289,8 @@
 
 #pragma mark - 获取所有聊天室信息
 - (void)fetchAllChatRoomsWithType:(XMPPChatRoomType)type
-                  completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject> *data, NSError *error))completionBlock;
-- (NSArray<XMPPChatRoomCoreDataStorageObject> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type;
+                  completionBlock:(void(^)(NSArray<XMPPChatRoomCoreDataStorageObject *> *data, NSError *error))completionBlock;
+- (NSArray<XMPPChatRoomCoreDataStorageObject *> *)fetchAllChatRoomsWithType:(XMPPChatRoomType)type;
 
 #pragma mark - 获取所有人员信息
 

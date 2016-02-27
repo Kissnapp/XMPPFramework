@@ -15,6 +15,8 @@
 @dynamic streamBareJidStr;
 @dynamic unReadCount;
 @dynamic hasBeenEnd;
+@dynamic lastChatTime;
+@dynamic topTime;
 
 #pragma mark -
 #pragma mark - Getter/Setters Methods
@@ -77,6 +79,21 @@
     [self willChangeValueForKey:@"lastChatTime"];
     [self setPrimitiveValue:value forKey:@"lastChatTime"];
     [self didChangeValueForKey:@"lastChatTime"];
+}
+
+- (NSDate *)topTime
+{
+    [self willAccessValueForKey:@"topTime"];
+    NSDate *value = [self primitiveValueForKey:@"topTime"];
+    [self didAccessValueForKey:@"topTime"];
+    return value;
+}
+
+- (void)setTopTime:(NSDate *)value
+{
+    [self willChangeValueForKey:@"topTime"];
+    [self setPrimitiveValue:value forKey:@"topTime"];
+    [self didChangeValueForKey:@"topTime"];
 }
 
 //- (NSNumber *)hasBeenEnd
