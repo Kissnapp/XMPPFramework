@@ -271,7 +271,6 @@
     [self didChangeValueForKey:@"hasBeenDelete"];
 }
 
-
 - (NSNumber *)hasBeenDownload
 {
     [self willAccessValueForKey:@"hasBeenDownload"];
@@ -285,6 +284,7 @@
     [self setPrimitiveValue:hasBeenDownload forKey:@"hasBeenDownload"];
     [self didChangeValueForKey:@"hasBeenDownload"];
 }
+
 
 //- (NSDate *)updateTime
 //{
@@ -506,10 +506,7 @@
     NSString *tempSize = [dic objectForKey:@"size"];
     NSString *tempVersion_count = [dic objectForKey:@"version_count"];
     NSNumber *tempHasBeenDelete = [dic objectForKey:@"hasBeenDelete"];
-    NSNumber *tempHasBeenDownload = [NSNumber numberWithInteger:[[dic objectForKey:@"hasBeenDownload"] boolValue]];
-    
-    //    NSString *tempUpdateTime = [dic objectForKey:@"updateTime"];
-    
+    NSNumber *tempHasBeenDownload = [dic objectForKey:@"hasBeenDownload"];
     
     if (tempCloudID)            self.cloudID = tempCloudID;
     if (tempCreateTime)         self.createTime = [tempCreateTime StringToDate];
@@ -526,9 +523,7 @@
     if (tempSize)               self.size = tempSize;
     if (tempVersion_count)      self.version_count = tempVersion_count;
     if (tempHasBeenDelete)      self.hasBeenDelete = tempHasBeenDelete;
-    if (tempHasBeenDownload)           self.hasBeenDownload = tempHasBeenDownload;
-    
-    //    if (tempUpdateTime)         self.updateTime = [tempUpdateTime StringToDate];
+    if (tempHasBeenDownload)    self.hasBeenDownload = tempHasBeenDownload;
 }
 
 @end
