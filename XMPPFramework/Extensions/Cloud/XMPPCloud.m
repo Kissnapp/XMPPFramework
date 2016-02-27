@@ -1843,6 +1843,80 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 }
 
 
+/**
+ 
+ 17.检索文件
+ <iq type="get" id="1234" >
+ <query xmlns="aft:library" project="xxx" subtype="search_file">
+ {"folder":"5", "name":"xxx", "page":"1", "count":"10"} %% 获取条数，默认10条。
+ </query>
+ </iq>
+ 
+ <iq type="result" id="1234" >
+ <query xmlns="aft:library"  project="xxx" subtype="search_file">
+ {"folder":"5", "name":"xxx", "page":"1", "count1":"10", "count2":"10", "files":[] }  %% count1为检索条数，count2为实际返回的条数，如果count2 < count1，即是最后一页。
+ </query>
+ </iq>
+ 
+ */
+#pragma mark 17.检索文件
+- (void)requestCloudSearchFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID page:(NSString *)page count:(NSString *)count name:(NSString *)name block:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        if (!dispatch_get_specific(moduleQueueTag)) return;
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // If the templateId is nil，we should notice the user the info
+            
+            // 0. Create a key for storaging completion block
+            //            NSString *requestKey = [NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY];
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /**
+             <iq type="get" id="1234" >
+             <query xmlns="aft:library" project="xxx" subtype="search_file">
+             {"folder":"5", "name":"xxx", "page":"1", "count":"10"} %% 获取条数，默认10条。
+             </query>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID,@"folder", name,@"name", page,@"page", count,@"count", nil];
+            
+            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
+                                                                      xmlns:@"aft:library"
+                                                                  attribute:@{@"subtype":@"search_file", @"project":projectID}
+                                                                stringValue:[templateDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:cloudElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - 三. XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2448,6 +2522,52 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:dicData];
+                }
+                return YES;
+            }
+#pragma mark - 17.search_file
+            else if ([projectType isEqualToString:@"search_file"]) {
+                if ([[iq type] isEqualToString:@"error"]) {
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",CLOUD_REQUEST_ERROR_XMLNS]];
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    return YES;
+                }
+                
+                /**
+                 <iq type="result" id="1234" >
+                 <query xmlns="aft:library"  project="xxx" subtype="search_file">
+                 {"folder":"5", "name":"xxx", "page":"1", "count1":"10", "count2":"10", "files":[] }  %% count1为检索条数，count2为实际返回的条数，如果count2 < count1，即是最后一页。
+                 </query>
+                 </iq>
+                 
+                 
+                 <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="19BDE2B9-6299-4427-8BA0-ACEA6EC268F0" type="result">
+                    <query xmlns="aft:library" subtype="search_file" project="601">
+                        {"folder":"638", "name":"测试", "page":"1", "count":"10", 
+                            "file":[{"id":"1580", "uuid":"4330d1a913c64f42aa97671963eb558d", "name":"测试03.PNG", "size":"217222", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"638", "time":"2016-02-27 04:08:00"},
+                                    {"id":"1320", "uuid":"8f37c59230aa41e2a2ba0bd6e21361d4", "name":"测试1.jpg", "size":"185341", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "version_count":"1", "folder":"1001", "time":"2016-02-01 08:07:10"},
+                                    {"id":"1303", "uuid":"576c2f8a15a94ce1a8382d9f2b935893", "name":"测试02.jpg", "size":"165294", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"1033", "time":"2016-01-29 11:00:09"},
+                                    {"id":"1230", "uuid":"1f649a14a79940feb74694d01a970a72", "name":"01测试01.jpg", "size":"191193", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "version_count":"1", "folder":"1033", "time":"2016-01-26 10:34:00"}]}
+                    </query>
+                </iq>
+                 */
+                
+                id data = [[project stringValue] objectFromJSONString];
+                NSDictionary *dicData = (NSDictionary *)data;
+                NSArray *files = dicData[@"file"];
+                NSArray *Ids = [files valueForKeyPath:@"id"];
+//                [self handleCloudRecoverFileDatasWithDicDatas:dicData projectID:projectID];
+                
+                // 1.判断是否向逻辑层返回block
+                if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
+                    // 3.用block返回数据
+                    NSMutableArray *results = [NSMutableArray array];
+                    for (NSString *cloudId in Ids) {
+                        NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:cloudId xmppStream:xmppStream];
+                        [results addObjectsFromArray:folder];
+                    }
+                    [self _executeRequestBlockWithRequestKey:requestkey valueObject:results];
                 }
                 return YES;
             }

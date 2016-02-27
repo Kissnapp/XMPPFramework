@@ -69,6 +69,8 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 15.恢复
 - (void)requestCloudRecoverFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID name:(NSString *)name destParent:(NSString *)destParent block:(CompletionBlock)completionBlock;
 
+#pragma mark - 17.检索文件
+- (void)requestCloudSearchFileWithProjectID:(NSString *)projectID cloudID:(NSString *)cloudID page:(NSString *)page count:(NSString *)count name:(NSString *)name block:(CompletionBlock)completionBlock;
 
 @end
 
