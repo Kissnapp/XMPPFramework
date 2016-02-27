@@ -17,7 +17,7 @@ typedef NS_ENUM(NSUInteger, XMPPChatRoomType) {
 };
 
 typedef NS_ENUM(NSUInteger, XMPPChatRoomProgressType) {
-    XMPPChatRoomProgressTypeDuring,
+    XMPPChatRoomProgressTypeDuring = 0,
     XMPPChatRoomProgressTypeEnd
 };
 

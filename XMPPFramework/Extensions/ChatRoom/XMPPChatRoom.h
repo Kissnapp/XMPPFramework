@@ -307,6 +307,13 @@
 #pragma mark - 获取聊天室头像
 - (NSArray <NSString *> *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 
+#pragma mark - 查询聊天是否被结束
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+
+#pragma mark - 结束聊天
+
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr completionBlock:(CompletionBlock)completionBlock;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,6 +352,9 @@
 - (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr  xmppStream:(XMPPStream *)stream;
 
 - (void)deleteUserWithBareJidStr:(NSString *)bareJidStr fromChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
+
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
 @optional
 

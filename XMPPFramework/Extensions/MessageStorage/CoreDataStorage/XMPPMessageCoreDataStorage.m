@@ -729,6 +729,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                                                                                                                              bareJidStr:bareJidStr
                                                                                                                        streamBareJidStr:streamBareJidStr];
         if (messageHistory) messageHistory.hasBeenEnd = @(YES);
+        
     }];
 
 }
