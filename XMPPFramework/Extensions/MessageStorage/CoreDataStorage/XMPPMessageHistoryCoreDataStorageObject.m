@@ -18,7 +18,6 @@
 @dynamic lastChatTime;
 @dynamic topTime;
 
-#pragma mark -
 #pragma mark - Getter/Setters Methods
 
 - (NSString *)bareJidStr
@@ -96,24 +95,24 @@
     [self didChangeValueForKey:@"topTime"];
 }
 
-//- (NSNumber *)hasBeenEnd
-//{
-//    [self willAccessValueForKey:@"hasBeenEnd"];
-//    NSNumber *value = [self primitiveValueForKey:@"hasBeenEnd"];
-//    [self didAccessValueForKey:@"hasBeenEnd"];
-//    return value;
-//}
-//
-//- (void)setHasBeenEnd:(NSNumber *)value
-//{
-//    [self willChangeValueForKey:@"hasBeenEnd"];
-//    [self setPrimitiveValue:value forKey:@"hasBeenEnd"];
-//    [self didChangeValueForKey:@"hasBeenEnd"];
-//}
+- (NSNumber *)hasBeenEnd
+{
+    [self willAccessValueForKey:@"hasBeenEnd"];
+    NSNumber *value = [self primitiveValueForKey:@"hasBeenEnd"];
+    [self didAccessValueForKey:@"hasBeenEnd"];
+    return value;
+}
+
+- (void)setHasBeenEnd:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"hasBeenEnd"];
+    [self setPrimitiveValue:value forKey:@"hasBeenEnd"];
+    [self didChangeValueForKey:@"hasBeenEnd"];
+}
 
 - (void)awakeFromInsert
 {
-    //self.hasBeenEnd = [NSNumber numberWithBool:NO];
+    self.hasBeenEnd = [NSNumber numberWithBool:NO];
 }
 
 #pragma mark - Public  Methods
