@@ -548,10 +548,24 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 - (NSDictionary *)_handleCloudAddVersionWithDicData:(NSDictionary *)dicData projectID:(NSString *)projectID
 {
-    NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
-    [dicM setObject:[dicData objectForKey:@"id"] forKey:@"id"];
-    [dicM setObject:@"2" forKey:@"version_count"];
-    return [NSDictionary dictionaryWithDictionary:dicM];
+    /**
+     file =     (
+         {
+         creator = "1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38";
+         folder = 638;
+         id = 1580;
+         name = "\U6211\U53bb.PNG";
+         size = 165294;
+         time = "2016-02-27 10:51:45";
+         uuid = 89a5a86e63f14f09a56fd6fec82f4d47;
+         "version_count" = 2;
+         }
+     );
+     parent = 638;
+     */
+    NSArray *files = dicData[@"file"];
+    NSDictionary *fileDic = [files firstObject];
+    return [NSDictionary dictionaryWithDictionary:fileDic];
 }
 
 
@@ -2295,12 +2309,14 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
+                NSArray *files = dicData[@"file"];
+                NSDictionary *fileDic = [files firstObject];
                 [self handleCloudAddVersionWithDicData:dicData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[dicData objectForKey:@"id"] xmppStream:xmppStream];
+                    NSArray *folder = [_xmppCloudStorage cloudIDInfoWithProjectID:projectID cloudID:[fileDic objectForKey:@"id"] xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folder];
                 }
@@ -2363,6 +2379,24 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                  </query>
                  </iq>
                  
+                 <JKArray 0x16729150>(
+                     {
+                         creator = "1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38";
+                         file = 1593;
+                         id = "-1";
+                         size = 927813;
+                         time = "2016-02-28 04:47:06";
+                         uuid = 4c642579205640529ed7bb2e95869a18;
+                     },
+                     {
+                         creator = "1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38";
+                         file = 1593;
+                         id = 72;
+                         size = 1041998;
+                         time = "2016-02-28 04:33:37";
+                         uuid = 55ddc19239d3495bad5f4d5f72cc4a75;
+                     }
+                 )
                  */
                 
                 id data = [[project stringValue] objectFromJSONString];
