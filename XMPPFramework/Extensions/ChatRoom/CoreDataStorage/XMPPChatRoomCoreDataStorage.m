@@ -331,6 +331,14 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                                          withID:jid
                                                                streamBareJidStr:streamBareJidStr];
                 
+            }else if ([action isEqualToString:@"complete"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                            withID:jid
+                                                                                                                  streamBareJidStr:streamBareJidStr];
+                if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
+                
             }else /*if (![action isEqualToString:@"dismiss"]) */{
                 
                 XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
@@ -358,6 +366,14 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                 [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
                                                                          withID:jid
                                                                streamBareJidStr:streamBareJidStr];
+                
+            }else if ([action isEqualToString:@"complete"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                            withID:jid
+                                                                                                                  streamBareJidStr:streamBareJidStr];
+                if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
                 
             }else /*if (![action isEqualToString:@"dismiss"]) */{
                 
@@ -800,10 +816,11 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     [self scheduleBlock:^{
         
         NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         //delete the chat room
         XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
                                                                                                                     withID:bareChatRoomJidStr
-                                                                                                          streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+                                                                                                          streamBareJidStr:streamBareJidStr];
         if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
         
     }];

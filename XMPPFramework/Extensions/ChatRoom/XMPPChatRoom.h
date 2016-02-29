@@ -21,6 +21,17 @@
 @protocol XMPPChatRoomStorage;
 @protocol XMPPChatRoomDelegate;
 
+
+FOUNDATION_EXTERN NSString * const queryElementName;
+FOUNDATION_EXTERN NSString * const queryElementXmlns;
+FOUNDATION_EXTERN NSString * const error_code_element_xmlns;
+
+FOUNDATION_EXTERN NSString * const group_info_push;
+FOUNDATION_EXTERN NSString * const group_member_push;
+
+FOUNDATION_EXTERN const NSUInteger group_list_count;
+FOUNDATION_EXTERN const NSUInteger group_user_list_count;
+
 @interface XMPPChatRoom : XMPPModule
 {
 

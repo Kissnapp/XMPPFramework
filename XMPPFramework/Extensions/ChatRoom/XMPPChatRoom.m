@@ -24,15 +24,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-static NSString * const queryElementName = @"query";
-static NSString * const queryElementXmlns = @"aft:groupchat";
-static NSString * const error_code_element_xmlns = @"aft:error";
+NSString * const queryElementName = @"query";
+NSString * const queryElementXmlns = @"aft:groupchat";
+NSString * const error_code_element_xmlns = @"aft:error";
 
-static NSString * const group_info_push = @"groupinfo";
-static NSString * const group_member_push = @"groupmember";
+NSString * const group_info_push = @"groupinfo";
+NSString * const group_member_push = @"groupmember";
 
-static NSUInteger group_list_count = 50;
-static NSUInteger group_user_list_count = 50;
+const NSUInteger group_list_count = 50;
+const NSUInteger group_user_list_count = 50;
 
 
 enum XMPPChatRoomConfig
@@ -2626,7 +2626,6 @@ enum XMPPChatRoomUserListFlags
                
                [self groupInfoPushElement:pushElement];
           }
-          
           [multicastDelegate xmppChatRoom:self didReceiveSeiverPush:message];
      }
 }

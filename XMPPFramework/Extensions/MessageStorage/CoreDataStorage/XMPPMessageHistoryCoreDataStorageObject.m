@@ -112,7 +112,7 @@
 
 - (void)awakeFromInsert
 {
-    self.hasBeenEnd = [NSNumber numberWithBool:NO];
+    //self.hasBeenEnd = [NSNumber numberWithBool:NO];
 }
 
 #pragma mark - Public  Methods
