@@ -664,6 +664,25 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)fetchAllChatHistoryWithCompletionBlock:(CompletionBlock) completionBlock
+{
+    dispatch_block_t block = ^{
+        
+        NSArray *allChatHistory = [xmppMessageStorage allHistoryMessageWithXMPPStream:xmppStream];
+    
+        dispatch_main_async_safe(^{
+            if (completionBlock != NULL) {
+                completionBlock(allChatHistory, nil);
+            }
+        });
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
