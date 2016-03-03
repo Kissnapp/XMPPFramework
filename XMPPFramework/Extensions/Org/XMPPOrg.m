@@ -3100,16 +3100,6 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 }
                 
                 /*
-                 <iq from="ddde03a3151945abbed57117eb7cb31f@192.168.1.164/Gajim" id="5244001" type="result">
-                 <project xmlns="aft:project"  type="add_job">
-                 {
-                    "project":"12345",
-                    "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx",, "part_level":"xxx"}
-                 }
-                 </project>
-                 </iq>
-                 
-        
                  
                  push msg:（客户端接收到这个消息后，需要重新去服务器拉组织架构，并重新获取project的job_tag)
                  <message from="1@localhost" type="chat" xml:lang="en" to="13412345678@localhost">
@@ -3130,24 +3120,29 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  { "project":"92", "self_job_id":"321" "parent_job_id":"369", "job_name":"安装主任2", "part":"xxx", "part_level":"xxx"}  %% modify 11
                  </project>
                  </iq>
+                 
+                 返回的字典
+                 {
+                 "job_name" = "\U5982\U6b64";
+                 "parent_job_id" = 8591;
+                 part = "\U9886\U5bfc\U73ed\U5b50";
+                 "part_level" = 1;
+                 project = 667;
+                 "self_job_id" = 8591;
+                 }
                  */
                 
                 
                 // 0.修改数据库
-                id  data = [[project stringValue] objectFromJSONString];
+                id data = [[project stringValue] objectFromJSONString];
                 NSString *orgId = [data objectForKey:@"project"];
-                NSString *ptId = [data objectForKey:@"parent_job_id"];
-//                NSDictionary *ptInfoDic = [data objectForKey:@"job"];
-//                NSString *ptId = [ptInfoDic objectForKey:@"id"];
-//                
-//                [self _insertOrUpatePositionWithOrgId:orgId positionDic:ptInfoDic];
+
+                
+//                [self _insertOrUpatePositionWithOrgId:orgId positionDic:data];
                 
                 // 1.返回block
-                XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithPtId:ptId
-                                                                                             orgId:orgId
-                                                                                        xmppStream:xmppStream];
                 
-                [self _executeRequestBlockWithRequestKey:requestkey valueObject:position];
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:orgId];
                 
                 return YES;
                 
