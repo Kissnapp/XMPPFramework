@@ -21,6 +21,17 @@
 @protocol XMPPChatRoomStorage;
 @protocol XMPPChatRoomDelegate;
 
+
+FOUNDATION_EXTERN NSString * const queryElementName;
+FOUNDATION_EXTERN NSString * const queryElementXmlns;
+FOUNDATION_EXTERN NSString * const error_code_element_xmlns;
+
+FOUNDATION_EXTERN NSString * const group_info_push;
+FOUNDATION_EXTERN NSString * const group_member_push;
+
+FOUNDATION_EXTERN const NSUInteger group_list_count;
+FOUNDATION_EXTERN const NSUInteger group_user_list_count;
+
 @interface XMPPChatRoom : XMPPModule
 {
 
@@ -307,6 +318,13 @@
 #pragma mark - 获取聊天室头像
 - (NSArray <NSString *> *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
 
+#pragma mark - 查询聊天是否被结束
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr;
+
+#pragma mark - 结束聊天
+
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr completionBlock:(CompletionBlock)completionBlock;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,6 +363,9 @@
 - (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr  xmppStream:(XMPPStream *)stream;
 
 - (void)deleteUserWithBareJidStr:(NSString *)bareJidStr fromChatRoomWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
+
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream;
 
 @optional
 

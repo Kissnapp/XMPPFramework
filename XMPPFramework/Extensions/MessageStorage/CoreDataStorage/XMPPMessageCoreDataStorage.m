@@ -531,6 +531,37 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return result;
 }
 
+
+- (id)allHistoryMessageWithXMPPStream:(XMPPStream *)xmppStream
+{
+    if (!xmppStream) return nil;
+    
+    __block id result = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageHistoryCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"topTime" ascending:NO];
+        NSSortDescriptor *sd2 = [[NSSortDescriptor alloc] initWithKey:@"lastChatTime" ascending:NO];
+        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1,sd2, nil];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && hasBeenEnd != %@", streamBareJidStr, @(YES)];
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setPredicate:predicate];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        result = [moc executeFetchRequest:fetchRequest error:nil];
+    }];
+    
+    return result;
+}
+
 - (NSArray *)fetchMessagesWithBareJidStr:(NSString *)bareJidStr
                                fetchSize:(NSInteger)fetchSize
                              fetchOffset:(NSInteger)fetchOffset
@@ -729,6 +760,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
                                                                                                                              bareJidStr:bareJidStr
                                                                                                                        streamBareJidStr:streamBareJidStr];
         if (messageHistory) messageHistory.hasBeenEnd = @(YES);
+        
     }];
 
 }

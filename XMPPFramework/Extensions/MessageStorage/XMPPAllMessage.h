@@ -248,6 +248,8 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr;
 
+- (void)fetchAllChatHistoryWithCompletionBlock:(CompletionBlock) completionBlock;
+
 @end
 
 
@@ -282,6 +284,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (void)setAllSendingStateMessagesToFailureStateWithXMPPStream:(XMPPStream *)stream;
 - (id)allSendingStateMessagesWithXMPPStream:(XMPPStream *)stream;
+- (id)allHistoryMessageWithXMPPStream:(XMPPStream *)xmppStream;
 
 - (void)stopUpdatingMessageHistoryWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 

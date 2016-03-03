@@ -24,15 +24,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-static NSString * const queryElementName = @"query";
-static NSString * const queryElementXmlns = @"aft:groupchat";
-static NSString * const error_code_element_xmlns = @"aft:error";
+NSString * const queryElementName = @"query";
+NSString * const queryElementXmlns = @"aft:groupchat";
+NSString * const error_code_element_xmlns = @"aft:error";
 
-static NSString * const group_info_push = @"groupinfo";
-static NSString * const group_member_push = @"groupmember";
+NSString * const group_info_push = @"groupinfo";
+NSString * const group_member_push = @"groupmember";
 
-static NSUInteger group_list_count = 50;
-static NSUInteger group_user_list_count = 50;
+const NSUInteger group_list_count = 50;
+const NSUInteger group_user_list_count = 50;
 
 
 enum XMPPChatRoomConfig
@@ -900,6 +900,69 @@ enum XMPPChatRoomUserListFlags
      
 }
 
+
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr completionBlock:(CompletionBlock)completionBlock
+{
+     if ( !bareChatRoomJidStr ) return;
+     
+     dispatch_block_t block = ^{
+          if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+               
+               
+               // 0. Create a key for storaging completion block
+               NSString *requestKey = [self requestKey];;
+               
+               // 1. add the completionBlock to the dcitionary
+               if (completionBlock != NULL)[requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+               
+               // 2. Listing the request iq XML
+               /*
+                <iq type="get" id="aad5ba">
+                <query xmlns="aft:groupchat" query_type="complete_task" groupid="1"></query>
+                </iq>
+                */
+               
+               // 3.create a dictionary
+               NSMutableDictionary *attributeMaps = [NSMutableDictionary dictionary];
+               attributeMaps[@"query_type"] = @"complete_task";
+               attributeMaps[@"groupid"] = bareChatRoomJidStr;
+               
+               
+               // 4. Create the request iq
+               
+               ChildElement *queryElement = [ChildElement childElementWithName:queryElementName
+                                                                         xmlns:queryElementXmlns
+                                                                     attribute:attributeMaps
+                                                                   stringValue:nil];
+               
+               XMPPIQ *iq = [XMPPIQ iqWithType:@"get" elementID:requestKey child:queryElement];
+               
+               // 5. add this iq to xmppIDTracker
+               [xmppIDTracker addElement:iq
+                                  target:self
+                                selector:@selector(handleEndChatRoomInfoIQ:withInfo:)
+                                 timeout:60];
+               
+               // 6. Send the request iq element to the server
+               [[self xmppStream] sendElement:iq];
+               
+               // 7. add a timer to call back to user after a long time without server's reponse
+               [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+               
+          }else{
+               // 0. tell the the user that can not send a request
+               [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+          }
+          
+     };
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_async(moduleQueue, block);
+}
+
+
 #pragma mark - 获取聊天室头像
 - (NSArray <NSString *> *)jidsWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
 {
@@ -922,6 +985,25 @@ enum XMPPChatRoomUserListFlags
           dispatch_sync(moduleQueue, block);
      
      return jids;
+}
+
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr
+{
+     if ( !bareChatRoomJidStr ) return NO;
+     
+     __block BOOL groupEndState = NO;
+     
+     dispatch_block_t block = ^{
+          
+          groupEndState = [xmppChatRoomStorage groupEndStateWithBareChatRoomJidStr:bareChatRoomJidStr xmppStream:xmppStream];
+     };
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_sync(moduleQueue, block);
+     
+     return groupEndState;
 }
 
 #pragma mark - 指定聊天室人员列表信息
@@ -1772,6 +1854,66 @@ enum XMPPChatRoomUserListFlags
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)handleEndChatRoomInfoIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
+{
+     /*
+      <iq from="13412345678@localhost" type="result" to="13412345678@localhost" id="aad5ba">
+      <query xmlns="aft:groupchat" query_type="complete_task" groupid="1"></query>
+      </iq>
+      */
+     
+     dispatch_block_t block = ^{ @autoreleasepool {
+          
+          //if there is a error attribute
+          NSString *requestKey = [iq elementID];
+          
+          if ([[iq type] isEqualToString:@"error"]) {
+               
+               NSXMLElement *errorElement = [iq elementForName:@"error"];
+               NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",error_code_element_xmlns]];
+               
+               [self _executeRequestBlockWithRequestKey:requestKey errorMessage:[codeElement stringValue]];
+               
+               [multicastDelegate xmppChatRoom:self didInviteFriendError:iq];
+               
+               return ;
+          }
+          
+          //if this action have succeed
+          if ([[iq type] isEqualToString:@"result"]) {
+               //find the query elment
+               NSXMLElement *query = [iq elementForName:queryElementName xmlns:queryElementXmlns];
+               
+               if (!query) return;
+               
+               
+               if ([[query attributeStringValueForName:@"query_type"] isEqualToString:@"complete_task"]) {
+                    
+                    
+                    
+                    // 0.获得返回数据
+                    NSString *bareChatRoomJidStr = [query attributeStringValueForName:@"groupid"];
+                    
+                    
+                    // 1.跟新数据库
+                    
+                    [xmppChatRoomStorage endGroupChatWithBareChatRoomJidStr:bareChatRoomJidStr xmppStream:xmppStream];
+                    
+                    // 2.判断是否向逻辑层返回block
+                    
+                    [self _executeRequestBlockWithRequestKey:requestKey valueObject:bareChatRoomJidStr];
+                    
+               }
+          }
+     }};
+     
+     if (dispatch_get_specific(moduleQueueTag))
+          block();
+     else
+          dispatch_async(moduleQueue, block);
+}
+
+
 - (void)handleSingleChatRoomInfoIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo
 {
      /*
@@ -2484,7 +2626,6 @@ enum XMPPChatRoomUserListFlags
                
                [self groupInfoPushElement:pushElement];
           }
-          
           [multicastDelegate xmppChatRoom:self didReceiveSeiverPush:message];
      }
 }

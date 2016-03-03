@@ -331,6 +331,14 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                                                                          withID:jid
                                                                streamBareJidStr:streamBareJidStr];
                 
+            }else if ([action isEqualToString:@"complete"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                            withID:jid
+                                                                                                                  streamBareJidStr:streamBareJidStr];
+                if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
+                
             }else /*if (![action isEqualToString:@"dismiss"]) */{
                 
                 XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:jid
@@ -358,6 +366,14 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
                 [XMPPChatRoomCoreDataStorageObject deleteInManagedObjectContext:moc
                                                                          withID:jid
                                                                streamBareJidStr:streamBareJidStr];
+                
+            }else if ([action isEqualToString:@"complete"]) {
+                
+                NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                            withID:jid
+                                                                                                                  streamBareJidStr:streamBareJidStr];
+                if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
                 
             }else /*if (![action isEqualToString:@"dismiss"]) */{
                 
@@ -775,6 +791,40 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     }];
     
     return result;
+}
+
+- (BOOL)groupEndStateWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                    withID:bareChatRoomJidStr
+                                                                                                          streamBareJidStr:[[self myJIDForXMPPStream:stream] bare]];
+        if (chatRoom) result = ([chatRoom.progressType integerValue] == XMPPChatRoomProgressTypeEnd);
+    }];
+    
+    return result;
+}
+- (void)endGroupChatWithBareChatRoomJidStr:(NSString *)bareChatRoomJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!bareChatRoomJidStr || !stream) return;
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        //delete the chat room
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [XMPPChatRoomCoreDataStorageObject fetchObjectInManagedObjectContext:moc
+                                                                                                                    withID:bareChatRoomJidStr
+                                                                                                          streamBareJidStr:streamBareJidStr];
+        if (chatRoom) chatRoom.progressType = @(XMPPChatRoomProgressTypeEnd);
+        
+    }];
+
 }
 - (id)userInfoFromChatRoom:(NSString *)bareChatRoomJidStr withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
 {
