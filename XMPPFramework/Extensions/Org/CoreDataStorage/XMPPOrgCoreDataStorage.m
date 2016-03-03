@@ -1469,6 +1469,30 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return name;
 }
 
+
+- (id)positionWithOrgId:(NSString *)orgId bareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    __block XMPPOrgPositionCoreDataStorageObject *position = nil;
+    
+    [self executeBlock:^{
+        //Your code ...
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPOrgUserCoreDataStorageObject *user = [XMPPOrgUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                          orgId:orgId
+                                                                                                     userJidStr:bareJidStr
+                                                                                               streamBareJidStr:streamBareJidStr];
+        if (user) {
+            position = user.userPtShip;
+        }
+        
+    }];
+    
+    return position;
+}
+
+
 - (id)positionWithPtId:(NSString *)ptId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block XMPPOrgPositionCoreDataStorageObject *position = nil;

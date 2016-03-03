@@ -1628,6 +1628,23 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
     return name;
 }
 
+- (id)requestDBUserPositionWithOrgId:(NSString *)orgId bareJidStr:(NSString *)bareJidStr;
+{
+    __block XMPPOrgPositionCoreDataStorageObject *position = nil;
+    
+    dispatch_block_t block = ^{
+        
+        position = [_xmppOrgStorage positionWithOrgId:orgId bareJidStr:bareJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return position;
+}
+
 - (id)requestDBAllUsersWithOrgId:(NSString *)orgId
 {
     __block NSArray *users = nil;
@@ -1809,6 +1826,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 
 }
 - (void)createPositionWithOrgId:(NSString *)orgId
+                      adminPtId:(NSString *)adminPtId
                      parentPtId:(NSString *)parentPtId
                          ptName:(NSString *)ptName
                          dpName:(NSString *)dpName
@@ -1828,17 +1846,29 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             // 2. Listing the request iq XML
             /*
-             <iq from="79509d447102413a89e9ada9fde3cf6b@192.168.1.162/Gajim" id="5244001" type="set">
+             
+             <iq from="81464048fffd4648915e839d9acebcda@192.168.1.130/Gajim" id="5244001" type="set">
              <project xmlns="aft:project"  type="add_job">
-             { "project":"62", "parent_job_id":"277", "job_name":"安装主任2", "part":"领导班子"}
+             %%{ "project":"92", "self_job_id":"321" "parent_job_id":"369", "job_name":"安装主任2", "part":"领导班子"}  %% modify 10
+             { "project":"92", "self_job_id":"321" "parent_job_id":"369", "job_name":"安装主任2", "part":"领导班子", "part_level":"xxx"}  %% modify 11
              </project>
              </iq>
              
+             结果：
+             <iq from="81464048fffd4648915e839d9acebcda@192.168.1.130/Gajim" id="5244001" type="result">
+             <project xmlns="aft:project"  type="add_job">
+             %{
+             %	"project":"60",
+             %     "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}
+             %}
+             { "project":"92", "self_job_id":"321" "parent_job_id":"369", "job_name":"安装主任2", "part":"xxx", "part_level":"xxx"}  %% modify 11
+             </project>
+             </iq>
              */
             
             // 3. Create the request iq
-            
-            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project",parentPtId,@"parent_job_id",ptName,@"job_name",dpName,@"part", @(dpLevel), @"part_level", nil];
+            NSString *dpLevelStr = [NSString stringWithFormat:@"%ld", (long)dpLevel];
+            NSDictionary * tmpDic = [NSDictionary dictionaryWithObjectsAndKeys:orgId, @"project", adminPtId, @"self_job_id",parentPtId,@"parent_job_id",ptName,@"job_name",dpName,@"part", dpLevelStr, @"part_level", nil];
             
             ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
                                                                              xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
@@ -3087,14 +3117,30 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                  {"job_tag":"xxx"}
                  </sys>
                  </message>
+                 
+                 
+                 
+                 结果：
+                 <iq from="81464048fffd4648915e839d9acebcda@192.168.1.130/Gajim" id="5244001" type="result">
+                 <project xmlns="aft:project"  type="add_job">
+                 %{
+                 %	"project":"60",
+                 %     "job":{"id":"xxx", "name":"项目经理", "left":"1", "right":"20", "part":"xxx"}
+                 %}
+                 { "project":"92", "self_job_id":"321" "parent_job_id":"369", "job_name":"安装主任2", "part":"xxx", "part_level":"xxx"}  %% modify 11
+                 </project>
+                 </iq>
                  */
+                
+                
                 // 0.修改数据库
                 id  data = [[project stringValue] objectFromJSONString];
                 NSString *orgId = [data objectForKey:@"project"];
-                NSDictionary *ptInfoDic = [data objectForKey:@"job"];
-                NSString *ptId = [ptInfoDic objectForKey:@"id"];
-                
-                [self _insertOrUpatePositionWithOrgId:orgId positionDic:ptInfoDic];
+                NSString *ptId = [data objectForKey:@"parent_job_id"];
+//                NSDictionary *ptInfoDic = [data objectForKey:@"job"];
+//                NSString *ptId = [ptInfoDic objectForKey:@"id"];
+//                
+//                [self _insertOrUpatePositionWithOrgId:orgId positionDic:ptInfoDic];
                 
                 // 1.返回block
                 XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithPtId:ptId
