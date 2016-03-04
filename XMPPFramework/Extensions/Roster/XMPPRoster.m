@@ -899,12 +899,11 @@ enum XMPPRosterFlags
 {
     dispatch_block_t block = ^{ @autoreleasepool {
         
-        if (iq == nil) return;
-        
         NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:roster"];
         
 		BOOL hasRoster = [self hasRoster];
 		
+        // 如果query有数据，表明是服务器返回的，需要跟新roster，不然就跟新
 		if (query && !hasRoster){
             
             [xmppRosterStorage clearAllUsersAndResourcesForXMPPStream:xmppStream];
@@ -918,7 +917,8 @@ enum XMPPRosterFlags
         
         [self _addRosterItems:items version:version];
 		
-		if (query && !hasRoster){
+        // 向服务器获取roster结束，各个值回复，以便
+		if (!hasRoster){
             
 			// We should have our roster now
 			
