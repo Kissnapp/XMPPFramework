@@ -776,7 +776,7 @@ enum XMPPRosterFlags
 {
 	// This is a public method, so it may be invoked on any thread/queue.
 	
-	if (jid == nil) return;
+	if (jid == nil) return; 
 	
 	XMPPJID *myJID = xmppStream.myJID;
 	
@@ -1034,8 +1034,9 @@ enum XMPPRosterFlags
 	{
 		XMPPJID *userJID = [[presence from] bareJID];
 		
-		BOOL knownUser = [xmppRosterStorage userExistsWithJID:userJID xmppStream:xmppStream];
+		BOOL knownUser = [xmppRosterStorage hasRequestSubscribeSomeoneEarlierWithBareJidStr:userJID.bare xmppStream:xmppStream];
 		
+        // 表明是我加他，他同意后请求加我，所以此时应该自动接受
 		if (knownUser && [self autoAcceptKnownPresenceSubscriptionRequests]){
 			// Presence subscription request from someone who's already in our roster.
 			// Automatically approve.
@@ -1058,7 +1059,7 @@ enum XMPPRosterFlags
 			XMPPPresence *response = [XMPPPresence presenceWithType:@"subscribed" to:userJID];
 			[xmppStream sendElement:response];
             
-		}else{
+		}else{ // 别人请求加我
 			// Presence subscription request from someone who's NOT in our roster
             /*
              <presence xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38/mobile" type="subscribe">
