@@ -1079,7 +1079,11 @@ enum XMPPRosterFlags
 			
 			[multicastDelegate xmppRoster:self didReceivePresenceSubscriptionRequest:presence];
 		}
-	}
+	}else if ([[presence type] isEqualToString:@"unsubscribe"])
+    {
+        XMPPJID *userJID = [[presence from] bareJID];
+        [xmppRosterStorage deleteSubscribeRequestWithBareJidStr:userJID.bare xmppStream:xmppStream];
+    }
 	else
 	{
 		#ifdef _XMPP_MUC_H
