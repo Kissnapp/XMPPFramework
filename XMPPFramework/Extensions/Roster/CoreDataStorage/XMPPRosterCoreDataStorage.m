@@ -412,6 +412,25 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 	return result;
 }
 
+- (BOOL)hasRequestSubscribeSomeoneEarlierWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPUserCoreDataStorageObject *user = [self userForJID:[XMPPJID jidWithString:bareJidStr]
+                                                    xmppStream:stream
+                                          managedObjectContext:moc];
+        
+        result = ([user.subscription isEqualToString:@"to"]);
+    }];
+    
+    return result;
+}
+
 #if TARGET_OS_IPHONE
 - (void)setPhoto:(UIImage *)photo forUserWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 #else

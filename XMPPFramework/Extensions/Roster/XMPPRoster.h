@@ -344,7 +344,7 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
 - (BOOL)userExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
-- (BOOL)hasRequestSubscribeSomeoneEarlierWithBareJidStr:(NSString *)areJidStr xmppStream:(XMPPStream *)stream;
+- (BOOL)hasRequestSubscribeSomeoneEarlierWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream;
