@@ -44,6 +44,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
     
     __strong id <XMPPAllMessageStorage> xmppMessageStorage;
     NSString *activeUser;
+    NSString *audioFilePath;
     
 @private
     
@@ -61,6 +62,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @property (readwrite, assign) BOOL receiveSystemPushMessage;
 
 @property (nonatomic, strong) NSString *activeUser;
+@property (nonatomic, strong) NSString *audioFilePath;
 
 @property (readwrite, copy) NSXMLElement *preferences;
 

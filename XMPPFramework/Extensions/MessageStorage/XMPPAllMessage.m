@@ -232,6 +232,35 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (NSString *)audioFilePath
+{
+    __block NSString *result = nil;
+    
+    dispatch_block_t block = ^{
+        
+        result = [audioFilePath copy];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setAudioFilePath:(NSString *)filePath
+{
+    dispatch_block_t block = ^{
+        audioFilePath = [filePath copy];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 
 - (NSXMLElement *)preferences
 {
@@ -919,19 +948,25 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     
     dispatch_block_t block = ^{
         
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *documentsDirectory = [paths objectAtIndex:0];
+        NSString *audioDirectory = nil;
         
-        NSString *voiceDirectory = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@",[[xmppStream myJID] user],@"voice"]];
+        if (self.audioFilePath.length > 0) {
+            audioDirectory = self.audioFilePath;
+        }else{
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            
+            audioDirectory = [[documentsDirectory stringByAppendingPathComponent:[[xmppStream myJID] user]] stringByAppendingPathComponent:@"audio"];
+        }
         
-        if (![[NSFileManager defaultManager] fileExistsAtPath:voiceDirectory]) {
-            [[NSFileManager defaultManager] createDirectoryAtPath:voiceDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:audioDirectory]) {
+            [[NSFileManager defaultManager] createDirectoryAtPath:audioDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
         }
         
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat: @"yyyyMMdd_HHmmss_SSS"];
         
-       name = [voiceDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.spx", [dateFormatter stringFromDate:[NSDate date]]]];
+       name = [audioDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.spx", [dateFormatter stringFromDate:[NSDate date]]]];
         
     };
     
