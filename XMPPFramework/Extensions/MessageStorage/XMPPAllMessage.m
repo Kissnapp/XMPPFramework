@@ -722,6 +722,11 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     //save the message
     BOOL activeMessage = sendFromMe ? NO:[[self activeUser] isEqualToString:message.msgFrom];
     [message setMsgOutgoing:sendFromMe];
+    
+    // 语音消息需要标志为未读状态
+    if (!message.msgOutgoing && message.msgType == XMPPExtendSubMessageAudioType) {
+        message.msgBeenRead = NO;
+    }
 
     [xmppMessageStorage archiveMessage:message active:activeMessage xmppStream:sender];
     
@@ -966,10 +971,10 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat: @"yyyyMMdd_HHmmss_SSS"];
         
-       name = [audioDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.spx", [dateFormatter stringFromDate:[NSDate date]]]];
+        name = [audioDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.spx", [dateFormatter stringFromDate:[NSDate date]]]];
         
     };
-    
+     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else

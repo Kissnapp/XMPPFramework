@@ -264,6 +264,11 @@
     
     [newObject updateFromXMPPExtendMessage:xmppExtendMessage streamBareJidStr:streamBareJidStr];
     
+    // 收到消息是语音，标注为未读
+    if (!xmppExtendMessage.msgOutgoing && xmppExtendMessage.msgType == XMPPExtendSubMessageAudioType) {
+        newObject.beenRead = @(NO);
+    }
+    
     //Add the unread message count or insert a new unread message info
     [XMPPMessageHistoryCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                              bareJidStr:(xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom)
