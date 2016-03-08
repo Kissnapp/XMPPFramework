@@ -348,59 +348,59 @@
 
 
 
-
-#pragma mark - 特殊情况 -- 有了自己的私人文件夹要删除掉之前所有的假的文件夹
-+ (BOOL)deleteOriginalPrivateFolderObjectInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
-{
-    BOOL result = NO;
-    NSString *name = [dic objectForKey:@"name"];
-    NSString *cloudID = [dic objectForKey:@"id"];
-    NSString *project = [dic objectForKey:@"project"];
-    if (!name) return result;
-    if (!cloudID) return result;
-    if (!project) return result;
-    
-    // 自己的创建的 name 和 空id
-    NSString *original_name = @"工作";
-    NSString *original_cloudID = @"";
-    
-    // 找到自己创建的私人文件夹 (还有其他人的)
-    if ([name isEqualToString:@""] && ![cloudID isEqualToString:original_cloudID]) {
-        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND cloudID == %@ AND name == %@", streamBareJidStr, project, original_cloudID, original_name];
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        [fetchRequest setEntity:entity];
-        [fetchRequest setPredicate:predicate];
-        [fetchRequest setIncludesPendingChanges:YES];
-        [fetchRequest setFetchLimit:1];
-        NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
-        
-        for ( XMPPCloudCoreDataStorageObject *cloud in results ) {
-            [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloud.cloudID streamBareJidStr:streamBareJidStr];
-        }
-        result = YES;
-    }
-    return result;
-}
-
-
+//
+//#pragma mark - 特殊情况 -- 有了自己的私人文件夹要删除掉之前所有的假的文件夹
+//+ (BOOL)deleteOriginalPrivateFolderObjectInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
+//{
+//    BOOL result = NO;
+//    NSString *name = [dic objectForKey:@"name"];
+//    NSString *cloudID = [dic objectForKey:@"id"];
+//    NSString *project = [dic objectForKey:@"project"];
+//    if (!name) return result;
+//    if (!cloudID) return result;
+//    if (!project) return result;
+//    
+//    // 自己的创建的 name 和 空id
+//    NSString *original_name = @"工作";
+//    NSString *original_cloudID = @"";
+//    
+//    // 找到自己创建的私人文件夹 (还有其他人的)
+//    if ([name isEqualToString:@""] && ![cloudID isEqualToString:original_cloudID]) {
+//        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+//        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+//        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND project == %@ AND cloudID == %@ AND name == %@", streamBareJidStr, project, original_cloudID, original_name];
+//        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+//        [fetchRequest setEntity:entity];
+//        [fetchRequest setPredicate:predicate];
+//        [fetchRequest setIncludesPendingChanges:YES];
+//        [fetchRequest setFetchLimit:1];
+//        NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+//        
+//        for ( XMPPCloudCoreDataStorageObject *cloud in results ) {
+//            [XMPPCloudCoreDataStorageObject deleteInManagedObjectContext:moc cloudID:cloud.cloudID streamBareJidStr:streamBareJidStr];
+//        }
+//        result = YES;
+//    }
+//    return result;
+//}
 
 
-#pragma mark - 更新
+
+
+#pragma mark - 更新 
 + (BOOL)updateInManagedObjectContext:(NSManagedObjectContext *)moc dic:(NSDictionary *)dic streamBareJidStr:(NSString *)streamBareJidStr
 {
     BOOL result = NO;
     NSString *cloudID = [dic objectForKey:@"id"];
     NSString *parent = [dic objectForKey:@"parent"];
-    NSNumber *type = [dic objectForKey:@"type"];
+//    NSNumber *type = [dic objectForKey:@"type"];
     if (!cloudID) return result;
     if (!parent) return result;
     
-    // 有了自己的私人文件夹 删除以前自己创建的私人文件夹
-    if ( [parent isEqualToString:@"-1"] && (type.integerValue == 2) ) {
-        result = [XMPPCloudCoreDataStorageObject deleteOriginalPrivateFolderObjectInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
-    }
+//    // 有了自己的私人文件夹 删除以前自己创建的私人文件夹
+//    if ( [parent isEqualToString:@"-1"] && (type.integerValue == 2) ) {
+//        result = [XMPPCloudCoreDataStorageObject deleteOriginalPrivateFolderObjectInManagedObjectContext:moc dic:dic streamBareJidStr:streamBareJidStr];
+//    }
     
     
     XMPPCloudCoreDataStorageObject *newCloud = [XMPPCloudCoreDataStorageObject objectInManagedObjectContext:moc cloudID:cloudID streamBareJidStr:streamBareJidStr];

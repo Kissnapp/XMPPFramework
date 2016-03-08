@@ -117,191 +117,277 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 #pragma mark - 一. 处理服务器返回的数据
 
 #pragma mark - 1.处理获取文件夹内容 OK
-- (void)handleCloudListFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+- (void)handleCloudListFolderDatasWithServerDic:(NSDictionary *)serverDic projectID:(NSString *)projectID
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
-    NSArray *serverDatas = [self _handleCloudListFolderDatasWithDicDatas:dicDatas projectID:projectID];
     
-    [self _handleCloudListFolderDeleteDatasWithDicDatas:dicDatas serverDatas:serverDatas projectID:projectID];
+    /**
+     *  1.删除原始的数据库信息,保证最新的信息.
+     */
+    [self _handleCloudListFolderDeleteDatasSubWithServerDic:serverDic projectID:projectID];
     
-    for (NSDictionary *dic in serverDatas) {
-        [_xmppCloudStorage insertCloudDic:dic xmppStream:xmppStream];
+    
+    /**
+     *  2.生成所对应的字典的数组.
+     */
+    NSArray<NSDictionary *> *results = [self _handleCloudListFolderDatasSubWithServerDic:serverDic projectID:projectID];
+    
+    
+    /**
+     *  3.写入数据库.
+     */
+    for (NSDictionary *resultsDic in results) {
+        [_xmppCloudStorage insertCloudDic:resultsDic xmppStream:xmppStream];
     }
-    
 }
 
-- (NSArray *)_handleCloudListFolderDatasWithDicDatas:(NSDictionary *)dicDatas projectID:(NSString *)projectID
+- (NSArray<NSDictionary *> *)_handleCloudListFolderDatasSubWithServerDic:(NSDictionary *)serverDic projectID:(NSString *)projectID
 {
     /**
+     *  新的数据库
      
-     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="B0D937C6-2990-4E07-A667-DA4FD3A3A724" type="result">
-        <query xmlns="aft:library" subtype="list_folder" project="483">
-            {"parent":"186", 
-             "folder":[{"id":"250", "type":"1", "name":"人人人", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-11-12 15:40:15"},{"id":"232", "type":"1", "name":"哈哈还是", "creator":"7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38", "owner":"admin", "Time":"2015-11-08 17:04:08"}], 
-             "file":[{"id":"7", "uuid":"0360ad270564475e98139777701302f3", "name":"2015-11-12- 185616951.jpg", "size":"53919", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:56:17"},{"id":"6", "uuid":"1fc2af2943be4bfc86717024311b920d", "name":"20151112181441536_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"142744", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:14:46"},{"id":"4", "uuid":"8c6167fa2d7f4449bdfb43a3bd0fb6a4", "name":"20151112181104306_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:11:07"},{"id":"3", "uuid":"93059ce920794524bb06616c243a656a", "name":"20151112180905048_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:09:11"},{"id":"2", "uuid":"38a9abb4d26c46d6ae23b93dbc16a19a", "name":"20151112174004174_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"47164", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 17:40:19"}]}
+     1.root_list 数据
+     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="B38D0FAA-B05B-4EFD-B72B-502C8AD4F706" type="result">
+        <query xmlns="aft:library" subtype="list_folder" project="677">
+     
+            {"parent":"-1", 
+            "folder":[{"id":"1159", "type":"6", "name":"部门云-领导", "creator":"admin", "owner":"8922", "time":"2016-03-08 02:46:08", "part_id":"1"},
+                        {"id":"1173", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "time":"2016-03-08 02:46:08", "part_id":"-1"},
+                        {"id":"1158", "type":"0", "name":"项目云", "creator":"admin", "owner":"admin", "time":"2016-03-08 02:46:08", "part_id":"-1"}],
+            "file":[]}
+     
         </query>
      </iq>
      
-     {"parent":"-1", 
-     "folder":[{"id":"10", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"},
-     {"id":"9", "type":"0", "name":"资料归档", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
-     {"id":"8", "type":"0", "name":"资料库", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
-     {"id":"7", "type":"0", "name":"工作文件", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"}], 
-     "file":[]}
-     客户端检查一下type=2的项，有没有owner=self jid，如果没有，显示一个自己的文件夹
-     
      */
-    NSString *myJidStr = [[xmppStream myJID] bare];
-    NSString *parent = [dicDatas objectForKey:@"parent"];
-    NSArray *folders = [dicDatas objectForKey:@"folder"];
-    NSArray *files = [dicDatas objectForKey:@"file"];
-    NSMutableArray *arrayM = [NSMutableArray array];
-    
-    
-    // 一.在root目录下
-    if ([parent isEqualToString:@"-1"]) {
-        
-        
-        int count = 0;
-        for ( NSDictionary *dic in folders ) {
-            // 1.判断是否有自己的私人文件夹
-            NSString *creator = [dic objectForKey:@"creator"];
-            NSString *owner = [dic objectForKey:@"owner"];
-            NSString *type = [dic objectForKey:@"type"];
-            NSString *name = [dic objectForKey:@"name"];
-            if ( [type isEqualToString:@"2"] &&
-                 [creator isEqualToString:myJidStr] &&
-                 [owner isEqualToString:myJidStr] &&
-                 [name isEqualToString:@""] ) {
-                count++;
-            }
-            
-            // 2.添加到新的字典 (服务器返回数据需要处理)
-            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-            [dicM setObject:projectID forKey:@"project"];
-            [dicM setObject:parent forKey:@"parent"];
-            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
-            if ( [creator isEqualToString:myJidStr] ) {
-                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
-            } else {
-                [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
-            }
-            [arrayM addObject:dicM];
-        }
-        
-        
-        // 3.处理有没有自己的私人文件夹
-        // 3.1没有自己的私人文件夹 (需要创建一个属于自己假的私人文件夹)
-        if (count == 0) {
-            NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
-            [dicM setObject:projectID forKey:@"project"];
-            [dicM setObject:parent forKey:@"parent"];
-            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"type"];
-            
-            /**
-             *  区分假的私人文件夹
-             */
-            [dicM setObject:@"工作" forKey:@"name"];
-            [dicM setObject:@"" forKey:@"id"];
-            
-            
-            [dicM setObject:myJidStr forKey:@"owner"];
-            [dicM setObject:myJidStr forKey:@"creator"];
-            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
-            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
-            [arrayM addObject:dicM];
-        }
-    }
-    
-    
-    // 二. 不在root目录下的请求
-    else {
-        
-        // 1.添加folders到新的字典
-        for ( NSDictionary *dic in folders ) {
-            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-            [dicM setObject:projectID forKey:@"project"];
-            [dicM setObject:parent forKey:@"parent"];
-            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
-            NSString *creator = [dic objectForKey:@"creator"];
-            if ( [creator isEqualToString:myJidStr] ) {
-                [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
-            } else {
-                [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
-            }
-            [arrayM addObject:dicM];
-        }
-        
-        /**
-         // 公共文件夹/子文件夹
-         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="4FB8B9C3-BB8A-4527-AF80-BC3FF05CEDC1" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"9", "folder":[{"id":"27", "type":"1", "name":"尼克", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 15:36:29"},{"id":"24", "type":"1", "name":"星期", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 11:19:35"},{"id":"22", "type":"1", "name":"心情", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 10:58:42"}], "file":[]}</query></iq>
-         // 私人文件夹
-         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="EF25643B-BD84-483C-BAF1-8476DA63E8D6" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"10", "folder":[{"id":"21", "type":"3", "name":"星期天", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-16 13:28:21"},{"id":"11", "type":"5", "name":"通讯录", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"}], "file":[]}</query></iq>
-         
-         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="18ADBB05-A195-4770-A3E0-8585C6A41261" type="result"><query xmlns="aft:library" subtype="list_folder" project="483">{"parent":"199", "folder":[{"id":"201", "type":"3", "name":"天天天", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 15:01:49"},{"id":"200", "type":"3", "name":"他哥哥", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 14:48:44"}], "file":[]}</query></iq>
-         
-         // 有文件的情况
-         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="B0D937C6-2990-4E07-A667-DA4FD3A3A724" type="result">
-            <query xmlns="aft:library" subtype="list_folder" project="483">
-                {"parent":"186",
-                 "folder":[{"id":"250", "type":"1", "name":"人人人", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-11-12 15:40:15"},{"id":"232", "type":"1", "name":"哈哈还是", "creator":"7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38", "owner":"admin", "Time":"2015-11-08 17:04:08"}],
-                 "file":[{"id":"7", "uuid":"0360ad270564475e98139777701302f3", "name":"2015-11-12- 185616951.jpg", "size":"53919", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:56:17"},{"id":"6", "uuid":"1fc2af2943be4bfc86717024311b920d", "name":"20151112181441536_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"142744", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:14:46"},{"id":"4", "uuid":"8c6167fa2d7f4449bdfb43a3bd0fb6a4", "name":"20151112181104306_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:11:07"},{"id":"3", "uuid":"93059ce920794524bb06616c243a656a", "name":"20151112180905048_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:09:11"},{"id":"2", "uuid":"38a9abb4d26c46d6ae23b93dbc16a19a", "name":"20151112174004174_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"47164", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 17:40:19"}]}
-            </query>
-         </iq>
-         */
-        
-        
 
-    }
+    NSString *myJidStr = [[xmppStream myJID] bare];
+    NSString *parent = [serverDic objectForKey:@"parent"];
+    NSArray *folders = [serverDic objectForKey:@"folder"];
+    NSArray *files = [serverDic objectForKey:@"file"];
+    NSMutableArray *resultArrM = [NSMutableArray array];
     
-    // 2.添加files到新的字典
-    for ( NSDictionary *dic in files ) {
-        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
-        [dicM setObject:projectID forKey:@"project"];
-        [dicM setObject:parent forKey:@"parent"];
-        [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
-        NSString *creator = [dic objectForKey:@"creator"];
+    for (NSDictionary *serverDic in folders) {
+        NSMutableDictionary *resultDicM = [NSMutableDictionary dictionaryWithDictionary:serverDic];
+        [resultDicM setObject:projectID forKey:@"project"];
+        [resultDicM setObject:parent forKey:@"parent"];
+        [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+        NSString *creator = [serverDic objectForKey:@"creator"];
         if ( [creator isEqualToString:myJidStr] ) {
-            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
         } else {
-            [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
         }
-        [arrayM addObject:dicM];
+        [resultArrM addObject:resultDicM];
     }
     
-    return [NSArray arrayWithArray:arrayM];
+    for (NSDictionary *serverDic in files) {
+        NSMutableDictionary *resultDicM = [NSMutableDictionary dictionaryWithDictionary:serverDic];
+        [resultDicM setObject:projectID forKey:@"project"];
+        [resultDicM setObject:parent forKey:@"parent"];
+        [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
+        NSString *creator = [serverDic objectForKey:@"creator"];
+        if ( [creator isEqualToString:myJidStr] ) {
+            [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
+        } else {
+            [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
+        }
+        [resultArrM addObject:resultDicM];
+    }
+    NSArray<NSDictionary *> *resultArr = [NSArray arrayWithArray:resultArrM];
+    return resultArr;
+    
+    
+    
+    
+    
+//    /**
+//     
+//     <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="B0D937C6-2990-4E07-A667-DA4FD3A3A724" type="result">
+//        <query xmlns="aft:library" subtype="list_folder" project="483">
+//            {"parent":"186", 
+//             "folder":[{"id":"250", "type":"1", "name":"人人人", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-11-12 15:40:15"},{"id":"232", "type":"1", "name":"哈哈还是", "creator":"7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38", "owner":"admin", "Time":"2015-11-08 17:04:08"}], 
+//             "file":[{"id":"7", "uuid":"0360ad270564475e98139777701302f3", "name":"2015-11-12- 185616951.jpg", "size":"53919", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:56:17"},{"id":"6", "uuid":"1fc2af2943be4bfc86717024311b920d", "name":"20151112181441536_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"142744", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:14:46"},{"id":"4", "uuid":"8c6167fa2d7f4449bdfb43a3bd0fb6a4", "name":"20151112181104306_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:11:07"},{"id":"3", "uuid":"93059ce920794524bb06616c243a656a", "name":"20151112180905048_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:09:11"},{"id":"2", "uuid":"38a9abb4d26c46d6ae23b93dbc16a19a", "name":"20151112174004174_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"47164", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 17:40:19"}]}
+//        </query>
+//     </iq>
+//     
+//     {"parent":"-1", 
+//     "folder":[{"id":"10", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"},
+//     {"id":"9", "type":"0", "name":"资料归档", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
+//     {"id":"8", "type":"0", "name":"资料库", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"},
+//     {"id":"7", "type":"0", "name":"工作文件", "creator":"admin", "owner":"admin", "Time":"2015-10-13 16:41:36"}], 
+//     "file":[]}
+//     客户端检查一下type=2的项，有没有owner=self jid，如果没有，显示一个自己的文件夹
+//     
+//     */
+//    
+//    
+//    /**
+//     
+//    NSString *myJidStr = [[xmppStream myJID] bare];
+//    NSString *parent = [dicDatas objectForKey:@"parent"];
+//    NSArray *folders = [dicDatas objectForKey:@"folder"];
+//    NSArray *files = [dicDatas objectForKey:@"file"];
+//    NSMutableArray *arrayM = [NSMutableArray array];
+//    
+//    
+//    
+//    
+//    
+//    // 一.在root目录下
+//    if ([parent isEqualToString:@"-1"]) {
+//        
+//        
+//        int count = 0;
+//        for ( NSDictionary *dic in folders ) {
+//            // 1.判断是否有自己的私人文件夹
+//            NSString *creator = [dic objectForKey:@"creator"];
+//            NSString *owner = [dic objectForKey:@"owner"];
+//            NSString *type = [dic objectForKey:@"type"];
+//            NSString *name = [dic objectForKey:@"name"];
+//            if ( [type isEqualToString:@"2"] &&
+//                 [creator isEqualToString:myJidStr] &&
+//                 [owner isEqualToString:myJidStr] &&
+//                 [name isEqualToString:@""] ) {
+//                count++;
+//            }
+//            
+//            // 2.添加到新的字典 (服务器返回数据需要处理)
+//            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+//            [dicM setObject:projectID forKey:@"project"];
+//            [dicM setObject:parent forKey:@"parent"];
+//            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+//            if ( [creator isEqualToString:myJidStr] ) {
+//                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
+//            } else {
+//                [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
+//            }
+//            [arrayM addObject:dicM];
+//        }
+//        
+//        
+//        // 3.处理有没有自己的私人文件夹
+//        // 3.1没有自己的私人文件夹 (需要创建一个属于自己假的私人文件夹)
+//        if (count == 0) {
+//            NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+//            [dicM setObject:projectID forKey:@"project"];
+//            [dicM setObject:parent forKey:@"parent"];
+//            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"type"];
+//            
+//            /**
+//             *  区分假的私人文件夹
+//             */
+//            [dicM setObject:@"工作" forKey:@"name"];
+//            [dicM setObject:@"" forKey:@"id"];
+//            
+//            
+//            [dicM setObject:myJidStr forKey:@"owner"];
+//            [dicM setObject:myJidStr forKey:@"creator"];
+//            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
+//            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+//            [arrayM addObject:dicM];
+//        }
+//    }
+//    
+//    
+//    // 二. 不在root目录下的请求
+//    else {
+//        
+//        // 1.添加folders到新的字典
+//        for ( NSDictionary *dic in folders ) {
+//            NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+//            [dicM setObject:projectID forKey:@"project"];
+//            [dicM setObject:parent forKey:@"parent"];
+//            [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+//            NSString *creator = [dic objectForKey:@"creator"];
+//            if ( [creator isEqualToString:myJidStr] ) {
+//                [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+//            } else {
+//                [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+//            }
+//            [arrayM addObject:dicM];
+//        }
+//        
+//        /**
+//         // 公共文件夹/子文件夹
+//         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="4FB8B9C3-BB8A-4527-AF80-BC3FF05CEDC1" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"9", "folder":[{"id":"27", "type":"1", "name":"尼克", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"admin", "Time":"2015-10-22 15:36:29"},{"id":"24", "type":"1", "name":"星期", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 11:19:35"},{"id":"22", "type":"1", "name":"心情", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-10-21 10:58:42"}], "file":[]}</query></iq>
+//         // 私人文件夹
+//         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="EF25643B-BD84-483C-BAF1-8476DA63E8D6" type="result"><query xmlns="aft:library" subtype="list_folder" project="460">{"parent":"10", "folder":[{"id":"21", "type":"3", "name":"星期天", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-16 13:28:21"},{"id":"11", "type":"5", "name":"通讯录", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"}], "file":[]}</query></iq>
+//         
+//         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="18ADBB05-A195-4770-A3E0-8585C6A41261" type="result"><query xmlns="aft:library" subtype="list_folder" project="483">{"parent":"199", "folder":[{"id":"201", "type":"3", "name":"天天天", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 15:01:49"},{"id":"200", "type":"3", "name":"他哥哥", "creator":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "owner":"33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38", "Time":"2015-11-07 14:48:44"}], "file":[]}</query></iq>
+//         
+//         // 有文件的情况
+//         <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="B0D937C6-2990-4E07-A667-DA4FD3A3A724" type="result">
+//            <query xmlns="aft:library" subtype="list_folder" project="483">
+//                {"parent":"186",
+//                 "folder":[{"id":"250", "type":"1", "name":"人人人", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"admin", "Time":"2015-11-12 15:40:15"},{"id":"232", "type":"1", "name":"哈哈还是", "creator":"7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38", "owner":"admin", "Time":"2015-11-08 17:04:08"}],
+//                 "file":[{"id":"7", "uuid":"0360ad270564475e98139777701302f3", "name":"2015-11-12- 185616951.jpg", "size":"53919", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:56:17"},{"id":"6", "uuid":"1fc2af2943be4bfc86717024311b920d", "name":"20151112181441536_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"142744", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:14:46"},{"id":"4", "uuid":"8c6167fa2d7f4449bdfb43a3bd0fb6a4", "name":"20151112181104306_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:11:07"},{"id":"3", "uuid":"93059ce920794524bb06616c243a656a", "name":"20151112180905048_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"175935", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 18:09:11"},{"id":"2", "uuid":"38a9abb4d26c46d6ae23b93dbc16a19a", "name":"20151112174004174_1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38.jpg", "size":"47164", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "version_count":"1", "folder":"186", "Time":"2015-11-12 17:40:19"}]}
+//            </query>
+//         </iq>
+//         */
+//        
+//        
+//
+//    }
+//    
+//    // 2.添加files到新的字典
+//    for ( NSDictionary *dic in files ) {
+//        NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:dic];
+//        [dicM setObject:projectID forKey:@"project"];
+//        [dicM setObject:parent forKey:@"parent"];
+//        [dicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
+//        NSString *creator = [dic objectForKey:@"creator"];
+//        if ( [creator isEqualToString:myJidStr] ) {
+//            [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
+//        } else {
+//            [dicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
+//        }
+//        [arrayM addObject:dicM];
+//    }
+//    
+//    return [NSArray arrayWithArray:arrayM];
 }
 
 
 /** 其他账户删除文件/文件夹 共享的操作的文件 */
-- (void)_handleCloudListFolderDeleteDatasWithDicDatas:(NSDictionary *)dicDatas serverDatas:(NSArray *)serverDatas projectID:(NSString *)projectID
+- (void)_handleCloudListFolderDeleteDatasSubWithServerDic:(NSDictionary *)serverDic projectID:(NSString *)projectID
 {
-    NSArray *DBDatas = [_xmppCloudStorage cloudGetFolderWithParent:[dicDatas objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
-    if (DBDatas.count) { // 比较(数据库和服务器)
-        for (XMPPCloudCoreDataStorageObject *DBCloud in DBDatas) {
-            
-            int count = 0;
-            for (NSDictionary *serDic in serverDatas) {
-                if ([DBCloud.cloudID isEqualToString:[serDic valueForKey:@"id"]]) {
-                    count++;
-                    break;
-                }
-            }
-            
-            // 实体有删除或共享类操作，更新数据库
-            if (count == 0) {
-                NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
-                [dicM setObject:DBCloud.cloudID forKey:@"id"];
-                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
-                [_xmppCloudStorage deleteCloudDic:dicM xmppStream:xmppStream];
-                
-            }
-            
-        }
-        
+    /**
+     *  新的
+     */
+    NSString *parent = [serverDic objectForKey:@"parent"];
+    NSArray<XMPPCloudCoreDataStorageObject *> *DBClouds = [_xmppCloudStorage cloudGetFolderWithParent:parent projectID:projectID xmppStream:xmppStream];
+    
+    for (XMPPCloudCoreDataStorageObject *DBCloud in DBClouds) {
+        [_xmppCloudStorage deleteCloudID:DBCloud.cloudID xmppStream:xmppStream];
     }
-
+    
+    
+//    NSArray *DBDatas = [_xmppCloudStorage cloudGetFolderWithParent:[dicDatas objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+//    if (DBDatas.count) { // 比较(数据库和服务器)
+//        for (XMPPCloudCoreDataStorageObject *DBCloud in DBDatas) {
+//            
+//            int count = 0;
+//            for (NSDictionary *serDic in serverDatas) {
+//                if ([DBCloud.cloudID isEqualToString:[serDic valueForKey:@"id"]]) {
+//                    count++;
+//                    break;
+//                }
+//            }
+//            
+//            // 实体有删除或共享类操作，更新数据库
+//            if (count == 0) {
+//                NSMutableDictionary *dicM = [NSMutableDictionary dictionary];
+//                [dicM setObject:DBCloud.cloudID forKey:@"id"];
+//                [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"hasBeenDelete"];
+//                [_xmppCloudStorage deleteCloudDic:dicM xmppStream:xmppStream];
+//                
+//            }
+//            
+//        }
+//        
+//    }
 }
 
 
@@ -1991,6 +2077,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 }
                 
                 /**
+                 旧的：
     list_root result:
                  {"parent":"-1", "folder":
                     [{"id":"10", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "Time":"2015-10-15 17:57:03"},
@@ -2003,16 +2090,24 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                     [{"id":"21", "type":"3", "name":"星期天", 		"creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"Time":"2015-10-16 13:28:21"},
                     {"id":"11", "type":"5", "name":"通讯录", 		"creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", 		"Time":"2015-10-15 17:57:03"}], "file":[]}
                  
+                 新的：
+                 <iq xmlns="jabber:client" from="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38" to="1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38/mobile" id="22E39A79-99AB-4397-AD79-E1F57B650277" type="result">
+                    <query xmlns="aft:library" subtype="list_folder" project="677">
+                        {"parent":"-1", "folder":
+                            [{"id":"1159", "type":"6", "name":"部门云-领导", "creator":"admin", "owner":"8922", "time":"2016-03-08 02:46:08", "part_id":"1"},{"id":"1173", "type":"2", "name":"", "creator":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "owner":"1758b0fbfecb47398d4d2710269aa9e5@120.24.94.38", "time":"2016-03-08 02:46:08", "part_id":"-1"},
+                            {"id":"1158", "type":"0", "name":"项目云", "creator":"admin", "owner":"admin", "time":"2016-03-08 02:46:08", "part_id":"-1"}], "file":[]}
+                    </query>
+                 </iq>
                  */
                 
                 id data = [[project stringValue] objectFromJSONString];
-                NSDictionary *dicData = (NSDictionary *)data;
-                [self handleCloudListFolderDatasWithDicDatas:dicData projectID:projectID];
+                NSDictionary *serverDic = (NSDictionary *)data;
+                [self handleCloudListFolderDatasWithServerDic:serverDic projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
                     // 2.向数据库获取数据
-                    NSArray *folders = [_xmppCloudStorage cloudGetFolderWithParent:[dicData objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
+                    NSArray *folders = [_xmppCloudStorage cloudGetFolderWithParent:[serverDic objectForKey:@"parent"] projectID:projectID xmppStream:xmppStream];
                     // 3.用block返回数据
                     [self _executeRequestBlockWithRequestKey:requestkey valueObject:folders];
                 }

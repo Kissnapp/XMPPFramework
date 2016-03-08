@@ -11,7 +11,7 @@
 #import <CoreData/CoreData.h>
 
 typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
-    XMPPCloudCoreDataStorageObjectFolderTypeRoot = -1,
+    XMPPCloudCoreDataStorageObjectFolderTypeRoot = 1,
     XMPPCloudCoreDataStorageObjectFolderTypePublic,
     XMPPCloudCoreDataStorageObjectFolderTypePublicSub,
     XMPPCloudCoreDataStorageObjectFolderTypePrivate,
