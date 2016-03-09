@@ -15,6 +15,7 @@
     </entity>
     <entity name="XMPPMessageHistoryCoreDataStorageObject" representedClassName="XMPPMessageHistoryCoreDataStorageObject" syncable="YES">
         <attribute name="bareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="chatType" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="hasBeenEnd" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="lastChatTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="streamBareJidStr" attributeType="String" indexed="YES" syncable="YES"/>
@@ -24,7 +25,7 @@
     <entity name="XMPPServerPushCoreDataStorageObject" syncable="YES"/>
     <elements>
         <element name="XMPPMessageCoreDataStorageObject" positionX="0" positionY="0" width="128" height="210"/>
-        <element name="XMPPMessageHistoryCoreDataStorageObject" positionX="0" positionY="0" width="128" height="135"/>
+        <element name="XMPPMessageHistoryCoreDataStorageObject" positionX="0" positionY="0" width="128" height="150"/>
         <element name="XMPPServerPushCoreDataStorageObject" positionX="0" positionY="0" width="128" height="45"/>
     </elements>
 </model>

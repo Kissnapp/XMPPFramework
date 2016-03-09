@@ -203,6 +203,35 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (BOOL)autoArchiveMessage
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        result = autoArchiveMessage;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
+- (void)setAutoArchiveMessage:(BOOL)flag
+{
+    dispatch_block_t block = ^{
+        autoArchiveMessage = flag;
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+
 - (NSString *)activeUser
 {
     __block NSString *result = nil;
@@ -332,12 +361,17 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)saveXMPPMessage:(XMPPMessage *)message
 {
+    [self saveXMPPMessage:message groupType:XMPPMessageHistoryTypeDefault];
+}
+
+- (void)saveXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType
+{
     XMPPLogTrace();
     
     dispatch_block_t block = ^{
         @autoreleasepool {
             XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:message];
-            [self saveMessageWithXMPPStream:xmppStream message:newMessage sendFromMe:YES];
+            [self saveMessageWithXMPPStream:xmppStream message:newMessage groupType:groupType sendFromMe:YES];
             [multicastDelegate xmppAllMessage:self willSendXMPPMessage:message];
         }
     };
@@ -554,11 +588,16 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message
 {
+    [self saveAndSendXMPPExtendMessage:message groupType:XMPPMessageHistoryTypeDefault];
+}
+
+- (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message groupType:(XMPPMessageHistoryType)groupType
+{
     dispatch_block_t block = ^{
         
-        XMPPMessage *newMessage = [message copy];
+        XMPPExtendMessage *newMessage = [message copy];
         //we should stroage this message firstly
-        [self saveMessageWithXMPPStream:xmppStream message:message sendFromMe:YES];
+        [self saveMessageWithXMPPStream:xmppStream message:message groupType:groupType sendFromMe:YES];
         //send the message
         [xmppStream sendElement:newMessage];
         
@@ -576,20 +615,46 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 
 - (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message
 {
+    [self saveXMPPExtendMessage:message groupType:XMPPMessageHistoryTypeDefault];
+}
+
+- (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message groupType:(XMPPMessageHistoryType)groupType
+{
     dispatch_block_t block = ^{
         
         BOOL sendFromMe = message.msgOutgoing;
         //we should stroage this message firstly
-        [self saveMessageWithXMPPStream:xmppStream message:[message copy] sendFromMe:sendFromMe];
+        [self saveMessageWithXMPPStream:xmppStream message:[message copy] groupType:groupType sendFromMe:sendFromMe];
     };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
     else
         dispatch_async(moduleQueue, block);
-
 }
-- (void)sendXMPPExtendMessage:(XMPPExtendMessage *)message
+
+- (void)saveAndSendXMPPMessage:(XMPPMessage *)message
+{
+    [self saveAndSendXMPPMessage:message groupType:XMPPMessageHistoryTypeDefault];
+}
+
+- (void)saveAndSendXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType
+{
+    dispatch_block_t block = ^{
+        
+        XMPPExtendMessage *extendMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:message];
+        BOOL sendFromMe = extendMessage.msgOutgoing;
+        //we should stroage this message firstly
+        [self saveMessageWithXMPPStream:xmppStream message:[extendMessage copy] groupType:groupType sendFromMe:sendFromMe];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)sendXMPPMessage:(XMPPMessage *)message
 {
     dispatch_block_t block = ^{
         
@@ -600,6 +665,28 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         
         //Call the delegate
         [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:newMessage];
+         XMPPExtendMessage *extendMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:newMessage];
+        [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:extendMessage];
+        
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)sendXMPPExtendMessage:(XMPPExtendMessage *)message
+{
+    dispatch_block_t block = ^{
+        
+        XMPPExtendMessage *newMessage = [message copy];
+        
+        //send the message
+        [xmppStream sendElement:newMessage];
+        
+        //Call the delegate
+        [multicastDelegate xmppAllMessage:self didReceiveXMPPExtendMessage:newMessage];
         [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:newMessage];
         
     };
@@ -715,7 +802,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)saveMessageWithXMPPStream:(XMPPStream *)sender message:(XMPPExtendMessage *)message sendFromMe:(BOOL)sendFromMe
+- (void)saveMessageWithXMPPStream:(XMPPStream *)sender message:(XMPPExtendMessage *)message groupType:(XMPPMessageHistoryType)groupType sendFromMe:(BOOL)sendFromMe
 {
     if (!dispatch_get_specific(moduleQueueTag)) return;
     
@@ -728,7 +815,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         message.msgBeenRead = NO;
     }
 
-    [xmppMessageStorage archiveMessage:message active:activeMessage xmppStream:sender];
+    [xmppMessageStorage archiveMessage:message active:activeMessage groupType:groupType xmppStream:sender];
     
     //send the message to the UI
     //Call the delegate
@@ -901,7 +988,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 {
     XMPPLogTrace();
     
-    if ([message isChatMessageWithInfo]) {
+    if ([message isChatMessageWithInfo] && self.autoArchiveMessage) {
         
         //save the message
         XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:[message copy]];
@@ -926,7 +1013,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
                     
                     dispatch_block_t block = ^{
                         
-                        [strongSelf saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
+                        [strongSelf saveMessageWithXMPPStream:sender message:newMessage groupType:XMPPMessageHistoryTypeDefault sendFromMe:NO];
                         [multicastDelegate xmppAllMessage:strongSelf didReceiveXMPPMessage:message];
                         [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
                     };
@@ -939,12 +1026,66 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             });
             
         }else{
-            [self saveMessageWithXMPPStream:sender message:newMessage sendFromMe:NO];
+            [self saveMessageWithXMPPStream:sender message:newMessage groupType:XMPPMessageHistoryTypeDefault sendFromMe:NO];
             [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:message];
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
         }
         
     }
+}
+
+- (void)receiveXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType
+{
+    dispatch_block_t block = ^{
+        
+        //save the message
+        XMPPExtendMessage *newMessage = [XMPPExtendMessage xmppExtendMessageFromXMPPMessage:[message copy]];
+        
+        if (newMessage.msgType == XMPPExtendSubMessageAudioType) {
+            
+            __weak typeof(self) weakSelf = self;
+            
+            dispatch_async(globalModuleQueue, ^{
+                
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                
+                XMPPAudioMessageObject *audio = [XMPPAudioMessageObject xmppAudioMessageObjectFromElement:(NSXMLElement *)newMessage.msgSubData];
+                
+                NSData *fileData = audio.fileData;
+                NSString *filePath = [strongSelf filePathWithName:audio.fileName];
+                if (fileData.length > 0 &&
+                    [fileData writeToFile:filePath atomically:YES]) {
+                    audio.fileData = nil;
+                    audio.fileId = filePath;
+                    newMessage.msgSubData = audio;
+                    
+                    dispatch_block_t block = ^{
+                        
+                        [strongSelf saveMessageWithXMPPStream:xmppStream message:newMessage groupType:groupType sendFromMe:NO];
+                        [multicastDelegate xmppAllMessage:strongSelf didReceiveXMPPMessage:message];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
+                    };
+                    
+                    if (dispatch_get_specific(moduleQueueTag))
+                        block();
+                    else
+                        dispatch_async(moduleQueue, block);
+                }
+            });
+            
+        }else{
+            [self saveMessageWithXMPPStream:xmppStream message:newMessage groupType:groupType sendFromMe:NO];
+            [multicastDelegate xmppAllMessage:self didReceiveXMPPMessage:message];
+            [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVE_NEW_XMPP_MESSAGE object:message];
+        }
+
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+    
 }
 
 - (NSString *)filePathWithName:(NSString *)fileName

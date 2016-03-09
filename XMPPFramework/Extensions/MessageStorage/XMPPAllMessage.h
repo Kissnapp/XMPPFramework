@@ -51,6 +51,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
     BOOL clientSideMessageArchivingOnly;
     BOOL receiveUserRequestMessage;
     BOOL receiveSystemPushMessage;
+    BOOL autoArchiveMessage;
     NSXMLElement *preferences;
 }
 
@@ -60,6 +61,7 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
 @property (readwrite, assign) BOOL receiveUserRequestMessage;
 @property (readwrite, assign) BOOL receiveSystemPushMessage;
+@property (readwrite, assign) BOOL autoArchiveMessage;
 
 @property (nonatomic, strong) NSString *activeUser;
 @property (nonatomic, strong) NSString *audioFilePath;
@@ -208,12 +210,16 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  @param message The given XMPPExtendMessageObject object
  */
 - (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message;
+
+- (void)saveAndSendXMPPExtendMessage:(XMPPExtendMessage *)message groupType:(XMPPMessageHistoryType)groupType;
 /**
  *  Save a XMPPExtendMessageObject object
  *
  *  @param message The given message object
  */
 - (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message;
+
+- (void)saveXMPPExtendMessage:(XMPPExtendMessage *)message groupType:(XMPPMessageHistoryType)groupType;
 /**
  *  Send a XMPPExtendMessageObject object
  *
@@ -227,18 +233,26 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
  *  @param message The message will been sent
  */
 - (void)saveXMPPMessage:(XMPPMessage *)message;
+
+- (void)saveXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType;
+
+- (void)receiveXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType;
+
 /**
  *  Send a XMPPMessage object
  *
  *  @param message The given message
  */
 - (void)sendXMPPMessage:(XMPPMessage *)message;
+
 /**
  *  Save and send a XMPPMessage object
  *
  *  @param message The given message
  */
 - (void)saveAndSendXMPPMessage:(XMPPMessage *)message;
+
+- (void)saveAndSendXMPPMessage:(XMPPMessage *)message groupType:(XMPPMessageHistoryType)groupType;
 
 - (void)setAllSendingStateMessagesToFailureState;
 
@@ -263,7 +277,10 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
 - (BOOL)isListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 - (void)listHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
-- (void)archiveMessage:(XMPPExtendMessage *)message active:(BOOL)active xmppStream:(XMPPStream *)stream;
+- (void)archiveMessage:(XMPPExtendMessage *)message
+                active:(BOOL)active
+             groupType:(XMPPMessageHistoryType)groupType
+            xmppStream:(XMPPStream *)xmppStream;
 - (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 - (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid
                              xmppStream:(XMPPStream *)xmppStream

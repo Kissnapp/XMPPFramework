@@ -88,6 +88,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
 
 - (void)archiveMessage:(XMPPExtendMessage *)message
                 active:(BOOL)active
+             groupType:(XMPPMessageHistoryType)groupType
             xmppStream:(XMPPStream *)xmppStream
 {
     [self scheduleBlock:^{
@@ -97,6 +98,7 @@ static XMPPMessageCoreDataStorage *sharedInstance;
         
         if ([XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                                   active:active
+                                                                               groupType:groupType
                                                                        xmppExtendMessage:message
                                                                         streamBareJidStr:myBareJidStr]) {
             // do nothing
