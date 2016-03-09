@@ -10,14 +10,15 @@
 #import "XMPPManagedObject.h"
 #import <CoreData/CoreData.h>
 
-typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType){
-    XMPPCloudCoreDataStorageObjectFolderTypeRoot = 1,
-    XMPPCloudCoreDataStorageObjectFolderTypePublic,
-    XMPPCloudCoreDataStorageObjectFolderTypePublicSub,
+typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType) {
+    XMPPCloudCoreDataStorageObjectFolderTypeProject = 0,
+    XMPPCloudCoreDataStorageObjectFolderTypeProjectSub,
     XMPPCloudCoreDataStorageObjectFolderTypePrivate,
     XMPPCloudCoreDataStorageObjectFolderTypePrivateFullShared,
     XMPPCloudCoreDataStorageObjectFolderTypePrivatePartShared,
-    XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret
+    XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret,
+    XMPPCloudCoreDataStorageObjectFolderTypeDepartment,
+    XMPPCloudCoreDataStorageObjectFolderTypeDepartmentSub
 };
 
 @interface XMPPCloudCoreDataStorageObject : NSManagedObject
