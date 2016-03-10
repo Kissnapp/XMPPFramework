@@ -17,6 +17,7 @@
 @dynamic hasBeenEnd;
 @dynamic lastChatTime;
 @dynamic topTime;
+@dynamic chatType;
 
 #pragma mark - Getter/Setters Methods
 
@@ -110,9 +111,25 @@
     [self didChangeValueForKey:@"hasBeenEnd"];
 }
 
+- (NSNumber *)chatType
+{
+    [self willAccessValueForKey:@"chatType"];
+    NSNumber *value = [self primitiveValueForKey:@"chatType"];
+    [self didAccessValueForKey:@"chatType"];
+    return value;
+}
+
+- (void)setChatType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"chatType"];
+    [self setPrimitiveValue:value forKey:@"chatType"];
+    [self didChangeValueForKey:@"chatType"];
+}
+
 - (void)awakeFromInsert
 {
-    //self.hasBeenEnd = [NSNumber numberWithBool:NO];
+    //self.hasBeenEnd = @(NO);
+    //self.chatType = @(XMPPMessageHistoryTypeDefault);
 }
 
 #pragma mark - Public  Methods
@@ -148,6 +165,21 @@
                               time:(NSDate *)time
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
+    return [XMPPMessageHistoryCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                      bareJidStr:bareJidStr
+                                                                          unRead:unRead
+                                                                            type:XMPPMessageHistoryTypeDefault
+                                                                            time:time
+                                                                streamBareJidStr:streamBareJidStr];
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                        bareJidStr:(NSString *)bareJidStr
+                            unRead:(BOOL)unRead
+                              type:(XMPPMessageHistoryType)type
+                              time:(NSDate *)time
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
     if (!moc) return nil;
     if (bareJidStr.length < 1) return nil;
     if (streamBareJidStr.length < 1) return nil;
@@ -158,6 +190,7 @@
     newObject.streamBareJidStr = streamBareJidStr;
     newObject.unReadCount = @(unRead);
     newObject.lastChatTime = time;
+    newObject.chatType = @(type);
     
     return newObject;
 }
@@ -182,11 +215,24 @@
 }
 
 
-
++ (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                                        bareJidStr:(NSString *)bareJidStr
+                                            unRead:(BOOL)unRead
+                                              time:(NSDate *)time
+                                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    return [XMPPMessageHistoryCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                                    bareJidStr:bareJidStr
+                                                                                        unRead:unRead
+                                                                                          type:XMPPMessageHistoryTypeDefault
+                                                                                          time:time
+                                                                              streamBareJidStr:streamBareJidStr];
+}
 
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                         bareJidStr:(NSString *)bareJidStr
                                             unRead:(BOOL)unRead
+                                              type:(XMPPMessageHistoryType)type
                                               time:(NSDate *)time
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
@@ -208,6 +254,10 @@
             updateObject.lastChatTime = time;
         }
         
+        if (type != [updateObject.chatType unsignedIntegerValue]) {
+            updateObject.chatType = @(type);
+        }
+        
         return YES;
         
     }else{//if not find the object in the CoreData system ,we should insert the new object to it
@@ -215,6 +265,7 @@
         updateObject = [XMPPMessageHistoryCoreDataStorageObject insertInManagedObjectContext:moc
                                                                                   bareJidStr:bareJidStr
                                                                                       unRead:unRead
+                                                                                        type:type
                                                                                         time:time
                                                                             streamBareJidStr:streamBareJidStr];
         return YES;

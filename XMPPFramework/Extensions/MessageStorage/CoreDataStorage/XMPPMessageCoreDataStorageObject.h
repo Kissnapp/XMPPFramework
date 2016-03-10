@@ -35,13 +35,25 @@
                              msgId:(NSString *)msgId
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
+//+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+//                            active:(BOOL)active
+//                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
+//                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                             active:(BOOL)active
+                         groupType:(XMPPMessageHistoryType)groupType
                  xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
+//+ (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+//                                            active:(BOOL)active
+//                                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
+//                                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                             active:(BOOL)active
+                                         groupType:(XMPPMessageHistoryType)groupType
                                  xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                                   streamBareJidStr:(NSString *)streamBareJidStr;
 

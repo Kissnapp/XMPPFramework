@@ -253,6 +253,19 @@
                  xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
+        return [XMPPMessageCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                       active:active
+                                                                    groupType:XMPPMessageHistoryTypeDefault
+                                                            xmppExtendMessage:xmppExtendMessage
+                                                             streamBareJidStr:streamBareJidStr];
+}
+
++ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+                            active:(BOOL)active
+                         groupType:(XMPPMessageHistoryType)groupType
+                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
     NSString *msgId = [xmppExtendMessage msgId];
     
     if (msgId == nil) return nil;
@@ -273,6 +286,7 @@
     [XMPPMessageHistoryCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
                                                                              bareJidStr:(xmppExtendMessage.msgOutgoing ? xmppExtendMessage.msgTo:xmppExtendMessage.msgFrom)
                                                                                  unRead:(xmppExtendMessage.msgOutgoing ? NO:!active)
+                                                                                   type:groupType
                                                                                    time:xmppExtendMessage.msgTime
                                                                        streamBareJidStr:streamBareJidStr];
     return newObject;
@@ -298,6 +312,19 @@
                                  xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
+    return [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                                 active:active
+                                                                              groupType:XMPPMessageHistoryTypeDefault
+                                                                      xmppExtendMessage:xmppExtendMessage
+                                                                       streamBareJidStr:streamBareJidStr];
+}
+
++ (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                                            active:(BOOL)active
+                                         groupType:(XMPPMessageHistoryType)groupType
+                                 xmppExtendMessage:(XMPPExtendMessage *)xmppExtendMessage
+                                  streamBareJidStr:(NSString *)streamBareJidStr
+{
     NSString *msgId = xmppExtendMessage.msgId;
     
     if (msgId == nil) return NO;
@@ -318,6 +345,7 @@
         //FIXME:There is a bug meybe here
         updateObject = [XMPPMessageCoreDataStorageObject insertInManagedObjectContext:moc
                                                                                active:active
+                                                                            groupType:groupType
                                                                     xmppExtendMessage:xmppExtendMessage
                                                                      streamBareJidStr:streamBareJidStr];
         

@@ -9,6 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+typedef NS_ENUM(NSUInteger, XMPPMessageHistoryType) {
+    XMPPMessageHistoryTypeDefault = 0,
+    XMPPMessageHistoryTypeTask,
+    XMPPMessageHistoryTypeEvent
+};
 
 @interface XMPPMessageHistoryCoreDataStorageObject : NSManagedObject
 
@@ -18,14 +23,22 @@
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * unReadCount;
 @property (nonatomic, retain) NSNumber * hasBeenEnd;
+@property (nonatomic, retain) NSNumber * chatType;
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                         bareJidStr:(NSString *)bareJidStr
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
+//+ (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
+//                        bareJidStr:(NSString *)bareJidStr
+//                            unRead:(BOOL)unRead
+//                              time:(NSDate *)time
+//                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                         bareJidStr:(NSString *)bareJidStr
                             unRead:(BOOL)unRead
+                              type:(XMPPMessageHistoryType)type
                               time:(NSDate *)time
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
@@ -33,9 +46,16 @@
                                 bareJidStr:(NSString *)bareJidStr
                           streamBareJidStr:(NSString *)streamBareJidStr;
 
+//+ (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+//                                        bareJidStr:(NSString *)bareJidStr
+//                                            unRead:(BOOL)unRead
+//                                              time:(NSDate *)time
+//                                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                         bareJidStr:(NSString *)bareJidStr
                                             unRead:(BOOL)unRead
+                                              type:(XMPPMessageHistoryType)type
                                               time:(NSDate *)time
                                   streamBareJidStr:(NSString *)streamBareJidStr;
 
