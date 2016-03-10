@@ -40,7 +40,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType) {
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * folderIsMe; // 文件或文件夹是否是自己创建的 YES : 是自己
 @property (nonatomic, retain) NSNumber * hasBeenDelete;
-@property (nonatomic, retain) NSDate * updateTime;
+@property (nonatomic, retain) NSNumber * partID;
 
 
 #pragma mark - 查找

@@ -24,11 +24,11 @@
 @dynamic project;
 @dynamic size;
 //@dynamic folderOrFileType;
-@dynamic updateTime;
 @dynamic version_count;
 @dynamic streamBareJidStr;
 @dynamic folderIsMe;
 @dynamic hasBeenDelete;
+@dynamic partID;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -172,20 +172,6 @@
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
-//- (NSNumber *)folderOrFileType
-//{
-//    [self willAccessValueForKey:@"folderOrFileType"];
-//    NSNumber *value = [self primitiveValueForKey:@"folderOrFileType"];
-//    [self didAccessValueForKey:@"folderOrFileType"];
-//    return value;
-//}
-//- (void)setFolderOrFileType:(NSNumber *)folderOrFileType
-//{
-//    [self willChangeValueForKey:@"folderOrFileType"];
-//    [self setPrimitiveValue:folderOrFileType forKey:@"folderOrFileType"];
-//    [self didChangeValueForKey:@"folderOrFileType"];
-//}
-
 - (NSNumber *)folderIsMe
 {
     [self willAccessValueForKey:@"folderIsMe"];
@@ -271,23 +257,20 @@
     [self didChangeValueForKey:@"hasBeenDownload"];
 }
 
+- (NSNumber *)partID
+{
+    [self willAccessValueForKey:@"partID"];
+    NSNumber *value = [self primitiveValueForKey:@"partID"];
+    [self didAccessValueForKey:@"partID"];
+    return value;
+}
 
-//- (NSDate *)updateTime
-//{
-//    [self willAccessValueForKey:@"updateTime"];
-//    NSDate *value = [self primitiveValueForKey:@"updateTime"];
-//    [self didAccessValueForKey:@"updateTime"];
-//    return value;
-//}
-//- (void)setUpdateTime:(NSString *)value
-//{
-//    [self willChangeValueForKey:@"updateTime"];
-//    [self setPrimitiveValue:value forKey:@"updateTime"];
-//    [self didChangeValueForKey:@"updateTime"];
-//}
-//
-//
-
+- (void)setPartID:(NSNumber *)partID
+{
+    [self willChangeValueForKey:@"partID"];
+    [self setPrimitiveValue:partID forKey:@"partID"];
+    [self didChangeValueForKey:@"partID"];
+}
 
 
 - (void)awakeFromInsert
@@ -493,6 +476,7 @@
     NSString *tempVersion_count = [dic objectForKey:@"version_count"];
     NSNumber *tempHasBeenDelete = [dic objectForKey:@"hasBeenDelete"];
     NSNumber *tempHasBeenDownload = [dic objectForKey:@"hasBeenDownload"];
+    NSNumber *tempPart_id = [NSNumber numberWithInteger:[[dic objectForKey:@"part_id"] integerValue]];
     
     if (tempCloudID)            self.cloudID = tempCloudID;
     if (tempCreateTime)         self.createTime = [tempCreateTime StringToDate];
@@ -510,6 +494,7 @@
     if (tempVersion_count)      self.version_count = tempVersion_count;
     if (tempHasBeenDelete)      self.hasBeenDelete = tempHasBeenDelete;
     if (tempHasBeenDownload)    self.hasBeenDownload = tempHasBeenDownload;
+    if (tempPart_id)            self.partID = tempPart_id;
 }
 
 @end
