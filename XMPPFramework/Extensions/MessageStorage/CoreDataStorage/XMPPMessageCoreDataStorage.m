@@ -677,6 +677,55 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     return result;
 }
 
+- (NSUInteger)countOfAllUnreadMessageWithXMPPStream:(XMPPStream *)stream
+{
+    __block NSUInteger result = 0;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPMessageHistoryCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        
+        NSExpression *keyPathExpression = [NSExpression expressionForKeyPath:@"unReadCount"];
+        NSExpression *sumUnReadCountExpression = [NSExpression expressionForFunction:@"sum:"
+                                                                           arguments:@[keyPathExpression]];
+        
+        NSExpressionDescription *expressionDescription = [[NSExpressionDescription alloc] init];
+        [expressionDescription setName:@"sumUnReadCount"];
+        [expressionDescription setExpression:sumUnReadCountExpression];
+        [expressionDescription setExpressionResultType:NSInteger32AttributeType];
+        
+        // init a NSFetchRequest instance
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        [fetchRequest setResultType:NSDictionaryResultType];
+        
+        [fetchRequest setPropertiesToFetch:@[expressionDescription]];
+        
+        if (streamBareJidStr){
+            
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@", streamBareJidStr];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            NSArray *resultArray = [moc executeFetchRequest:fetchRequest error:nil];
+            if (resultArray.count > 0) {
+                NSDictionary *resultDic = resultArray[0];
+                if (resultDic) {
+                    result = [resultDic[@"sumUnReadCount"] unsignedIntegerValue];
+                }
+            }
+        }
+    }];
+    
+    return result;
+}
+
 - (void)setAllSendingStateMessagesToFailureStateWithXMPPStream:(XMPPStream *)stream
 {
     [self scheduleBlock:^{
