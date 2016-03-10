@@ -18,7 +18,8 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType) {
     XMPPCloudCoreDataStorageObjectFolderTypePrivatePartShared,
     XMPPCloudCoreDataStorageObjectFolderTypePrivateSecret,
     XMPPCloudCoreDataStorageObjectFolderTypeDepartment,
-    XMPPCloudCoreDataStorageObjectFolderTypeDepartmentSub
+    XMPPCloudCoreDataStorageObjectFolderTypeDepartmentSub,
+    XMPPCloudCoreDataStorageObjectFolderTypeFile
 };
 
 @interface XMPPCloudCoreDataStorageObject : NSManagedObject
@@ -34,7 +35,7 @@ typedef NS_ENUM(NSInteger, XMPPCloudCoreDataStorageObjectFolderType) {
 @property (nonatomic, retain) NSNumber * parent;
 @property (nonatomic, retain) NSString * project;
 @property (nonatomic, retain) NSString * size; // 文件大小
-@property (nonatomic, retain) NSNumber * folderOrFileType; // 文件夹或者文件 YES : 文件夹
+//@property (nonatomic, retain) NSNumber * folderOrFileType; // 文件夹或者文件 YES : 文件夹
 @property (nonatomic, retain) NSString * version_count; // 版本数
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * folderIsMe; // 文件或文件夹是否是自己创建的 YES : 是自己

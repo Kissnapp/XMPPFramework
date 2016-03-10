@@ -172,12 +172,13 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         NSMutableDictionary *resultDicM = [NSMutableDictionary dictionaryWithDictionary:serverDic];
         [resultDicM setObject:projectID forKey:@"project"];
         [resultDicM setObject:parent forKey:@"parent"];
-        [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+        [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"hasBeenDelete"];
+        [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"hasBeenDownload"];
         NSString *creator = [serverDic objectForKey:@"creator"];
         if ( [creator isEqualToString:myJidStr] ) {
-            [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
         } else {
-            [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
         }
         [resultArrM addObject:resultDicM];
     }
@@ -186,12 +187,14 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         NSMutableDictionary *resultDicM = [NSMutableDictionary dictionaryWithDictionary:serverDic];
         [resultDicM setObject:projectID forKey:@"project"];
         [resultDicM setObject:parent forKey:@"parent"];
-        [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
+        [resultDicM setObject:[NSNumber numberWithInteger:8] forKey:@"type"];
+        [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"hasBeenDelete"];
+        [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"hasBeenDownload"];
         NSString *creator = [serverDic objectForKey:@"creator"];
         if ( [creator isEqualToString:myJidStr] ) {
-            [resultDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
         } else {
-            [resultDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderIsMe"];
+            [resultDicM setObject:[NSNumber numberWithInteger:0] forKey:@"folderIsMe"];
         }
         [resultArrM addObject:resultDicM];
     }
@@ -427,7 +430,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         NSMutableDictionary *dicM = [NSMutableDictionary dictionaryWithDictionary:folderDic];
         [dicM setObject:parent forKey:@"parent"];
         [dicM setObject:projectID forKey:@"project"];
-        [dicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
         if ( [creator isEqualToString:myJidStr] ) {
             [dicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
         } else {
@@ -482,7 +484,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             NSMutableDictionary *folderDicM = [NSMutableDictionary dictionaryWithDictionary:folderDic];
             [folderDicM setObject:parent forKey:@"parent"];
             [folderDicM setObject:projectID forKey:@"project"];
-            [folderDicM setObject:[NSNumber numberWithBool:YES] forKey:@"folderOrFileType"];
+            [folderDicM setObject:[NSNumber numberWithInteger:8] forKey:@"type"];
             if ( [creator isEqualToString:myJidStr] ) {
                 [folderDicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
             } else {
@@ -502,7 +504,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             NSMutableDictionary *fileDicM = [NSMutableDictionary dictionaryWithDictionary:fileDic];
             [fileDicM setObject:parent forKey:@"parent"];
             [fileDicM setObject:projectID forKey:@"project"];
-            [fileDicM setObject:[NSNumber numberWithBool:NO] forKey:@"folderOrFileType"];
+            [fileDicM setObject:[NSNumber numberWithInteger:8] forKey:@"type"];
             if ( [creator isEqualToString:myJidStr] ) {
                 [fileDicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
             } else {

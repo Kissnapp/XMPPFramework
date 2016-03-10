@@ -23,7 +23,7 @@
 @dynamic parent;
 @dynamic project;
 @dynamic size;
-@dynamic folderOrFileType;
+//@dynamic folderOrFileType;
 @dynamic updateTime;
 @dynamic version_count;
 @dynamic streamBareJidStr;
@@ -172,19 +172,19 @@
     [self didChangeValueForKey:@"streamBareJidStr"];
 }
 
-- (NSNumber *)folderOrFileType
-{
-    [self willAccessValueForKey:@"folderOrFileType"];
-    NSNumber *value = [self primitiveValueForKey:@"folderOrFileType"];
-    [self didAccessValueForKey:@"folderOrFileType"];
-    return value;
-}
-- (void)setFolderOrFileType:(NSNumber *)folderOrFileType
-{
-    [self willChangeValueForKey:@"folderOrFileType"];
-    [self setPrimitiveValue:folderOrFileType forKey:@"folderOrFileType"];
-    [self didChangeValueForKey:@"folderOrFileType"];
-}
+//- (NSNumber *)folderOrFileType
+//{
+//    [self willAccessValueForKey:@"folderOrFileType"];
+//    NSNumber *value = [self primitiveValueForKey:@"folderOrFileType"];
+//    [self didAccessValueForKey:@"folderOrFileType"];
+//    return value;
+//}
+//- (void)setFolderOrFileType:(NSNumber *)folderOrFileType
+//{
+//    [self willChangeValueForKey:@"folderOrFileType"];
+//    [self setPrimitiveValue:folderOrFileType forKey:@"folderOrFileType"];
+//    [self didChangeValueForKey:@"folderOrFileType"];
+//}
 
 - (NSNumber *)folderIsMe
 {
@@ -198,20 +198,6 @@
     [self willChangeValueForKey:@"folderIsMe"];
     [self setPrimitiveValue:folderIsMe forKey:@"folderIsMe"];
     [self didChangeValueForKey:@"folderIsMe"];
-}
-
-- (NSString *)fileID
-{
-    [self willAccessValueForKey:@"fileID"];
-    NSString *value = [self primitiveValueForKey:@"fileID"];
-    [self didAccessValueForKey:@"fileID"];
-    return value;
-}
-- (void)setFileID:(NSString *)fileID
-{
-    [self willChangeValueForKey:@"fileID"];
-    [self setPrimitiveValue:fileID forKey:@"fileID"];
-    [self didChangeValueForKey:@"fileID"];
 }
 
 - (NSString *)size
@@ -500,8 +486,8 @@
     NSNumber *tempParent = [NSNumber numberWithInteger:[[dic objectForKey:@"parent"] integerValue]];
     NSString *tempProject = [dic objectForKey:@"project"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
-    NSNumber *tempFolderOrFileType = [NSNumber numberWithInteger:[[dic objectForKey:@"folderOrFileType"] integerValue]];
-    NSNumber *tempFolderIsMe = [NSNumber numberWithInteger:[[dic objectForKey:@"folderIsMe"] integerValue]];
+//    NSNumber *tempFolderOrFileType = [dic objectForKey:@"folderOrFileType"];
+    NSNumber *tempFolderIsMe = [dic objectForKey:@"folderIsMe"];
     NSString *tempUuid = [dic objectForKey:@"uuid"];
     NSString *tempSize = [dic objectForKey:@"size"];
     NSString *tempVersion_count = [dic objectForKey:@"version_count"];
@@ -517,7 +503,7 @@
     if (tempParent)             self.parent = tempParent;
     if (tempProject)            self.project = tempProject;
     if (tempStreamBareJidStr)   self.streamBareJidStr = tempStreamBareJidStr;
-    if (tempFolderOrFileType)   self.folderOrFileType = tempFolderOrFileType;
+//    if (tempFolderOrFileType)   self.folderOrFileType = tempFolderOrFileType;
     if (tempFolderIsMe)         self.folderIsMe = tempFolderIsMe;
     if (tempUuid)               self.uuid = tempUuid;
     if (tempSize)               self.size = tempSize;

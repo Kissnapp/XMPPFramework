@@ -179,7 +179,7 @@ static XMPPCloudCoreDataStorage *sharedInstance;
         
         NSNumber *parentNum = [NSNumber numberWithInteger:[parent integerValue]];
         NSNumber *hasBeenDelete = [NSNumber numberWithBool:NO];
-        NSSortDescriptor *sdFirst = [[NSSortDescriptor alloc] initWithKey:@"folderOrFileType" ascending:NO];
+        NSSortDescriptor *sdFirst = [[NSSortDescriptor alloc] initWithKey:@"folderType" ascending:YES];
         NSSortDescriptor *sdSecond = [[NSSortDescriptor alloc] initWithKey:@"createTime" ascending:NO];
         NSArray *sortDescriptors = [NSArray arrayWithObjects:sdFirst, sdSecond, nil];
         
