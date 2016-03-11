@@ -585,6 +585,8 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         eg:{"id":"73"}
      2.(部分共享),右上角有红箭头  共享开关关闭着 有成员列表 type = 4
         eg:{"id":"74","users":["33d3119b90ce42e4824e4328bdae8d0e@120.24.94.38","4c76a063541d48da9b46a7bce4f1eca8@120.24.94.38"]}
+     
+     tip: 完全共享废弃
      3.(完全共享),没标记  共享开关开着 没有成员列表 type = 3
         eg:{"id":"75","users":[]}
      */
@@ -603,13 +605,13 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             if (users.count) {
                 type = @"4";
             } else if (users.count == 0) {
-                type = @"3";
+                type = @"5";
             }
         }
     }
-    if (!type) {
-        type = @"5";
-    }
+//    if (!type) {
+//        type = @"3";
+//    }
     
     [dicM setObject:cloudID forKey:@"id"];
     [dicM setObject:type forKey:@"type"];
@@ -1221,16 +1223,25 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             
             // 3. Create the request iq
             NSDictionary *templateDic;
-            if (hasShared) {
+            // hasShared 废弃
+//            if (hasShared) {
+//                NSArray *temp =  [NSArray array];
+//                templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", temp, @"users", nil];
+//            } else {
+//                if (users.count) {
+//                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", nil];
+//                } else {
+//                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", users, @"users", nil];
+//                }
+//            }
+            if (users.count) {
+                templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", users, @"users", nil];
+            }
+            else {
                 NSArray *temp =  [NSArray array];
                 templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", temp, @"users", nil];
-            } else {
-                if (users.count) {
-                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", users, @"users", nil];
-                } else {
-                    templateDic = [NSDictionary dictionaryWithObjectsAndKeys:cloudID, @"id", nil];
-                }
             }
+            
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
