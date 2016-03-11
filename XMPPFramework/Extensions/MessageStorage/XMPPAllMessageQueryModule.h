@@ -33,6 +33,7 @@
 
 - (XMPPMessageCoreDataStorageObject *)xmppMessageCoreDataStorageObjectWithMessageID:(NSString *)messageID;
 - (XMPPMessageSendState)xmppMessageSendStatusWithMessageID:(NSString *)messageID;
+- (NSUInteger)countOfAllUnreadMessage;
 
 
 @end
@@ -44,6 +45,7 @@
 
 - (NSInteger)messageSendStateWithID:(NSString *)messageID xmppStream:(XMPPStream *)stream;
 - (id)messageWithID:(NSString *)messageID xmppStream:(XMPPStream *)stream;
+- (NSUInteger)countOfAllUnreadMessageWithXMPPStream:(XMPPStream *)stream;
 
 @end
 
