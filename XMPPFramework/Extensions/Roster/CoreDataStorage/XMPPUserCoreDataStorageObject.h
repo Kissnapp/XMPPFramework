@@ -43,6 +43,7 @@
 @property (nonatomic, retain) NSString * nickname;
 @property (nonatomic, retain) NSString * phoneNumber;
 @property (nonatomic, retain) NSString * englishName;
+@property (nonatomic, retain) NSNumber * isPhoneUser;
 @property (nonatomic, retain) XMPPResourceCoreDataStorageObject *primaryResource;
 @property (nonatomic, retain) NSSet *resources;
 @property (nonatomic, retain) NSSet *groups;

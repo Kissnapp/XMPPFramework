@@ -917,7 +917,7 @@ enum XMPPRosterFlags
         
         [self _addRosterItems:items version:version];
 		
-        // 向服务器获取roster结束，各个值回复，以便
+        // 向服务器获取roster结束，各个值恢复原始状态，表明本次获取结束了
 		if (!hasRoster){
             
 			// We should have our roster now
@@ -943,6 +943,23 @@ enum XMPPRosterFlags
 	else
 		dispatch_async(moduleQueue, block);
     
+}
+
+- (void)addLocalUsersWithLocalUserInfo:(NSArray <NSDictionary *> *)users
+{
+    if (users.count < 1) return;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        for (NSDictionary *userDic in users) {
+            [xmppRosterStorage addLocalUser:userDic xmppStream:xmppStream];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

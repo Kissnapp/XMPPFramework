@@ -292,6 +292,8 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 
 - (void)ignoreAllSubscriptionRequests;
 
+- (void)addLocalUsersWithLocalUserInfo:(NSArray <NSDictionary *> *)users;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,6 +377,8 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)ignoreAllSubscriptionRequestsWithXMPPStream:(XMPPStream *)stream;
 
 - (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
+
+- (void)addLocalUser:(NSDictionary *)userInfoDic xmppStream:(XMPPStream *)stream;
 
 @optional
 

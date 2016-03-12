@@ -59,6 +59,7 @@
 @dynamic phoneNumber;
 @dynamic emailAddress;
 @dynamic englishName, primitiveEnglishName;
+@dynamic isPhoneUser;
 
 - (XMPPJID *)jid
 {
@@ -212,6 +213,22 @@
     [self setPrimitiveValue:value forKey:@"phoneNumber"];
     [self didChangeValueForKey:@"phoneNumber"];
 }
+
+- (NSNumber *)isPhoneUser
+{
+    [self willAccessValueForKey:@"isPhoneUser"];
+    NSNumber *value = [self primitiveValueForKey:@"isPhoneUser"];
+    [self didAccessValueForKey:@"isPhoneUser"];
+    return value;
+}
+
+- (void)setIsPhoneUser:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"isPhoneUser"];
+    [self setPrimitiveValue:value forKey:@"isPhoneUser"];
+    [self didChangeValueForKey:@"isPhoneUser"];
+}
+
 - (NSString *)emailAddress
 {
     [self willAccessValueForKey:@"emailAddress"];

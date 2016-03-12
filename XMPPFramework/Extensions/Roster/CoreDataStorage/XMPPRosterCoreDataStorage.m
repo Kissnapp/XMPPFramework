@@ -286,8 +286,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (stream)
 		{
 			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                                     [[self myJIDForXMPPStream:stream] bare]];
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && isPhoneUser == %@",
+			                                     [[self myJIDForXMPPStream:stream] bare], @(NO)];
 			
 			[fetchRequest setPredicate:predicate];
 		}
@@ -367,6 +367,63 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			}
 		}
 	}];
+}
+
+- (void)addLocalUser:(NSDictionary *)userInfoDic xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    //NSLog(@"NSXMLElement:%@",itemSubElement.description);
+    // Remember XML heirarchy memory management rules.
+    // The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
+    NSXMLElement *item = [itemSubElement copy];
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        if ([rosterPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]])
+        {
+            NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+            
+            [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                               withItem:item
+                                                       streamBareJidStr:streamBareJidStr];
+        }
+        else
+        {
+            NSString *jidStr = [item attributeStringValueForName:@"jid"];
+            XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
+            
+            XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
+            
+            NSString *subscription = [item attributeStringValueForName:@"subscription"];
+            //MARK:I have changed this here,orgin value is @"remove",but our server will send us @"none" instead of the @"remove"
+            //if ([subscription isEqualToString:@"remove"])
+            if ([subscription isEqualToString:@"none"] || [subscription isEqualToString:@"remove"])
+            {
+                if (user)
+                {
+                    [moc deleteObject:user];
+                }
+            }
+            else
+            {
+                if (user)
+                {
+                    [user updateWithItem:item];
+                }
+                else
+                {
+                    NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                    
+                    [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                       withItem:item
+                                                               streamBareJidStr:streamBareJidStr];
+                }
+            }
+        }
+    }];
+
 }
 
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
@@ -481,8 +538,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (stream)
 		{
 			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                            [[self myJIDForXMPPStream:stream] bare]];
+            predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && isPhoneUser == %@",
+                         [[self myJIDForXMPPStream:stream] bare], @(NO)];
 			
 			[fetchRequest setPredicate:predicate];
 		}

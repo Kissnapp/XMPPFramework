@@ -14,6 +14,7 @@
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_ID_ATTRIBUTE_NAME              @"fileId"
+#define FILE_SIZE_ATTRIBUTE_NAME              @"fileSize"
 #define ASPECT_RATIO_ATTRIBUTE_NAME        @"aspectRatio"
 
 @implementation XMPPPictureMessageObject
@@ -84,7 +85,6 @@
 {
     return  [self initWithFleId:nil fileData:fileData aspectRatio:aspectRatio];
 }
-
 
 #pragma mark - getters and setters
 
