@@ -22,7 +22,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN; // | XMPP_LOG_FLAG_TRACE;
 static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 //static const NSString *CLOUD_PUSH_MSG_XMLNS = @"aft:library";
-static const NSString *CLOUD_REQUEST_ERROR_XMLNS = @"aft:errors";
+static const NSString *CLOUD_REQUEST_ERROR_XMLNS = @"aft:error";
 //static const NSString *CLOUD_ERROR_DOMAIN = @"com.afusion.cloud.error";
 static NSString *CLOUD_REQUEST_XMLNS = @"aft:library";
 static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
@@ -948,7 +948,11 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
  如果有，则不用创建个人文件夹。
  
  */
-- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid block:(CompletionBlock)completionBlock
+
+/**
+ *  tip: cloudID 是指是不是copy 有说明是copy
+ */
+- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid cloudID:(NSString *)cloudID block:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -991,7 +995,14 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 tempParent = parent;
             }
             
-            NSDictionary *templateDic = [NSDictionary dictionaryWithObjectsAndKeys:tempParent, @"parent", name, @"name", uuid, @"uuid", size, @"size", nil];
+            NSDictionary *templateDic;
+            if (cloudID.length) {
+                templateDic = [NSDictionary dictionaryWithObjectsAndKeys:tempParent, @"parent", name, @"name", uuid, @"uuid", size, @"size", cloudID, @"fileId", nil];
+            }
+            else {
+                templateDic = [NSDictionary dictionaryWithObjectsAndKeys:tempParent, @"parent", name, @"name", uuid, @"uuid", size, @"size", nil];
+            }
+            
             
             ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
                                                                       xmlns:@"aft:library"
