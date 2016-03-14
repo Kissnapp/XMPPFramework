@@ -48,6 +48,10 @@
 @property (nonatomic, retain) NSSet *resources;
 @property (nonatomic, retain) NSSet *groups;
 
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withBareJidStr:(NSString *)bareJidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr;
+
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withJID:(XMPPJID *)jid
                   streamBareJidStr:(NSString *)streamBareJidStr;

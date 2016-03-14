@@ -145,7 +145,7 @@
                         bareJidStr:(NSString *)bareJidStr
                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-     if (moc == nil) return nil;
+    if (moc == nil) return nil;
     if (bareJidStr == nil) return nil;
     if (streamBareJidStr == nil) return nil;
     

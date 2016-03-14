@@ -267,6 +267,31 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withBareJidStr:(NSString *)bareJidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (bareJidStr == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPUserCoreDataStorageObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                              inManagedObjectContext:moc];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@", bareJidStr, streamBareJidStr];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    return (XMPPUserCoreDataStorageObject *)[results lastObject];
+}
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withJID:(XMPPJID *)jid

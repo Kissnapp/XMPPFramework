@@ -962,6 +962,21 @@ enum XMPPRosterFlags
         dispatch_async(moduleQueue, block);
 }
 
+- (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr
+{
+    if (phone.length < 1) return;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        [xmppRosterStorage replaceLocalUserJidStrWithPhone:phone newBareJidStr:newBareJidStr xmppStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
