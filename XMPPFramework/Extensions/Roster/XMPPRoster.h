@@ -292,6 +292,15 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 
 - (void)ignoreAllSubscriptionRequests;
 
+- (void)addLocalUsersWithLocalUserInfo:(NSArray <NSDictionary *> *)users;
+/**
+ *  将手机联系人roster中的jid 由原来的phone替换为真实的jid
+ *
+ *  @param phone         用于查找手机联系人的手机号
+ *  @param newBareJidStr 真实的bare jid 字符串
+ */
+- (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,6 +384,10 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)ignoreAllSubscriptionRequestsWithXMPPStream:(XMPPStream *)stream;
 
 - (void)deleteSubscribeRequestWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
+
+- (void)addLocalUser:(NSDictionary *)userInfoDic xmppStream:(XMPPStream *)stream;
+
+- (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr xmppStream:(XMPPStream *)stream;
 
 @optional
 

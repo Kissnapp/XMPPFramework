@@ -59,6 +59,7 @@
 @dynamic phoneNumber;
 @dynamic emailAddress;
 @dynamic englishName, primitiveEnglishName;
+@dynamic isPhoneUser;
 
 - (XMPPJID *)jid
 {
@@ -212,6 +213,22 @@
     [self setPrimitiveValue:value forKey:@"phoneNumber"];
     [self didChangeValueForKey:@"phoneNumber"];
 }
+
+- (NSNumber *)isPhoneUser
+{
+    [self willAccessValueForKey:@"isPhoneUser"];
+    NSNumber *value = [self primitiveValueForKey:@"isPhoneUser"];
+    [self didAccessValueForKey:@"isPhoneUser"];
+    return value;
+}
+
+- (void)setIsPhoneUser:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"isPhoneUser"];
+    [self setPrimitiveValue:value forKey:@"isPhoneUser"];
+    [self didChangeValueForKey:@"isPhoneUser"];
+}
+
 - (NSString *)emailAddress
 {
     [self willAccessValueForKey:@"emailAddress"];
@@ -250,6 +267,31 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Creation & Updates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withBareJidStr:(NSString *)bareJidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (moc == nil) return nil;
+    if (bareJidStr == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    
+    NSString *entityName = NSStringFromClass([XMPPUserCoreDataStorageObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                              inManagedObjectContext:moc];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@", bareJidStr, streamBareJidStr];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    return (XMPPUserCoreDataStorageObject *)[results lastObject];
+}
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withJID:(XMPPJID *)jid

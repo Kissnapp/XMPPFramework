@@ -43,9 +43,14 @@
 @property (nonatomic, retain) NSString * nickname;
 @property (nonatomic, retain) NSString * phoneNumber;
 @property (nonatomic, retain) NSString * englishName;
+@property (nonatomic, retain) NSNumber * isPhoneUser;
 @property (nonatomic, retain) XMPPResourceCoreDataStorageObject *primaryResource;
 @property (nonatomic, retain) NSSet *resources;
 @property (nonatomic, retain) NSSet *groups;
+
++ (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withBareJidStr:(NSString *)bareJidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                            withJID:(XMPPJID *)jid

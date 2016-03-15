@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14B25" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15B42" minimumToolsVersion="Xcode 4.3">
     <entity name="XMPPGroupCoreDataStorageObject" representedClassName="XMPPGroupCoreDataStorageObject" syncable="YES">
         <attribute name="name" attributeType="String" indexed="YES" syncable="YES"/>
         <relationship name="users" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="XMPPUserCoreDataStorageObject" inverseName="groups" inverseEntity="XMPPUserCoreDataStorageObject" indexed="YES" syncable="YES"/>
@@ -35,6 +35,7 @@
         <attribute name="displayName" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="emailAddress" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="englishName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isPhoneUser" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="jid" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="jidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="nickname" optional="YES" attributeType="String" syncable="YES"/>
@@ -54,7 +55,7 @@
         <element name="XMPPGroupCoreDataStorageObject" positionX="0" positionY="0" width="128" height="75"/>
         <element name="XMPPResourceCoreDataStorageObject" positionX="394" positionY="54" width="200" height="225"/>
         <element name="XMPPRosterVersionCoreDataStorageObject" positionX="207" positionY="153" width="128" height="75"/>
-        <element name="XMPPUserCoreDataStorageObject" positionX="126" positionY="108" width="171" height="315"/>
         <element name="XMPPSubscribeCoreDataStorageObject" positionX="198" positionY="144" width="128" height="135"/>
+        <element name="XMPPUserCoreDataStorageObject" positionX="126" positionY="108" width="171" height="330"/>
     </elements>
 </model>

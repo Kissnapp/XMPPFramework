@@ -286,8 +286,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (stream)
 		{
 			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                                     [[self myJIDForXMPPStream:stream] bare]];
+			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && isPhoneUser == %@",
+			                                     [[self myJIDForXMPPStream:stream] bare], @(NO)];
 			
 			[fetchRequest setPredicate:predicate];
 		}
@@ -328,6 +328,21 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if ([rosterPopulationSet containsObject:[NSNumber xmpp_numberWithPtr:(__bridge void *)stream]])
 		{
 			NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+            
+            NSString *subscription = [item attributeStringValueForName:@"subscription"];
+            
+            // we should delete the local user info which come from cell phone contact list
+            if ([subscription isEqualToString:@"both"]) {
+                
+                NSString *jidStr = [item attributeStringValueForName:@"jid"];
+                XMPPJID *jid = [[XMPPJID jidWithString:jidStr] bareJID];
+                
+                XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
+                
+                if (user) {
+                    [moc deleteObject:user];
+                }
+            }
 			
 			[XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
 			                                                   withItem:item
@@ -341,7 +356,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			XMPPUserCoreDataStorageObject *user = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
 			
 			NSString *subscription = [item attributeStringValueForName:@"subscription"];
-            //MARK:I have changed this here,orgin value is @"remove",but our server will send us @"none" instead of the @"remove"
+            // MARK: - I have changed this value here,orgin value is @"remove",but our server will send us @"none" instead of the @"remove"
 			//if ([subscription isEqualToString:@"remove"])
             if ([subscription isEqualToString:@"none"] || [subscription isEqualToString:@"remove"])
 			{
@@ -358,8 +373,19 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 				}
 				else
 				{
-					NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
-					
+                    NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+                    
+                    // MARK: when inserting a roster,wo should find that whether this item has a local data,if this is one,delete it
+                    
+                    if ([subscription isEqualToString:@"both"]) {
+                        
+                        XMPPUserCoreDataStorageObject *localUser = [self userForJID:jid xmppStream:stream managedObjectContext:moc];
+                        
+                        if (localUser) {
+                            [moc deleteObject:localUser];
+                        }
+                    }
+                    
 					[XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
 					                                                   withItem:item
 					                                           streamBareJidStr:streamBareJidStr];
@@ -367,6 +393,60 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 			}
 		}
 	}];
+}
+
+- (void)addLocalUser:(NSDictionary *)userInfoDic xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    //NSLog(@"NSXMLElement:%@",itemSubElement.description);
+    // Remember XML heirarchy memory management rules.
+    // The passed parameter is a subnode of the IQ, and we need to pass it to an asynchronous operation.
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *phone = userInfoDic[@"phone"];
+        UIImage *photo = userInfoDic[@"photo"];
+        NSString *nickname = userInfoDic[@"name"];
+        
+        if (phone) {
+        
+            XMPPUserCoreDataStorageObject *user = [XMPPUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                               withBareJidStr:phone
+                                                                                             streamBareJidStr:streamBareJidStr];
+            if (user) {// 跟新
+                if (photo) user.photo = photo;
+                if (nickname) user.nickname = nickname;
+                user.phoneNumber = phone;
+            }else{
+                user = [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                           withJID:[XMPPJID jidWithString:phone]
+                                                                  streamBareJidStr:streamBareJidStr];
+                if (photo) user.photo = photo;
+                if (nickname) user.nickname = nickname;
+                user.phoneNumber = phone;
+            }
+        }
+    }];
+
+}
+
+- (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPUserCoreDataStorageObject *user = [XMPPUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                           withBareJidStr:phone
+                                                                                         streamBareJidStr:streamBareJidStr];
+        if (user) {// 跟新
+            user.jidStr = newBareJidStr;
+        }
+    }];
 }
 
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream
@@ -481,8 +561,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 		if (stream)
 		{
 			NSPredicate *predicate;
-			predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@",
-			                            [[self myJIDForXMPPStream:stream] bare]];
+            predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ && isPhoneUser == %@",
+                         [[self myJIDForXMPPStream:stream] bare], @(NO)];
 			
 			[fetchRequest setPredicate:predicate];
 		}
