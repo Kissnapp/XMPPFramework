@@ -409,7 +409,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         
         NSString *phone = userInfoDic[@"phone"];
         UIImage *photo = userInfoDic[@"photo"];
-        NSString *nickName = userInfoDic[@"nickName"];
+        NSString *nickname = userInfoDic[@"name"];
         
         if (phone) {
         
@@ -418,14 +418,14 @@ static XMPPRosterCoreDataStorage *sharedInstance;
                                                                                              streamBareJidStr:streamBareJidStr];
             if (user) {// 跟新
                 if (photo) user.photo = photo;
-                if (nickName) user.nickname = nickName;
+                if (nickname) user.nickname = nickname;
                 user.phoneNumber = phone;
             }else{
                 user = [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
                                                                            withJID:[XMPPJID jidWithString:phone]
                                                                   streamBareJidStr:streamBareJidStr];
                 if (photo) user.photo = photo;
-                if (nickName) user.nickname = nickName;
+                if (nickname) user.nickname = nickname;
                 user.phoneNumber = phone;
             }
         }
