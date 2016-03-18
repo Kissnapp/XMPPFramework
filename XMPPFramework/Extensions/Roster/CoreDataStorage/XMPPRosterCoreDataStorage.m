@@ -412,9 +412,11 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         NSString *nickname = userInfoDic[@"name"];
         
         if (phone) {
+            
+            NSString *phoneJidStr = [phone stringByAppendingString:[NSString stringWithFormat:@"@%@",[[self myJIDForXMPPStream:stream] domain]]];
         
             XMPPUserCoreDataStorageObject *user = [XMPPUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                               withBareJidStr:phone
+                                                                                               withBareJidStr:phoneJidStr
                                                                                              streamBareJidStr:streamBareJidStr];
             if (user) {// 跟新
                 if (photo) user.photo = photo;
@@ -422,10 +424,15 @@ static XMPPRosterCoreDataStorage *sharedInstance;
                 user.phoneNumber = phone;
             }else{
                 user = [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
-                                                                           withJID:[XMPPJID jidWithString:phone]
+                                                                           withJID:[XMPPJID jidWithString:phoneJidStr]
                                                                   streamBareJidStr:streamBareJidStr];
+                user.isPhoneUser = @(YES);
                 if (photo) user.photo = photo;
-                if (nickname) user.nickname = nickname;
+                if (nickname) {
+                    user.nickname = nickname;
+                    user.englishName = nil;
+                    user.sectionName = nil;
+                }
                 user.phoneNumber = phone;
             }
         }
@@ -440,8 +447,11 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
+        NSString *phoneJidStr = [phone stringByAppendingString:[NSString stringWithFormat:@"@%@",[[self myJIDForXMPPStream:stream] domain]]];
+        
+        
         XMPPUserCoreDataStorageObject *user = [XMPPUserCoreDataStorageObject objectInManagedObjectContext:moc
-                                                                                           withBareJidStr:phone
+                                                                                           withBareJidStr:phoneJidStr
                                                                                          streamBareJidStr:streamBareJidStr];
         if (user) {// 跟新
             user.jidStr = newBareJidStr;
@@ -894,6 +904,40 @@ static XMPPRosterCoreDataStorage *sharedInstance;
     
     return result;
 }
+
+- (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+    __block BOOL result = NO;
+    
+    [self executeBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:NSStringFromClass([XMPPUserCoreDataStorageObject class])
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchLimit:1];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"(jidStr == %@ || phoneNumber == %@ ) && streamBareJidStr == %@",phone, phone,
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        XMPPUserCoreDataStorageObject *user = [[moc executeFetchRequest:fetchRequest error:nil] lastObject];
+        
+        if (user) result = YES;
+        
+    }];
+    
+    return result;
+}
+
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
     XMPPLogTrace();
