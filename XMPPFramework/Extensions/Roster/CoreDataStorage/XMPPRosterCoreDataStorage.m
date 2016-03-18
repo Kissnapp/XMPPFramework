@@ -8,6 +8,7 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
+#import "NSString+ChineseToPinYin.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -430,8 +431,8 @@ static XMPPRosterCoreDataStorage *sharedInstance;
                 if (photo) user.photo = photo;
                 if (nickname) {
                     user.nickname = nickname;
-                    user.englishName = nil;
-                    user.sectionName = nil;
+                    user.englishName = [nickname chineseToPinYin];
+                    user.sectionName = [user.englishName firstLetter];
                 }
                 user.phoneNumber = phone;
             }

@@ -39,7 +39,7 @@
         <attribute name="jid" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="jidStr" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="nickname" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="phoneNumber" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="phoneNumber" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="photo" optional="YES" attributeType="Transformable" valueTransformerName="RFImageToDataTransformer" syncable="YES"/>
         <attribute name="section" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="sectionName" optional="YES" attributeType="String" syncable="YES"/>
