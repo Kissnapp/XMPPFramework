@@ -21,6 +21,28 @@
 
 @implementation XMPPvCardCoreDataStorageObject
 
++ (XMPPvCardCoreDataStorageObject *)fetchvCardForPhone:(NSString *)phone
+                              inManagedObjectContext:(NSManagedObjectContext *)moc
+{
+    NSString *entityName = NSStringFromClass([XMPPvCardCoreDataStorageObject class]);
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                              inManagedObjectContext:moc];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"vCardTempRel.vCardTemp.phoneNumber == %@", phone];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+    
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    
+    return (XMPPvCardCoreDataStorageObject *)[results lastObject];
+}
+
 + (XMPPvCardCoreDataStorageObject *)fetchvCardForJID:(XMPPJID *)jid
                               inManagedObjectContext:(NSManagedObjectContext *)moc
 {
@@ -66,6 +88,12 @@
 	}
 	
 	return vCard;
+}
+
++ (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForPhone:(NSString *)phone
+                                      inManagedObjectContext:(NSManagedObjectContext *)moc
+{
+    return [self fetchvCardForPhone:phone inManagedObjectContext:moc];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

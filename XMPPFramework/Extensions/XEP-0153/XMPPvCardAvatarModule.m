@@ -171,6 +171,25 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
 	return phoneNumber;
     
 }
+
+- (NSString *)bareJidStrWithPhone:(NSString *)phone
+{
+    __block NSString *bareJidStr;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        bareJidStr = [_moduleStorage bareJidStrForPhone:phone xmppStream:xmppStream];
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return bareJidStr;
+}
+
 - (NSString *)emailAddressForJID:(XMPPJID *)jid
 {
     __block NSString *emailAddress;

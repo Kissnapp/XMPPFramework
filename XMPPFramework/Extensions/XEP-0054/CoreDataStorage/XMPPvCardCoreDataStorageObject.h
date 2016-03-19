@@ -68,4 +68,7 @@
 
 + (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForJID:(XMPPJID *)jid
                                       inManagedObjectContext:(NSManagedObjectContext *)moc;
+
++ (XMPPvCardCoreDataStorageObject *)fetchOrInsertvCardForPhone:(NSString *)phone
+                                        inManagedObjectContext:(NSManagedObjectContext *)moc;
 @end

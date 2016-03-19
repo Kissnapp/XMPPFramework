@@ -56,6 +56,7 @@
 - (NSString *)emailAddressForJID:(XMPPJID *)jid;
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)photoURLForBareJidStr:(NSString *)bareJidStr;
+- (NSString *)bareJidStrWithPhone:(NSString *)phone;
 
 
 - (void)fetchPhotoDataWithBareJidStr:(NSString *)bareJidStr
@@ -105,6 +106,7 @@
 - (NSString *)phoneNumberForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)emailAddressForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (NSString *)bareJidStrForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream;
 
 
 /**

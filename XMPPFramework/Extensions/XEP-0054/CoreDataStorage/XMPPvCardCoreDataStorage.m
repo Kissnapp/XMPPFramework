@@ -93,6 +93,27 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	return result;
 }
 
+- (NSString *)bareJidStrForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream
+{
+    // This is a public method.
+    // It may be invoked on any thread/queue.
+    
+    XMPPLogTrace();
+    
+    __block NSString *result;
+    
+    [self executeBlock:^{
+        
+        XMPPvCardCoreDataStorageObject *vCard;
+        vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForPhone:phone
+                                                    inManagedObjectContext:[self managedObjectContext]];
+        
+        result = [[[vCard vCardTemp] jid] bare];
+    }];
+    
+    return result;
+}
+
 - (NSString *)phoneNumberForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
 {
     // This is a public method.

@@ -192,6 +192,23 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     return result;
 }
 
+- (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        result = [_moduleStorage phoneUserExistInRosterForPhone:phone xmppStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

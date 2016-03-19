@@ -160,9 +160,9 @@
 
 - (void)setSectionName:(NSString *)sectionName
 {
- [self willChangeValueForKey:@"sectionName"];
- [self setPrimitiveSectionName:sectionName];
- [self didChangeValueForKey:@"sectionName"];
+    [self willChangeValueForKey:@"sectionName"];
+    [self setPrimitiveSectionName:sectionName];
+    [self didChangeValueForKey:@"sectionName"];
 }
 
 - (NSString *)sectionName

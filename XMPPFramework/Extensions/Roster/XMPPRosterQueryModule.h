@@ -43,6 +43,7 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 - (BOOL)userExistInRosterForJID:(XMPPJID *)jid;
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)displayNameForJID:(XMPPJID *)jid;
+- (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone;
 
 
 @end
@@ -75,6 +76,7 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 - (BOOL)userExistInRosterForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)displayNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream;
 
 /**
  * Clears the roster from the store.
