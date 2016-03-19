@@ -29,7 +29,7 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 - (void)requestCloudAddFolderWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name block:(CompletionBlock)completionBlock;
 
 #pragma mark - 3.添加文件
-- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid cloudID:(NSString *)cloudID block:(CompletionBlock)completionBlock;
+- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid cloudID:(NSString *)cloudID localKey:(NSString *)localKey block:(CompletionBlock)completionBlock;
 
 #pragma mark - 4.删除文件夹/删除文件
 - (void)requestCloudDeleteWithCloudID:(NSString *)cloudID projectID:(NSString *)projectID folderOrFileType:(NSNumber *)folderOrFileType block:(CompletionBlock)completionBlock;
