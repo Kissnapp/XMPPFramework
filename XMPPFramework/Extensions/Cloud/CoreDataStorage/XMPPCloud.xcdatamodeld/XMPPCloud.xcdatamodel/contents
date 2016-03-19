@@ -8,7 +8,6 @@
         <attribute name="folderType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="hasBeenDelete" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="hasBeenDownload" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="localKey" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="owner" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="parent" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
@@ -20,6 +19,6 @@
         <attribute name="version_count" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="XMPPCloudCoreDataStorageObject" positionX="-54" positionY="-9" width="128" height="300"/>
+        <element name="XMPPCloudCoreDataStorageObject" positionX="-54" positionY="-9" width="128" height="285"/>
     </elements>
 </model>

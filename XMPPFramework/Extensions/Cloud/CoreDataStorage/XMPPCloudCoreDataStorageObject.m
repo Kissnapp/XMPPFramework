@@ -29,7 +29,6 @@
 @dynamic folderIsMe;
 @dynamic hasBeenDelete;
 @dynamic partID;
-@dynamic localKey;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -273,22 +272,6 @@
     [self didChangeValueForKey:@"partID"];
 }
 
-- (NSString *)localKey
-{
-    [self willAccessValueForKey:@"localKey"];
-    NSString *value = [self primitiveValueForKey:@"localKey"];
-    [self didAccessValueForKey:@"localKey"];
-    return value;
-}
-
-- (void)setLocalKey:(NSString *)localKey
-{
-    [self willChangeValueForKey:@"localKey"];
-    [self setPrimitiveValue:localKey forKey:@"localKey"];
-    [self didChangeValueForKey:@"localKey"];
-}
-
-
 
 
 - (void)awakeFromInsert
@@ -495,7 +478,6 @@
     NSNumber *tempHasBeenDelete = [dic objectForKey:@"hasBeenDelete"];
     NSNumber *tempHasBeenDownload = [dic objectForKey:@"hasBeenDownload"];
     NSNumber *tempPart_id = [NSNumber numberWithInteger:[[dic objectForKey:@"part_id"] integerValue]];
-    NSString *tempLocalKey = [dic objectForKey:@"localKey"];
     
     
     if (tempCloudID)            self.cloudID = tempCloudID;
@@ -515,7 +497,6 @@
     if (tempHasBeenDelete)      self.hasBeenDelete = tempHasBeenDelete;
     if (tempHasBeenDownload)    self.hasBeenDownload = tempHasBeenDownload;
     if (tempPart_id)            self.partID = tempPart_id;
-    if (tempLocalKey)           self.localKey = tempLocalKey;
 }
 
 @end

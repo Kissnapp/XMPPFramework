@@ -29,8 +29,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 
 @interface XMPPCloud ()
 
-@property (nonatomic, copy) NSString *localKey;
-
 @end
 
 @implementation XMPPCloud
@@ -505,7 +503,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             [fileDicM setObject:parent forKey:@"parent"];
             [fileDicM setObject:projectID forKey:@"project"];
             [fileDicM setObject:[NSNumber numberWithInteger:8] forKey:@"type"];
-            [fileDicM setObject:self.localKey forKey:@"localKey"];
             if ( [creator isEqualToString:myJidStr] ) {
                 [fileDicM setObject:[NSNumber numberWithInteger:1] forKey:@"folderIsMe"];
             } else {
@@ -939,7 +936,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
 /**
  *  tip: cloudID 是指是不是copy 有说明是copy
  */
-- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid cloudID:(NSString *)cloudID localKey:(NSString *)localKey block:(CompletionBlock)completionBlock
+- (void)requestCloudAddFileWithParent:(NSString *)parent projectID:(NSString *)projectID name:(NSString *)name size:(NSString *)size uuid:(NSString *)uuid cloudID:(NSString *)cloudID block:(CompletionBlock)completionBlock
 {
     dispatch_block_t block = ^{@autoreleasepool{
         
@@ -981,8 +978,6 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             else {
                 tempParent = parent;
             }
-            self.localKey = nil;
-            self.localKey = localKey;
             
             NSDictionary *templateDic;
             if (cloudID.length) {
