@@ -2533,7 +2533,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 
                 id data = [[project stringValue] objectFromJSONString];
                 NSDictionary *dicData = (NSDictionary *)data;
-                [self handleDownloadDatasWithDicData:dicData projectID:projectID];
+//                [self handleDownloadDatasWithDicData:dicData projectID:projectID];
                 
                 // 1.判断是否向逻辑层返回block
                 if (![requestkey isEqualToString:[NSString stringWithFormat:@"%@",REQUEST_ALL_CLOUD_KEY]]) {
