@@ -414,7 +414,15 @@
 - (void)setOrgPhotoWithOrgId:(NSString *)orgId
                       fileId:(NSString *)fileId
              completionBlock:(CompletionBlock)completionBlock;
-
+/**
+ *  查询一个人的所有正在进行的任务
+ *
+ *  @param orgId             当前任务所属的项目id
+ *  @param bareJidStr        这个人的jid
+ *  @param page              是否需要分页
+ *  @param countOfDataInPage 分页数量，如果不要分页 改数字无效
+ *  @param completionBlock   回掉的数据源block
+ */
 - (void)requestServerAllTasksWithOrgId:(NSString *)orgId
                             bareJidStr:(NSString *)bareJidStr
                                   page:(BOOL)page
