@@ -415,6 +415,13 @@
                       fileId:(NSString *)fileId
              completionBlock:(CompletionBlock)completionBlock;
 
+- (void)requestServerAllTasksWithOrgId:(NSString *)orgId
+                            bareJidStr:(NSString *)bareJidStr
+                                  page:(BOOL)page
+                     countOfDataInPage:(NSInteger)countOfDataInPage
+                       completionBlock:(CompletionBlock)completionBlock;
+
+
 @end
 
 

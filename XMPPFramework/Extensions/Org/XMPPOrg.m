@@ -2548,6 +2548,88 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         dispatch_async(moduleQueue, block);
 }
 
+- (void)requestServerAllTasksWithOrgId:(NSString *)orgId
+                            bareJidStr:(NSString *)bareJidStr
+                                  page:(BOOL)page
+                     countOfDataInPage:(NSInteger)countOfDataInPage
+                       completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (orgId.length <= 0 && bareJidStr.length <= 0) {
+            [self _callBackWithMessage:@"you can not send this request because that this is no orgId or bareJidStr" completionBlock:completionBlock];
+            return ;
+        }
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [self requestKey];;
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq id="5244001" type="get">
+             <project xmlns="aft:project"  type="get_task">
+             {"project":"48", "self_job_id":"xxx", "job_id":"jid1_job_id", "jid":"jid1", "page":"1"}
+             </project>
+             </iq>
+             */
+            // 3. Create the request iq
+            
+            NSMutableDictionary *tmpDic = [NSMutableDictionary dictionary];
+            tmpDic[@"project"] = orgId;
+            tmpDic[@"page"] =  page ? @(countOfDataInPage):@(10000000);
+            tmpDic[@"jid"] = bareJidStr;
+            
+            XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithOrgId:orgId
+                                                                                     bareJidStr:bareJidStr
+                                                                                     xmppStream:xmppStream];
+            if (position) {
+                tmpDic[@"job_id"] = position.ptId;
+            }
+            
+            XMPPOrgPositionCoreDataStorageObject *myPosition = [_xmppOrgStorage positionWithOrgId:orgId
+                                                                                     bareJidStr:[[xmppStream myJID] bare]
+                                                                                     xmppStream:xmppStream];
+            if (myPosition) {
+                tmpDic[@"self_job_id"] = myPosition.ptId;
+            }
+            
+            
+            ChildElement *organizationElement = [ChildElement childElementWithName:@"project"
+                                                                             xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_XMLNS]
+                                                                         attribute:@{
+                                                                                     @"type":@"get_task"
+                                                                                     }
+                                                                       stringValue:[tmpDic JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:organizationElement];
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3448,6 +3530,31 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
                 [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                  */
+                
+                return YES;
+                
+            }else if([projectType isEqualToString:@"get_task"]){
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",ORG_REQUEST_ERROR_XMLNS]];
+                    
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    
+                    return YES;
+                }
+                
+                /*
+                 <iq id="5244001" type="result">
+                 <project xmlns="aft:project"  type="get_task">
+                 {"project":"48", "job_id":"jid1_job_id", "jid":"jid1", "tasks":[{"title":"材料验收","created_time":"xxx","owner":"xxx", "joined_time":"xxx"}, ...]}
+                 </project>
+                 </iq>
+                 */
+                
+                 id  data = [[project stringValue] objectFromJSONString];
+                 
+                 [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
                 
                 return YES;
                 
