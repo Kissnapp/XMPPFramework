@@ -2581,7 +2581,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             NSMutableDictionary *tmpDic = [NSMutableDictionary dictionary];
             tmpDic[@"project"] = orgId;
-            tmpDic[@"page"] =  page ? @(countOfDataInPage):@(10000000);
+            tmpDic[@"page"] =  page ? [NSString stringWithFormat:@"%ld", (long)countOfDataInPage]:[NSString stringWithFormat:@"%ld", (long)100000000];
             tmpDic[@"jid"] = bareJidStr;
             
             XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithOrgId:orgId
