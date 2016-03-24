@@ -411,6 +411,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
         NSString *phone = userInfoDic[@"phone"];
         UIImage *photo = userInfoDic[@"photo"];
         NSString *nickname = userInfoDic[@"name"];
+        NSString *displayName = userInfoDic[@"realName"];
         
         if (phone) {
             
@@ -422,6 +423,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
             if (user) {// 跟新
                 if (photo) user.photo = photo;
                 if (nickname) user.nickname = nickname;
+                if (displayName) user.displayName = displayName;
                 user.phoneNumber = phone;
             }else{
                 user = [XMPPUserCoreDataStorageObject insertInManagedObjectContext:moc
@@ -434,6 +436,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
                     user.englishName = [nickname chineseToPinYin];
                     user.sectionName = [user.englishName firstLetter];
                 }
+                if (displayName) user.displayName = displayName;
                 user.phoneNumber = phone;
             }
         }
@@ -456,6 +459,25 @@ static XMPPRosterCoreDataStorage *sharedInstance;
                                                                                          streamBareJidStr:streamBareJidStr];
         if (user) {// 跟新
             user.jidStr = newBareJidStr;
+        }
+    }];
+}
+
+- (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *phoneJidStr = [phone stringByAppendingString:[NSString stringWithFormat:@"@%@",[[self myJIDForXMPPStream:stream] domain]]];
+        
+        
+        XMPPUserCoreDataStorageObject *user = [XMPPUserCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                           withBareJidStr:phoneJidStr
+                                                                                         streamBareJidStr:streamBareJidStr];
+        if (user) {// 跟新
+            user.nickname = displayName;
         }
     }];
 }

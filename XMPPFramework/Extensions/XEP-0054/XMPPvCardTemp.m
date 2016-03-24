@@ -124,7 +124,7 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     return result;
 }
 
-
+/*<EMAIL><HOME/><INTERNET/><PREF/><USERID>vufrg@vhh.com</USERID></EMAIL>*/
 - (void)setEmailAddress:(NSString *)emailAddress {
     if (emailAddress == nil) {
         return;
@@ -138,6 +138,15 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     NSXMLElement *email = [NSXMLElement elementWithName:@"EMAIL"];
     [self addChild:email];
     
+    NSXMLElement *home = [NSXMLElement elementWithName:@"HOME"];
+    [self addChild:home];
+    
+    NSXMLElement *internet = [NSXMLElement elementWithName:@"INTERNET"];
+    [self addChild:internet];
+    
+    NSXMLElement *pref = [NSXMLElement elementWithName:@"PREF"];
+    [self addChild:pref];
+
     //创建email节点的名为USERID的子节点
     NSXMLElement *userid = [NSXMLElement elementWithName:@"USERID"];
     [email addChild:userid];
@@ -175,11 +184,6 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     NSXMLElement *tel = [NSXMLElement elementWithName:@"TEL"];
     [self addChild:tel];
     
-    //创建email节点的名为USERID的子节点
-    NSXMLElement *number = [NSXMLElement elementWithName:@"NUMBER"];
-    [number setStringValue:phoneNumber];
-    [tel addChild:number];
-    
     // 下面的没有用
     //创建email节点的名为USERID的子节点
     NSXMLElement *home = [NSXMLElement elementWithName:@"HOME"];
@@ -188,6 +192,12 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     //创建email节点的名为USERID的子节点
     NSXMLElement *cell = [NSXMLElement elementWithName:@"CELL"];
     [tel addChild:cell];
+    
+    //创建email节点的名为USERID的子节点
+    NSXMLElement *number = [NSXMLElement elementWithName:@"NUMBER"];
+    [number setStringValue:phoneNumber];
+    [tel addChild:number];
+
 }
 
 - (NSString *)photoURL {

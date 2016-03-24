@@ -301,6 +301,8 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
  */
 - (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr;
 
+- (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -388,6 +390,7 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)addLocalUser:(NSDictionary *)userInfoDic xmppStream:(XMPPStream *)stream;
 
 - (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr xmppStream:(XMPPStream *)stream;
+- (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName xmppStream:(XMPPStream *)stream;
 
 @optional
 

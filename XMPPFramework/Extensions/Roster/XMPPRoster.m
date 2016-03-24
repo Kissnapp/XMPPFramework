@@ -977,6 +977,21 @@ enum XMPPRosterFlags
         dispatch_async(moduleQueue, block);
 }
 
+- (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName
+{
+    if (phone.length < 1) return;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        [xmppRosterStorage setLocalUserNameWithPhone:phone displayName:displayName xmppStream:xmppStream];
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
