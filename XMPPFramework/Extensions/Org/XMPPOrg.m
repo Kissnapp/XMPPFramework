@@ -2719,9 +2719,20 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                 
                 // 0.跟新数据库
                 id  data = [[project stringValue] objectFromJSONString];
-                NSString *orgId = [data objectForKey:@"project"];
-                NSArray *positions = [data objectForKey:@"structure"];
+                NSDictionary *dic = (NSDictionary *)data;
+                NSArray *keys = dic.allKeys;
                 
+                NSString *orgId;
+                for (NSString *key in keys) {
+                    if ([key isEqualToString:@"template"]) {
+                        orgId = [data objectForKey:@"template"];
+                    }
+                    else if ([key isEqualToString:@"project"]) {
+                        orgId = [data objectForKey:@"project"];
+                    }
+                }
+                
+                NSArray *positions = [data objectForKey:@"structure"];
                 [self _insertOrUpdatePositionWithDic:positions orgId:orgId];
                 
                 // 1.判断是否向逻辑层返回block
