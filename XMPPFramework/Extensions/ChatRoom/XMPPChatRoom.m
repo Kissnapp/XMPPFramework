@@ -438,7 +438,11 @@ enum XMPPChatRoomUserListFlags
      dispatch_block_t block = ^{
           @autoreleasepool {
                
-               NSArray *tempArray = [[push stringValue] objectFromJSONString];
+               NSArray<NSDictionary *> *tempArray = [[push stringValue] objectFromJSONString];
+               
+               [tempArray enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [self fetchChatRoomFromServerWithBareChatRoomJidStr:obj[@"groupid"]];
+               }];
                
                [self transFormDataWithArray:tempArray];
                
@@ -472,6 +476,7 @@ enum XMPPChatRoomUserListFlags
                
                //If this chat room has already in the core data system
                if (isChatRoomExisted) {
+                    
                     // 增加或者修改聊天室信息
                     [xmppChatRoomStorage InsertOrUpdateChatRoomWith:[chatRoomDic destinationDictionaryWithNewKeysMapDic:@{
                                                                                                                           @"jid":@"groupid",
@@ -485,6 +490,7 @@ enum XMPPChatRoomUserListFlags
                                                                                                                           @"startTime":@"startTime",
                                                                                                                           @"endTime":@"endTime"
                                                                                                                           }] xmppStream:xmppStream];
+                    
                     // 增加或者删除聊天室人人员信息
                     for (NSDictionary * dic in userDics) {
                          
@@ -500,7 +506,7 @@ enum XMPPChatRoomUserListFlags
                     //If this chat room info is new to us
                }else{
                     //down the group info and the user info
-                    
+                    /*
                     //If there is a full chat room info,we will insert it into the coredata system
                     //Insert the chat room info to the coredata syetem
                     [xmppChatRoomStorage InsertOrUpdateChatRoomWith:[chatRoomDic destinationDictionaryWithNewKeysMapDic:@{
@@ -515,6 +521,10 @@ enum XMPPChatRoomUserListFlags
                                                                                                                           @"startTime":@"startTime",
                                                                                                                           @"endTime":@"endTime"
                                                                                                                           }] xmppStream:xmppStream];
+                     */
+                    
+                    // 增加或者修改聊天室信息
+                    [self fetchChatRoomFromServerWithBareChatRoomJidStr:chatRoomDic[@"groupid"]];
                     
                     //only download the user list info from server
                     [self downloadUserListFromServerWithBareChatRoomJidStr:chatRoomDic[@"groupid"] sinceId:nil requestKey:nil];
