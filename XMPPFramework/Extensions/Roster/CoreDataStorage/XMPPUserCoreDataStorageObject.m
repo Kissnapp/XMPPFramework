@@ -195,7 +195,7 @@
     [self didChangeValueForKey:@"displayName"];
     
     // If the displayName changes, the sectionName becomes invalid.
-    [self setPrimitiveSectionName:nil];
+    //[self setPrimitiveSectionName:nil];
 }
 
 - (NSString *)phoneNumber
