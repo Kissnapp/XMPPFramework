@@ -56,6 +56,8 @@
 - (NSString *)emailAddressForJID:(XMPPJID *)jid;
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)photoURLForBareJidStr:(NSString *)bareJidStr;
+- (NSString *)qqIdForBareJidStr:(NSString *)bareJidStr;
+- (NSString *)wechatIdForBareJidStr:(NSString *)bareJidStr;
 - (NSString *)bareJidStrWithPhone:(NSString *)phone;
 
 
@@ -68,6 +70,10 @@
 - (void)fetchNickNameWithBareJidStr:(NSString *)bareJidStr
                     completionBlock:(CompletionBlock)completionBlock;
 - (void)fetchPhotoURLWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchQqIdWithBareJidStr:(NSString *)bareJidStr
+                completionBlock:(CompletionBlock)completionBlock;
+- (void)fetchWechatIdWithBareJidStr:(NSString *)bareJidStr
                     completionBlock:(CompletionBlock)completionBlock;
 
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr
@@ -106,6 +112,8 @@
 - (NSString *)phoneNumberForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)emailAddressForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (NSString *)qqidForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (NSString *)wechatIdForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)bareJidStrForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream;
 
 

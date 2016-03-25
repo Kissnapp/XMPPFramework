@@ -93,6 +93,37 @@ static XMPPvCardCoreDataStorage *sharedInstance;
 	return result;
 }
 
+- (NSString *)qqidForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    __block NSString *result;
+    
+    [self executeBlock:^{
+        
+        XMPPvCardCoreDataStorageObject *vCard;
+        vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+                                                  inManagedObjectContext:[self managedObjectContext]];
+        
+        result = [[vCard vCardTemp] qqId];
+    }];
+    
+    return result;
+}
+- (NSString *)wechatIdForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
+{
+    __block NSString *result;
+    
+    [self executeBlock:^{
+        
+        XMPPvCardCoreDataStorageObject *vCard;
+        vCard = [XMPPvCardCoreDataStorageObject fetchOrInsertvCardForJID:jid
+                                                  inManagedObjectContext:[self managedObjectContext]];
+        
+        result = [[vCard vCardTemp] wechatId];
+    }];
+    
+    return result;
+}
+
 - (NSString *)bareJidStrForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream
 {
     // This is a public method.

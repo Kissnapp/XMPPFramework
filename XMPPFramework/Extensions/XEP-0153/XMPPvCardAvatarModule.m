@@ -257,6 +257,51 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
     return photoURL;
 }
 
+- (NSString *)qqIdForBareJidStr:(NSString *)bareJidStr
+{
+    __block NSString *qqId;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
+        qqId = [_moduleStorage qqidForJID:jid xmppStream:xmppStream];
+        
+        if (jid == nil){
+            [_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
+        }
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return qqId;
+}
+- (NSString *)wechatIdForBareJidStr:(NSString *)bareJidStr
+{
+    __block NSString *wechatId;
+    
+    dispatch_block_t block = ^{ @autoreleasepool {
+        
+        XMPPJID *jid = [XMPPJID jidWithString:bareJidStr];
+        wechatId = [_moduleStorage wechatIdForJID:jid xmppStream:xmppStream];
+        
+        if (jid == nil){
+            [_xmppvCardTempModule vCardTempForJID:jid shouldFetch:YES];
+        }
+        
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_sync(moduleQueue, block);
+    
+    return wechatId;
+}
+
 #pragma mark - asys methods
 - (void)fetchPhotoDataWithBareJidStr:(NSString *)bareJidStr
                      completionBlock:(CompletionBlock)completionBlock
@@ -379,7 +424,54 @@ NSString *const kXMPPvCardAvatarPhotoElement = @"photo";
         dispatch_async(moduleQueue, block);
 }
 
-
+- (void)fetchQqIdWithBareJidStr:(NSString *)bareJidStr
+                completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.qqId, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)fetchWechatIdWithBareJidStr:(NSString *)bareJidStr
+                    completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{
+        [_xmppvCardTempModule vCardWithBareJidStr:bareJidStr
+                                  completionBlock:^(id data, NSError *error) {
+                                      
+                                      if (!error) {
+                                          
+                                          XMPPvCardTemp *vCardTemp = (XMPPvCardTemp *)data;
+                                          completionBlock(vCardTemp.wechatId, nil);
+                                          
+                                      }else{
+                                          completionBlock(nil, error);
+                                      }
+                                      
+                                  }];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
 
 
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
