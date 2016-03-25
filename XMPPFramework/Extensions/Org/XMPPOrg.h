@@ -426,6 +426,7 @@
 - (void)requestServerAllTasksWithOrgId:(NSString *)orgId
                             bareJidStr:(NSString *)bareJidStr
                                   page:(BOOL)page
+                           countOfPage:(NSInteger)countOfPage
                      countOfDataInPage:(NSInteger)countOfDataInPage
                        completionBlock:(CompletionBlock)completionBlock;
 

@@ -2551,6 +2551,7 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
 - (void)requestServerAllTasksWithOrgId:(NSString *)orgId
                             bareJidStr:(NSString *)bareJidStr
                                   page:(BOOL)page
+                           countOfPage:(NSInteger)countOfPage
                      countOfDataInPage:(NSInteger)countOfDataInPage
                        completionBlock:(CompletionBlock)completionBlock
 {
@@ -2581,7 +2582,8 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
             
             NSMutableDictionary *tmpDic = [NSMutableDictionary dictionary];
             tmpDic[@"project"] = orgId;
-            tmpDic[@"page"] =  page ? [NSString stringWithFormat:@"%ld", (long)countOfDataInPage]:[NSString stringWithFormat:@"%ld", (long)100000000];
+            tmpDic[@"page"] =  page ? [NSString stringWithFormat:@"%ld", (long)countOfPage]:[NSString stringWithFormat:@"%ld", (long)1];
+            tmpDic[@"count"] =  page ? [NSString stringWithFormat:@"%ld", (long)countOfDataInPage]:[NSString stringWithFormat:@"%ld", (long)100000000];
             tmpDic[@"jid"] = bareJidStr;
             
             XMPPOrgPositionCoreDataStorageObject *position = [_xmppOrgStorage positionWithOrgId:orgId
