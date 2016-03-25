@@ -184,7 +184,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                                   inManagedObjectContext:moc];
         
-        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"orgStartTime" ascending:YES];
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"orgId" ascending:YES];
         
         NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, nil];
         
