@@ -209,6 +209,24 @@ NSString *const kXMPPvCardTempTagElement = @"vCardTag";
     XMPP_VCARD_SET_STRING_CHILD(photoURL, @"HEADPHOTO");
 }
 
+- (NSString *)qqId {
+    return [[self elementForName:@"QQ"] stringValue];
+}
+
+
+- (void)setQqId:(NSString *)qqId {
+    XMPP_VCARD_SET_STRING_CHILD(qqId, @"QQ");
+}
+
+- (NSString *)wechatId {
+    return [[self elementForName:@"WECHAT"] stringValue];
+}
+
+
+- (void)setWechatId:(NSString *)wechatId {
+    XMPP_VCARD_SET_STRING_CHILD(wechatId, @"WECHAT");
+}
+
 - (NSDate *)bday {
 	NSDate *bday = nil;
 	NSXMLElement *elem = [self elementForName:@"BDAY"];

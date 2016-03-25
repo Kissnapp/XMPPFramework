@@ -46,6 +46,8 @@ extern NSString *const kXMPPvCardTempTagElement;
 @property (strong, nonatomic) NSString *emailAddress;
 @property (strong, nonatomic) NSString *phoneNumber;
 @property (strong, nonatomic) NSString *photoURL;
+@property (strong, nonatomic) NSString *qqId;
+@property (strong, nonatomic) NSString *wechatId;
 
 @property (nonatomic, strong) NSDate *bday;
 @property (nonatomic, strong) NSData *photo;
