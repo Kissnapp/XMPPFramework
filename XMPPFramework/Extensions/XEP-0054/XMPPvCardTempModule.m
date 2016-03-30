@@ -212,7 +212,9 @@
         XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
         
         if (vCardTemp != nil) {
-            completionBlock(vCardTemp, nil);
+            dispatch_main_async_safe(^{
+                completionBlock(vCardTemp, nil);
+            });
             return;
         }
         
