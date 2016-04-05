@@ -231,4 +231,35 @@ static XMPPCloudCoreDataStorage *sharedInstance;
     return allUsers;
 }
 
+
+- (id)cloudIdWithProjectId:(NSString *)projectId
+            owerBareJidStr:(NSString *)owerBareJidStr
+                    parent:(NSInteger)parent
+                xmppStream:(XMPPStream *)stream
+{
+    __block NSString *cloudId = nil;
+    
+    [self executeBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        NSString *entityName = NSStringFromClass([XMPPCloudCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+        
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND creator == %@ AND project == %@ AND parent == %@",streamBareJidStr, (owerBareJidStr ? :streamBareJidStr), projectId, @(parent)];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        [fetchRequest setPredicate:predicate];
+        
+        XMPPCloudCoreDataStorageObject *cloudObject = [[moc executeFetchRequest:fetchRequest error:nil] firstObject];
+        if (cloudObject) {
+            cloudId = cloudObject.cloudID;
+        }
+    }];
+    return cloudId;
+}
+
 @end

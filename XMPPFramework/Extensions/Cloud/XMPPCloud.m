@@ -807,6 +807,30 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         dispatch_async(moduleQueue, block);
 }
 
+- (void)requestMyFolderWithProjectId:(NSString *)projectId
+                               block:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (!dispatch_get_specific(moduleQueueTag)) return;
+        
+        NSInteger parentCloudId = -1;
+        NSString *folderId = [_xmppCloudStorage cloudIdWithProjectId:projectId
+                                                      owerBareJidStr:nil
+                                                              parent:parentCloudId
+                                                          xmppStream:xmppStream];
+        
+        dispatch_main_async_safe(^{
+            completionBlock(folderId, nil);
+        });
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 
 #pragma mark 2.创建文件夹 OK
 /*
