@@ -207,7 +207,7 @@
 
 - (void)vCardWithBareJidStr:(NSString *)bareJidStr completionBlock:(CompletionBlock)completionBlock
 {
-    dispatch_block_t block = ^{@autoreleasepool{
+    dispatch_block_t block = ^{
         // if there is vCard in the database,we should return the existed vCard
         XMPPvCardTemp *vCardTemp = [_xmppvCardTempModuleStorage vCardTempForJID:[XMPPJID jidWithString:bareJidStr] xmppStream:xmppStream];
         
@@ -218,10 +218,8 @@
             return;
         }
         
-        
         // if there is no vCard in the database, we should request from server
         if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
-            
             
             // 0. Create a key for storaging completion block
             NSString *requestKey = [self requestKey];;
@@ -250,7 +248,7 @@
             // 0. tell the the user that can not send a request
             [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
         }
-    }};
+    };
     
     if (dispatch_get_specific(moduleQueueTag))
         block();
