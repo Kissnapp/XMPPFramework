@@ -130,6 +130,10 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 18.获取个人文件夹id
 - (void)requestMyFolderWithProjectId:(NSString *)projectId
                                block:(CompletionBlock)completionBlock;
+
+- (void)requestPublicFileIdWithProjectId:(NSString *)projectId
+                                    data:(NSArray<NSDictionary *> *)data
+                    completionBlock:(CompletionBlock)completionBlock;
 @end
 
 
@@ -158,5 +162,6 @@ typedef void(^CompletionBlock)(id data, NSError *error);
             owerBareJidStr:(NSString *)owerBareJidStr
                     parent:(NSInteger)parent
                 xmppStream:(XMPPStream *)stream;
+
 
 @end

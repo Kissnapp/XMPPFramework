@@ -831,6 +831,66 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
         dispatch_async(moduleQueue, block);
 }
 
+- (void)requestPublicFileIdWithProjectId:(NSString *)projectId
+                                    data:(NSArray<NSDictionary *> *)data
+                         completionBlock:(CompletionBlock)completionBlock;
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (!dispatch_get_specific(moduleQueueTag)) return;
+        
+        if ([self canSendRequest]) {
+            
+            // we should make sure whether we can send a request to the server
+            // If the templateId is nil，we should notice the user the info
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [[self xmppStream] generateUUID];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /**
+             <iq type="get" id="1234" >
+             <query xmlns="aft:library" project="49" subtype="get_normal_uuid">
+             [{"id":"id1", "uuid":"uuid1"}, ...]
+             </query>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            ChildElement *cloudElement = [ChildElement childElementWithName:@"query"
+                                                                      xmlns:CLOUD_REQUEST_XMLNS
+                                                                  attribute:@{
+                                                                              @"subtype":@"get_normal_uuid",
+                                                                              @"project":projectId
+                                                                              }
+                                                                stringValue:[data JSONString]];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"get"
+                                                             id:requestKey
+                                                   childElement:cloudElement];
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        } else {
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 
 #pragma mark 2.创建文件夹 OK
 /*
@@ -2732,8 +2792,34 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
                 }
                 return YES;
             }
-            
-            
+#pragma mark - 17.request file public fileid
+            else if ([projectType isEqualToString:@"get_normal_uuid"]) {
+                
+                if ([[iq type] isEqualToString:@"error"]) {
+                    
+                    NSXMLElement *errorElement = [iq elementForName:@"error"];
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code" xmlns:[NSString stringWithFormat:@"%@",CLOUD_REQUEST_ERROR_XMLNS]];
+                    
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                    
+                    return YES;
+                }
+                
+                /**
+                 <iq type="result" id="1234" >
+                 <query xmlns="aft:library" project="49" subtype="get_normal_uuid">
+                 [{"id":"id1", "uuid":"abcdefg", "normal_uuid":"abcdffff"}, ...]
+                 </query>
+                 </iq>
+                 */
+                
+                id data = [[project stringValue] objectFromJSONString];
+                
+                // 1.用block返回数据
+                [self _executeRequestBlockWithRequestKey:requestkey valueObject:data];
+                
+                return YES;
+            }
         }
         
     }
