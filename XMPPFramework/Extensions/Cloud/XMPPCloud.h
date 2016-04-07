@@ -130,10 +130,11 @@ typedef void(^CompletionBlock)(id data, NSError *error);
 #pragma mark - 18.获取个人文件夹id
 - (void)requestMyFolderWithProjectId:(NSString *)projectId
                                block:(CompletionBlock)completionBlock;
-
+#pragma mark - 19.批量将资料库的文件下载的uuid 转换成对外公开的uuid
 - (void)requestPublicFileIdWithProjectId:(NSString *)projectId
                                     data:(NSArray<NSDictionary *> *)data
                     completionBlock:(CompletionBlock)completionBlock;
+
 @end
 
 
