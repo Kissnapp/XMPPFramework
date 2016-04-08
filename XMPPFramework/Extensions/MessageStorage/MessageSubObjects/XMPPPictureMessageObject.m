@@ -14,8 +14,8 @@
 #define FILE_NAME_ATTRIBUTE_NAME            @"fileName"
 #define FILE_DATA_ATTRIBUTE_NAME            @"fileData"
 #define FILE_ID_ATTRIBUTE_NAME              @"fileId"
-#define FILE_SIZE_ATTRIBUTE_NAME              @"fileSize"
-#define ASPECT_RATIO_ATTRIBUTE_NAME        @"aspectRatio"
+#define FILE_SIZE_ATTRIBUTE_NAME            @"fileSize"
+#define ASPECT_RATIO_ATTRIBUTE_NAME         @"aspectRatio"
 
 @implementation XMPPPictureMessageObject
 //class init methods
@@ -42,19 +42,19 @@
     return xmppPictureMessageObject;
 }
 
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 {
-    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil fileId:fileId fileData:fileData aspectRatio:aspectRatio];
+    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil fileId:fileId fileData:fileData aspectRatio:aspectRatio fileSize:fileSize];
 }
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 {
-    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil fileId:nil fileData:fileData aspectRatio:aspectRatio];
+    return [XMPPPictureMessageObject xmppPictureMessageObjectWithFileName:nil fileId:nil fileData:fileData aspectRatio:aspectRatio fileSize:fileSize];
 }
 
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 {
     XMPPPictureMessageObject *xmppPictureMessageObject = nil;
-    xmppPictureMessageObject = [[XMPPPictureMessageObject alloc] initWithFileName:fileName fileId:fileId fileData:fileData aspectRatio:aspectRatio];
+    xmppPictureMessageObject = [[XMPPPictureMessageObject alloc] initWithFileName:fileName fileId:fileId fileData:fileData aspectRatio:aspectRatio fileSize:fileSize];
     [xmppPictureMessageObject setFileName:fileName];
     [xmppPictureMessageObject setFileId:fileId];
     [xmppPictureMessageObject setFileData:fileData];
@@ -64,7 +64,7 @@
 }
 
 //object init objects
-- (instancetype)initWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
+- (instancetype)initWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 
 {
     self = [super initWithName:PICTURE_ELEMENT_NAME];
@@ -72,18 +72,19 @@
         [self setFileName:fileName];
         [self setFileId:fileId];
         [self setFileData:fileData];
+        [self setFileSize:fileSize];
         
     }
     return self;
 }
-- (instancetype)initWithFleId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
+- (instancetype)initWithFleId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 
 {
-    return [self initWithFileName:nil fileId:fileId fileData:fileData aspectRatio:aspectRatio];
+    return [self initWithFileName:nil fileId:fileId fileData:fileData aspectRatio:aspectRatio fileSize:fileSize];
 }
-- (instancetype)initWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio
+- (instancetype)initWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize
 {
-    return  [self initWithFleId:nil fileData:fileData aspectRatio:aspectRatio];
+    return  [self initWithFleId:nil fileData:fileData aspectRatio:aspectRatio fileSize:fileSize];
 }
 
 #pragma mark - getters and setters
@@ -112,6 +113,18 @@
         return;
     }
     XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileId, FILE_ID_ATTRIBUTE_NAME);
+}
+
+- (NSString *)fileSize
+{
+    return [self attributeStringValueForName:FILE_SIZE_ATTRIBUTE_NAME];
+}
+
+- (void)setFileSize:(NSString *)fileSize
+{
+    if (!fileSize) return;
+    
+    XMPP_SUB_MSG_SET_STRING_ATTRIBUTE(fileSize, FILE_SIZE_ATTRIBUTE_NAME);
 }
 
 - (NSData *)fileData

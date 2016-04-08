@@ -12,6 +12,7 @@
 @interface XMPPPictureMessageObject : XMPPBaseMessageSubObject
 @property (strong, nonatomic) NSString          *fileName;
 @property (strong, nonatomic) NSString          *fileId;
+@property (strong, nonatomic) NSString          *fileSize;
 @property (strong, nonatomic) NSData            *fileData;
 @property (assign, nonatomic) CGFloat           aspectRatio;      //Picture width&height
 
@@ -19,12 +20,12 @@
 + (XMPPPictureMessageObject *)xmppPictureMessageObject;
 + (XMPPPictureMessageObject*)xmppPictureMessageObjectFromElement:(NSXMLElement *)element;
 + (XMPPPictureMessageObject *)xmppPictureMessageObjectFromInfoElement:(NSXMLElement *)infoElement;
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileId:(NSString *)fileId fileData:(NSData *)fileData  aspectRatio:(CGFloat)aspectRatio;
-+ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileId:(NSString *)fileId fileData:(NSData *)fileData  aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
++ (XMPPPictureMessageObject *)xmppPictureMessageObjectWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
 
 //object init objects
-- (instancetype)initWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
-- (instancetype)initWithFileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
-- (instancetype)initWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio;
+- (instancetype)initWithFileName:(NSString *)fileName fileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
+- (instancetype)initWithFileId:(NSString *)fileId fileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
+- (instancetype)initWithFileData:(NSData *)fileData aspectRatio:(CGFloat)aspectRatio fileSize:(NSString *)fileSize;
 @end

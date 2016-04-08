@@ -466,13 +466,16 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
      note(2, 3):如果在私人文件夹内创建文件夹或添加文件，个人文件夹还未创立，parent设为""，
      服务器会根据""，如果没有创建去创建它，创建的id号在parent属性里，客户端根据此parent去更新一下本地,
      如果有，则不用创建个人文件夹。
+     
+     <iq id="BDBC2342-1AD9-4551-83A1-751DB346D3F4" type="set"><query xmlns="aft:library" subtype="add_file" project="710">{"name":"video1460106832796.mp4","uuid":"9c28de5df43c4979a07bf1fd5d541b2c","size":"537014","parent":"1861"}</query></iq>
+     
      */
 
     NSString *myJidStr = [[xmppStream myJID] bare];
     NSMutableArray *arrayM = [NSMutableArray array];
     for ( NSDictionary *dic in arrData ) {
         NSString *parent = [dic objectForKey:@"parent"];
-        if ([parent isEqualToString:@"-1"]) {
+        if (parent.length > 0 && [parent isEqualToString:@"-1"]) {
             NSArray *folders = [dic objectForKey:@"folder"];
             // 添加到新的字典
             // 1.文件夹
@@ -492,7 +495,7 @@ static NSString *const REQUEST_ALL_CLOUD_KEY = @"request_all_cloud_key";
             
         }
         
-        else {
+        else if (parent.length > 0){
             NSArray *files = [dic objectForKey:@"file"];
             
             // 2.文件
