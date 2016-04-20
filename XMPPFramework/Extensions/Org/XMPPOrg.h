@@ -349,6 +349,9 @@
 - (void)requestDBOrgNameWithOrgId:(NSString *)orgId
                   completionBlock:(CompletionBlock)completionBlock;
 
+#pragma mark - 查询最近的正在运行的项目信息
+- (void)requestDBRecentOrgWithCompletionBlock:(CompletionBlock)completionBlock;
+
 #pragma mark - 根据某个关联组织的id查询他在数据库中的名称
 - (void)requestDBRelationOrgNameWithRelationOrgId:(NSString *)relationOrgId
                                             orgId:(NSString *)orgId
@@ -465,6 +468,7 @@
 - (id)allOrgTemplatesWithXMPPStream:(XMPPStream *)stream;
 - (id)allOrgsWithXMPPStream:(XMPPStream *)stream;
 - (id)orgWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
+- (id)recentOrgWithXMPPStream:(XMPPStream *)stream;
 - (id)relationOrgWithRelationId:(NSString *)relationId orgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 - (id)orgPositionsWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream;
 

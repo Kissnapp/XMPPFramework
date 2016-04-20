@@ -640,6 +640,28 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         dispatch_async(moduleQueue, block);
 }
 
+#pragma mark - 查询最近的正在运行的项目信息
+- (void)requestDBRecentOrgWithCompletionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        XMPPOrgCoreDataStorageObject *org = [_xmppOrgStorage recentOrgWithXMPPStream:xmppStream];
+        
+        if (org != nil) {
+            dispatch_main_async_safe(^{
+                completionBlock(org, nil);
+            });
+        }else{
+            [self _callBackWithMessage:@"There is no result in your database" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 #pragma mark - 根据某个关联组织的id查询他在数据库中的名称
 - (void)requestDBRelationOrgNameWithRelationOrgId:(NSString *)relationOrgId
                                             orgId:(NSString *)orgId

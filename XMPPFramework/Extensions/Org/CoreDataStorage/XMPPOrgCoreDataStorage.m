@@ -275,6 +275,44 @@ static XMPPOrgCoreDataStorage *sharedInstance;
     return org;
 }
 
+- (id)recentOrgWithXMPPStream:(XMPPStream *)stream
+{
+    __block id org = nil;
+    
+    [self executeBlock:^{
+        
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSString *entityName = NSStringFromClass([XMPPOrgCoreDataStorageObject class]);
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
+                                                  inManagedObjectContext:moc];
+        
+        NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"orgStartTime" ascending:YES];
+        
+        NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, nil];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:1];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        
+        
+        if (streamBareJidStr){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"streamBareJidStr == %@ AND orgState == %@",
+                                      streamBareJidStr, @(XMPPOrgCoreDataStorageObjectStateActive)];
+            
+            [fetchRequest setPredicate:predicate];
+            
+            org = [[moc executeFetchRequest:fetchRequest error:nil] firstObject];
+        }
+    }];
+    
+    return org;
+}
+
 - (id)orgPhotoWithOrgId:(NSString *)orgId xmppStream:(XMPPStream *)stream
 {
     __block XMPPOrgCoreDataStorageObject *org = nil;
