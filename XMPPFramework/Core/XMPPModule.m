@@ -428,9 +428,15 @@ static  NSInteger const XMPP_MODULE_ERROR_CODE = 9999;
 
 - (BOOL)_executeRequestBlockWithElementName:(NSString *)elementName xmlns:(NSString *)xmlns sendIQ:(XMPPIQ *)iq
 {
-    if ([[iq type] isEqualToString:@"get"]) {
+    if (elementName && iq) {
         
-        NSXMLElement *queryElement = [iq elementForName:elementName xmlns:xmlns];
+        NSXMLElement *queryElement = nil;
+        
+        if (xmlns.length > 0) {
+            queryElement = [iq elementForName:elementName xmlns:xmlns];
+        }else{
+            queryElement = [iq elementForName:elementName];
+        }
         
         if (queryElement){
             

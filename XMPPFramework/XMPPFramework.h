@@ -126,5 +126,7 @@
 #import "XMPPCloudCoreDataStorage.h"
 #import "XMPPCloudCoreDataStorageObject.h"
 
+#import "XMPPCustomRequest.h"
+
 #import "XMPPManagedObject.h"
 #import "NSDictionary+KeysTransfrom.h"
