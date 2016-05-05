@@ -737,7 +737,8 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         
         
         NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"dpLevel" ascending:YES];
-        NSArray *sortDescriptors = @[sd1];
+        NSSortDescriptor *sd2 = [[NSSortDescriptor alloc] initWithKey:@"dpId" ascending:YES];
+        NSArray *sortDescriptors = @[sd1, sd2];
         
         // init a NSFetchRequest instance
         NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
@@ -746,7 +747,7 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [fetchRequest setSortDescriptors:sortDescriptors];
         [fetchRequest setResultType:NSDictionaryResultType];
         
-        
+        NSAttributeDescription *dpIdDescription = [entity.attributesByName objectForKey:@"dpId"];
         NSAttributeDescription *dpNameDescription = [entity.attributesByName objectForKey:@"dpName"];
         
         
@@ -758,10 +759,12 @@ static XMPPOrgCoreDataStorage *sharedInstance;
         [expressionDescription setExpression: ptNameExpression];
         [expressionDescription setExpressionResultType: NSInteger32AttributeType];
         
-        [fetchRequest setPropertiesToFetch:@[dpNameDescription,expressionDescription]];
+        [fetchRequest setPropertiesToFetch:@[dpIdDescription,dpNameDescription,expressionDescription]];
         
         // setting the groupby value
-        [fetchRequest setPropertiesToGroupBy:@[dpNameDescription]];
+        [fetchRequest setPropertiesToGroupBy:@[dpIdDescription,dpNameDescription]];
+        
+        [fetchRequest setReturnsDistinctResults:YES];
         
         if (streamBareJidStr){
 

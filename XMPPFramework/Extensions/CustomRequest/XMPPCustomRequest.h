@@ -14,4 +14,8 @@
 - (void)requestCameraListWithProjectId:(NSString *)projectId
                        completionBlock:(CompletionBlock)completionBlock;
 
+// 获取url验证token数据
+- (void)requestBoAuthorizeWithProjectId:(NSString *)projectId
+                        completionBlock:(CompletionBlock)completionBlock;
+
 @end
