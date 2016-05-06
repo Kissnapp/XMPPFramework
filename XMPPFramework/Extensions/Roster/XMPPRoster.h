@@ -302,6 +302,7 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr;
 
 - (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName;
+- (void)deleteLocalUserWithPhone:(NSString *)phone;
 
 @end
 
@@ -355,6 +356,7 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 - (void)handlePresence:(XMPPPresence *)presence xmppStream:(XMPPStream *)stream;
 
 - (BOOL)userExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
+- (BOOL)rosterUserExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (BOOL)hasRequestSubscribeSomeoneEarlierWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream;
 
 - (void)clearAllResourcesForXMPPStream:(XMPPStream *)stream;
@@ -391,6 +393,7 @@ FOUNDATION_EXTERN NSString *const addFriendMessageNodeXmlns;
 
 - (void)replaceLocalUserJidStrWithPhone:(NSString *)phone newBareJidStr:(NSString *)newBareJidStr xmppStream:(XMPPStream *)stream;
 - (void)setLocalUserNameWithPhone:(NSString *)phone displayName:(NSString *)displayName xmppStream:(XMPPStream *)stream;
+- (void)deleteLocalUserWithPhone:(NSString *)phone xmppStream:(XMPPStream *)stream;
 
 @optional
 

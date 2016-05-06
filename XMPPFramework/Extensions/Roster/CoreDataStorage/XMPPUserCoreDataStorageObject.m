@@ -280,7 +280,7 @@
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
                                               inManagedObjectContext:moc];
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"jidStr == %@ AND streamBareJidStr == %@", bareJidStr, streamBareJidStr];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(jidStr == %@ OR phoneNumber == %@) AND streamBareJidStr == %@", bareJidStr, [[XMPPJID jidWithString:bareJidStr] user], streamBareJidStr];
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     [fetchRequest setEntity:entity];
