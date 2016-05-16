@@ -40,7 +40,8 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 - (id)initWithRoster:(XMPPRoster *)xmppRoster  dispatchQueue:(dispatch_queue_t)queue;
 
 - (BOOL)privateModelForJID:(XMPPJID *)jid;
-- (BOOL)userExistInRosterForJID:(XMPPJID *)jid;
+- (BOOL)userExistInRosterForJID:(XMPPJID *)jid; // only existed in roster (both、from、to)
+- (BOOL)alreadyFriendForBareJidStr:(NSString *)bareJidStr;// alreadly friend (both、from)
 - (NSString *)nickNameForJID:(XMPPJID *)jid;
 - (NSString *)displayNameForJID:(XMPPJID *)jid;
 - (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone;
@@ -77,7 +78,7 @@ typedef NS_ENUM(NSUInteger, XMPPRosterFetchStatus){
 - (NSString *)nickNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (NSString *)displayNameForJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 - (BOOL)phoneUserExistInRosterForPhone:(NSString *)phone xmppStream:(XMPPStream *)stream;
-
+- (BOOL)rosterUserExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream;
 /**
  * Clears the roster from the store.
  * This is used so we can clear any cached roster for the JID.
