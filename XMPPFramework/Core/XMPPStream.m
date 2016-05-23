@@ -149,6 +149,7 @@ enum XMPPStreamConfig
     NSString *authenticateInputStr;
     XMPPLoginType authenticateInputType;
     BOOL hasMyJidFromServer;
+    BOOL loginWithCurrentUser;
     
     NSData *clientKeyData;
     NSData *serverkeyData;
@@ -497,6 +498,34 @@ enum XMPPStreamConfig
 	return result;
 }
 
+- (BOOL)loginWithCurrentUser
+{
+    __block BOOL result = NO;
+    
+    dispatch_block_t block = ^{
+        
+        result = loginWithCurrentUser;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_sync(xmppQueue, block);
+    
+    return result;
+}
+
+- (void)setLoginWithCurrentUser:(BOOL)value
+{
+    dispatch_block_t block = ^{
+        loginWithCurrentUser = value;
+    };
+    
+    if (dispatch_get_specific(xmppQueueTag))
+        block();
+    else
+        dispatch_async(xmppQueue, block);
+}
 
 - (BOOL)hasMyJIDFromServer
 {
@@ -2723,7 +2752,8 @@ enum XMPPStreamConfig
     
     SEL selector = @selector(clientKeyDataInDatabaseWithXMPPStream:);
 
-    dispatch_group_t clientDataGroup = dispatch_group_create();
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2731,21 +2761,26 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_group_async(clientDataGroup, dq, ^{ @autoreleasepool {
+        dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
             
             data = [delegate clientKeyDataInDatabaseWithXMPPStream:weakSelf];
+            dispatch_semaphore_signal(delegateSemaphore);
             
         }});
         
         break;
     }
     
-    dispatch_group_wait(clientDataGroup, DISPATCH_TIME_FOREVER);
+    dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
+    
+    if (handled) return data;
     
 #if !OS_OBJECT_USE_OBJC
-    dispatch_release(clientDataGroup);
+    dispatch_release(delegateSemaphore);
+    dispatch_release(delGroup);
 #endif
-    
+
     return data;
 }
 
@@ -2765,6 +2800,7 @@ enum XMPPStreamConfig
     SEL selector = @selector(serverKeyDataInDatabaseWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2772,24 +2808,23 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_async(dq, ^{ @autoreleasepool {
-    
+        dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
+            
             data = [delegate serverKeyDataInDatabaseWithXMPPStream:weakSelf];
             dispatch_semaphore_signal(delegateSemaphore);
             
         }});
-        
+
         break;
     }
     
+    dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
     BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
     
-    if (handled) {
-        return data;
-    }
     
 #if !OS_OBJECT_USE_OBJC
     dispatch_release(delegateSemaphore);
+    dispatch_release(delGroup);
 #endif
     
     return data;
@@ -2809,7 +2844,7 @@ enum XMPPStreamConfig
     
     SEL selector = @selector(currentUserLoginIdStrWithXMPPStream:);
     
-    dispatch_group_t delegateGroup = dispatch_group_create();
+    dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2817,19 +2852,22 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_group_async(delegateGroup, dq, ^{ @autoreleasepool {
+        dispatch_sync(dq, ^{ @autoreleasepool {
             
             userLoginIdStr = [delegate currentUserLoginIdStrWithXMPPStream:weakSelf];
-    
+            dispatch_semaphore_signal(delegateSemaphore);
+            
         }});
         
-        break;
+        if (userLoginIdStr) {
+            break;
+        }
     }
     
-    dispatch_group_wait(delegateGroup, DISPATCH_TIME_FOREVER);
+    BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
 
 #if !OS_OBJECT_USE_OBJC
-    dispatch_release(delegateGroup);
+    dispatch_release(delegateSemaphore);
 #endif
     
     return userLoginIdStr;
@@ -2850,6 +2888,7 @@ enum XMPPStreamConfig
     SEL selector = @selector(currentUserBareJidStrWithXMPPStream:);
     
     dispatch_semaphore_t delegateSemaphore = dispatch_semaphore_create(0);
+    dispatch_group_t delGroup = dispatch_group_create();
     
     GCDMulticastDelegateEnumerator *delegateEnumerator = [multicastDelegate delegateEnumerator];
     
@@ -2857,23 +2896,24 @@ enum XMPPStreamConfig
     
     while ([delegateEnumerator getNextDelegate:&delegate delegateQueue:&dq forSelector:selector])
     {
-        dispatch_async(dq, ^{ @autoreleasepool {
+        dispatch_group_async(delGroup, dq, ^{ @autoreleasepool {
             
             userBareJidStr = [delegate currentUserBareJidStrWithXMPPStream:weakSelf];
             dispatch_semaphore_signal(delegateSemaphore);
+            
         }});
         
         break;
     }
     
+    dispatch_group_wait(delGroup, DISPATCH_TIME_FOREVER);
+    
     BOOL handled = (dispatch_semaphore_wait(delegateSemaphore, DISPATCH_TIME_FOREVER) == 0);
     
-    if (handled) {
-        return userBareJidStr;
-    }
     
 #if !OS_OBJECT_USE_OBJC
     dispatch_release(delegateSemaphore);
+    dispatch_release(delGroup);
 #endif
     
     return userBareJidStr;
@@ -2975,7 +3015,7 @@ enum XMPPStreamConfig
         
         clientKeyData = [self clientKeyDataInDatabase];
         serverkeyData = [self serverKeyDataInDatabase];
-        
+       
         //If the myJidStr is nil
         if (!myJidStr) {
             authenticateInputStr = [self currentUserLoginIdStr];
@@ -3813,7 +3853,7 @@ enum XMPPStreamConfig
     SEL selector = @selector(xmppStream:willReceiveIQ:);
     
     if (![multicastDelegate hasDelegateThatRespondsToSelector:selector])
-    {
+    { 
         // None of the delegates implement the method.
         // Use a shortcut.
         
