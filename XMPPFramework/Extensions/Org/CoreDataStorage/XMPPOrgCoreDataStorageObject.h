@@ -46,6 +46,13 @@ typedef NS_ENUM(NSInteger, XMPPOrgCoreDataStorageObjectState){
 // when the relationship org list of a org had been update,this value will been updated
 @property (nonatomic, retain) NSString * relationShipTag;
 
+@property (nonatomic, retain) NSString *tools;
+@property (nonatomic, retain) NSString *cityId;
+@property (nonatomic, retain) NSString *backgroundURL;
+
+
+
+
 
 + (id)objectInManagedObjectContext:(NSManagedObjectContext *)moc
                          withOrgId:(NSString *)orgId

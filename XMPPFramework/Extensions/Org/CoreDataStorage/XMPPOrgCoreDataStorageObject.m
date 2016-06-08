@@ -23,6 +23,9 @@
 @dynamic ptTag;
 @dynamic userTag;
 @dynamic relationShipTag;
+@dynamic tools;
+@dynamic cityId;
+@dynamic backgroundURL;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +48,9 @@
                                                  @"ptTag":@"job_tag",
                                                  @"userTag":@"member_tag",
                                                  @"orgRelationShipTag":@"link_tag",
+                                                 @"tools":@"work_url",
+                                                 @"cityId":@"city",
+                                                 @"backgroundURL":@"background",
                                                  }];
     
     return keysMapDic;
@@ -239,6 +245,54 @@
     [self didChangeValueForKey:@"relationShipTag"];
 }
 
+- (NSString *)tools
+{
+    [self willAccessValueForKey:@"tools"];
+    NSString *value = [self primitiveValueForKey:@"tools"];
+    [self didAccessValueForKey:@"tools"];
+    
+    return value;
+}
+
+- (void)setTools:(NSString *)value
+{
+    [self willChangeValueForKey:@"tools"];
+    [self setPrimitiveValue:value forKey:@"tools"];
+    [self didChangeValueForKey:@"tools"];
+}
+
+- (NSString *)cityId
+{
+    [self willAccessValueForKey:@"cityId"];
+    NSString *value = [self primitiveValueForKey:@"cityId"];
+    [self didAccessValueForKey:@"cityId"];
+    
+    return value;
+}
+
+- (void)setCityId:(NSString *)value
+{
+    [self willChangeValueForKey:@"cityId"];
+    [self setPrimitiveValue:value forKey:@"cityId"];
+    [self didChangeValueForKey:@"cityId"];
+}
+
+- (NSString *)backgroundURL
+{
+    [self willAccessValueForKey:@"backgroundURL"];
+    NSString *value = [self primitiveValueForKey:@"backgroundURL"];
+    [self didAccessValueForKey:@"backgroundURL"];
+    
+    return value;
+}
+
+- (void)setBackgroundURL:(NSString *)value
+{
+    [self willChangeValueForKey:@"backgroundURL"];
+    [self setPrimitiveValue:value forKey:@"backgroundURL"];
+    [self didChangeValueForKey:@"backgroundURL"];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark NSManagedObject
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -385,6 +439,10 @@
     NSString *tempUserTag = [dic objectForKey:@"userTag"];
     NSString *tempRelationShipTag = [dic objectForKey:@"orgRelationShipTag"];
     NSString *tempStreamBareJidStr = [dic objectForKey:@"streamBareJidStr"];
+    NSString *tempCityId = dic[@"cityId"];
+    NSString *tempBackgroundURL= dic[@"backgroundURL"];
+    NSString *tempTools= dic[@"tools"];
+    
     
     if (tempOrgId) self.orgId = tempOrgId;
     if (tempOrgName) self.orgName = tempOrgName;
@@ -398,6 +456,9 @@
     if (tempUserTag) self.userTag = tempUserTag;
     if (tempRelationShipTag) self.relationShipTag = tempRelationShipTag;
     if (tempStreamBareJidStr) self.streamBareJidStr = tempStreamBareJidStr;
+    if (tempCityId) self.cityId = tempCityId;
+    if (tempBackgroundURL) self.backgroundURL = tempBackgroundURL;
+    if (tempTools) self.tools = tempTools;
 }
 
 @end

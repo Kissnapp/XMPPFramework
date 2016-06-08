@@ -250,6 +250,9 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                                                                 @"ptTag":@"job_tag",
                                                                                                 @"userTag":@"member_tag",
                                                                                                 @"orgRelationShipTag":@"link_tag",
+                                                                                                @"tools":@"work_url",
+                                                                                                @"cityId":@"city",
+                                                                                                @"backgroundURL":@"background"
                                                                                                 }]
                                     xmppStream:xmppStream
                                      userBlock:^(NSString *orgId) {
@@ -338,7 +341,10 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                                                                                  @"orgDescription":@"description",
                                                                                                                  @"ptTag":@"job_tag",
                                                                                                                  @"userTag":@"member_tag",
-                                                                                                                 @"orgRelationShipTag":@"link_tag"
+                                                                                                                 @"orgRelationShipTag":@"link_tag",
+                                                                                                                 @"tools":@"work_url",
+                                                                                                                 @"cityId":@"city",
+                                                                                                                 @"backgroundURL":@"background"
                                                                                                                  }]
                                         isTemplate:isTemplate
                                         xmppStream:xmppStream
@@ -525,7 +531,15 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
         
         id org = [_xmppOrgStorage orgWithOrgId:orgId xmppStream:xmppStream];
         
-        org ? completionBlock(org, nil) : [self _requestServerOrgWithOrgId:orgId completionBlock:completionBlock];
+        if (org) {
+            
+            dispatch_main_async_safe(^{
+                completionBlock(org, nil);
+            });
+            
+        }else{
+            [self _requestServerOrgWithOrgId:orgId completionBlock:completionBlock];
+        }
         
     }};
     
@@ -2976,7 +2990,10 @@ static NSString *const REQUEST_RELATION_ORG_INFO_KEY = @"request_relation_org_in
                                                                                                                              @"orgDescription":@"description",
                                                                                                                              @"ptTag":@"job_tag",
                                                                                                                              @"userTag":@"member_tag",
-                                                                                                                             @"orgRelationShipTag":@"link_tag"
+                                                                                                                             @"orgRelationShipTag":@"link_tag",
+                                                                                                                             @"tools":@"work_url",
+                                                                                                                             @"cityId":@"city",
+                                                                                                                             @"backgroundURL":@"background"
                                                                                                                              }]
                                                     isTemplate:NO
                                                     xmppStream:xmppStream
