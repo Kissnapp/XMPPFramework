@@ -780,6 +780,22 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
         dispatch_async(moduleQueue, block);
 }
 
+- (void)cancelListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr
+{
+    if (!bareJidStr) return;
+    
+    dispatch_block_t block = ^{
+        
+        [xmppMessageStorage cancelListHistoryOnTopWithBareJidStr:bareJidStr
+                                                      xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 - (void)fetchAllChatHistoryWithCompletionBlock:(CompletionBlock) completionBlock
 {
     dispatch_block_t block = ^{

@@ -493,6 +493,21 @@ static XMPPMessageCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)cancelListHistoryOnTopWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        XMPPMessageHistoryCoreDataStorageObject *historyMessage = [XMPPMessageHistoryCoreDataStorageObject objectInManagedObjectContext:moc
+                                                                                                                             bareJidStr:bareJidStr
+                                                                                                                       streamBareJidStr:streamBareJidStr];
+        if (historyMessage) {
+            historyMessage.topTime = nil;
+        }
+    }];
+}
+
 - (id)lastMessageWithBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)xmppStream
 {
     if (!bareJidStr || !xmppStream) return nil;
