@@ -113,6 +113,86 @@ static NSString *const CUSTOM_REQUEST_ID_PREFIX = @"custom_request_";
         dispatch_async(moduleQueue, block);
 }
 
+- (void)requestBoAuthorizeWithProjectId:(NSString *)projectId
+                        completionBlock:(CompletionBlock)completionBlock
+{
+
+}
+
+- (void)requestSettingPasswordWithOldPassword:(NSString *)oldPassword
+                                  newPassword:(NSString *)newPassword
+                              completionBlock:(CompletionBlock)completionBlock
+{
+    dispatch_block_t block = ^{@autoreleasepool{
+        
+        if (oldPassword.length < 1 || newPassword.length < 1) {
+            [self _callBackWithMessage:@"old password or new password ware needed" completionBlock:completionBlock];
+        }
+        
+        if ([self canSendRequest]) {// we should make sure whether we can send a request to the server
+            
+            // 0. Create a key for storaging completion block
+            NSString *requestKey = [self requestKey];
+            
+            // 1. add the completionBlock to the dcitionary
+            [requestBlockDcitionary setObject:completionBlock forKey:requestKey];
+            
+            // 2. Listing the request iq XML
+            /*
+             <iq type='set' id='change1'>
+                <query xmlns='aft:register'>
+                    <old_password>R0m30</old_password>
+                    <password>R0m30</password>
+                </query>
+             </iq>
+             */
+            
+            // 3. Create the request iq
+            
+            ChildElement *queryElement = [ChildElement childElementWithName:@"query"
+                                                                      xmlns:@"aft:register"
+                                                                  attribute:nil
+                                                                stringValue:nil];
+            // 旧密码节点<old_password>oldPassword</old_password>
+            ChildElement *oldPwdElemnt = [ChildElement childElementWithName:@"old_password"
+                                                                      xmlns:nil
+                                                                  attribute:nil
+                                                                stringValue:oldPassword];
+            
+            // 新密码节点 <password>newPassword</password>
+            ChildElement *newPwdElemnt = [ChildElement childElementWithName:@"password"
+                                                                      xmlns:nil
+                                                                  attribute:nil
+                                                                stringValue:newPassword];
+            
+            [queryElement addChild:oldPwdElemnt];
+            [queryElement addChild:newPwdElemnt];
+            
+            IQElement *iqElement = [IQElement iqElementWithFrom:nil
+                                                             to:nil
+                                                           type:@"set"
+                                                             id:requestKey
+                                                   childElement:queryElement];
+            
+            
+            // 4. Send the request iq element to the server
+            [[self xmppStream] sendElement:iqElement];
+            
+            // 5. add a timer to call back to user after a long time without server's reponse
+            [self _removeCompletionBlockWithDictionary:requestBlockDcitionary requestKey:requestKey];
+            
+        }else{
+            // 0. tell the the user that can not send a request
+            [self _callBackWithMessage:@"you can not send this iq before logining" completionBlock:completionBlock];
+        }
+    }};
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - XMPPStreamDelegate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +229,9 @@ static NSString *const CUSTOM_REQUEST_ID_PREFIX = @"custom_request_";
         
     }];
 }
-
+/*
+ <iq xmlns="jabber:client" from="7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38" to="7e75cb7ccf6447c0b595cb2107c90b35@120.24.94.38/mobile" id="custom_request_B2B3D108-533B-46B7-8B86-3FA6EB03C6F1" type="result"><query xmlns="aft:register"><old_password>a111111</old_password><password>a222222</password></query></iq>
+ */
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
@@ -172,10 +254,23 @@ static NSString *const CUSTOM_REQUEST_ID_PREFIX = @"custom_request_";
             if ([[iq type] isEqualToString:@"error"]) {
             
                 NSXMLElement *errorElement = [iq elementForName:@"error"];
-                NSXMLElement *codeElement = [errorElement elementForName:@"code"];
                 
-                [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                NSXMLElement *errorTextElement = [errorElement elementForName:@"text" xmlns:@"urn:ietf:params:xml:ns:xmpp-stanzas"];
                 
+                if (errorTextElement) {
+                    NSString *info = [errorTextElement stringValue];
+                    NSString *errorCode = [errorElement attributeStringValueForName:@"code"];
+                    if ([errorCode isEqualToString:@"401"] && [info isEqualToString:@"The old password is wrong"]) {
+                        [self _executeRequestBlockWithRequestKey:requestkey errorMessage:@"11401"];
+                    }else if ([errorCode isEqualToString:@"406"] && [info isEqualToString:@"The password is too weak"]){
+                        [self _executeRequestBlockWithRequestKey:requestkey errorMessage:@"11402"];
+                    }
+                }else{
+                    NSXMLElement *codeElement = [errorElement elementForName:@"code"];
+                    
+                    [self _executeRequestBlockWithRequestKey:requestkey errorMessage:[codeElement stringValue]];
+                }
+    
                 return YES;
             }
             

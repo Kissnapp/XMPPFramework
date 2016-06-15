@@ -18,4 +18,9 @@
 - (void)requestBoAuthorizeWithProjectId:(NSString *)projectId
                         completionBlock:(CompletionBlock)completionBlock;
 
+// 修改密码，注：该方法必须在登录之后使用
+- (void)requestSettingPasswordWithOldPassword:(NSString *)oldPassword
+                                  newPassword:(NSString *)newPassword
+                              completionBlock:(CompletionBlock)completionBlock;
+
 @end
