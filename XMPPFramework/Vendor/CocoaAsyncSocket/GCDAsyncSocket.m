@@ -7552,7 +7552,13 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 				{
 					// Found IPv6 address.
 					// Wrap the native address structure, and add to results.
-					
+					// Reference: https://github.com/SametDEDE/CocoaAsyncSocket/commit/ed8bfaf30f96bbfc59d79e9f7ea78d16702f964e
+					struct sockaddr_in6 *sockaddr = (struct sockaddr_in6 *)res->ai_addr;
+					in_port_t *portPtr = &sockaddr->sin6_port;
+					if ((portPtr != NULL) && (*portPtr == 0)) {
+						*portPtr = htons(port);
+					}
+
 					NSData *address6 = [NSData dataWithBytes:res->ai_addr length:res->ai_addrlen];
 					[addresses addObject:address6];
 				}

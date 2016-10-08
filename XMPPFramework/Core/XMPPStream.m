@@ -247,6 +247,7 @@ enum XMPPStreamConfig
 		
 		// Initialize socket
 		asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+        asyncSocket.IPv4PreferredOverIPv6 = NO;
 	}
 	return self;
 }
@@ -264,6 +265,7 @@ enum XMPPStreamConfig
         [self setHostPort:HostPort];
         // Initialize socket
         asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+        asyncSocket.IPv4PreferredOverIPv6 = NO;
     }
     return self;
 }
@@ -278,6 +280,7 @@ enum XMPPStreamConfig
         authenticateInputType = authenticateType;
         // Initialize socket
         asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:xmppQueue];
+        asyncSocket.IPv4PreferredOverIPv6 = NO;
     }
     return self;
 }
